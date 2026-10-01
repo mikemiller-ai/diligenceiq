@@ -1,0 +1,28 @@
+# Dependencies & builds
+node_modules/
+.next/
+out/
+dist/
+cdk.out/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Corpus & generated index artifacts (public-domain SEC data; uploaded to S3, not committed)
+edgar_corpus/
+/data/
+/.index/
+
+# Assessment brief (Eliza's document; keep out of a possibly public repo)
+UPDATED_FDE-AI-RAG-Assessment.pdf
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

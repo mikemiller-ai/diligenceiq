@@ -1,0 +1,14 @@
+{
+  "name": "diligenceiq",
+  "private": true,
+  "version": "0.0.0",
+  "description": "DiligenceIQ — AI Investment Diligence Workspace (SEC filings RAG, one generation call per analysis)",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check:docs": "node scripts/check-docs.mjs",
+    "gate": "pnpm check:docs"
+  }
+}

@@ -1,0 +1,88 @@
+# DiligenceIQ — Assumptions
+
+Each assumption names its basis and what changes if it turns out to be false. Any assumption verified against data or the AWS account says so explicitly. The rest are labeled *unverified* until a phase checks them.
+
+## A. Assessment & scope
+
+| # | Assumption | Basis | If false |
+|---|---|---|---|
+| A1 | "Exactly one LLM API request" applies to **generative** calls that produce the answer. Query embedding is retrieval. | SPEC §1 says embeddings are retrieval, not generation; assessment PDF: "Your indexing and retrieval pipeline can run beforehand, but the answer itself must come from a single LLM call." Treating a non-generative **rerank** call the same way is our extension of that reasoning, not something the SPEC states. | Rerank therefore **defaults off**. It is enabled only if the Phase 3 evals show a clear lift, and then flagged as a question to confirm with Eliza (§F). BM25-only retrieval remains possible via config if even the query embedding were disallowed. |
+| A2 | Streaming the single generation response (`ConverseStream`) is still **one API request**. | One HTTP request/response, one model invocation. | Switch to `Converse` (non-streaming). The async worker design doesn't depend on streaming. |
+| A3 | The panel's live question is unknown and may name any corpus company, multiple companies, multiple years, or a sector. | Assessment PDF examples; SPEC §1. | Design for it regardless. |
+| A4 | Questions about companies or periods **not in the corpus** should return an honest "insufficient evidence" brief with coverage notes, not outside knowledge. | SPEC §20 (no outside knowledge; acknowledge gaps). | Not applicable; this is a product rule. |
+| A5 | The Project Atlas engagement is fictitious seeded demo data. Its seeded analyses and findings must be **real pipeline outputs**, not hand-written. | SPEC §6 ("All statistics must derive from actual application data or seeded demo data"). | Not applicable; this is a product rule. |
+
+## B. Corpus (verified in Phase 0; reproduce with `node scripts/ingestion/probe-corpus.mjs`)
+
+| # | Assumption / fact | Handling |
+|---|---|---|
+| B1 | `manifest.json` has `corpus`, `description`, `file_count` (246), `filing_types` (89 10-K / 157 10-Q), `files` (filenames only), `license`, and `source` (verified). Its description claims 15 companies with full quarterly coverage; the files show 12 (B5). | Metadata comes from each file's header block. The manifest is used for completeness checks and the license statement only. |
+| B2 | Header fields `Company, Ticker, Filing Type, Filing Date, CIK, Source, URL` are on 246/246 files; `Report Period` and `Quarter` on 192/246 (verified). Where both exist, header period and URL slug date agree on 192/192. | **Period-end source order:** header `Report Period` → URL slug date, matched by `/[-_](\d{8})(?:x10[kq])?\.htm$/` (covers `aapl-20250927.htm`, `de-20251102x10k.htm`, `msft-10k_20220630.htm`) → cover page "For the fiscal year/quarterly period ended <date>" (`gecc10k2014.htm`) → filing date (last resort, flagged). Current corpus: header 192, slug 53, cover 1, filing date 0. A test covers all 246 files in Phase 2. |
+| B3 | `Quarter` in the header is the **calendar** quarter of the period end, not the fiscal quarter (verified: NVDA 10-Q with period end 2023-10-29 is labeled `2023Q4`). Most companies name the fiscal year by the calendar year in which it **ends** (NVDA FY2025 ended 2025-01-26; WMT "fiscal 2025" ended 2025-01-31; AAPL FY2025 ended 2025-09-27). Exceptions (verified in the filing text): **TGT** "Fiscal 2024 ended February 1, 2025"; **HD** "fiscal 2024: Fiscal year ended February 2, 2025"; **JNJ** 52/53-week years ending in early January ("fiscal 2021" ended 2022-01-02; "fiscal 2022" ended 2023-01-01). | `fiscalYear` = calendar year of the fiscal-year end, with two adjustments: (1) a period end on January 1–7 belongs to the prior fiscal year (52/53-week years that end near December 31); (2) a per-company override table for companies that name the year by its **start** (TGT, HD). A 10-Q is assigned to the fiscal year whose end follows its period end, using the company's FY-end month from its 10-K(s); `fiscalQuarter` is derived from months since the FY start. Calendar quarter is kept as metadata. Unit tests lock the labels for NVDA, AAPL, MSFT, WMT, TGT, HD, JNJ, and DIS. |
+| B4 | Filing dates span 2015-02-27 → 2026-02-19; period ends span 2022-01-01 → 2025-12-31 except one filing (verified). | `GE_10K_2015` is handled by a metadata override (Known corpus anomalies). Everything is indexed; the Interpretation panel names any requested period that is not covered. |
+| B5 | Coverage is uneven (verified): 12 companies have 14–17 filings (AAPL, AMZN, DIS, GOOG, JNJ, KO, MSFT, NVDA, PFE, TSLA, UNH, XOM); META 8; BAC 4 (FY2024 10-K + 2025 Q1–Q3 10-Qs); JPM 4 (FY2025 10-K + 2025 Q1–Q3 10-Qs); MCD and PEP 2 each (10-K + a stray 2023 Q1 10-Q); 37 companies have exactly one filing, always a 10-K. | Coverage warnings are shown in the Interpretation panel. Longitudinal questions on single-filing companies are answered honestly ("only one period available"). |
+| B6 | File bodies are HTML flattened to text, with an XBRL preamble, pipe tables, and inline Item headings (TOC first, then body). The longest line is 287,855 characters; 69 files have a line over 90,000 characters (verified). | The chunker splits inside lines on sentence and table-row boundaries with a hard character cap (architecture §6.2). |
+| B7 | The exact cover heading `UNITED STATES SECURITIES AND EXCHANGE COMMISSION` appears in only 30/246 files; `/UNITED\s*STATES\s*SECURITIES\s*AND\s*EXCHANGE\s*COMMISSION/i` matches 246/246 (verified; LLY needs case-insensitivity, NFLX has non-breaking spaces). | The preamble stripper uses the tolerant pattern. |
+| B8 | Section headings vary (verified with a naive probe): an `Item 1A … Risk Factors` TOC + body pair is found in 82/89 10-Ks and 124/157 10-Qs; MD&A in 246/246. Exceptions are listed under Known corpus anomalies. | Offset-based detection skips the TOC, ignores cross-references, and recognizes TOC forms without "Item". The Phase 2 index summary reports the per-filing detection result. |
+| B9 | 46/157 10-Qs state that risk factors had no material changes since the 10-K (verified with a pattern probe). | Those 10-Q Item 1A chunks are flagged `boilerplate: true` and down-weighted in retrieval. |
+| B10 | The corpus is public domain (manifest `license`: SEC filings are US government documents). | It may be stored in S3 and shown in full in the UI. It is not committed to git because of size (79 MB), and the README documents where to place it. |
+
+### Known corpus anomalies
+
+| File(s) | Anomaly (verified) | Handling |
+|---|---|---|
+| `GE_10K_2015-02-27` | Header says "General Electric Company", ticker GE, CIK 0000040554, but the cover page registrant is **General Electric Capital Corporation** (Commission file number 1-6461), fiscal year ended 2014-12-31. No `Report Period`; URL slug `gecc10k2014.htm` has no date. | Metadata override: label "General Electric Capital Corp (GE Capital)", FY2014, flagged **outside the review window**. Period end from the cover page. The alias table does not map "GE" or "General Electric" to it as current GE coverage; the Interpretation panel says so. |
+| JNJ 10-Qs (12 files) | No Item 1A section; "risk factors" appears only as a cross-reference to the 10-K. | No Risk Factors section is created; the cross-reference is never used as an anchor. Risk questions for JNJ draw on its 10-Ks. |
+| XOM 10-Qs (12 files) | No Item 1A section; only "discussed under Item 1A. Risk Factors of ExxonMobil's 20xx Form 10-K". | Same as JNJ. |
+| `MS_10K_2026-02-19` | TOC lists `Risk Factors |  | 1A` with no "Item"; the body heading is "Risk Factors" without an item number. | Detected via the alternate TOC pattern and its matching body heading, not a whole-file fallback. |
+| AXP and T 10-Ks | TOC uses `1A. | Risk Factors` (no "Item"). | Same alternate-pattern handling. |
+| BAC | Only 10-K is FY2024 (period 2024-12-31); its 10-Qs are 2025 Q1–Q3. | FY2025 is shown as YTD only; no FY2025 10-K is claimed. |
+| JPM | 10-K is FY2025 (filed 2026-02-13); 10-Qs are 2025 Q1–Q3 of the same fiscal year. | "Current view" for JPM is the FY2025 10-K alone (no later 10-Qs). |
+| MCD, PEP | One 10-K plus a stray 2023 Q1 10-Q that predates it. | The stray 10-Q is indexed and citable but excluded from the "current view" default (it precedes the latest 10-K). |
+| TGT, HD | Name the fiscal year by its **start** year. | Fiscal-label override table (B3). |
+| JNJ 10-Ks for 2021 and 2022 | Fiscal years end on 2022-01-02 and 2023-01-01. | January 1–7 rule (B3). |
+| 54 files | No `Report Period`/`Quarter` header; six non-standard URL slugs (`de-20251102x10k.htm`, `gecc10k2014.htm`, four `msft-10q_/10k_YYYYMMDD.htm`). | Period-end source order (B2). |
+| `manifest.json` | Description says 15 companies have full quarterly coverage; the files show 12. | Coverage is computed from files. |
+
+## C. Query interpretation
+
+| # | Assumption | Handling |
+|---|---|---|
+| C1 | "Last N years" is ambiguous relative to today (2026-10) versus the corpus. | **Rule:** resolved per company and corpus-relative: the N most recent **complete fiscal years** (by 10-K) for that company, plus any later quarters shown separately as "FY<next> YTD". Always displayed in the Interpretation panel and locked by a unit test. **Example (verified):** NVDA's latest 10-K covers FY2025 (period ended 2025-01-26), and its 10-Qs run through the quarter ended 2025-10-26. "Last two years" therefore resolves to FY2024 + FY2025 (complete), plus FY2026 YTD (Q1–Q3, through 2025-10-26) labeled separately. |
+| C2 | "Major pharmaceutical companies" maps to a curated sector list from the corpus (e.g. JNJ, PFE, MRK, LLY, ABBV). TMO and UNH count as healthcare but not pharma. | A static GICS-style map lives in `packages/corpus`. It is deterministic, documented, and shown in the Interpretation panel. |
+| C3 | Company names and tickers collide with ordinary English. | **Names** that are common words (Target, Visa, Oracle, Meta, Apple, Caterpillar…) match only as case-sensitive capitalized words. **Tickers** that are short or English words (V, T, MA, GE, BA, TGT, MS, DE, HD, PG, CAT, KO…) match only as uppercase standalone tokens (not adjacent to a letter, digit, `-`, `&`, `.`, or apostrophe). Unit tests: "the target market" → no TGT; "Target's margins" → TGT; "a T-shaped team" → no T; "AT&T and T-Mobile" → AT&T only via its name; "visa requirements" → no V; "Visa and MA" → V + MA; "meta-analysis" → no META; "apple supply" → no AAPL; "MS and GS" → MS + GS; "ms. smith" → no MS. |
+| C4 | Topic keywords should help retrieval, never restrict it. | Topics apply soft section boosts only, never filters. |
+| C5 | A question that names no period should not silently mix years. | **Default "current view":** per company, the latest 10-K plus any subsequent 10-Qs. Shown in the Interpretation panel; user filters override it. |
+
+## D. AWS & environment (verified in Phase 0 unless marked)
+
+| # | Assumption | Basis | If false |
+|---|---|---|---|
+| D1 | Deploy to **us-east-1**. | Mike's other products (ResolveIQ, TrustResponse, CareerOps) are in us-east-1; CDK is bootstrapped there (verified `CDKToolkit` UPDATE_COMPLETE). | Not applicable. |
+| D2 | The `mikemiller.ai` public hosted zone exists in this account (verified). | `diligenceiq.mikemiller.ai` is attached via an Amplify `CfnDomain`. | Delegate the zone or attach the domain manually. |
+| D3 | **Generation model quotas** (verified via `aws service-quotas list-service-quotas --service-code bedrock`): Claude Sonnet 4.6 cross-region 6,000,000 tokens/min (L-15B8E632) and 10,000 requests/min; Claude **Sonnet 5.5 cross-region 0 tokens/min** (L-94A31E46, adjustable). The `us.anthropic.claude-sonnet-4-6` profile is ACTIVE and routes to us-east-1, us-east-2, and us-west-2. **Invoke entitlement is unverified** (no model was invoked in Phase 0). | Default `GENERATION_MODEL_ID = us.anthropic.claude-sonnet-4-6`. Sonnet 5.5 becomes the default only if Mike files and receives a quota increase for L-94A31E46. Invoke is checked first thing in Phase 2; temperature acceptance with forced tool use is checked in Phase 4. | Use another listed Claude model via env config. |
+| D4 | Docker is not available on the build machine (verified). | All Lambdas ship as esbuild zip bundles. | Not applicable. |
+| D5 | Index size (~25K chunks × 1024-dim Float32 ≈ 100 MB, plus BM25 and metadata) loads into a 3 GB Lambda in a few seconds. *Unverified.* | Measured in Phase 2. | Use int8 or 512-dim embeddings (Titan v2 supports 256/512/1024), shard by company, or move to the "Growing" search tier (architecture §13.5). |
+| D6 | A brief generation over ~25K input tokens finishes well within the worker's generation budget inside the 180 s timeout and the 240 s job deadline. *Unverified.* | Measured in Phase 4. | Lower the context budget and output cap, or raise the worker timeout and job deadline together (visibility timeout stays 6 × the worker timeout). |
+| D7 | **Lambda account concurrency is 10, shared with Mike's other apps** (verified: `aws lambda get-account-settings` → `ConcurrentExecutions: 10`, `UnreservedConcurrentExecutions: 10`). | No reserved concurrency. The worker's SQS event source mapping uses `maximumConcurrency: 2` (the minimum allowed). **Recommended before the demo:** Mike requests a Lambda concurrency quota increase (an account change he must approve and file). | Under contention, api requests can be throttled (HTTP 429/503) and queued analyses wait; the job deadline turns long waits into a clear `QUEUE_TIMEOUT`. |
+| D8 | **Embedding quotas** (verified): Titan Text Embeddings v2 on-demand 6,000 requests/min and 300,000 tokens/min, no daily token quota listed. Cohere Embed v4: 8.1M tokens/day on-demand, 16.2M/day cross-region, both non-adjustable, versus a ~20M-token corpus. | Default embeddings: **Titan v2** (`amazon.titan-embed-text-v2:0`, 1024-dim, normalized). The indexer rate-limits to the TPM quota, checkpoints, and caches embeddings by content hash. Cohere Embed v4 is evaluated in Phase 3; one full Cohere build uses about 1.5 days of quota. | If Titan's retrieval quality is clearly worse in the Phase 3 evals, build a Cohere index over two quota days and switch `EMBEDDING_MODEL_ID`. |
+| D9 | The Amplify rewrite proxy forwards `Set-Cookie` from the HTTP API for a static (WEB) app. *Unverified.* | Verified in the Phase 1 deploy. | Serve the API from an `api.` subdomain with a parent-domain cookie and credentialed CORS. |
+| D10 | A workable CSP exists for the inline scripts a static Next.js export emits. *Unverified.* | Decided in Phase 7 (hashes vs. scoped allowance). | Document the residual allowance and its rationale. |
+
+## E. Product & UX
+
+| # | Assumption | Handling |
+|---|---|---|
+| E1 | Panelists must reach the product without signing up. | Anonymous demo workspace via a signed cookie. No accounts. |
+| E2 | Each visitor gets an isolated workspace, so one visitor's reset can't affect another. | Partitioned by workspace ID. Reset is scoped to the caller's own partition. |
+| E3 | The primary demo device is a desktop browser. Tablet and mobile must be acceptable but are secondary. | Responsive layout with priority on desktop density. |
+| E4 | PDF export, collaboration, SSO, and notifications are out of scope. | Documented in `future-state.md`. |
+| E5 | The first analysis after idle pays a cold index load inside the async job. | Acceptable for v1 (shown as a real stage, measured in Phase 2). A user-triggered prewarm is a documented future option. |
+
+## F. Open questions (optional, for Mike)
+
+| # | Question | Default if unanswered |
+|---|---|---|
+| F1 | Would Eliza count a non-generative rerank call as retrieval (A1)? | Rerank stays off unless the Phase 3 evals show a clear lift; if enabled, it is disclosed in the README and on the Architecture page. |
+| F2 | Request a quota increase for Claude Sonnet 5.5 (L-94A31E46)? | Ship on Sonnet 4.6. |
+| F3 | Request a Lambda concurrency quota increase (D7)? | Run within the shared limit of 10. |
