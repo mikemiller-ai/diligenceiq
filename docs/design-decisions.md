@@ -5,7 +5,7 @@ Lightweight decision records. Format: **Context → Decision → Alternatives co
 ---
 
 ## DD-01 · Retrieval store: pre-built hybrid index in S3, loaded by Lambda (not OpenSearch)
-**Status:** Accepted. SPEC §22 named OpenSearch; the cost addendum overrides it.
+**Status:** Accepted. SPEC v1 §22 (archived) named OpenSearch; the cost addendum overrode it (now SPEC §35.3).
 
 **Context**
 - The corpus is ~81M characters, roughly 20–25K chunks.
@@ -47,7 +47,7 @@ Lightweight decision records. Format: **Context → Decision → Alternatives co
 **Status:** Accepted.
 
 **Context**
-- SPEC §22 prefers Amplify.
+- SPEC v1 §22 (archived) preferred Amplify (now SPEC §34).
 - ResolveIQ and TrustResponse use Amplify static export; CareerOps uses Amplify SSR (WEB_COMPUTE).
 - The one generation call can exceed 30 s, which is about Amplify SSR's request ceiling.
 
@@ -88,7 +88,7 @@ Lightweight decision records. Format: **Context → Decision → Alternatives co
 - WebSockets: idle cost/complexity not justified.
 
 **Consequences**
-- Progress stages map to real execution (SPEC §26).
+- Progress stages map to real execution (SPEC §38.1).
 - Poll traffic is cheap, a few requests per analysis.
 - The UI must handle QUEUED, RUNNING, FAILED, and timeout states.
 - No reserved concurrency: the account limit is 10 and shared with other apps (assumptions D7), so the event source mapping's `maximumConcurrency` bounds this app instead.
@@ -127,8 +127,8 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 **Status:** Accepted. Thresholds are Provisional until the Phase 3 evals.
 
 **Context**
-- No runtime LLM may rewrite or plan the query (SPEC §18).
-- Multi-company and longitudinal questions must not collapse onto one company or onto the newest filing (SPEC §17).
+- No runtime LLM may rewrite or plan the query (SPEC §26).
+- Multi-company and longitudinal questions must not collapse onto one company or onto the newest filing (SPEC §27).
 
 **Decision**
 - Alias, sector, period, filing-type, and topic extraction are fully deterministic.
@@ -207,16 +207,16 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 
 **Context**
 - Panelists can't sign up.
-- State must be server-side (SPEC §29), and one visitor's reset must not affect another.
+- State must be server-side (SPEC §40), and one visitor's reset must not affect another.
 
 **Decision**
 - A random workspace ID lives in an HMAC-signed, httpOnly, Secure, SameSite=Lax cookie.
-- DynamoDB is partitioned per workspace, seeded with Project Atlas, and expired by a 30-day TTL.
+- DynamoDB is partitioned per workspace, seeded with the demo workspace (real findings and analyses; a watchlist and an example thesis from Phase 8b; the Project Atlas engagement framing was retired in DD-15), and expired by a 30-day TTL.
 - Reset is scoped to the cookie's own partition.
 
 **Alternatives considered**
 - Cognito demo users (ResolveIQ/CareerOps): more friction and machinery than an anonymous demo needs.
-- localStorage: SPEC says to avoid it.
+- localStorage: SPEC §40 says to avoid it.
 
 ---
 
@@ -242,10 +242,10 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 ---
 
 ## DD-12 · Phase gate process adaptation
-**Status:** Accepted. Deviates from the wording of SPEC §36–37.
+**Status:** Accepted. Deviates from the wording of SPEC v1 §36–37 (archived); SPEC §48 states the adapted process.
 
 **Context**
-- SPEC §36 lists "adversary fixes its findings" as a gate step, and §37 says the adversary "must not merely produce a report" but fix, add regression tests, and rerun them.
+- SPEC v1 §36 (archived) listed "adversary fixes its findings" as a gate step, and v1 §37 said the adversary "must not merely produce a report" but fix, add regression tests, and rerun them.
 - The installed `adversary` agent (`~/.claude/agents/adversary.md`) is read-only by design ("Do not fix anything"), and changing Mike's global agent definition is out of scope.
 
 **Decision:** Each gate runs in this order:
@@ -255,7 +255,7 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 4. Gate command.
 5. `/handoff`, whose commit waits for Mike's go-ahead.
 
-**Consequences:** The SPEC's intent is preserved: findings are fixed by a context that did not write the original work, and the fix is checked again by `/code-review`. The only difference is that finding and fixing are split across two fresh agents instead of one.
+**Consequences:** SPEC v1's intent is preserved: findings are fixed by a context that did not write the original work, and the fix is checked again by `/code-review`. The only difference is that finding and fixing are split across two fresh agents instead of one.
 
 ---
 
@@ -299,3 +299,199 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 **Consequences**
 - Every analysis reaches a terminal state that the user sees, with a request ID, without any background compute.
 - Full lifecycle table: architecture §4.3.
+
+---
+
+## DD-15 · Product pivot: investment intelligence first, Deep Analysis as the drill-down
+**Status:** Accepted (2026-10-01, from the product direction, now archived at `docs/archive/PRODUCT_DIRECTION.md`; carried into SPEC v2 §3–§6).
+
+**Context**
+- SPEC v1 made a question box (New Analysis) the center of the product. That assumes the user already knows SEC filings and knows what to ask.
+- The product direction (archived; now SPEC §3) requires value **before** a question: what is happening, what changed, what deserves attention, why it matters, and what to investigate next.
+- The Eliza constraints are unchanged. An arbitrary question in an input field must still get one-call, evidence-grounded RAG.
+
+**Decision**
+- **Primary nav,** in order: **Company Intelligence | Compare | Deep Analysis | Findings | Thesis | Watchlist.** Thesis and Watchlist are P1. They are **omitted from the nav** until Phase 8b builds them; there are no "coming soon" stubs.
+- **Global "Ask a question" action** in the top bar on every page (the SPEC v1 §5 (archived) "+ New Analysis" action, renamed; SPEC §5.2). It opens Deep Analysis empty, so an expert can bypass the guided path at any time (SPEC §5.4). The landing page has the same "Ask any question" entry.
+- **Company Intelligence** (`/intelligence`) is the default destination. It is a per-company dashboard that reads a persisted profile (DD-16).
+- **Deep Analysis** is the existing RAG pipeline (DD-03 to DD-07), unchanged. Users reach it from Recommended Diligence, signals, What's Changed, Compare, Thesis, Watchlist events, or by typing any question directly. Prefilled questions stay editable.
+- **A prefilled Deep Analysis never auto-submits.** Loading `/analysis/new?q=&tickers=&origin=` only fills the form. Generation requires an explicit Run click, which issues the `POST /api/analyses`. A URL alone can never trigger a generation call (E2E test, testing-strategy §6).
+- **Progressive levels** (SPEC §5.4) map to surfaces: Level 1 30-second view; Level 2 What's Changed and Attention Signals with Why This Matters; Level 3 Compare; Level 4 Deep Analysis; Level 5 evidence drawer and source view.
+- **Secondary destinations:** Sources (also reached through every citation), IC Brief (P1), and Architecture.
+- **Workstreams become Finding themes.** The six IDs are kept as a taxonomy: `financial-performance`, `growth-outlook`, `risk-factors`, `regulatory-compliance`, `liquidity-capital`, `strategic-shifts`. The workstream pages and the progress tracker are removed.
+- **The demo workspace is retired as a deal.** The "Project Atlas" engagement framing (SPEC v1 §6, archived) leaves the primary screens. The anonymous workspace (DD-09) remains and is seeded with real findings and analyses; a watchlist and an example thesis are added to the seed when Phase 8b builds those surfaces. The PE-client story moves to the landing page and the demo script.
+- **Primary screens use plain language:** "Risk changes", not "Item 1A delta". SEC terminology appears only in evidence and source views.
+
+**Alternatives considered**
+- *Keep the workstream workspace and add a dashboard tab.* Rejected: the question-first IA would remain the primary experience.
+- *A chat-style assistant over a dashboard.* Rejected: SPEC v1 §2 (archived) said "not a chatbot" (SPEC §1.1 keeps it), and chat invites follow-up calls that blur the single-call rule.
+
+**Consequences**
+- The uncommitted Phase 1 shell is reworked in place to the new IA before its gate (implementation plan, Phase 1).
+- **Data model:** `Finding.workstreamId` becomes `theme`, and Findings gain an `origin`. `THESIS#` and `WATCH#` items are added (architecture §8).
+- DD-09's "seeded with Project Atlas" now reads "seeded demo workspace".
+
+---
+
+## DD-16 · Company Intelligence profiles: deterministic facts + one offline structured call per company
+**Status:** Accepted (Mike, 2026-10-01). Prompt, thresholds and pass bars are Provisional until the Phase 4b evals. This decision is an **explicit, dated override** of three cost-addendum lines (below).
+
+**Context**
+- A dashboard needs plain-language synthesis: a 30-second view, "why this matters", and recommended diligence. Pure templates read as generic.
+- Constraints:
+  - Assessment: "the answer itself must come from a single LLM call"; "your indexing and retrieval pipeline can run beforehand". The second sentence authorizes precomputed **indexing and retrieval**. It does not authorize precomputed generation. Treating an offline profile call as acceptable is **our interpretation** (assumptions A6), not something the PDF states.
+  - Cost addendum: no background LLM calls; no LLM calls merely to populate dashboards; meaningful inference cost only when a user performs an analysis.
+  - Product direction §22–24 (archived; now SPEC §32 and §35.13): one structured generation per company profile, persisted, versioned, and never regenerated on page view. Numbers come from deterministic extraction.
+
+**Supersedes / overrides (2026-10-01).** At the time, `CLAUDE.md` said the cost addendum (now archived at `docs/archive/SPEC-ADDENDUM-COST.md`; its rules are SPEC §35) won on cost. The LLM profile set conflicts with three of its lines, quoted verbatim:
+- Opening section ("The architecture should:"): "incur meaningful inference cost only when a user actually performs an analysis;"
+- §Bedrock: "avoid LLM calls merely to populate dashboards;"
+- §Cost-related Definition of Done: "RAG generation occurs only in response to user analysis;"
+
+On 2026-10-01 Mike explicitly chose the hybrid offline profile approach in this session, after being told that the docs at that time said dashboards never call an LLM. That choice overrides the three lines above **for the offline profile build only**, within these limits:
+
+| Limit | Rule |
+|---|---|
+| Offline | Runs on an admin workstation with the admin's credentials. Never deployed as a Lambda or any other runtime component. |
+| Admin-run | Started by hand (`pnpm intelligence:build`). Never on page view, never scheduled, never triggered by an event. |
+| Bounded | At most **one** generation call per company per (`indexVersion`, `profilePromptVersion`), enforced by the build ledger below. |
+| Budget-capped | `--max-calls` is required; the run stops at the cap. |
+| Live plane untouched | Every user question is still exactly one live call (DD-04). The api Lambda has no Bedrock permission. |
+
+The rest of the cost addendum still wins on cost. SPEC v2 carries this override as a named, bounded exception (SPEC §35.7). The deterministic profile set (below) is always built as well, so the override can be withdrawn at runtime with no rebuild.
+
+**Decision**
+- **Build-time artifact, not a runtime feature.** Profiles are produced by an admin-run script, `scripts/intelligence/build-profiles.mjs`, as a step after index build.
+- **Two profile sets per index version** (until F4 is answered; assumptions F4):
+  - `intelligence/<indexVersion>/llm-v<profilePromptVersion>/<TICKER>.json`: the LLM set (one call per company, with per-company deterministic fallback when the call errors or fails validation);
+  - `intelligence/<indexVersion>/det-v<templateVersion>/<TICKER>.json`: the deterministic set (zero calls).
+  - Each set has a `manifest.json`. The set's directory name is its `profileSetId` (`llm-v1`, `det-v1`).
+- **Runtime pointer.** The api Lambda reads the active set from the SSM parameter `/diligenceiq/active-profile-set` (value `<indexVersion>/<profileSetId>`, cached 60 s like the kill switch). Switching between the LLM and deterministic sets is a parameter change: instant, no rebuild, no deploy. `GET /api/health` and `GET /api/companies` report the active `profileSetId`.
+- **Runtime never generates.** The api Lambda only reads profiles. Opening, refreshing, or comparing dashboards never calls an LLM. Nothing schedules the builder.
+- **Pipeline for each company:**
+  1. Deterministic financial facts (DD-17).
+  2. Deterministic change and signal candidates (DD-18), each with evidence chunk IDs for each period.
+  3. Deterministic current risks (latest 10-K risk headings) and drivers (MD&A segment/product rows with the largest reported change), each with chunk IDs (architecture §7.1).
+  4. Balanced evidence per period and topic from the same retrieval stack, using fixed deterministic topic lanes.
+  5. A context block in the same untrusted-content format as Deep Analysis.
+  6. LLM set only: **exactly one** forced-tool generation call (`submit_company_profile`) using `prompts/company-intelligence-prompt.md`.
+- **What the model may do:** select, explain, and categorize the supplied signals, risks, and drivers. It writes the executive view, "why this matters", management outlook, and recommended diligence questions.
+- **What the model may not do:** cite anything outside the supplied chunk IDs and signal IDs, or state any currency or percentage figure that is not in the supplied facts (numeric validation).
+- **Banned vocabulary (canonical list).** One list, in `packages/core/vocabulary.ts`, used by both the profile validator and the eval harness. It applies only to **model-written** text (headline, whatChanged, whyThisMatters, executive view, outlook, recommended diligence). Deterministic labels (trajectory words, coverage levels "Strong / Partial / Limited evidence" from SPEC §19) and quoted filing passages are exempt. Matching is case-insensitive and phrase-level with word boundaries:
+
+  | Banned (phrase rules) | Not matched (allowed) |
+  |---|---|
+  | Recommendations: `strong buy`, `strong sell`, `buy rating`, `sell rating`, `hold rating`, `rated (a )?(buy\|sell\|hold)`, `(we\|investors should\|you should) (buy\|sell\|hold\|avoid)`, `recommend (buying\|selling\|holding\|investing)`, `(is\|looks like) a (buy\|sell)` | `buyback(s)`, `share repurchase`, `selling, general and administrative`, `sells`, `sold`, `customers buy`, `strong demand` (a filing phrase, allowed when cited) |
+  | Scores and ratings: `\d+\s*/\s*(10\|100)`, `score of`, `rating of`, `out of (10\|100)`, `\d+ stars?`, `grade [A-F]\b` | `credit rating(s)` (a disclosure topic), `rating agencies` |
+  | Verdicts: `low[- ]risk (investment\|company\|stock)`, `safe investment`, `best investment`, `(undervalued\|overvalued)`, `must[- ]own`, `guaranteed return` | `low-income`, `high-risk` inside a quoted passage |
+
+  Bare "buy", "sell", and "strong" are not banned on their own; only the phrases are. A match rejects the LLM profile and the builder writes the deterministic profile for that company.
+- **Fallback.** If validation fails, or no Bedrock call can be made, the builder writes a **deterministic profile** for that company in the LLM set. It uses the same facts, signals, risks and drivers, a curated per-category "why this matters" library, and templated questions. Every company always has a profile, and the profile's `generation.mode` (`llm` | `deterministic`) is shown on the page.
+- **Curated "why this matters" library: an allowed, labeled exception** to "no hardcoded demo answers". It is hand-written, generic, per signal category (for example "Customer concentration: when a few customers drive a large share of revenue, losing one can move results"). It never names a company, never states a figure, and never claims what happened. It is rendered with a "General context" label so it is not read as company analysis. It lives in `packages/rag/profile/why-library.ts` and is versioned as `templateVersion`.
+- **Same discipline as Deep Analysis.** Generation client `maxAttempts: 1`. A `GenerationGateway` instance with `purpose: 'profile'` allows one call per (ticker, `indexVersion`, `profilePromptVersion`).
+- **Build ledger (enforces the one-call bound across processes).** The ledger is append-only by construction: one immutable S3 object per call, `intelligence/ledger/<indexVersion>/<profilePromptVersion>/<TICKER>.json`, holding `{ ticker, indexVersion, profilePromptVersion, startedAt, runId }`. The builder creates it with a conditional write (`If-None-Match: *`) **before** the call, as Deep Analysis persists `generationStartedAt`. Ledger objects are never overwritten or deleted. If the object already exists, the builder makes no call for that key. There is **no `--force`**: regenerating a profile requires a `profilePromptVersion` bump (`llm-v2`), which is a new key. A bump is made **only for a real prompt change**, which gets a real prompt-iteration entry; the version is never bumped just to retry, so prompt history stays truthful. Manifest call counts are derived from the ledger, so interrupted runs are counted.
+- **A failed call is never retried at the same version.** If the one call errors (throttle, timeout, Bedrock error) or its output fails validation, that company's profile in the LLM set is its deterministic fallback, with `generation.mode: 'deterministic'`, `generationCallCount: 1` and the failure code in the manifest. It is picked up again only by the next genuine prompt version. The bound stays ≤ 1 call per key, and a transient failure costs one company its LLM narrative, never a hidden second call. Failures count toward the fallback-rate bar below.
+- **Telemetry.** Tokens, model, call count (0 or 1), validation results, and the ledger `runId` are recorded per profile in the manifest.
+- **Naming.** `profilePromptVersion` is the version of `prompts/company-intelligence-prompt.md`. `templateVersion` is the version of the deterministic library. `profileSetId` names a set. `promptVersion` (no prefix) is reserved for the Deep Analysis prompt in analysis telemetry.
+- **Provisional pass bars** (testing-strategy §7; revisited after the first real build): 0 invalid citations, 0 unsupported figures, 0 banned-phrase matches in shipped profiles; LLM-to-deterministic fallback rate ≤ 10% across the 12 deep-tier companies; ≤ 1 call per profile.
+- **How this is explained to the panel.** "Live: every question you ask is answered by exactly one LLM call. Offline: each company profile is computed once per index version and stored, like the embeddings; the dashboard only reads it. We also ship a zero-call deterministic set and can switch to it instantly." The offline plane gets at most one minute of the demo; the live question stays at the center.
+
+**Alternatives considered**
+- *Fully deterministic.* This is the safest single-call story, but the narrative is generic. It is built as the `det-v*` set and is the scope fallback if Phase 4b slips (implementation plan, Scope fallback).
+- *Profiles assembled from several seeded Deep Analyses per company.* This costs 3–4 calls per company and fragments the profile. Rejected.
+- *Generate on first view and cache.* This means LLM calls triggered by page views (cost addendum) and first-view latency. Rejected.
+
+**Consequences**
+- Offline generation cost is at most one call per company per (`indexVersion`, `profilePromptVersion`), 54 calls for a full LLM build, recorded in the ledger, the manifest, and architecture §13.3.
+- Profile quality is evaluated like Deep Analysis: citation validity, numeric match, vocabulary, signal precision, and fallback rate (testing-strategy §7).
+- A profile is a snapshot of the index version it was built from. Findings saved from it copy their passages, as with Deep Analysis findings (DD-06).
+
+---
+
+## DD-17 · Deterministic financial extraction from filing tables
+**Status:** Accepted. The metric alias map is Provisional until the Phase 2 golden tests.
+
+**Context**
+- Filing tables survive as pipe-delimited rows. For example, AAPL's FY2025 10-K has `Total net sales | $ | 416,161 | … | 6 | % | … | 391,035 | … | 383,285`.
+- SPEC §32.2: the LLM must not recreate easily determinable numbers.
+
+**Decision**
+- `packages/corpus/financials` scans the MD&A and financial-statement sections. It recognizes period header rows, a unit hint ("in millions"), and row labels matched against a **metric alias map**. Metrics:
+  - revenue (e.g. "Total net sales", "Total revenues", "Revenue");
+  - gross margin;
+  - operating income;
+  - net income;
+  - cash and equivalents;
+  - total debt;
+  - capital expenditures;
+  - operating cash flow.
+- **Each value records:** metric, period (fiscal label from the column header and the filing's period table), value, unit, scale, the source `chunkId`, the raw row text, and a cross-check flag. All of these are kept in the profile's `facts` (architecture §7.1), so a figure on screen can always show its source row.
+- **Derived values:** growth rates and margins are computed in code only when both inputs exist for comparable periods (same duration, same company).
+- **Trajectory labels** (Accelerating, Growing, Stable, Slowing, Declining; Improving, Stable, Declining for margins) come from fixed thresholds on the derived values. The thresholds are recorded with each label.
+- **Cross-check.** When a 10-K reports the same metric for several years, values from overlapping filings are compared. A mismatch above 0.5% (for example a restatement) sets `crossCheck: 'mismatch'` on both values. It is a **flag, never a blocker**: the build continues, both values keep their own source rows, and the UI shows "Values differ across filings" with both rows. Values are never averaged.
+- **Gaps are honest.** A metric that is not found shows as "Not extracted" and is never filled in. Single-10-K companies get trends from the multi-year columns inside that one 10-K. 10-Qs are extracted too: their comparative columns (quarter and year-to-date vs the same period a year earlier) give BAC and JPM current-year trends after their only 10-K.
+
+**Consequences**
+- Long-tail labels (banks, insurers, conglomerates) will extract fewer metrics. The coverage note on the dashboard (and the P1 coverage matrix, DD-19) shows this as partial evidence.
+- Golden tests cover AAPL, NVDA, MSFT, JNJ, and XOM (testing-strategy §3).
+
+---
+
+## DD-18 · Deterministic change detection and attention-signal candidates
+**Status:** Accepted. Thresholds and lexicons are Provisional until the Phase 3 hand-labeled evals.
+
+**Decision.** Signals are computed in `packages/rag/signals`. Each one carries:
+- an ID;
+- a type;
+- a category (Performance, Growth, Margin, Liquidity, Debt, Regulatory, Competition, Customer concentration, Geographic concentration, Supply chain, Cybersecurity, Litigation, Management outlook);
+- the periods compared;
+- `evidenceByPeriod`: for **each** period compared, its own chunk IDs (`Array<{ period, chunkIds }>`), so the evidence drawer can show the passages side by side;
+- the deterministic measurement that triggered it;
+- `investigateQuestion`: a templated, editable Deep Analysis question for that type and category (for example NEW + regulatory: "What new regulatory risks did {company} add in {period}, and what actions does management describe?"). It prefills Deep Analysis and never auto-runs.
+
+| Type | Detection |
+|---|---|
+| NEW / REDUCED (risk) | Diff of normalized risk-factor headings between consecutive 10-Ks, matched by token-set similarity. A heading with no match ≥ threshold in the prior 10-K is NEW. A heading that disappears is REDUCED. |
+| PERSISTENT | A heading matched in **each of at least two** consecutive 10-Ks, through the latest one. With a single 10-K nothing is PERSISTENT; its headings appear as current risks instead (architecture §7.1 `currentRisks`). |
+| EXPANDED / REDUCED (emphasis) | Per-topic lexicon density (matches per 10K characters) per section per filing, compared across like-for-like filings (10-K vs 10-K, or consecutive 10-Qs of the same fiscal quarter cadence). A change above both a relative and an absolute threshold triggers the signal. |
+| TREND CHANGE | From DD-17 trajectories, for example growth slowed while margin improved. Works **inside one filing** too: a single 10-K's multi-year columns, or a 10-Q's prior-year comparative columns, are enough. |
+| OUTLOOK CHANGE | MD&A outlook-lexicon deltas (demand, headwinds, investment, guidance). The candidate is deterministic; the profile call (DD-16) explains it from the cited passages. |
+
+- 10-Q "no material changes" boilerplate (assumptions B9) never produces a signal.
+- JNJ and XOM 10-Qs have no Item 1A (Known corpus anomalies), so their risk signals use 10-Ks only.
+- Companies with a single 10-K get no 10-K-vs-10-K signals (NEW, REDUCED, PERSISTENT, 10-K emphasis). They still get in-filing TREND CHANGE signals, current risks, and drivers (architecture §3 tiers), and the profile says "Limited history: one annual report in the corpus". This covers 41 companies: the 37 single-filing companies plus BAC, JPM, MCD and PEP, which have one 10-K each. BAC and JPM also get 10-Q-vs-10-Q emphasis and outlook signals within their 2025 quarters.
+
+**Consequences**
+- Signals are reproducible and explainable: the evidence drawer shows the measurement and the passages from both periods.
+- Precision is measured on a hand-labeled set for AAPL, NVDA, and MSFT before the thresholds are fixed.
+- **Phase 3 go/no-go on signal quality** (provisional bar: precision ≥ 0.8 on the hand-labeled set, with a recall sanity check that at least half of the hand-labeled real changes are found). It runs before Phase 4b. If heading diffs or lexicon deltas miss the bar, the signal types that fail are suppressed, and the dashboard **leads with current risks, trajectories, and recommended diligence**. Change signals are shown only for types that clear the bar. This keeps the weakest assumption (G4) from emptying or polluting the dashboard.
+
+---
+
+## DD-19 · Compare, Thesis, Watchlist, and Diligence Gaps are deterministic; live monitoring is future state
+**Status:** Accepted. Thesis and Watchlist are P1 and are built in Phase 8b, after the Phase 7 and 8 exit criteria pass (implementation plan).
+
+**Decision**
+- **Compare** (P0) is composed in the api Lambda from the selected companies' profiles, with no LLM call. It is built from what every tier has (current risks and trajectories), so it is useful even when a company has no change signals (for example Tesla vs JPMorgan):
+  - **trajectories** side by side (revenue, margin, operating income, cash flow), with each company's fiscal-year end shown;
+  - **common attention areas:** risk/signal categories present in the `currentRisks` or `signals` of every selected company;
+  - **distinctive attention areas:** categories present in exactly one company;
+  - **diverging trends:** trajectories of the same metric pointing in opposite directions;
+  - **management emphasis:** per company, the top three outlook topics by lexicon density in the latest MD&A (DD-18 lexicons), with the passages;
+  - **ranking of attention areas:** by number of selected companies sharing the category, then signal count, then the category's position in the latest 10-K's risk headings, then category order. The rule is fixed and shown in a tooltip;
+  - templated comparative diligence questions that prefill a multi-company Deep Analysis (never auto-run). The live question is answered by the one RAG call.
+  - **Partial and missing profiles:** a company in the limited-history tier contributes current risks and in-filing trends, and the view says "Limited history" in its column. A selected ticker with no profile is listed in `missing` and the rest are compared if at least two remain; otherwise the response is `404 PROFILE_MISSING`. Different fiscal-year ends are noted, never silently aligned.
+- **Thesis** (P1) is an analyst-written statement with:
+  - linked findings and signals, each marked *supporting* or *challenging* by the analyst;
+  - open questions;
+  - watched signal categories;
+  - "Test with Deep Analysis" (prefilled and editable, never auto-run).
+  - It **never** issues a verdict and calls no LLM. Caps: ≤ 20 theses per workspace, ≤ 50 links and ≤ 20 open questions per thesis.
+- **Watchlist** (P1):
+  - per-company category preferences (`WATCH#<ticker>`), ≤ 25 watches per workspace; the ticker must exist in the company catalog;
+  - **filing events** come from the filing catalog (each filing's filing date, type and period, as in `GET /api/sources`); **intelligence events** are the historical change signals from the stored profiles, filtered by the watched categories. Showing both side by side is the SPEC §21.2 distinction. The `new_filings` category selects filing events;
+  - nothing polls.
+- **Diligence Gaps / coverage matrix** (P1): per category, "Strong / Partial / Limited evidence" (the SPEC §19 labels), from extraction and signal coverage counts. These are deterministic labels, exempt from the banned-vocabulary list (DD-16). The **brief-level** coverage matrix (company × period for a Deep Analysis) is P0 and separate (architecture §7).
+- **Live monitoring is P2.** The pipeline EventBridge → SEC check → ingestion → index update → change detection → watch match → SNS is drawn in `docs/future-state.md` and on the Architecture page. It is **not built**, because the cost addendum forbids schedules in this deployment.
+
+**Consequences:** Every surface here is plain DynamoDB and S3 reads and writes. A test asserts that no model client is reachable from these handlers.

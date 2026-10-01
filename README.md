@@ -1,11 +1,13 @@
 # DiligenceIQ
 
-**AI Investment Diligence Workspace.** Turn SEC filings into evidence-backed investment decisions.
+**Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 0 (architecture baseline). The application is not built or deployed yet. This README grows as each phase lands. Setup, ingestion, local run, deployment, evaluation, and example-request instructions are added in the phases that implement them.
+> **Status:** Phase 0b (product re-baseline; consolidated [SPEC v2](SPEC.md)). Nothing is deployed. A Phase 1 app shell exists but is uncommitted and is being reworked to the SPEC v2 navigation. This README grows as each phase lands. Setup, ingestion, local run, deployment, and evaluation instructions are added in the phases that implement them; the complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## What it is
-A diligence workflow for a private-equity deal team. Teams research public companies, verify conclusions against source filings, capture findings, organize them by workstream, and prepare an Investment Committee brief. Retrieval-augmented generation over SEC 10-K/10-Q filings powers the research step. Each analysis is answered by **exactly one generative LLM request**, grounded in retrieved, citable filing excerpts.
+An investment-intelligence product for a private-equity team. Pick a company and see how it is performing, what changed across its filings, what deserves attention, why it matters, and what to investigate next, before asking anything (Company Intelligence). Compare companies side by side. Then ask any question in **Deep Analysis**: retrieval-augmented generation over SEC 10-K/10-Q filings, answered by **exactly one generative LLM request** grounded in retrieved, citable filing excerpts. Save findings with their evidence.
+
+Company Intelligence profiles are built **offline** by an admin-run script (one call per company per index and prompt version, plus a zero-call deterministic set) and only read at runtime. Opening a page never calls an LLM. This is an explicit, dated override of part of the cost addendum; see [DD-16](docs/design-decisions.md).
 
 ## Design docs
 - [Architecture](docs/architecture.md), including the Cost and Scaling Strategy
@@ -18,5 +20,7 @@ A diligence workflow for a private-equity deal team. Teams research public compa
 Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-corpus.mjs` (reads `CORPUS_PATH`, default `./edgar_corpus`; Node ≥ 22).
 
 ## Requirements
-- [SPEC.md](SPEC.md): product and engineering specification
-- [SPEC-ADDENDUM-COST.md](SPEC-ADDENDUM-COST.md): cost-control requirements (wins on conflicts)
+- The Eliza assessment PDF is the outer constraint.
+- [SPEC.md](SPEC.md) (v2) is the sole canonical implementation specification. Its only cost exception is the offline Company Intelligence profile build: a named, bounded exception (SPEC §35.7) recorded as the dated override in DD-16.
+- The design docs above elaborate SPEC v2 and cannot override it.
+- Superseded sources, kept verbatim for provenance in [docs/archive/](docs/archive/): [SPEC v1](docs/archive/SPEC-v1.md), [the cost addendum](docs/archive/SPEC-ADDENDUM-COST.md), and [the product direction](docs/archive/PRODUCT_DIRECTION.md). SPEC v2 Appendix A lists every change from them.

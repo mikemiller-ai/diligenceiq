@@ -1,3 +1,5 @@
+> Archived 2026-10-01. Superseded by the consolidated SPEC.md (v2); kept verbatim for provenance.
+
 # SPEC Addendum — Cost Control and Scale-to-Near-Zero Architecture
 
 > Provided verbatim by Mike on 2026-10-01 during Phase 0 planning. Where this addendum conflicts with SPEC.md (e.g. §22's OpenSearch), this addendum wins.
