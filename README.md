@@ -2,7 +2,18 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 0b (product re-baseline; consolidated [SPEC v2](SPEC.md)). Nothing is deployed. A Phase 1 app shell exists but is uncommitted and is being reworked to the SPEC v2 navigation. This README grows as each phase lands. Setup, ingestion, local run, deployment, and evaluation instructions are added in the phases that implement them; the complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 1 (application shell on the SPEC v2 navigation) is live at <https://diligenceiq.mikemiller.ai>. Company Intelligence runs on preview profiles for AAPL, MSFT and NVDA: verbatim, cited risk headings plus labeled placeholders, and no figures. Deep Analysis accepts any question, but the RAG pipeline arrives in Phases 2–4, so the API answers `ANALYSES_DISABLED` for now. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+
+## Develop
+Node ≥ 22 and pnpm 9.
+
+```bash
+pnpm install
+pnpm dev            # http://localhost:3000
+pnpm gate           # check:docs, lint, typecheck, test, cdk:synth, build, e2e (Playwright)
+```
+
+Deploy (AWS us-east-1, CDK): `pnpm deploy:infra`, then `pnpm deploy:web` (uploads the static export to Amplify).
 
 ## What it is
 An investment-intelligence product for a private-equity team. Pick a company and see how it is performing, what changed across its filings, what deserves attention, why it matters, and what to investigate next, before asking anything (Company Intelligence). Compare companies side by side. Then ask any question in **Deep Analysis**: retrieval-augmented generation over SEC 10-K/10-Q filings, answered by **exactly one generative LLM request** grounded in retrieved, citable filing excerpts. Save findings with their evidence.

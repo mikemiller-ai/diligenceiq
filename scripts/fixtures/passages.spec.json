@@ -1,0 +1,138 @@
+{
+ "_comment": "Phase 1 fixtures. Each passage is an exact slice of a real filing in edgar_corpus/, located by start/end anchors and verified by build-web-fixtures.mjs. `passages` (R-) start at a verbatim latest-10-K risk heading and back the fixture profiles; they are the only passages the app ships. `testPassages` (F-) back the test-only sample brief and are written under apps/web/src/test/, which application code never imports. Replaced by the real index in Phase 2.",
+ "passages": [
+  {
+   "chunkId": "AAPL-FY2025-10K-1A-R01",
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Global markets for the Company’s products and services are highly competitive",
+   "end": "on the part of consumers and businesses."
+  },
+  {
+   "chunkId": "AAPL-FY2025-10K-1A-R02",
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "The Company depends on component and product manufacturing",
+   "end": "flexibility to respond to changing conditions."
+  },
+  {
+   "chunkId": "AAPL-FY2025-10K-1A-R03",
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "The Company is subject to complex and changing laws and regulations worldwide",
+   "end": "intellectual property ownership and infringement;"
+  },
+  {
+   "chunkId": "AAPL-FY2025-10K-1A-R04",
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Losses or unauthorized access to or releases of confidential information",
+   "end": "with respect to the Company’s customers and employees."
+  },
+  {
+   "chunkId": "MSFT-FY2025-10K-1A-R01",
+   "documentId": "MSFT_10K_2025-07-30",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "We face intense competition across all markets for our products and services",
+   "end": "technical, marketing, and financial resources."
+  },
+  {
+   "chunkId": "MSFT-FY2025-10K-1A-R02",
+   "documentId": "MSFT_10K_2025-07-30",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Cyberattacks and security vulnerabilities could lead to reduced revenue",
+   "end": "our customers and our internal infrastructure"
+  },
+  {
+   "chunkId": "MSFT-FY2025-10K-1A-R03",
+   "documentId": "MSFT_10K_2025-07-30",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "We are subject to a variety of new, existing, and evolving legal and regulatory requirements",
+   "end": "digital accessibility, advertising, and online safety."
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1A-R01",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Dependency on third-party suppliers and their technology to manufacture",
+   "end": "but instead contract with independent subcontractors.",
+   "occurrence": 2
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1A-R02",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "We are subject to complex laws, rules, regulations, and political and other actions",
+   "end": "import and export requirements and tariffs;",
+   "occurrence": 2
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1A-R03",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Competition could adversely impact our market share and financial results.",
+   "end": "lower-than-expected selling prices or demand for our products.",
+   "occurrence": 2
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1A-R04",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Product, system security, and data protection incidents or breaches",
+   "end": "implement adequate preventative measures."
+  }
+ ],
+ "testPassages": [
+  {
+   "chunkId": "AAPL-FY2025-10K-1A-F01",
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "The Company depends on component and product manufacturing",
+   "end": "flexibility to respond to changing conditions."
+  },
+  {
+   "chunkId": "AAPL-FY2025-10K-1A-F02",
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Many components, including those that are available from multiple sources",
+   "end": "manufacturing capacities have increased."
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1-F01",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1 — Business",
+   "start": "We have expanded our supplier relationships to build redundancy",
+   "end": "testing and packaging of our final products."
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1A-F01",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "We depend on foundries to manufacture our semiconductor wafers",
+   "end": "decommitment by our suppliers;"
+  },
+  {
+   "chunkId": "NVDA-FY2025-10K-1A-F02",
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "section": "Item 1A — Risk Factors",
+   "start": "Challenges in estimating demand could become more pronounced",
+   "end": "could have a material adverse impact on us."
+  }
+ ]
+}

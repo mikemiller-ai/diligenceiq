@@ -3,56 +3,34 @@
 _Last updated: 2026-10-01 (local)_
 
 ## Branch
-`main` (no remote yet). Last commit: `9a7a764` Phase 0. The Phase 0b docs commit waits for Mike's go-ahead.
+`main` (no remote yet). Last commit: `6eb77a2` Phase 0b (docs only). The Phase 1 commit is pending Mike's go-ahead.
 
 ## Current phase
-**Phase 0b complete (product re-baseline), pending commit.**
-- Mike supplied a revised product direction: investment intelligence first, with Company Intelligence as the primary screen and Deep Analysis (the RAG) as the drill-down.
-- It was reconciled into a consolidated **SPEC.md (v2)**, now the sole canonical spec.
-- SPEC v1, the cost addendum and the product direction are archived verbatim in `docs/archive/`.
-- Gate record: adversary (2 blocker, 6 high, 12 medium, 12 low) → fresh fixer fixed all → `/code-review` (2 findings, both fixed) → `pnpm gate` green. See `docs/handoffs/phase-00b.md`.
+**Phase 1 (rework to the SPEC v2 IA) is complete and deployed; the commit is pending.** Handoff: `docs/handoffs/phase-01.md`.
+- Live at https://diligenceiq.mikemiller.ai (Amplify job 1, app `d1jxmy4ao911ax`; the api Lambda was updated by `pnpm deploy:infra` on 2026-10-01).
+- **D9 verified:** the Amplify `/api/<*>` rewrite forwards `Set-Cookie` and the returning `Cookie` header (curl with a cookie jar, and a real browser).
+- Navigation: Company Intelligence | Compare | Deep Analysis | Findings, plus "Ask a question". Routes: `/`, `/intelligence`, `/compare`, `/analysis/new`, `/analysis`, `/findings`, `/architecture`, `/sources/filing`.
+- Content is fixture-only: preview profiles for AAPL, MSFT and NVDA hold a **selection** of verbatim, cited latest-10-K risk headings plus labeled placeholders, and no figures. Compare shows placeholders for anything that needs the complete heading list.
+- The workspace starts empty. The hand-written sample brief is test-only (`apps/web/src/test/`), and a test forbids app imports from there.
+- The API answers `POST /api/analyses` with `ANALYSES_DISABLED`; there is no pipeline yet.
 
 ## Gate
-`pnpm gate` was run on 2026-10-01 in the working tree, which includes uncommitted Phase 1 code. It exited 0:
-- `check-docs: OK (13 files verified)`
-- Tests: 120 passed (packages/core 12, infrastructure/cdk 35, services/api 23, apps/web 50)
-- `cdk:synth` and `build` succeeded
+`pnpm gate` was run on 2026-10-01 against the working tree (exit 0):
+- `check-docs: OK (13 files verified)`;
+- lint and typecheck (including `tests/e2e`) clean;
+- unit tests: core 30, cdk 35, api 23, web 89 (177 in total; the corpus exact-slice test ran);
+- `cdk:synth` and `build` succeeded;
+- **e2e: 31 passed** (Playwright 1.63.0, including axe scans and the prefill-never-auto-submits network test).
 
-The committed `package.json` still has the Phase 0 gate (check-docs only). The full gate arrives with the Phase 1 commit.
-
-## Key decisions this session (2026-10-01)
-- **Company Intelligence engine (Mike's choice):**
-  - Deterministic facts and signals, plus **one offline, admin-run LLM call per company per (indexVersion, profilePromptVersion)**, enforced by a build ledger. This is a dated, bounded exception to the cost rules (SPEC v2 §35.7, DD-16).
-  - A zero-call deterministic profile set is always built, and the SSM pointer `/diligenceiq/active-profile-set` switches between the two sets.
-  - **Ask Eliza before Phase 4b** whether the offline call is acceptable (assumptions F4).
-- **The Phase 1 shell is reworked in place** to the new navigation before its gate. There is no separate Phase 1b.
-- **Navigation:**
-  - Company Intelligence | Compare | Deep Analysis | Findings, plus a global "Ask a question" action.
-  - Thesis and Watchlist (P1) arrive in Phase 8b, after Phases 7 and 8.
-  - The IC Brief and the filing explorer are P1.
-- **Phases:** 0b, 1 (rework), 2, 3, 4, 4b (offline profiles), 5, 6, 7, 8, 8b (P1), 9. See `docs/implementation-plan.md` Revision 2.
+Gate record for the phase:
+- the adversary found 1 blocker, 3 high and the rest medium or low;
+- a fresh fixer fixed all of them, with regression tests;
+- `/code-review` at medium returned 0 findings;
+- `pnpm gate` passed.
 
 ## In flight
-- **Phase 0b docs commit:** waiting on Mike.
-- **Phase 1 code is uncommitted and on the OLD navigation** (Overview, Diligence, Findings, IC Brief, Sources). It is built and tests pass, but it is not deployed. The Set-Cookie check (D9) has not been done.
-  - Paths: `apps/`, `packages/core`, `services/api`, `infrastructure/cdk`, `package.json`, pnpm files, `eslint.config.mjs`, `tsconfig.base.json`, `scripts/deploy-web.sh`, `scripts/fixtures/`, `.claude/launch.json`.
-  - `docs/design-tokens.md` already describes its design system and is in the 0b commit.
-
-## Next
-**Phase 1 rework:**
-1. New navigation and routes:
-   - `/intelligence` (selector), `/intelligence?ticker=`
-   - `/compare`
-   - `/analysis/new` (prefill never auto-submits), `/analysis`
-   - `/findings`
-   - `/architecture` (P0 business-value page)
-   - new landing page
-2. Data model:
-   - `CompanyIntelligenceProfileSchema` in `packages/core`
-   - workstreams → themes
-   - Finding `theme` + `origin`, plus the `AnalysisOrigin` and `FindingSource` unions
-3. Fixture profiles carry no figures and no narrative presented as fact (test).
-4. Then run the full Phase 1 gate, deploy to `diligenceiq.mikemiller.ai`, verify Set-Cookie through the Amplify rewrite, and commit.
+- Commit the Phase 1 tree. It is all uncommitted: `apps/`, `packages/`, `services/`, `infrastructure/`, `tests/`, `scripts/fixtures/`, root config, and the doc edits.
+- Next is **Phase 2**, ingestion and indexing. Verify Bedrock invoke entitlement first.
 
 ## Decisions pending with Mike
 - **Ask Eliza** about the offline profile generation (F4), before Phase 4b.
@@ -78,3 +56,13 @@ The committed `package.json` still has the Phase 0 gate (check-docs only). The f
 - **JNJ and XOM 10-Qs have no Item 1A.** MS's 10-K TOC has no "Item".
 - **`GE_10K_2015` is GE Capital's FY2014 10-K.**
 - **Lines reach 287,855 characters.** Never chunk by line.
+- **E2E:**
+  - `pnpm e2e` serves `apps/web/out` with `python3 -m http.server` on port 4174, with **one worker**: parallel workers stall the Python server and pages hang on "Loading…".
+  - It needs a prior `pnpm build`; the gate order handles that.
+  - `@playwright/test` is pinned to 1.63.0 to match the cached Chromium 1243. Bumping it triggers a browser download.
+- **Fixture profiles hold a selection of headings.** While any `profileSetId` is `fixture-*` (`isFixtureProfile`), nothing that depends on the complete heading list may be stated as a conclusion: common or distinctive areas, ranking, "major attention area", or a heading's rank. SPEC §8.6.
+- **Fixture passages are regenerated, never hand-edited:**
+  - Run `node scripts/fixtures/build-web-fixtures.mjs`; it needs `./edgar_corpus`.
+  - App passages and test-only passages (`apps/web/src/test/generated/`) are separate files.
+- **Corpus company names have no trailing period** ("Apple Inc", "Tesla Inc"). GE's display name is overridden to "General Electric Capital Corp (GE Capital)" (G2).
+- **`cdk diff` is not side-effect free.** It publishes template and Lambda assets to the CDK bootstrap bucket.

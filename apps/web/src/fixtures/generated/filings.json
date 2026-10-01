@@ -1,0 +1,2462 @@
+[
+ {
+  "documentId": "AAPL_10K_2022Q3_2022-10-28",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-K",
+  "filingDate": "2022-10-28",
+  "periodEnd": "2022-09-24",
+  "characters": 242890,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019322000108/aapl-20220924.htm"
+ },
+ {
+  "documentId": "AAPL_10K_2023Q3_2023-11-03",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-K",
+  "filingDate": "2023-11-03",
+  "periodEnd": "2023-09-30",
+  "characters": 226336,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm"
+ },
+ {
+  "documentId": "AAPL_10K_2024Q3_2024-11-01",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-11-01",
+  "periodEnd": "2024-09-28",
+  "characters": 228034,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm"
+ },
+ {
+  "documentId": "AAPL_10K_2025-10-31",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-10-31",
+  "periodEnd": "2025-09-27",
+  "characters": 230212,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2022Q1_2022-04-29",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-04-29",
+  "periodEnd": "2022-03-26",
+  "characters": 82528,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019322000059/aapl-20220326.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-07-29",
+  "periodEnd": "2022-06-25",
+  "characters": 80516,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019322000070/aapl-20220625.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-02-03",
+  "periodEnd": "2022-12-31",
+  "characters": 74618,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000006/aapl-20221231.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-05",
+  "periodEnd": "2023-04-01",
+  "characters": 80592,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000064/aapl-20230401.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-04",
+  "periodEnd": "2023-07-01",
+  "characters": 80654,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000077/aapl-20230701.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-02-02",
+  "periodEnd": "2023-12-30",
+  "characters": 71648,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000006/aapl-20231230.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-03",
+  "periodEnd": "2024-03-30",
+  "characters": 77108,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000069/aapl-20240330.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-02",
+  "periodEnd": "2024-06-29",
+  "characters": 76295,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000081/aapl-20240629.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-01-31",
+  "periodEnd": "2024-12-28",
+  "characters": 77741,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000008/aapl-20241228.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2025Q1_2025-05-02",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-02",
+  "periodEnd": "2025-03-29",
+  "characters": 89475,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000057/aapl-20250329.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2025Q2_2025-08-01",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-01",
+  "periodEnd": "2025-06-28",
+  "characters": 78124,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019325000073/aapl-20250628.htm"
+ },
+ {
+  "documentId": "AAPL_10Q_2025Q4_2026-01-30",
+  "ticker": "AAPL",
+  "company": "Apple Inc",
+  "filingType": "10-Q",
+  "filingDate": "2026-01-30",
+  "periodEnd": "2025-12-27",
+  "characters": 72584,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000006/aapl-20251227.htm"
+ },
+ {
+  "documentId": "ABBV_10K_2025-02-14",
+  "ticker": "ABBV",
+  "company": "AbbVie Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-14",
+  "periodEnd": "2024-12-31",
+  "characters": 527994,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1551152/000155115225000020/abbv-20241231.htm"
+ },
+ {
+  "documentId": "ADBE_10K_2026-01-15",
+  "ticker": "ADBE",
+  "company": "Adobe Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-01-15",
+  "periodEnd": "2025-11-28",
+  "characters": 384671,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000003/adbe-20251128.htm"
+ },
+ {
+  "documentId": "AMD_10K_2026-02-04",
+  "ticker": "AMD",
+  "company": "Advanced Micro Devices Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-04",
+  "periodEnd": "2025-12-27",
+  "characters": 434787,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm"
+ },
+ {
+  "documentId": "AMZN_10K_2022Q4_2023-02-03",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-K",
+  "filingDate": "2023-02-03",
+  "periodEnd": "2022-12-31",
+  "characters": 305010,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000004/amzn-20221231.htm"
+ },
+ {
+  "documentId": "AMZN_10K_2023Q4_2024-02-02",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-02-02",
+  "periodEnd": "2023-12-31",
+  "characters": 320836,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000008/amzn-20231231.htm"
+ },
+ {
+  "documentId": "AMZN_10K_2024Q4_2025-02-07",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-07",
+  "periodEnd": "2024-12-31",
+  "characters": 317612,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000004/amzn-20241231.htm"
+ },
+ {
+  "documentId": "AMZN_10K_2026-02-06",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-06",
+  "periodEnd": "2025-12-31",
+  "characters": 321632,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2022Q1_2022-04-29",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-04-29",
+  "periodEnd": "2022-03-31",
+  "characters": 181986,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872422000013/amzn-20220331.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2022Q2_2022-07-29",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-07-29",
+  "periodEnd": "2022-06-30",
+  "characters": 195781,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872422000019/amzn-20220630.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2022Q3_2022-10-28",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-10-28",
+  "periodEnd": "2022-09-30",
+  "characters": 198421,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872422000023/amzn-20220930.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2023Q1_2023-04-28",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-28",
+  "periodEnd": "2023-03-31",
+  "characters": 188174,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000008/amzn-20230331.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2023Q2_2023-08-04",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-04",
+  "periodEnd": "2023-06-30",
+  "characters": 197658,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000012/amzn-20230630.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2023Q3_2023-10-27",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-27",
+  "periodEnd": "2023-09-30",
+  "characters": 200656,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872423000018/amzn-20230930.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2024Q1_2024-05-01",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-01",
+  "periodEnd": "2024-03-31",
+  "characters": 186961,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000083/amzn-20240331.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2024Q2_2024-08-02",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-02",
+  "periodEnd": "2024-06-30",
+  "characters": 199361,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000130/amzn-20240630.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2024Q3_2024-11-01",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-11-01",
+  "periodEnd": "2024-09-30",
+  "characters": 207715,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000161/amzn-20240930.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2025Q1_2025-05-02",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-02",
+  "periodEnd": "2025-03-31",
+  "characters": 187510,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000036/amzn-20250331.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2025Q2_2025-08-01",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-01",
+  "periodEnd": "2025-06-30",
+  "characters": 201079,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000086/amzn-20250630.htm"
+ },
+ {
+  "documentId": "AMZN_10Q_2025Q3_2025-10-31",
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-31",
+  "periodEnd": "2025-09-30",
+  "characters": 210410,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000123/amzn-20250930.htm"
+ },
+ {
+  "documentId": "AXP_10K_2026-02-06",
+  "ticker": "AXP",
+  "company": "American Express Company",
+  "filingType": "10-K",
+  "filingDate": "2026-02-06",
+  "periodEnd": "2025-12-31",
+  "characters": 722521,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/4962/000000496226000080/axp-20251231.htm"
+ },
+ {
+  "documentId": "BAC_10K_2025-02-25",
+  "ticker": "BAC",
+  "company": "Bank of America Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-02-25",
+  "periodEnd": "2024-12-31",
+  "characters": 1285270,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/70858/000007085825000139/bac-20241231.htm"
+ },
+ {
+  "documentId": "BAC_10Q_2025Q1_2025-04-30",
+  "ticker": "BAC",
+  "company": "Bank of America Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-04-30",
+  "periodEnd": "2025-03-31",
+  "characters": 715566,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/70858/000007085825000200/bac-20250331.htm"
+ },
+ {
+  "documentId": "BAC_10Q_2025Q2_2025-07-31",
+  "ticker": "BAC",
+  "company": "Bank of America Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-07-31",
+  "periodEnd": "2025-06-30",
+  "characters": 831776,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/70858/000007085825000268/bac-20250630.htm"
+ },
+ {
+  "documentId": "BAC_10Q_2025Q3_2025-10-31",
+  "ticker": "BAC",
+  "company": "Bank of America Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-31",
+  "periodEnd": "2025-09-30",
+  "characters": 833735,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/70858/000007085825000405/bac-20250930.htm"
+ },
+ {
+  "documentId": "BA_10K_2026-01-30",
+  "ticker": "BA",
+  "company": "The Boeing Company",
+  "filingType": "10-K",
+  "filingDate": "2026-01-30",
+  "periodEnd": "2025-12-31",
+  "characters": 508930,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/12927/000162828026004357/ba-20251231.htm"
+ },
+ {
+  "documentId": "BLK_10K_2024-02-23",
+  "ticker": "BLK",
+  "company": "BlackRock Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-02-23",
+  "periodEnd": "2023-12-31",
+  "characters": 657347,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1364742/000095017024019271/blk-20231231.htm"
+ },
+ {
+  "documentId": "BRK_10K_2025-02-24",
+  "ticker": "BRK",
+  "company": "Berkshire Hathaway Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-24",
+  "periodEnd": "2024-12-31",
+  "characters": 677250,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1067983/000095017025025210/brka-20241231.htm"
+ },
+ {
+  "documentId": "CAT_10K_2026-02-13",
+  "ticker": "CAT",
+  "company": "Caterpillar Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-13",
+  "periodEnd": "2025-12-31",
+  "characters": 603670,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000008/cat-20251231.htm"
+ },
+ {
+  "documentId": "CMCSA_10K_2026-02-03",
+  "ticker": "CMCSA",
+  "company": "Comcast Corporation",
+  "filingType": "10-K",
+  "filingDate": "2026-02-03",
+  "periodEnd": "2025-12-31",
+  "characters": 449200,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1166691/000162828026004994/cmcsa-20251231.htm"
+ },
+ {
+  "documentId": "COST_10K_2025-10-08",
+  "ticker": "COST",
+  "company": "Costco Wholesale Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-10-08",
+  "periodEnd": "2025-08-31",
+  "characters": 226782,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/909832/000090983225000101/cost-20250831.htm"
+ },
+ {
+  "documentId": "CRM_10K_2025-03-05",
+  "ticker": "CRM",
+  "company": "Salesforce Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-03-05",
+  "periodEnd": "2025-01-31",
+  "characters": 440167,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1108524/000110852425000006/crm-20250131.htm"
+ },
+ {
+  "documentId": "CSCO_10K_2025-09-03",
+  "ticker": "CSCO",
+  "company": "Cisco Systems Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-09-03",
+  "periodEnd": "2025-07-26",
+  "characters": 467466,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/858877/000085887725000111/csco-20250726.htm"
+ },
+ {
+  "documentId": "CVX_10K_2025-02-21",
+  "ticker": "CVX",
+  "company": "Chevron Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-02-21",
+  "periodEnd": "2024-12-31",
+  "characters": 604306,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/93410/000009341025000009/cvx-20241231.htm"
+ },
+ {
+  "documentId": "DE_10K_2025-12-18",
+  "ticker": "DE",
+  "company": "Deere & Company",
+  "filingType": "10-K",
+  "filingDate": "2025-12-18",
+  "periodEnd": "2025-11-02",
+  "characters": 555720,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/315189/000110465925122321/de-20251102x10k.htm"
+ },
+ {
+  "documentId": "DIS_10K_2022Q4_2022-11-29",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-K",
+  "filingDate": "2022-11-29",
+  "periodEnd": "2022-10-01",
+  "characters": 495172,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448922000213/dis-20221001.htm"
+ },
+ {
+  "documentId": "DIS_10K_2023Q3_2023-11-21",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-K",
+  "filingDate": "2023-11-21",
+  "periodEnd": "2023-09-30",
+  "characters": 546689,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448923000216/dis-20230930.htm"
+ },
+ {
+  "documentId": "DIS_10K_2024Q3_2024-11-14",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-K",
+  "filingDate": "2024-11-14",
+  "periodEnd": "2024-09-28",
+  "characters": 530303,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448924000276/dis-20240928.htm"
+ },
+ {
+  "documentId": "DIS_10K_2025-11-13",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-K",
+  "filingDate": "2025-11-13",
+  "periodEnd": "2025-09-27",
+  "characters": 523381,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448925000155/dis-20250927.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2022Q1_2022-02-09",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2022-02-09",
+  "periodEnd": "2022-01-01",
+  "characters": 201974,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448922000059/dis-20220101.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2022Q2_2022-05-11",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2022-05-11",
+  "periodEnd": "2022-04-02",
+  "characters": 263662,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448922000100/dis-20220402.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2022Q3_2022-08-10",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2022-08-10",
+  "periodEnd": "2022-07-02",
+  "characters": 266901,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448922000161/dis-20220702.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2022Q4_2023-02-08",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2023-02-08",
+  "periodEnd": "2022-12-31",
+  "characters": 196469,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448923000049/dis-20221231.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2023Q2_2023-05-10",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-10",
+  "periodEnd": "2023-04-01",
+  "characters": 265344,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448923000099/dis-20230401.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2023Q3_2023-08-09",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-09",
+  "periodEnd": "2023-07-01",
+  "characters": 277205,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448923000171/dis-20230701.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2023Q4_2024-02-07",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2024-02-07",
+  "periodEnd": "2023-12-30",
+  "characters": 208669,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448924000081/dis-20231230.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2024Q1_2024-05-07",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-07",
+  "periodEnd": "2024-03-30",
+  "characters": 285120,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448924000152/dis-20240330.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2024Q2_2024-08-07",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-07",
+  "periodEnd": "2024-06-29",
+  "characters": 290672,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448924000232/dis-20240629.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2024Q4_2025-02-05",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2025-02-05",
+  "periodEnd": "2024-12-28",
+  "characters": 217460,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448925000067/dis-20241228.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2025Q1_2025-05-07",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-07",
+  "periodEnd": "2025-03-29",
+  "characters": 294261,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448925000098/dis-20250329.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2025Q2_2025-08-06",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-06",
+  "periodEnd": "2025-06-28",
+  "characters": 295349,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448925000136/dis-20250628.htm"
+ },
+ {
+  "documentId": "DIS_10Q_2025Q4_2026-02-02",
+  "ticker": "DIS",
+  "company": "The Walt Disney Company",
+  "filingType": "10-Q",
+  "filingDate": "2026-02-02",
+  "periodEnd": "2025-12-27",
+  "characters": 174902,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1744489/000174448926000019/dis-20251227.htm"
+ },
+ {
+  "documentId": "GE_10K_2015-02-27",
+  "ticker": "GE",
+  "company": "General Electric Company",
+  "filingType": "10-K",
+  "filingDate": "2015-02-27",
+  "periodEnd": "2014-12-31",
+  "characters": 468387,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/40554/000004054515000032/gecc10k2014.htm"
+ },
+ {
+  "documentId": "GOOG_10K_2022Q4_2023-02-03",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-K",
+  "filingDate": "2023-02-03",
+  "periodEnd": "2022-12-31",
+  "characters": 363044,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000016/goog-20221231.htm"
+ },
+ {
+  "documentId": "GOOG_10K_2023Q4_2024-01-31",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-01-31",
+  "periodEnd": "2023-12-31",
+  "characters": 384699,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000022/goog-20231231.htm"
+ },
+ {
+  "documentId": "GOOG_10K_2024Q4_2025-02-05",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-05",
+  "periodEnd": "2024-12-31",
+  "characters": 396223,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000014/goog-20241231.htm"
+ },
+ {
+  "documentId": "GOOG_10K_2026-02-05",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-05",
+  "periodEnd": "2025-12-31",
+  "characters": 397894,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2022Q3_2022-10-26",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-10-26",
+  "periodEnd": "2022-09-30",
+  "characters": 197508,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204422000090/goog-20220930.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2023Q1_2023-04-26",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-26",
+  "periodEnd": "2023-03-31",
+  "characters": 164457,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000045/goog-20230331.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2023Q2_2023-07-26",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-07-26",
+  "periodEnd": "2023-06-30",
+  "characters": 197872,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000070/goog-20230630.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2023Q3_2023-10-25",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-25",
+  "periodEnd": "2023-09-30",
+  "characters": 200896,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000094/goog-20230930.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2024Q1_2024-04-26",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-04-26",
+  "periodEnd": "2024-03-31",
+  "characters": 166838,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000053/goog-20240331.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2024Q2_2024-07-24",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-07-24",
+  "periodEnd": "2024-06-30",
+  "characters": 195816,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000079/goog-20240630.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2024Q3_2024-10-30",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-10-30",
+  "periodEnd": "2024-09-30",
+  "characters": 204044,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000118/goog-20240930.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2025Q1_2025-04-25",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-04-25",
+  "periodEnd": "2025-03-31",
+  "characters": 172340,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000043/goog-20250331.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2025Q2_2025-07-24",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-07-24",
+  "periodEnd": "2025-06-30",
+  "characters": 208150,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000062/goog-20250630.htm"
+ },
+ {
+  "documentId": "GOOG_10Q_2025Q3_2025-10-30",
+  "ticker": "GOOG",
+  "company": "Alphabet Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-30",
+  "periodEnd": "2025-09-30",
+  "characters": 210750,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000091/goog-20250930.htm"
+ },
+ {
+  "documentId": "GS_10K_2025-02-27",
+  "ticker": "GS",
+  "company": "Goldman Sachs Group Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-27",
+  "periodEnd": "2024-12-31",
+  "characters": 1363615,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/886982/000088698225000005/gs-20241231.htm"
+ },
+ {
+  "documentId": "HD_10K_2025-03-21",
+  "ticker": "HD",
+  "company": "The Home Depot Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-03-21",
+  "periodEnd": "2025-02-02",
+  "characters": 363255,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/354950/000035495025000085/hd-20250202.htm"
+ },
+ {
+  "documentId": "IBM_10K_2025-02-25",
+  "ticker": "IBM",
+  "company": "International Business Machines Corp",
+  "filingType": "10-K",
+  "filingDate": "2025-02-25",
+  "periodEnd": "2024-12-31",
+  "characters": 223263,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/51143/000005114325000015/ibm-20241231.htm"
+ },
+ {
+  "documentId": "INTC_10K_2026-01-23",
+  "ticker": "INTC",
+  "company": "Intel Corporation",
+  "filingType": "10-K",
+  "filingDate": "2026-01-23",
+  "periodEnd": "2025-12-27",
+  "characters": 591434,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm"
+ },
+ {
+  "documentId": "JNJ_10K_2022Q1_2022-02-17",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-K",
+  "filingDate": "2022-02-17",
+  "periodEnd": "2022-01-02",
+  "characters": 572917,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040622000022/jnj-20220102.htm"
+ },
+ {
+  "documentId": "JNJ_10K_2023Q1_2023-02-16",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-K",
+  "filingDate": "2023-02-16",
+  "periodEnd": "2023-01-01",
+  "characters": 577230,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040623000016/jnj-20230101.htm"
+ },
+ {
+  "documentId": "JNJ_10K_2023Q4_2024-02-16",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-K",
+  "filingDate": "2024-02-16",
+  "periodEnd": "2023-12-31",
+  "characters": 526204,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040624000013/jnj-20231231.htm"
+ },
+ {
+  "documentId": "JNJ_10K_2024Q4_2025-02-13",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-K",
+  "filingDate": "2025-02-13",
+  "periodEnd": "2024-12-29",
+  "characters": 533608,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040625000038/jnj-20241229.htm"
+ },
+ {
+  "documentId": "JNJ_10K_2026-02-11",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-K",
+  "filingDate": "2026-02-11",
+  "periodEnd": "2025-12-28",
+  "characters": 535253,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040626000016/jnj-20251228.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2022Q2_2022-04-29",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2022-04-29",
+  "periodEnd": "2022-04-03",
+  "characters": 277044,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040622000048/jnj-20220403.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2022Q3_2022-07-29",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2022-07-29",
+  "periodEnd": "2022-07-03",
+  "characters": 354406,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040622000071/jnj-20220703.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2022Q4_2022-10-27",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2022-10-27",
+  "periodEnd": "2022-10-02",
+  "characters": 361529,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040622000086/jnj-20221002.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2023Q2_2023-04-28",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-28",
+  "periodEnd": "2023-04-02",
+  "characters": 266524,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040623000056/jnj-20230402.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2023Q3_2023-07-31",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2023-07-31",
+  "periodEnd": "2023-07-02",
+  "characters": 338515,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040623000082/jnj-20230702.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2023Q4_2023-10-27",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-27",
+  "periodEnd": "2023-10-01",
+  "characters": 321902,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040623000102/jnj-20231001.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2024Q1_2024-05-01",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-01",
+  "periodEnd": "2024-03-31",
+  "characters": 236725,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040624000049/jnj-20240331.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2024Q2_2024-07-25",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2024-07-25",
+  "periodEnd": "2024-06-30",
+  "characters": 312834,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040624000075/jnj-20240630.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2024Q3_2024-10-23",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2024-10-23",
+  "periodEnd": "2024-09-29",
+  "characters": 316382,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040624000096/jnj-20240929.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2025Q1_2025-04-23",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2025-04-23",
+  "periodEnd": "2025-03-30",
+  "characters": 241148,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040625000119/jnj-20250330.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2025Q2_2025-07-24",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2025-07-24",
+  "periodEnd": "2025-06-29",
+  "characters": 306159,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040625000178/jnj-20250629.htm"
+ },
+ {
+  "documentId": "JNJ_10Q_2025Q3_2025-10-22",
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-22",
+  "periodEnd": "2025-09-28",
+  "characters": 311633,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/200406/000020040625000209/jnj-20250928.htm"
+ },
+ {
+  "documentId": "JPM_10K_2026-02-13",
+  "ticker": "JPM",
+  "company": "JPMorgan Chase & Co",
+  "filingType": "10-K",
+  "filingDate": "2026-02-13",
+  "periodEnd": "2025-12-31",
+  "characters": 1500683,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/19617/000162828026008131/jpm-20251231.htm"
+ },
+ {
+  "documentId": "JPM_10Q_2025Q1_2025-05-01",
+  "ticker": "JPM",
+  "company": "JPMorgan Chase & Co",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-01",
+  "periodEnd": "2025-03-31",
+  "characters": 816188,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/19617/000001961725000421/jpm-20250331.htm"
+ },
+ {
+  "documentId": "JPM_10Q_2025Q2_2025-08-05",
+  "ticker": "JPM",
+  "company": "JPMorgan Chase & Co",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-05",
+  "periodEnd": "2025-06-30",
+  "characters": 933857,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/19617/000001961725000615/jpm-20250630.htm"
+ },
+ {
+  "documentId": "JPM_10Q_2025Q3_2025-11-04",
+  "ticker": "JPM",
+  "company": "JPMorgan Chase & Co",
+  "filingType": "10-Q",
+  "filingDate": "2025-11-04",
+  "periodEnd": "2025-09-30",
+  "characters": 951609,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/19617/000162828025048859/jpm-20250930.htm"
+ },
+ {
+  "documentId": "KO_10K_2022Q4_2023-02-21",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-K",
+  "filingDate": "2023-02-21",
+  "periodEnd": "2022-12-31",
+  "characters": 698021,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134423000011/ko-20221231.htm"
+ },
+ {
+  "documentId": "KO_10K_2023Q4_2024-02-20",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-K",
+  "filingDate": "2024-02-20",
+  "periodEnd": "2023-12-31",
+  "characters": 691681,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134424000009/ko-20231231.htm"
+ },
+ {
+  "documentId": "KO_10K_2025-02-20",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-K",
+  "filingDate": "2025-02-20",
+  "periodEnd": "2024-12-31",
+  "characters": 679624,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134425000011/ko-20241231.htm"
+ },
+ {
+  "documentId": "KO_10Q_2022Q2_2022-04-28",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2022-04-28",
+  "periodEnd": "2022-04-01",
+  "characters": 208261,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134422000016/ko-20220401.htm"
+ },
+ {
+  "documentId": "KO_10Q_2022Q3_2022-07-27",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2022-07-27",
+  "periodEnd": "2022-07-01",
+  "characters": 256002,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134422000034/ko-20220701.htm"
+ },
+ {
+  "documentId": "KO_10Q_2022Q3_2022-10-26",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2022-10-26",
+  "periodEnd": "2022-09-30",
+  "characters": 260755,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134422000042/ko-20220930.htm"
+ },
+ {
+  "documentId": "KO_10Q_2023Q1_2023-04-26",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-26",
+  "periodEnd": "2023-03-31",
+  "characters": 204695,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134423000024/ko-20230331.htm"
+ },
+ {
+  "documentId": "KO_10Q_2023Q2_2023-07-27",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2023-07-27",
+  "periodEnd": "2023-06-30",
+  "characters": 252807,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134423000048/ko-20230630.htm"
+ },
+ {
+  "documentId": "KO_10Q_2023Q3_2023-10-24",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-24",
+  "periodEnd": "2023-09-29",
+  "characters": 254692,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134423000060/ko-20230929.htm"
+ },
+ {
+  "documentId": "KO_10Q_2024Q1_2024-05-02",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-02",
+  "periodEnd": "2024-03-29",
+  "characters": 214247,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134424000017/ko-20240329.htm"
+ },
+ {
+  "documentId": "KO_10Q_2024Q2_2024-07-29",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2024-07-29",
+  "periodEnd": "2024-06-28",
+  "characters": 269740,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134424000044/ko-20240628.htm"
+ },
+ {
+  "documentId": "KO_10Q_2024Q3_2024-10-24",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2024-10-24",
+  "periodEnd": "2024-09-27",
+  "characters": 277979,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134424000060/ko-20240927.htm"
+ },
+ {
+  "documentId": "KO_10Q_2025Q1_2025-05-01",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-01",
+  "periodEnd": "2025-03-28",
+  "characters": 211467,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134425000029/ko-20250328.htm"
+ },
+ {
+  "documentId": "KO_10Q_2025Q2_2025-07-24",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2025-07-24",
+  "periodEnd": "2025-06-27",
+  "characters": 259222,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000002134425000061/ko-20250627.htm"
+ },
+ {
+  "documentId": "KO_10Q_2025Q3_2025-10-23",
+  "ticker": "KO",
+  "company": "The Coca-Cola Company",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-23",
+  "periodEnd": "2025-09-26",
+  "characters": 271638,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/21344/000162828025046054/ko-20250926.htm"
+ },
+ {
+  "documentId": "LLY_10K_2026-02-12",
+  "ticker": "LLY",
+  "company": "Eli Lilly and Company",
+  "filingType": "10-K",
+  "filingDate": "2026-02-12",
+  "periodEnd": "2025-12-31",
+  "characters": 430164,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/lly-20251231.htm"
+ },
+ {
+  "documentId": "LMT_10K_2026-01-29",
+  "ticker": "LMT",
+  "company": "Lockheed Martin Corporation",
+  "filingType": "10-K",
+  "filingDate": "2026-01-29",
+  "periodEnd": "2025-12-31",
+  "characters": 509026,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/936468/000162828026004195/lmt-20251231.htm"
+ },
+ {
+  "documentId": "MA_10K_2026-02-11",
+  "ticker": "MA",
+  "company": "Mastercard Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-11",
+  "periodEnd": "2025-12-31",
+  "characters": 500320,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1141391/000114139126000013/ma-20251231.htm"
+ },
+ {
+  "documentId": "MCD_10K_2025-02-25",
+  "ticker": "MCD",
+  "company": "McDonalds Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-02-25",
+  "periodEnd": "2024-12-31",
+  "characters": 316866,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63908/000006390825000012/mcd-20241231.htm"
+ },
+ {
+  "documentId": "MCD_10Q_2023Q1_2023-05-04",
+  "ticker": "MCD",
+  "company": "McDonalds Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-04",
+  "periodEnd": "2023-03-31",
+  "characters": 140416,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/63908/000006390823000036/mcd-20230331.htm"
+ },
+ {
+  "documentId": "META_10K_2024Q4_2025-01-30",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-01-30",
+  "periodEnd": "2024-12-31",
+  "characters": 532992,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000132680125000017/meta-20241231.htm"
+ },
+ {
+  "documentId": "META_10K_2026-01-29",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-01-29",
+  "periodEnd": "2025-12-31",
+  "characters": 546687,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+ },
+ {
+  "documentId": "META_10Q_2024Q1_2024-04-25",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-04-25",
+  "periodEnd": "2024-03-31",
+  "characters": 367620,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000132680124000049/meta-20240331.htm"
+ },
+ {
+  "documentId": "META_10Q_2024Q2_2024-08-01",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-01",
+  "periodEnd": "2024-06-30",
+  "characters": 389322,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000132680124000069/meta-20240630.htm"
+ },
+ {
+  "documentId": "META_10Q_2024Q3_2024-10-31",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-10-31",
+  "periodEnd": "2024-09-30",
+  "characters": 396814,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000132680124000081/meta-20240930.htm"
+ },
+ {
+  "documentId": "META_10Q_2025Q1_2025-05-01",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-01",
+  "periodEnd": "2025-03-31",
+  "characters": 377656,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000132680125000054/meta-20250331.htm"
+ },
+ {
+  "documentId": "META_10Q_2025Q2_2025-07-31",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-07-31",
+  "periodEnd": "2025-06-30",
+  "characters": 394800,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000162828025036791/meta-20250630.htm"
+ },
+ {
+  "documentId": "META_10Q_2025Q3_2025-10-30",
+  "ticker": "META",
+  "company": "Meta Platforms Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-30",
+  "periodEnd": "2025-09-30",
+  "characters": 411477,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1326801/000162828025047240/meta-20250930.htm"
+ },
+ {
+  "documentId": "MRK_10K_2025-02-25",
+  "ticker": "MRK",
+  "company": "Merck & Co Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-25",
+  "periodEnd": "2024-12-31",
+  "characters": 788150,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/310158/000162828025007732/mrk-20241231.htm"
+ },
+ {
+  "documentId": "MSFT_10K_2022Q2_2022-07-28",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-K",
+  "filingDate": "2022-07-28",
+  "periodEnd": "2022-06-30",
+  "characters": 406077,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000156459022026876/msft-10k_20220630.htm"
+ },
+ {
+  "documentId": "MSFT_10K_2023Q2_2023-07-27",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-K",
+  "filingDate": "2023-07-27",
+  "periodEnd": "2023-06-30",
+  "characters": 398533,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017023035122/msft-20230630.htm"
+ },
+ {
+  "documentId": "MSFT_10K_2024Q2_2024-07-30",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-K",
+  "filingDate": "2024-07-30",
+  "periodEnd": "2024-06-30",
+  "characters": 415804,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017024087843/msft-20240630.htm"
+ },
+ {
+  "documentId": "MSFT_10K_2025-07-30",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-07-30",
+  "periodEnd": "2025-06-30",
+  "characters": 370557,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2022Q1_2022-04-26",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-04-26",
+  "periodEnd": "2022-03-31",
+  "characters": 268285,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000156459022015675/msft-10q_20220331.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2022Q3_2022-10-25",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-10-25",
+  "periodEnd": "2022-09-30",
+  "characters": 232936,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000156459022035087/msft-10q_20220930.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2022Q4_2023-01-24",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-01-24",
+  "periodEnd": "2022-12-31",
+  "characters": 265591,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000156459023000733/msft-10q_20221231.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2023Q1_2023-04-25",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-25",
+  "periodEnd": "2023-03-31",
+  "characters": 262013,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017023014423/msft-20230331.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2023Q3_2023-10-24",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-24",
+  "periodEnd": "2023-09-30",
+  "characters": 219710,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017023054855/msft-20230930.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2023Q4_2024-01-30",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-01-30",
+  "periodEnd": "2023-12-31",
+  "characters": 261375,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017024008814/msft-20231231.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2024Q1_2024-04-25",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-04-25",
+  "periodEnd": "2024-03-31",
+  "characters": 262035,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017024048288/msft-20240331.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2024Q3_2024-10-30",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-10-30",
+  "periodEnd": "2024-09-30",
+  "characters": 235652,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017024118967/msft-20240930.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2024Q4_2025-01-29",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-01-29",
+  "periodEnd": "2024-12-31",
+  "characters": 258140,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017025010491/msft-20241231.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2025Q1_2025-04-30",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-04-30",
+  "periodEnd": "2025-03-31",
+  "characters": 261533,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000095017025061046/msft-20250331.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2025Q3_2025-10-29",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-29",
+  "periodEnd": "2025-09-30",
+  "characters": 225501,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000119312525256321/msft-20250930.htm"
+ },
+ {
+  "documentId": "MSFT_10Q_2025Q4_2026-01-28",
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2026-01-28",
+  "periodEnd": "2025-12-31",
+  "characters": 254482,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/789019/000119312526027207/msft-20251231.htm"
+ },
+ {
+  "documentId": "MS_10K_2026-02-19",
+  "ticker": "MS",
+  "company": "Morgan Stanley",
+  "filingType": "10-K",
+  "filingDate": "2026-02-19",
+  "periodEnd": "2025-12-31",
+  "characters": 1021005,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/895421/000089542126000086/ms-20251231.htm"
+ },
+ {
+  "documentId": "NFLX_10K_2026-01-23",
+  "ticker": "NFLX",
+  "company": "Netflix Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-01-23",
+  "periodEnd": "2025-12-31",
+  "characters": 323251,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm"
+ },
+ {
+  "documentId": "NKE_10K_2025-07-17",
+  "ticker": "NKE",
+  "company": "Nike Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-07-17",
+  "periodEnd": "2025-05-31",
+  "characters": 429457,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/320187/000032018725000047/nke-20250531.htm"
+ },
+ {
+  "documentId": "NVDA_10K_2022Q1_2022-03-18",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-K",
+  "filingDate": "2022-03-18",
+  "periodEnd": "2022-01-30",
+  "characters": 335063,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000036/nvda-20220130.htm"
+ },
+ {
+  "documentId": "NVDA_10K_2023Q1_2023-02-24",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-K",
+  "filingDate": "2023-02-24",
+  "periodEnd": "2023-01-29",
+  "characters": 349715,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000017/nvda-20230129.htm"
+ },
+ {
+  "documentId": "NVDA_10K_2024Q1_2024-02-21",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-K",
+  "filingDate": "2024-02-21",
+  "periodEnd": "2024-01-28",
+  "characters": 370746,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000029/nvda-20240128.htm"
+ },
+ {
+  "documentId": "NVDA_10K_2025-02-26",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-02-26",
+  "periodEnd": "2025-01-26",
+  "characters": 380196,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2022Q2_2022-05-27",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-05-27",
+  "periodEnd": "2022-05-01",
+  "characters": 134504,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000079/nvda-20220501.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2022Q3_2022-08-31",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-08-31",
+  "periodEnd": "2022-07-31",
+  "characters": 177606,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000147/nvda-20220731.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2022Q4_2022-11-18",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-11-18",
+  "periodEnd": "2022-10-30",
+  "characters": 159486,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581022000166/nvda-20221030.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2023Q2_2023-05-26",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-26",
+  "periodEnd": "2023-04-30",
+  "characters": 156268,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000093/nvda-20230430.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2023Q3_2023-08-28",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-28",
+  "periodEnd": "2023-07-30",
+  "characters": 171197,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000175/nvda-20230730.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2023Q4_2023-11-21",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-11-21",
+  "periodEnd": "2023-10-29",
+  "characters": 180760,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581023000227/nvda-20231029.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2024Q2_2024-05-29",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-29",
+  "periodEnd": "2024-04-28",
+  "characters": 157921,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000124/nvda-20240428.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2024Q3_2024-08-28",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-28",
+  "periodEnd": "2024-07-28",
+  "characters": 173267,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000264/nvda-20240728.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2024Q4_2024-11-20",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-11-20",
+  "periodEnd": "2024-10-27",
+  "characters": 167529,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000316/nvda-20241027.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2025Q2_2025-05-28",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-28",
+  "periodEnd": "2025-04-27",
+  "characters": 154684,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000116/nvda-20250427.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2025Q3_2025-08-27",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-27",
+  "periodEnd": "2025-07-27",
+  "characters": 159959,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000209/nvda-20250727.htm"
+ },
+ {
+  "documentId": "NVDA_10Q_2025Q4_2025-11-19",
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-11-19",
+  "periodEnd": "2025-10-26",
+  "characters": 178068,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000230/nvda-20251026.htm"
+ },
+ {
+  "documentId": "ORCL_10K_2025-06-18",
+  "ticker": "ORCL",
+  "company": "Oracle Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-06-18",
+  "periodEnd": "2025-05-31",
+  "characters": 476457,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1341439/000095017025087926/orcl-20250531.htm"
+ },
+ {
+  "documentId": "PEP_10K_2026-02-03",
+  "ticker": "PEP",
+  "company": "PepsiCo Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-03",
+  "periodEnd": "2025-12-27",
+  "characters": 500772,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/77476/000007747626000007/pep-20251227.htm"
+ },
+ {
+  "documentId": "PEP_10Q_2023Q1_2023-04-25",
+  "ticker": "PEP",
+  "company": "PepsiCo Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-25",
+  "periodEnd": "2023-03-25",
+  "characters": 158666,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/77476/000007747623000023/pep-20230325.htm"
+ },
+ {
+  "documentId": "PFE_10K_2022Q4_2023-02-23",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-K",
+  "filingDate": "2023-02-23",
+  "periodEnd": "2022-12-31",
+  "characters": 761884,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800323000024/pfe-20221231.htm"
+ },
+ {
+  "documentId": "PFE_10K_2023Q4_2024-02-22",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-02-22",
+  "periodEnd": "2023-12-31",
+  "characters": 802552,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800324000039/pfe-20231231.htm"
+ },
+ {
+  "documentId": "PFE_10K_2025-02-27",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-27",
+  "periodEnd": "2024-12-31",
+  "characters": 785766,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800325000054/pfe-20241231.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2022Q2_2022-05-11",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-05-11",
+  "periodEnd": "2022-04-03",
+  "characters": 285553,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800322000071/pfe-20220403.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2022Q3_2022-08-10",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-08-10",
+  "periodEnd": "2022-07-03",
+  "characters": 327347,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800322000094/pfe-20220703.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2022Q4_2022-11-09",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-11-09",
+  "periodEnd": "2022-10-02",
+  "characters": 335862,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800322000101/pfe-20221002.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2023Q2_2023-05-10",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-10",
+  "periodEnd": "2023-04-02",
+  "characters": 276077,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000162828023017196/pfe-20230402.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2023Q3_2023-08-09",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-09",
+  "periodEnd": "2023-07-02",
+  "characters": 343128,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800323000088/pfe-20230702.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2023Q4_2023-11-08",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-11-08",
+  "periodEnd": "2023-10-01",
+  "characters": 352426,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800323000115/pfe-20231001.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2024Q1_2024-05-08",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-08",
+  "periodEnd": "2024-03-31",
+  "characters": 271689,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800324000107/pfe-20240331.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2024Q2_2024-08-05",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-05",
+  "periodEnd": "2024-06-30",
+  "characters": 323467,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800324000166/pfe-20240630.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2024Q3_2024-11-04",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-11-04",
+  "periodEnd": "2024-09-29",
+  "characters": 330295,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800324000191/pfe-20240929.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2025Q1_2025-05-05",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-05",
+  "periodEnd": "2025-03-30",
+  "characters": 257473,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800325000114/pfe-20250330.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2025Q2_2025-08-05",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-05",
+  "periodEnd": "2025-06-29",
+  "characters": 307115,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800325000138/pfe-20250629.htm"
+ },
+ {
+  "documentId": "PFE_10Q_2025Q3_2025-11-04",
+  "ticker": "PFE",
+  "company": "Pfizer Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-11-04",
+  "periodEnd": "2025-09-28",
+  "characters": 320798,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/78003/000007800325000150/pfe-20250928.htm"
+ },
+ {
+  "documentId": "PG_10K_2025-08-04",
+  "ticker": "PG",
+  "company": "Procter & Gamble Company",
+  "filingType": "10-K",
+  "filingDate": "2025-08-04",
+  "periodEnd": "2025-06-30",
+  "characters": 351530,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/80424/000008042425000076/pg-20250630.htm"
+ },
+ {
+  "documentId": "RTX_10K_2026-02-06",
+  "ticker": "RTX",
+  "company": "RTX Corporation",
+  "filingType": "10-K",
+  "filingDate": "2026-02-06",
+  "periodEnd": "2025-12-31",
+  "characters": 624602,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/101829/000010182926000006/rtx-20251231.htm"
+ },
+ {
+  "documentId": "SBUX_10K_2025-11-14",
+  "ticker": "SBUX",
+  "company": "Starbucks Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-11-14",
+  "periodEnd": "2025-09-28",
+  "characters": 422331,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/829224/000082922425000114/sbux-20250928.htm"
+ },
+ {
+  "documentId": "TGT_10K_2025-03-12",
+  "ticker": "TGT",
+  "company": "Target Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-03-12",
+  "periodEnd": "2025-02-01",
+  "characters": 253681,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/27419/000002741925000018/tgt-20250201.htm"
+ },
+ {
+  "documentId": "TMO_10K_2025-02-20",
+  "ticker": "TMO",
+  "company": "Thermo Fisher Scientific Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-20",
+  "periodEnd": "2024-12-31",
+  "characters": 390070,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/97745/000009774525000010/tmo-20241231.htm"
+ },
+ {
+  "documentId": "TSLA_10K_2022Q4_2023-01-31",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-K",
+  "filingDate": "2023-01-31",
+  "periodEnd": "2022-12-31",
+  "characters": 470560,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000095017023001409/tsla-20221231.htm"
+ },
+ {
+  "documentId": "TSLA_10K_2023Q4_2024-01-29",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-01-29",
+  "periodEnd": "2023-12-31",
+  "characters": 444884,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828024002390/tsla-20231231.htm"
+ },
+ {
+  "documentId": "TSLA_10K_2024Q4_2025-01-30",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-01-30",
+  "periodEnd": "2024-12-31",
+  "characters": 431999,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025003063/tsla-20241231.htm"
+ },
+ {
+  "documentId": "TSLA_10K_2026-01-29",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-01-29",
+  "periodEnd": "2025-12-31",
+  "characters": 443412,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828026003952/tsla-20251231.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2022Q1_2022-04-25",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-04-25",
+  "periodEnd": "2022-03-31",
+  "characters": 267920,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000095017022006034/tsla-20220331.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2022Q2_2022-07-25",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-07-25",
+  "periodEnd": "2022-06-30",
+  "characters": 293756,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000095017022012936/tsla-20220630.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2022Q3_2022-10-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-10-24",
+  "periodEnd": "2022-09-30",
+  "characters": 302966,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000095017022019867/tsla-20220930.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2023Q1_2023-04-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-04-24",
+  "periodEnd": "2023-03-31",
+  "characters": 131920,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000095017023013890/tsla-20230331.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2023Q2_2023-07-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-07-24",
+  "periodEnd": "2023-06-30",
+  "characters": 152489,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000095017023033872/tsla-20230630.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2023Q3_2023-10-23",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-23",
+  "periodEnd": "2023-09-30",
+  "characters": 151759,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828023034847/tsla-20230930.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2024Q1_2024-04-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-04-24",
+  "periodEnd": "2024-03-31",
+  "characters": 127942,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828024017503/tsla-20240331.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2024Q2_2024-07-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-07-24",
+  "periodEnd": "2024-06-30",
+  "characters": 145960,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828024032662/tsla-20240630.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2024Q3_2024-10-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-10-24",
+  "periodEnd": "2024-09-30",
+  "characters": 150197,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828024043486/tsla-20240930.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2025Q1_2025-04-23",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-04-23",
+  "periodEnd": "2025-03-31",
+  "characters": 138239,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025018911/tsla-20250331.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2025Q2_2025-07-24",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-07-24",
+  "periodEnd": "2025-06-30",
+  "characters": 151945,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025035806/tsla-20250630.htm"
+ },
+ {
+  "documentId": "TSLA_10Q_2025Q3_2025-10-23",
+  "ticker": "TSLA",
+  "company": "Tesla Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-23",
+  "periodEnd": "2025-09-30",
+  "characters": 163822,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1318605/000162828025045968/tsla-20250930.htm"
+ },
+ {
+  "documentId": "T_10K_2026-02-09",
+  "ticker": "T",
+  "company": "AT&T Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-09",
+  "periodEnd": "2025-12-31",
+  "characters": 474772,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/732717/000073271726000120/t-20251231.htm"
+ },
+ {
+  "documentId": "UNH_10K_2022Q4_2023-02-24",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-K",
+  "filingDate": "2023-02-24",
+  "periodEnd": "2022-12-31",
+  "characters": 362530,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176623000008/unh-20221231.htm"
+ },
+ {
+  "documentId": "UNH_10K_2023Q4_2024-02-28",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-K",
+  "filingDate": "2024-02-28",
+  "periodEnd": "2023-12-31",
+  "characters": 369054,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176624000081/unh-20231231.htm"
+ },
+ {
+  "documentId": "UNH_10K_2025-02-27",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-02-27",
+  "periodEnd": "2024-12-31",
+  "characters": 376040,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176625000063/unh-20241231.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2022Q1_2022-05-04",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-05-04",
+  "periodEnd": "2022-03-31",
+  "characters": 94004,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176622000019/unh-20220331.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2022Q2_2022-08-03",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-08-03",
+  "periodEnd": "2022-06-30",
+  "characters": 120834,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176622000036/unh-20220630.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2022Q3_2022-11-02",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2022-11-02",
+  "periodEnd": "2022-09-30",
+  "characters": 120509,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176622000044/unh-20220930.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2023Q1_2023-05-03",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-03",
+  "periodEnd": "2023-03-31",
+  "characters": 95916,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176623000029/unh-20230331.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2023Q2_2023-08-02",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-02",
+  "periodEnd": "2023-06-30",
+  "characters": 118781,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176623000053/unh-20230630.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2023Q3_2023-11-06",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2023-11-06",
+  "periodEnd": "2023-09-30",
+  "characters": 119773,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176623000064/unh-20230930.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2024Q1_2024-05-09",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-05-09",
+  "periodEnd": "2024-03-31",
+  "characters": 101164,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176624000155/unh-20240331.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2024Q2_2024-08-09",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-09",
+  "periodEnd": "2024-06-30",
+  "characters": 127847,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176624000262/unh-20240630.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2024Q3_2024-11-04",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2024-11-04",
+  "periodEnd": "2024-09-30",
+  "characters": 131214,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176624000323/unh-20240930.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2025Q1_2025-05-07",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-07",
+  "periodEnd": "2025-03-31",
+  "characters": 102179,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176625000131/unh-20250331.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2025Q2_2025-08-11",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-11",
+  "periodEnd": "2025-06-30",
+  "characters": 129697,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176625000236/unh-20250630.htm"
+ },
+ {
+  "documentId": "UNH_10Q_2025Q3_2025-10-28",
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc",
+  "filingType": "10-Q",
+  "filingDate": "2025-10-28",
+  "periodEnd": "2025-09-30",
+  "characters": 133922,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/731766/000073176625000305/unh-20250930.htm"
+ },
+ {
+  "documentId": "UPS_10K_2026-02-17",
+  "ticker": "UPS",
+  "company": "United Parcel Service Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-17",
+  "periodEnd": "2025-12-31",
+  "characters": 557776,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1090727/000162828026008432/ups-20251231.htm"
+ },
+ {
+  "documentId": "VZ_10K_2026-02-17",
+  "ticker": "VZ",
+  "company": "Verizon Communications Inc",
+  "filingType": "10-K",
+  "filingDate": "2026-02-17",
+  "periodEnd": "2025-12-31",
+  "characters": 557585,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/732712/000073271226000007/vz-20251231.htm"
+ },
+ {
+  "documentId": "V_10K_2025-11-06",
+  "ticker": "V",
+  "company": "Visa Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-11-06",
+  "periodEnd": "2025-09-30",
+  "characters": 476353,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1403161/000140316125000089/v-20250930.htm"
+ },
+ {
+  "documentId": "WMT_10K_2025-03-14",
+  "ticker": "WMT",
+  "company": "Walmart Inc",
+  "filingType": "10-K",
+  "filingDate": "2025-03-14",
+  "periodEnd": "2025-01-31",
+  "characters": 411091,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/104169/000010416925000021/wmt-20250131.htm"
+ },
+ {
+  "documentId": "XOM_10K_2022Q4_2023-02-22",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-K",
+  "filingDate": "2023-02-22",
+  "periodEnd": "2022-12-31",
+  "characters": 521357,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408823000020/xom-20221231.htm"
+ },
+ {
+  "documentId": "XOM_10K_2023Q4_2024-02-28",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-K",
+  "filingDate": "2024-02-28",
+  "periodEnd": "2023-12-31",
+  "characters": 529380,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408824000018/xom-20231231.htm"
+ },
+ {
+  "documentId": "XOM_10K_2024Q4_2025-02-19",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-K",
+  "filingDate": "2025-02-19",
+  "periodEnd": "2024-12-31",
+  "characters": 558746,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408825000010/xom-20241231.htm"
+ },
+ {
+  "documentId": "XOM_10K_2026-02-18",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-K",
+  "filingDate": "2026-02-18",
+  "periodEnd": "2025-12-31",
+  "characters": 516983,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408826000045/xom-20251231.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2022Q1_2022-05-04",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-05-04",
+  "periodEnd": "2022-03-31",
+  "characters": 77937,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408822000026/xom-20220331.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2022Q2_2022-08-03",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-08-03",
+  "periodEnd": "2022-06-30",
+  "characters": 97092,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408822000051/xom-20220630.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2022Q3_2022-11-02",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2022-11-02",
+  "periodEnd": "2022-09-30",
+  "characters": 106968,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408822000064/xom-20220930.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2023Q1_2023-05-02",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-05-02",
+  "periodEnd": "2023-03-31",
+  "characters": 82081,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408823000030/xom-20230331.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2023Q2_2023-08-01",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-08-01",
+  "periodEnd": "2023-06-30",
+  "characters": 104630,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408823000048/xom-20230630.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2023Q3_2023-10-31",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2023-10-31",
+  "periodEnd": "2023-09-30",
+  "characters": 119629,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408823000056/xom-20230930.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2024Q1_2024-04-29",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-04-29",
+  "periodEnd": "2024-03-31",
+  "characters": 93927,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408824000029/xom-20240331.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2024Q2_2024-08-05",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-08-05",
+  "periodEnd": "2024-06-30",
+  "characters": 120797,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408824000050/xom-20240630.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2024Q3_2024-11-04",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2024-11-04",
+  "periodEnd": "2024-09-30",
+  "characters": 118494,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408824000068/xom-20240930.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2025Q1_2025-05-05",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-05-05",
+  "periodEnd": "2025-03-31",
+  "characters": 107551,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408825000024/xom-20250331.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2025Q2_2025-08-04",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-08-04",
+  "periodEnd": "2025-06-30",
+  "characters": 140705,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408825000042/xom-20250630.htm"
+ },
+ {
+  "documentId": "XOM_10Q_2025Q3_2025-11-03",
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation",
+  "filingType": "10-Q",
+  "filingDate": "2025-11-03",
+  "periodEnd": "2025-09-30",
+  "characters": 142197,
+  "sourceUrl": "https://www.sec.gov/Archives/edgar/data/34088/000003408825000061/xom-20250930.htm"
+ }
+]

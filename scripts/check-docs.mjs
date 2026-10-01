@@ -42,6 +42,10 @@ const required = {
     '## 51.3 Final product test',
     '## 51.4 Requirement-preservation checklist',
     '# A. Changes from v1',
+    // Phase 1 regression (adversary finding 9): the gate includes the local E2E suite.
+    'pnpm cdk:synth && pnpm build && pnpm e2e`, plus the docs check',
+    // Phase 1 regression (adversary finding 1): fixture headings are a selection.
+    'Phase 1 fixture profiles hold a **selection** of verbatim risk headings',
     '# B. Section map',
     // The PDF example questions and the expert question, verbatim.
     '"What are the primary risk factors facing Apple, Tesla, and JPMorgan, and how do they compare?"',
@@ -155,6 +159,16 @@ for (const f of ['docs/archive/SPEC-v1.md', 'docs/archive/SPEC-ADDENDUM-COST.md'
 }
 for (const f of ['SPEC-ADDENDUM-COST.md', 'PRODUCT_DIRECTION.md']) {
   if (existsSync(join(root, f))) orderChecks.push(`${f}: superseded; it lives in docs/archive/ only`);
+}
+
+// Stale statements that must not come back (Phase 1 adversary finding 9).
+for (const [f, stale] of [
+  ['docs/testing-strategy.md', 'No tests exist yet'],
+  ['docs/testing-strategy.md', '| Playwright local | | Yes (`pnpm e2e`) |'],
+  ['packages/core/package.json', 'workstreams'],
+]) {
+  const path = join(root, f);
+  if (existsSync(path) && readFileSync(path, 'utf8').includes(stale)) orderChecks.push(`${f}: stale text "${stale}"`);
 }
 
 // Text that must never ship in docs (placeholders / unfinished markers).

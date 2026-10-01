@@ -63,7 +63,7 @@ pnpm gate
 ```
 
 - **Phase 0:** `pnpm gate` runs `scripts/check-docs.mjs`, which checks required docs and sections and rejects placeholder markers.
-- **From Phase 1:** `pnpm gate` expands to `pnpm lint && pnpm typecheck && pnpm test && pnpm cdk:synth && pnpm build` (plus check:docs). Keep this section accurate when the gate changes.
+- **From Phase 1:** `pnpm gate` runs `pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm cdk:synth && pnpm build && pnpm e2e`. `pnpm e2e` is Playwright (`tests/e2e/local`) against the static export, including the prefill-never-auto-submits test; it uses the cached Chromium for `@playwright/test` 1.63.0. `typecheck` also covers `tests/e2e`. Keep this section accurate when the gate changes.
 
 ## Phase process (SPEC §48, adapted in DD-12)
 Implementation → tests → `adversary` agent report → **fresh** general-purpose fixer agent fixes the findings and adds regression tests → `/code-review` and fix findings → `pnpm gate` → `/handoff` (commit after Mike's go-ahead) plus `docs/handoffs/phase-XX.md`. Never skip a step.

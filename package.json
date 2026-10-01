@@ -2,13 +2,35 @@
   "name": "diligenceiq",
   "private": true,
   "version": "0.0.0",
-  "description": "DiligenceIQ — AI Investment Diligence Workspace (SEC filings RAG, one generation call per analysis)",
+  "description": "DiligenceIQ — investment intelligence over SEC filings: Company Intelligence, Compare, and one-call Deep Analysis (RAG)",
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "check:docs": "node scripts/check-docs.mjs",
-    "gate": "pnpm check:docs"
+    "lint": "eslint .",
+    "typecheck": "pnpm -r --if-present typecheck && tsc -p tests/e2e/tsconfig.json",
+    "test": "pnpm -r --if-present test",
+    "build": "pnpm -r --if-present build",
+    "cdk:synth": "pnpm --filter @diligenceiq/cdk cdk:synth",
+    "dev": "pnpm --filter @diligenceiq/web dev",
+    "fixtures:web": "node scripts/fixtures/build-web-fixtures.mjs",
+    "deploy:infra": "pnpm --filter @diligenceiq/cdk run deploy",
+    "deploy:web": "bash scripts/deploy-web.sh",
+    "gate": "pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm cdk:synth && pnpm build && pnpm e2e",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.3.8",
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.4",
+    "eslint": "10.11.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.0"
   }
 }

@@ -1,6 +1,6 @@
 # DiligenceIQ — Testing Strategy
 
-> Status: **Phase 0 plan.** No tests exist yet. Each phase adds the tests listed for it, and `pnpm gate` grows with them. This file is updated when the plan changes.
+> Status: **Phase 1.** Unit, component, CDK assertion and local Playwright tests exist for the Phase 1 scope (shell, fixture profiles, Compare, Deep Analysis input, Findings, api health and kill switch, cost guard). Each later phase adds the tests listed for it, and `pnpm gate` grows with them. This file is updated when the plan changes.
 
 ## 1. Frameworks
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | Unit + integration (TypeScript) | **Vitest** | Runs in Node, no AWS. Bedrock and AWS SDK clients are injected and mocked. |
 | React components | **React Testing Library** (on Vitest, jsdom) | Behavior and accessibility queries (`getByRole`), not snapshots. |
-| End-to-end | **Playwright** | Local full workflow against `pnpm dev`; smoke suite against `https://diligenceiq.mikemiller.ai`. |
+| End-to-end | **Playwright** | Local workflow against the built static export with the API mocked (`pnpm e2e`, part of `pnpm gate`), with axe (`@axe-core/playwright`) and keyboard checks; smoke suite against `https://diligenceiq.mikemiller.ai`. |
 | Infrastructure | **CDK assertions** (`aws-cdk-lib/assertions`) on Vitest | Asserts on synthesized templates; no deploy. |
 | Retrieval/answer quality | **Eval harness** (`scripts/evaluation`) | Runs the real pipeline against the real index; on demand only. |
 
@@ -66,7 +66,7 @@ Tests that need the full corpus (e.g. header parsing over all 246 files) read `C
 - **Profile-set pointer:** changing `/diligenceiq/active-profile-set` switches `GET /api/companies/:ticker/intelligence` between `llm-v*` and `det-v*` with no rebuild (mocked SSM, cache expiry).
 - **Prompt file match:** `prompts/company-intelligence-prompt.md` equals the runtime profile prompt, as for `prompts/final-diligence-prompt.md`.
 - **Compare:** common, distinctive, diverging, management emphasis, and attention ranking are correct on fixture profiles, **including a pair with no change signals** (a deep-tier company vs a limited-history bank, the PDF Q1 shape); a missing profile lands in `missing`; fewer than two profiles → `PROFILE_MISSING`; its handlers never reach a model client.
-- **Phase 1 fixture profiles:** a test renders each fixture profile and fails if any numeric figure (currency, percent, or bare number in a metric slot) appears without a fact carrying `chunkId` and `rawRow`.
+- **Phase 1 fixture profiles:** a test renders each fixture profile and fails if any numeric figure (currency, percent or percentage points, basis points, scaled amounts, multiples, or any digit in a metric slot) appears without a fact carrying `chunkId` and `rawRow`. Text is scanned per block, so a figure React renders as several text nodes is still caught; only the smallest elements carrying verbatim filing text, dates, filing counts or the version footer are exempt. Fixture headings are a selection, so a test also asserts that the fixture Compare page states no common, distinctive, ranking or derived-question conclusion.
 
 **Query analysis and retrieval (`packages/rag`)**
 - Company detection including collisions (assumptions C3): "the target market", "Target's margins", "a T-shaped team", "AT&T and T-Mobile", "visa requirements", "Visa and MA", "meta-analysis", "MS and GS", curated aliases (Google, Facebook, J&J, Coke, Exxon, Lilly, JPMorgan/Chase).
@@ -164,7 +164,7 @@ The SPEC §51.3 expert question ("How have Apple's regulatory disclosures change
 | Unit, component, integration | Yes (`pnpm test`) | | No |
 | Full-corpus tests | Yes when `CORPUS_PATH` is present, otherwise skipped with a message | | No |
 | CDK assertion tests | Yes (`pnpm test` + `pnpm cdk:synth`) | | No |
-| Playwright local | | Yes (`pnpm e2e`) | Optional |
+| Playwright local (static export, mocked API) | Yes (`pnpm e2e`, after `pnpm build`) | Yes (`pnpm e2e`) | No |
 | Playwright prod smoke | | Yes (`pnpm e2e:smoke`) | Yes (deployed app) |
 | Eval harness | | Yes (`pnpm eval`) | Yes (Bedrock, real index) |
 | Profile build + profile evals | | Yes (`pnpm intelligence:build`, `pnpm eval:profiles`) | Yes (Bedrock, real index) |

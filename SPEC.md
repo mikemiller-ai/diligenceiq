@@ -389,6 +389,7 @@ Every dashboard has a performance view, a cited risk section, drivers, and recom
 
 - The dashboard reads a **persisted, versioned profile** from the active profile set (§32). It never generates.
 - Provenance is labeled: model-written text is shown as company analysis; curated text is labeled "General context"; placeholders (Phase 1 only) are labeled "Placeholder, not filing data".
+- Phase 1 fixture profiles hold a **selection** of verbatim risk headings, not the latest 10-K's complete list (the heading extractor is Phase 2). They are labeled as a preview, and nothing that depends on a complete list (common or distinctive areas, attention ranking, "major attention area", the comparative questions derived from them, or a heading's position) is presented as a conclusion while a fixture profile is involved; those slots are labeled placeholders.
 
 **Business value.** This page answers: *What is happening with this company, and what should I look at first?*
 
@@ -1905,7 +1906,7 @@ Also fix reasonable medium-severity issues when doing so does not cause unnecess
 
 ## 48.4 Gate command
 
-`pnpm gate` must pass. In Phase 0 and 0b it runs `scripts/check-docs.mjs`. From Phase 1 it is `pnpm lint && pnpm typecheck && pnpm test && pnpm cdk:synth && pnpm build`, plus the docs check.
+`pnpm gate` must pass. In Phase 0 and 0b it runs `scripts/check-docs.mjs`. From Phase 1 it is `pnpm lint && pnpm typecheck && pnpm test && pnpm cdk:synth && pnpm build && pnpm e2e`, plus the docs check. `pnpm e2e` is the local Playwright suite against the built static export (testing-strategy §6); the production smoke suite runs on demand.
 
 ## 48.5 Handoff
 

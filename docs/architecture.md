@@ -394,6 +394,8 @@ type CompanyIntelligenceProfile = {
   ticker: string; company: string; sector: string;
   version: { indexVersion: string; profileSetId: string;            // 'llm-v1' | 'det-v1'
              profilePromptVersion?: string; templateVersion: string; builtAt: string; periodsCovered: string[] };
+  fiscalYearEnd: string;          // period end of the latest 10-K; shown as reported, never aligned (SPEC §9).
+                                  // Not periodsCovered.at(-1), which can be a quarter end.
   coverage: { tier: 'deep' | 'partial' | 'limited_history'; filings: number; tenK: number; tenQ: number;
               byCategory: Array<{ category: SignalCategory; level: 'strong' | 'partial' | 'limited' }> };
               // deterministic labels shown as "Strong / Partial / Limited evidence" (SPEC §19); not model text
@@ -415,7 +417,9 @@ type CompanyIntelligenceProfile = {
                    citationIds: string[] }>;
   executiveView: Array<{ dimension: string; label: string; summary: string; citationIds: string[] }>;  // 30-second view
   managementOutlook: { summary: string; citationIds: string[] } | null;
-  recommendedDiligence: Array<{ question: string; why: string; signalIds: string[]; tickers: string[] }>;
+  recommendedDiligence: Array<{ question: string; why: string; signalIds: string[];
+                                 citationIds: string[];                  // its signals' or current risk's passages;
+                                 tickers: string[] }>;                   // a saved recommendation keeps its evidence
   gaps: string[];
   citations: Citation[];          // server-derived from valid IDs, with passage text (as for briefs)
   generation: { mode: 'llm' | 'deterministic'; modelId?: string; generationCallCount: 0 | 1; ledgerRunId?: string;
@@ -428,7 +432,7 @@ Labels are descriptive only. Scores, ratings and recommendations are not part of
 
 **Every figure has a source row.** A number is rendered only from `facts` (or a value derived in code from two facts). The UI shows the fact's `rawRow` and chunk on hover and in the evidence drawer. A number in model-written text must match a fact (numeric validation).
 
-**Phase 1 fixture profiles** (before extraction exists) follow the same rule. They carry **no figures and no narrative presented as fact**: every slot is either clearly labeled placeholder structure ("Revenue trend: placeholder, not filing data") or a value copied verbatim from a filing row with its `chunkId` and `rawRow`. A test fails if a fixture profile renders a numeric figure without a source row (testing-strategy §3).
+**Phase 1 fixture profiles** (before extraction exists) follow the same rule. Their current risks are a hand-picked **selection** of verbatim latest-10-K headings, not the complete list, so the UI labels them a preview and shows nothing derived from completeness (common, distinctive, ranking, `rank` as a position) while one is involved (SPEC §8.6). They carry **no figures and no narrative presented as fact**: every slot is either clearly labeled placeholder structure ("Revenue trend: placeholder, not filing data") or a value copied verbatim from a filing row with its `chunkId` and `rawRow`. A test fails if a fixture profile renders a numeric figure without a source row (testing-strategy §3).
 
 ---
 

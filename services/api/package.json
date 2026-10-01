@@ -1,0 +1,25 @@
+{
+  "name": "@diligenceiq/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lambda handlers. Phase 1: health, a Set-Cookie rewrite probe, and stubbed analysis creation.",
+  "exports": {
+    ".": "./src/handler.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ssm": "3.1144.0",
+    "@diligenceiq/core": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.164",
+    "@types/node": "22.20.4",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}
