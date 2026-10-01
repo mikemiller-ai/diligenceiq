@@ -3,10 +3,10 @@
 _Last updated: 2026-10-01 (local)_
 
 ## Branch
-`main` (no remote yet). Last commit: `6eb77a2` Phase 0b (docs only). The Phase 1 commit is pending Mike's go-ahead.
+`main` (no remote yet). Last code commit: `716181a` Phase 1 (application shell on the SPEC v2 IA).
 
 ## Current phase
-**Phase 1 (rework to the SPEC v2 IA) is complete and deployed; the commit is pending.** Handoff: `docs/handoffs/phase-01.md`.
+**Phase 1 (rework to the SPEC v2 IA) is complete, deployed, and committed (`716181a`).** Handoff: `docs/handoffs/phase-01.md`.
 - Live at https://diligenceiq.mikemiller.ai (Amplify job 1, app `d1jxmy4ao911ax`; the api Lambda was updated by `pnpm deploy:infra` on 2026-10-01).
 - **D9 verified:** the Amplify `/api/<*>` rewrite forwards `Set-Cookie` and the returning `Cookie` header (curl with a cookie jar, and a real browser).
 - Navigation: Company Intelligence | Compare | Deep Analysis | Findings, plus "Ask a question". Routes: `/`, `/intelligence`, `/compare`, `/analysis/new`, `/analysis`, `/findings`, `/architecture`, `/sources/filing`.
@@ -29,7 +29,7 @@ Gate record for the phase:
 - `pnpm gate` passed.
 
 ## In flight
-- Commit the Phase 1 tree. It is all uncommitted: `apps/`, `packages/`, `services/`, `infrastructure/`, `tests/`, `scripts/fixtures/`, root config, and the doc edits.
+- Nothing uncommitted.
 - Next is **Phase 2**, ingestion and indexing. Verify Bedrock invoke entitlement first.
 
 ## Decisions pending with Mike
