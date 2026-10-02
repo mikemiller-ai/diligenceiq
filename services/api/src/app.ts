@@ -68,7 +68,7 @@ export interface AppCaps {
   perClientDailyWorkspaceCreations: number;
 }
 
-export const DEFAULT_CAPS: AppCaps = { workspaceHourlyAnalyses: 10, globalDailyAnalyses: 200, dailyWorkspaceCreations: 500, perClientDailyWorkspaceCreations: 20 };
+export const DEFAULT_CAPS: AppCaps = { workspaceHourlyAnalyses: 10, globalDailyAnalyses: 200, dailyWorkspaceCreations: 500, perClientDailyWorkspaceCreations: 100 };
 
 export interface AppDeps {
   killSwitch: KillSwitch;

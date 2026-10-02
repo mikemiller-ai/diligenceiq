@@ -147,7 +147,7 @@ describe('ApiStack', () => {
     expect(ssm).toContain(`parameter${CONFIG.sessionSecretParameterName}`);
     expect(ssm.match(/parameter/g)?.length).toBeGreaterThanOrEqual(3);
     templates.api.hasResourceProperties('AWS::Lambda::Function', {
-      Environment: { Variables: Match.objectLike({ QUEUE_URL: Match.anyValue(), SESSION_SECRET_PARAM: CONFIG.sessionSecretParameterName, ACTIVE_PROFILE_SET_PARAM: Match.anyValue(), GLOBAL_DAILY_ANALYSIS_CAP: '200', DAILY_WORKSPACE_CREATION_CAP: '500', PER_IP_DAILY_WORKSPACE_CAP: '20' }) },
+      Environment: { Variables: Match.objectLike({ QUEUE_URL: Match.anyValue(), SESSION_SECRET_PARAM: CONFIG.sessionSecretParameterName, ACTIVE_PROFILE_SET_PARAM: Match.anyValue(), GLOBAL_DAILY_ANALYSIS_CAP: '200', DAILY_WORKSPACE_CREATION_CAP: '500', PER_IP_DAILY_WORKSPACE_CAP: '100' }) },
     });
   });
 

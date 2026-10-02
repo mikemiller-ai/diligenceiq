@@ -37,7 +37,7 @@ Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all
 - Next phase: Phase 4b (offline profiles; must write the manifest format in `ProfileSetManifestSchema`), then Phase 6.
 
 ## Decisions pending with Mike
-- **D12 (per-client creation cap keyed on `sourceIp`):** behind the Amplify rewrite, `sourceIp` may be a shared proxy address, so many visitors would share 20 workspaces a day. Before deploy, choose: raise the cap, key on the last untrusted `X-Forwarded-For` hop, or verify in Phase 8.
+- **D12 (per-client creation cap keyed on `sourceIp`):** raised from 20 to 100 a day (Mike, 2026-10-02), because behind the Amplify rewrite `sourceIp` may be a shared proxy address. Verify which address the api sees in Phase 8; keying on the last untrusted `X-Forwarded-For` hop remains the option.
 - **Validator:** whether to also read a same-chunk "(MILLIONS)" caption (would address the 42 Pfizer near matches; free re-score). Do not loosen anything else.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.

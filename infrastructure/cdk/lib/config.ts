@@ -20,7 +20,7 @@ export const CONFIG = {
    */
   sessionSecretParameterName: '/diligenceiq/session-secret',
   /** Spend caps (SPEC §35.11), passed to the api as environment variables. */
-  caps: { workspaceHourlyAnalyses: 10, globalDailyAnalyses: 200, dailyWorkspaceCreations: 500, perClientDailyWorkspaceCreations: 20 },
+  caps: { workspaceHourlyAnalyses: 10, globalDailyAnalyses: 200, dailyWorkspaceCreations: 500, perClientDailyWorkspaceCreations: 100 },
   /** The index the worker loads from s3://<data bucket>/index/<indexVersion>/ (Phase 2 build, verified in S3). */
   indexVersion: 'iv-9cf51c066743',
   models: {

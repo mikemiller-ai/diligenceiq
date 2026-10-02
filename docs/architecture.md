@@ -766,7 +766,7 @@ Static export, so detail views use query parameters (ResolveIQ pattern). Since P
   - **Kill switch:** SSM parameter `/diligenceiq/analyses-enabled`, cached ~60 s. Checked on `POST /api/analyses` and again by the worker before generation.
   - **Global daily cap:** `GLOBAL / RATE#<yyyy-mm-dd>` counter, incremented by a conditional update that fails at the cap (`GLOBAL_DAILY_ANALYSIS_CAP`, default 200).
   - **Per-workspace hourly cap:** `WS#<id> / RATE#<yyyy-mm-ddThh>` (`WORKSPACE_HOURLY_ANALYSIS_CAP`).
-  - **Workspace-creation caps:** first per client, `GLOBAL / WSCREATE#<yyyy-mm-dd>#<hash16>` (`PER_IP_DAILY_WORKSPACE_CAP`, default 20; a salted hash of the source IP, never the IP), then global, `GLOBAL / WSCREATE#<yyyy-mm-dd>` (`DAILY_WORKSPACE_CREATION_CAP`, default 500). Cookie-clearing can't mint unlimited workspaces, and one client can't use up everyone's (DD-20 (f); assumptions D12).
+  - **Workspace-creation caps:** first per client, `GLOBAL / WSCREATE#<yyyy-mm-dd>#<hash16>` (`PER_IP_DAILY_WORKSPACE_CAP`, default 100, a fifth of the global cap; a salted hash of the source IP, never the IP), then global, `GLOBAL / WSCREATE#<yyyy-mm-dd>` (`DAILY_WORKSPACE_CREATION_CAP`, default 500). Cookie-clearing can't mint unlimited workspaces, and one client can't use up everyone's (DD-20 (f); assumptions D12).
   - HTTP API stage throttling, and the worker's event-source `maximumConcurrency: 2`.
   - Counters are not refunded when a later step fails, so the caps err on the conservative side.
 - **Sessions:** an HMAC-signed workspace cookie (§8 Demo sessions). The secret is an admin-created SSM SecureString; without a valid one, sessions fail closed.
