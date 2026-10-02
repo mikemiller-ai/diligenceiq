@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { WorkspaceProvider } from '@/lib/workspace-store';
 import { BrandMark, Wordmark } from './brand';
 import { Sidebar } from './sidebar';
+import { WorkspaceBanner } from './workspace-banner';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -85,6 +86,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
+          <WorkspaceBanner />
           {children}
         </main>
       </div>

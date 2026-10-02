@@ -1,21 +1,14 @@
-import {
-  composeCompare,
-  isFixtureProfile,
-  profileRef,
-  themeForCategory,
-  type Citation,
-  type CompanyIntelligenceProfile,
-  type CompareResult,
-  type FindingSource,
-  type ThemeId,
-} from '@diligenceiq/core';
-import type { AnalysisRecord } from '@/fixtures/types';
+import { composeCompare, type CompareResult } from './compare';
+import { comparisonHeaders, type BriefValidation, type Citation, type DiligenceBrief, type FigureCheck, type FindingSource } from './domain';
+import { isFixtureProfile, profileRef, themeForCategory, type CompanyIntelligenceProfile } from './intelligence';
+import type { ThemeId } from './themes';
 
 /**
- * Resolves a FindingSource to the stored content it names, the way POST /api/findings
- * will (architecture §9): text and citations are copied from the stored brief and its
- * context snapshot, or from the profile, never taken from the form. A source with no
- * cited passage resolves to null: a finding always keeps its evidence (SPEC §17.1).
+ * Resolves a FindingSource to the stored content it names (architecture §9). POST /api/findings
+ * uses it server-side: text and citations are copied from the stored brief and its cited
+ * passages, or from the profile, never taken from the client. The web uses the same function
+ * only to preview what will be saved. A source with no cited passage resolves to null: a
+ * finding always keeps its evidence (SPEC §17.1).
  */
 export interface ResolvedSource {
   title: string;
@@ -24,10 +17,22 @@ export interface ResolvedSource {
   citations: Citation[];
   analysisId?: string;
   defaultTheme: ThemeId;
+  /** The brief's numeric-grounding checks for this item (brief sources only; architecture §6.9). */
+  figures?: FigureCheck[];
+}
+
+/** The parts of a stored analysis a finding copies: its brief and the passages it cites. */
+export interface SourceAnalysis {
+  analysisId: string;
+  brief?: DiligenceBrief;
+  /** The server-built citations[] (every valid cited chunk, with passage text). */
+  citations?: Citation[];
+  /** The brief's deterministic validation; a saved item keeps its figure checks. */
+  validation?: BriefValidation;
 }
 
 export interface SourceStores {
-  analyses: readonly AnalysisRecord[];
+  analyses: readonly SourceAnalysis[];
   profiles: ReadonlyMap<string, CompanyIntelligenceProfile>;
 }
 
@@ -63,21 +68,24 @@ function resolveContent(source: FindingSource, stores: SourceStores): ResolvedSo
       const analysis = stores.analyses.find((a) => a.analysisId === source.analysisId);
       const brief = analysis?.brief;
       if (!analysis || !brief) return null;
-      const base = { analysisId: analysis.analysisId, defaultTheme: 'risk-factors' as ThemeId };
+      // A saved item keeps the figure checks validate.ts made at its own locations (`keyFindings[2].title`, ...).
+      const prefix = source.kind === 'keyFinding' ? `keyFindings[${source.index}].` : source.kind === 'consideration' ? `investmentConsiderations[${source.index}].` : `comparison.rows[${source.index}].`;
+      const figures = (analysis.validation?.numeric.figures ?? []).filter((f) => f.location.startsWith(prefix));
+      const base = { analysisId: analysis.analysisId, defaultTheme: 'risk-factors' as ThemeId, ...(figures.length ? { figures } : {}) };
       if (source.kind === 'keyFinding') {
         const k = brief.keyFindings[source.index];
-        return k ? { ...base, title: k.title, text: k.finding, tickers: k.tickers, citations: pick(analysis.context, k.citationIds) } : null;
+        return k ? { ...base, title: k.title, text: k.finding, tickers: k.tickers, citations: pick(analysis.citations ?? [], k.citationIds) } : null;
       }
       if (source.kind === 'consideration') {
         const c = brief.investmentConsiderations[source.index];
         if (!c) return null;
-        const citations = pick(analysis.context, c.citationIds);
+        const citations = pick(analysis.citations ?? [], c.citationIds);
         return { ...base, title: 'Investment consideration', text: c.text, tickers: [...new Set(citations.map((x) => x.ticker))], citations };
       }
       const row = brief.comparison?.rows[source.index];
       if (!row || !brief.comparison) return null;
-      const cells = brief.comparison.columns.slice(1).map((col, i) => `${col}: ${row.values[i] ?? ''}`);
-      const citations = pick(analysis.context, row.citationIds);
+      const cells = comparisonHeaders(brief.comparison).valueColumns.map((col, i) => `${col}: ${row.values[i] ?? ''}`);
+      const citations = pick(analysis.citations ?? [], row.citationIds);
       return { ...base, title: row.label, text: cells.join(' · '), tickers: [...new Set(citations.map((x) => x.ticker))], citations };
     }
     case 'compareRow':
@@ -223,5 +231,24 @@ export function sourceLabel(source: FindingSource): string {
       return `${source.ticker} · driver`;
     case 'executiveView':
       return `${source.ticker} · 30-second view`;
+  }
+}
+
+/**
+ * Same key for the same stored item, so a source can only be saved once. Canonical: the key
+ * order is fixed and a compare row's tickers are sorted, so AAPL,MSFT and MSFT,AAPL match.
+ */
+export function sourceKey(source: FindingSource): string {
+  switch (source.kind) {
+    case 'keyFinding':
+    case 'consideration':
+    case 'comparisonRow':
+      return `${source.kind}:${source.analysisId}:${source.index}`;
+    case 'compareRow':
+      return `${source.kind}:${[...source.tickers].sort().join(',')}:${source.ref}`;
+    case 'watchEvent':
+      return `${source.kind}:${source.ticker}:${source.signalId}`;
+    default:
+      return `${source.kind}:${source.ticker}:${source.ref}`;
   }
 }

@@ -4,14 +4,38 @@
     {
       "name": "web-dev",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@diligenceiq/web", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@diligenceiq/web",
+        "dev"
+      ],
       "port": 3000
     },
     {
       "name": "web-static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "apps/web/out"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173",
+        "--directory",
+        "apps/web/out"
+      ],
       "port": 4173
+    },
+    {
+      "name": "web-local",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "exec",
+        "tsx",
+        "tests/e2e/local-server.ts"
+      ],
+      "env": {
+        "E2E_PORT": "4175",
+        "E2E_STAGE_MS": "1200"
+      },
+      "port": 4175
     }
   ]
 }

@@ -5,7 +5,7 @@
  "ranAt": "2026-10-02T15:02:42.740Z",
  "summary": {
   "questions": 20,
-  "passed": 14,
+  "passed": 15,
   "completed": 20,
   "callsPerQuestion": [
    1,
@@ -31,11 +31,11 @@
   ],
   "citationValidityPre": 1,
   "citationValidityPost": 1,
-  "figuresVerified": 498,
+  "figuresVerified": 503,
   "figuresTotal": 540,
-  "figuresUnitUnstated": 35,
-  "numericGrounding": 0.9222,
-  "briefsFullyGrounded": 16,
+  "figuresUnitUnstated": 30,
+  "numericGrounding": 0.9315,
+  "briefsFullyGrounded": 17,
   "comparisonAligned": {
    "passed": 16,
    "total": 16
@@ -7573,8 +7573,8 @@
     },
     "figures": {
      "total": 81,
-     "verified": 76,
-     "unitUnstated": 5
+     "verified": 81,
+     "unitUnstated": 0
     },
     "uncitedFindings": 0,
     "citedCompanies": [
@@ -7588,7 +7588,7 @@
     "totalMs": 39769,
     "stopReason": "tool_use",
     "costUsd": 0.115257,
-    "pass": false,
+    "pass": true,
     "checks": [
      {
       "name": "completed",
@@ -7612,8 +7612,8 @@
      },
      {
       "name": "figures grounded",
-      "pass": false,
-      "detail": "76/81 figures found in cited passages; unverified: $29,906 million (keyFindings[2].finding, digits only: passage states no unit), $27,045 (comparison.rows[6].values[0], digits only: passage states no unit), $37,256 (comparison.rows[6].values[1], digits only: passage states no unit), $69,691 (comparison.rows[6].values[2], digits only: passage states no unit), $69,691 million (investmentConsiderations[0].text, digits only: passage states no unit)"
+      "pass": true,
+      "detail": "81/81 figures found in cited passages"
      },
      {
       "name": "comparison aligned",
@@ -8091,8 +8091,8 @@
       {
        "location": "keyFindings[2].finding",
        "figure": "$29,906 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "preceding_unit",
        "chunkId": "META-FY2025-10K-FS-012"
       },
       {
@@ -8315,22 +8315,22 @@
       {
        "location": "comparison.rows[6].values[0]",
        "figure": "$27,045",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "preceding_unit",
        "chunkId": "META-FY2025-10K-FS-012"
       },
       {
        "location": "comparison.rows[6].values[1]",
        "figure": "$37,256",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "preceding_unit",
        "chunkId": "META-FY2025-10K-FS-012"
       },
       {
        "location": "comparison.rows[6].values[2]",
        "figure": "$69,691",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "preceding_unit",
        "chunkId": "META-FY2025-10K-FS-012"
       },
       {
@@ -8399,8 +8399,8 @@
       {
        "location": "investmentConsiderations[0].text",
        "figure": "$69,691 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "preceding_unit",
        "chunkId": "META-FY2025-10K-FS-012"
       },
       {
@@ -8454,13 +8454,11 @@
       }
      ],
      "total": 81,
-     "verified": 76,
-     "unitUnstated": 5
+     "verified": 81,
+     "unitUnstated": 0
     },
     "comparisonMisaligned": [],
-    "notices": [
-     "5 figures not found in the cited passages (marked \"unverified figure\")."
-    ]
+    "notices": []
    },
    "interpretation": {
     "companies": [
@@ -11365,7 +11363,7 @@
   }
  ],
  "rescore": {
-  "rescoredAt": "2026-10-02T15:39:45.722Z",
+  "rescoredAt": "2026-10-02T16:40:49.576Z",
   "by": "pnpm eval:generation:rescore",
   "note": "Recorded responses re-validated and re-scored with the current validator and checks; no model call. Telemetry (generation latency, tokens, cost) is from the original run."
  }

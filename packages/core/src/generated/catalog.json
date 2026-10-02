@@ -1,0 +1,218 @@
+[
+ {
+  "ticker": "AAPL",
+  "company": "Apple Inc"
+ },
+ {
+  "ticker": "ABBV",
+  "company": "AbbVie Inc"
+ },
+ {
+  "ticker": "ADBE",
+  "company": "Adobe Inc"
+ },
+ {
+  "ticker": "AMD",
+  "company": "Advanced Micro Devices Inc"
+ },
+ {
+  "ticker": "AMZN",
+  "company": "Amazon.com Inc"
+ },
+ {
+  "ticker": "AXP",
+  "company": "American Express Company"
+ },
+ {
+  "ticker": "BA",
+  "company": "The Boeing Company"
+ },
+ {
+  "ticker": "BAC",
+  "company": "Bank of America Corporation"
+ },
+ {
+  "ticker": "BLK",
+  "company": "BlackRock Inc"
+ },
+ {
+  "ticker": "BRK",
+  "company": "Berkshire Hathaway Inc"
+ },
+ {
+  "ticker": "CAT",
+  "company": "Caterpillar Inc"
+ },
+ {
+  "ticker": "CMCSA",
+  "company": "Comcast Corporation"
+ },
+ {
+  "ticker": "COST",
+  "company": "Costco Wholesale Corporation"
+ },
+ {
+  "ticker": "CRM",
+  "company": "Salesforce Inc"
+ },
+ {
+  "ticker": "CSCO",
+  "company": "Cisco Systems Inc"
+ },
+ {
+  "ticker": "CVX",
+  "company": "Chevron Corporation"
+ },
+ {
+  "ticker": "DE",
+  "company": "Deere & Company"
+ },
+ {
+  "ticker": "DIS",
+  "company": "The Walt Disney Company"
+ },
+ {
+  "ticker": "GE",
+  "company": "General Electric Company"
+ },
+ {
+  "ticker": "GOOG",
+  "company": "Alphabet Inc"
+ },
+ {
+  "ticker": "GS",
+  "company": "Goldman Sachs Group Inc"
+ },
+ {
+  "ticker": "HD",
+  "company": "The Home Depot Inc"
+ },
+ {
+  "ticker": "IBM",
+  "company": "International Business Machines Corp"
+ },
+ {
+  "ticker": "INTC",
+  "company": "Intel Corporation"
+ },
+ {
+  "ticker": "JNJ",
+  "company": "Johnson & Johnson"
+ },
+ {
+  "ticker": "JPM",
+  "company": "JPMorgan Chase & Co"
+ },
+ {
+  "ticker": "KO",
+  "company": "The Coca-Cola Company"
+ },
+ {
+  "ticker": "LLY",
+  "company": "Eli Lilly and Company"
+ },
+ {
+  "ticker": "LMT",
+  "company": "Lockheed Martin Corporation"
+ },
+ {
+  "ticker": "MA",
+  "company": "Mastercard Inc"
+ },
+ {
+  "ticker": "MCD",
+  "company": "McDonalds Corporation"
+ },
+ {
+  "ticker": "META",
+  "company": "Meta Platforms Inc"
+ },
+ {
+  "ticker": "MRK",
+  "company": "Merck & Co Inc"
+ },
+ {
+  "ticker": "MS",
+  "company": "Morgan Stanley"
+ },
+ {
+  "ticker": "MSFT",
+  "company": "Microsoft Corporation"
+ },
+ {
+  "ticker": "NFLX",
+  "company": "Netflix Inc"
+ },
+ {
+  "ticker": "NKE",
+  "company": "Nike Inc"
+ },
+ {
+  "ticker": "NVDA",
+  "company": "NVIDIA Corporation"
+ },
+ {
+  "ticker": "ORCL",
+  "company": "Oracle Corporation"
+ },
+ {
+  "ticker": "PEP",
+  "company": "PepsiCo Inc"
+ },
+ {
+  "ticker": "PFE",
+  "company": "Pfizer Inc"
+ },
+ {
+  "ticker": "PG",
+  "company": "Procter & Gamble Company"
+ },
+ {
+  "ticker": "RTX",
+  "company": "RTX Corporation"
+ },
+ {
+  "ticker": "SBUX",
+  "company": "Starbucks Corporation"
+ },
+ {
+  "ticker": "T",
+  "company": "AT&T Inc"
+ },
+ {
+  "ticker": "TGT",
+  "company": "Target Corporation"
+ },
+ {
+  "ticker": "TMO",
+  "company": "Thermo Fisher Scientific Inc"
+ },
+ {
+  "ticker": "TSLA",
+  "company": "Tesla Inc"
+ },
+ {
+  "ticker": "UNH",
+  "company": "UnitedHealth Group Inc"
+ },
+ {
+  "ticker": "UPS",
+  "company": "United Parcel Service Inc"
+ },
+ {
+  "ticker": "V",
+  "company": "Visa Inc"
+ },
+ {
+  "ticker": "VZ",
+  "company": "Verizon Communications Inc"
+ },
+ {
+  "ticker": "WMT",
+  "company": "Walmart Inc"
+ },
+ {
+  "ticker": "XOM",
+  "company": "Exxon Mobil Corporation"
+ }
+]

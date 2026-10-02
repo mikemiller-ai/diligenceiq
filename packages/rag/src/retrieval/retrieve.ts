@@ -3,6 +3,7 @@ import type { ChunkRecord } from '../index/format';
 import { type QueryAnalysis, QueryAnalyzer, type QueryFilters, TOPIC_RULES } from '../query/analyze';
 import { type Catalog, buildCatalog } from '../query/catalog';
 import { type BuiltContext, type LaneCandidates, buildContext } from './context';
+import { precedingFilingText } from './preceding-text';
 import { type RetrievalPlan, planLanes } from './plan';
 import { DocumentChunks, type RetrievalMode, type SearchIndex, searchLane } from './search';
 
@@ -98,6 +99,19 @@ export class Retriever {
   chunk(chunkId: string): ChunkRecord | undefined {
     const i = this.indexOfChunkId.get(chunkId);
     return i === undefined ? undefined : this.index.chunks[i];
+  }
+
+  /**
+   * The filing text right before a chunk (same document and section, at most two chunks back;
+   * `precedingFilingText`), for the validator's preceding-unit rule. Null when there is none.
+   */
+  precedingText(chunkId: string): string | null {
+    const c = this.chunk(chunkId);
+    if (!c) return null;
+    return precedingFilingText(c, (x) => {
+      const i = this.indexOfChunkId.get(x.chunkId);
+      return i ? this.index.chunks[i - 1] : undefined;
+    });
   }
 
   async retrieve(question: string, filters: QueryFilters = {}, embedQuery: EmbedQuery | null = null, options: RetrieverOptions = {}): Promise<RetrievalResult> {

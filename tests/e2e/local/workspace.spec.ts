@@ -1,12 +1,19 @@
 import { expect, test } from '@playwright/test';
-import { expectNoAxeViolations, isAnalysisPost, mockAnalysesDisabled, recordRequests, settle } from './helpers';
+import { SEED, expectNoAxeViolations, isAnalysisPost, recordRequests, setKillSwitch, setWorker, settle } from './helpers';
 
 /*
  * Local workflow E2E (testing-strategy §6): axe and keyboard checks on each page, Compare,
- * the error and degraded states with mocked API responses (architecture §9.1), Findings
- * filters and grouping, and Reset. The static export has no backend, so every API answer
- * here is mocked.
+ * the error and degraded states (architecture §9.1), Findings filters and grouping, and Reset.
+ * The api is the real app over in-memory stores (tests/e2e/local-server.ts); a few transport
+ * failures (network down, a non-JSON 502) are simulated in the browser.
  */
+
+test.beforeEach(async ({ request }) => {
+  await setKillSwitch(request, true);
+  await setWorker(request, 'complete');
+});
+
+const SEEDED = SEED.analyses[0]!.analysisId;
 
 const A11Y_PAGES = [
   '/',
@@ -18,6 +25,7 @@ const A11Y_PAGES = [
   '/compare/?tickers=AAPL,MSFT,NVDA',
   '/analysis/new/?q=What%20changed%3F&tickers=AAPL&origin=recommendation:AAPL:rec-1',
   '/analysis/?id=an-unknown',
+  `/analysis/?id=${SEEDED}`,
   '/findings/',
   '/sources/filing/?id=AAPL_10K_2025-10-31#chunk-AAPL-FY2025-10K-1A-001',
 ];
@@ -52,8 +60,8 @@ test.describe('keyboard', () => {
     await expect(chip).toBeFocused();
   });
 
-  test('Deep Analysis can be filled and run from the keyboard alone', async ({ page }) => {
-    await mockAnalysesDisabled(page);
+  test('Deep Analysis can be filled and run from the keyboard alone', async ({ page, request }) => {
+    await setKillSwitch(request, false);
     const requests = recordRequests(page);
     await page.goto('/analysis/new/');
     await settle(page);
@@ -66,7 +74,7 @@ test.describe('keyboard', () => {
     }
     await expect(page.getByRole('button', { name: 'Run analysis' })).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page.getByRole('alert').filter({ hasText: 'New analyses are paused' })).toBeVisible();
+    await expect(page.getByRole('alert').filter({ hasText: 'New analyses are paused' }).last()).toBeVisible();
     expect(requests.filter(isAnalysisPost)).toHaveLength(1);
   });
 });
@@ -88,17 +96,38 @@ test.describe('error and degraded states (architecture §9.1)', () => {
     await expect(alert).toContainText('HTTP 502');
   });
 
-  test('a rate-limited request explains the cap with its request ID', async ({ page }) => {
-    await page.route('**/api/analyses', (route) =>
-      route.fulfill({
-        status: 429,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: { code: 'RATE_LIMITED', message: 'Hourly limit reached.', requestId: 'req-429' } }),
-      }),
-    );
-    await page.goto('/analysis/new/?q=What%20changed%3F');
+  test('the workspace hourly cap: the eleventh analysis in an hour is refused with an explanation and a request ID', async ({ page, request }) => {
+    await setWorker(request, 'hang');
+    await page.goto('/analysis/new/');
+    await settle(page);
+    // Ten runs through the api with this browser's session, then the form's run is the eleventh.
+    for (let i = 0; i < 10; i++) {
+      const res = await page.request.post('/api/analyses', { data: { question: `Run ${i}` } });
+      expect(res.status()).toBe(202);
+    }
+    await page.getByRole('textbox', { name: 'Question', exact: true }).fill('One more');
     await page.getByRole('button', { name: 'Run analysis' }).click();
-    await expect(page.getByRole('alert').filter({ hasText: 'req-429' })).toBeVisible();
+    const alert = page.getByRole('alert').filter({ hasText: 'This workspace has reached its hourly limit' });
+    await expect(alert).toContainText('Try again after');
+    await expect(alert).toContainText(/local-\d+/);
+  });
+
+  test('a failed analysis (generation timeout) shows a plain error, its request ID and a re-run that starts fresh', async ({ page, request }) => {
+    await setWorker(request, 'fail');
+    await page.goto('/analysis/new/?q=How%20has%20NVIDIA%20changed%3F');
+    await page.getByRole('button', { name: 'Run analysis' }).click();
+    const alert = page.getByRole('alert').filter({ hasText: 'The analysis took too long' });
+    await expect(alert).toBeVisible({ timeout: 10_000 });
+    await alert.getByRole('link', { name: 'Edit and run again' }).click();
+    await expect(page.getByRole('textbox', { name: 'Question', exact: true })).toHaveValue('How has NVIDIA changed?');
+  });
+
+  test('analyses paused: Deep Analysis says so before you run; dashboards keep working', async ({ page, request }) => {
+    await setKillSwitch(request, false);
+    await page.goto('/analysis/new/');
+    await expect(page.getByText('New analyses are paused')).toBeVisible();
+    await page.goto('/intelligence/?ticker=AAPL');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Apple Inc');
   });
 
   test('PROFILE_MISSING: a company without a profile offers Deep Analysis for it, and Compare lists it as missing', async ({ page }) => {
@@ -115,7 +144,6 @@ test.describe('error and degraded states (architecture §9.1)', () => {
 });
 
 test('Compare: AAPL, MSFT, NVDA launches comparative diligence without running it', async ({ page }) => {
-  await mockAnalysesDisabled(page);
   const requests = recordRequests(page);
   await page.goto('/compare/?tickers=AAPL,MSFT,NVDA');
   const section = page.getByRole('region', { name: 'Recommended comparative diligence' });
@@ -126,10 +154,13 @@ test('Compare: AAPL, MSFT, NVDA launches comparative diligence without running i
   expect(requests.filter(isAnalysisPost)).toHaveLength(0);
 });
 
-test('Findings: save from Company Intelligence, filter, group, clear, and Reset', async ({ page }) => {
+test('Findings: the seeded board, save from Company Intelligence, filter, group, clear, and Reset', async ({ page }) => {
+  // A new workspace starts with the demo seed: real pre-run analyses and the findings saved from them.
+  await page.goto('/findings/');
+  await expect(page.getByText(`${SEED.findings.length} findings`)).toBeVisible();
+
   await page.goto('/intelligence/?ticker=MSFT');
   for (const area of ['Cybersecurity', 'Regulatory']) {
-    // Each area lists all its extracted headings; save the first.
     await page.getByRole('region', { name: area }).getByRole('button', { name: 'Save Finding' }).first().click();
     const dialog = page.getByRole('dialog');
     if (area === 'Regulatory') await dialog.getByLabel('Status').selectOption('NEEDS_FOLLOW_UP');
@@ -137,23 +168,25 @@ test('Findings: save from Company Intelligence, filter, group, clear, and Reset'
     await expect(page.getByRole('region', { name: area }).getByRole('link', { name: 'Saved' })).toHaveCount(1);
   }
 
-  // Client-side navigation keeps the in-memory workspace (Phase 1 has no API).
-  await page.getByRole('navigation').getByRole('link', { name: 'Findings' }).click();
-  await expect(page.getByText('2 findings')).toBeVisible();
-
+  // A full reload: findings live on the server, not in the page.
+  await page.goto('/findings/');
+  await expect(page.getByText(`${SEED.findings.length + 2} findings`)).toBeVisible();
+  await page.getByLabel('Origin', { exact: true }).selectOption('intelligence');
+  await expect(page.getByText('2 findings · 1 filter applied')).toBeVisible();
   await page.getByLabel('Status', { exact: true }).selectOption('NEEDS_FOLLOW_UP');
-  await expect(page.getByText('1 finding · 1 filter applied')).toBeVisible();
+  await expect(page.getByText('1 finding · 2 filters applied')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Regulatory & Compliance · 1' })).toBeVisible();
-  await page.getByRole('button', { name: 'Clear filters' }).first().click();
-  await expect(page.getByText('2 findings')).toBeVisible();
+  await page.getByLabel('Status', { exact: true }).selectOption('all');
 
   await page.getByLabel('Group by').selectOption('status');
   await expect(page.getByRole('heading', { name: 'Active · 1' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Needs Follow-Up · 1' })).toBeVisible();
   await page.getByLabel('Group by').selectOption('company');
   await expect(page.getByRole('heading', { name: 'Microsoft Corporation (MSFT) · 2' })).toBeVisible();
+  await page.getByRole('button', { name: 'Clear filters' }).first().click();
+  await expect(page.getByText(`${SEED.findings.length + 2} findings`)).toBeVisible();
 
   await page.getByRole('button', { name: 'Reset workspace' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Reset workspace' }).click();
-  await expect(page.getByText('No findings yet')).toBeVisible();
+  await expect(page.getByText(`${SEED.findings.length} findings`)).toBeVisible();
 });

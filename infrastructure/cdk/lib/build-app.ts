@@ -12,23 +12,27 @@ export function buildApp(app: App) {
   const common = { env, tags: { ...TAGS } };
 
   const core = new CoreStack(app, CONFIG.stackNames.core, { ...common, stackName: CONFIG.stackNames.core });
-  const api = new ApiStack(app, CONFIG.stackNames.api, {
-    ...common,
-    stackName: CONFIG.stackNames.api,
-    table: core.table,
-    killSwitch: core.killSwitch,
-  });
-  const web = new WebStack(app, CONFIG.stackNames.web, {
-    ...common,
-    stackName: CONFIG.stackNames.web,
-    apiEndpoint: api.apiEndpoint,
-  });
+  // The worker plane first: the api sends to its queue.
   const worker = new WorkerStack(app, CONFIG.stackNames.worker, {
     ...common,
     stackName: CONFIG.stackNames.worker,
     table: core.table,
     dataBucket: core.dataBucket,
     killSwitch: core.killSwitch,
+  });
+  const api = new ApiStack(app, CONFIG.stackNames.api, {
+    ...common,
+    stackName: CONFIG.stackNames.api,
+    table: core.table,
+    dataBucket: core.dataBucket,
+    killSwitch: core.killSwitch,
+    activeProfileSet: core.activeProfileSet,
+    queue: worker.queue,
+  });
+  const web = new WebStack(app, CONFIG.stackNames.web, {
+    ...common,
+    stackName: CONFIG.stackNames.web,
+    apiEndpoint: api.apiEndpoint,
   });
   return { core, api, web, worker };
 }

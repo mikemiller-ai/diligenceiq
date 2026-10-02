@@ -353,3 +353,28 @@ export const profileRef = {
   driver: (index: number) => `driver-${index + 1}`,
   executiveView: (dimension: string) => dimension.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
 };
+
+/**
+ * `intelligence/<indexVersion>/<profileSetId>/manifest.json` (architecture §4.4): what the api
+ * needs to list a profile set. The offline builder (Phase 4b) may add fields (tokens, durations,
+ * validation); unknown fields are ignored here.
+ */
+export const ProfileSetManifestSchema = z.object({
+  indexVersion: z.string().min(1),
+  profileSetId: z.string().regex(/^(llm|det|fixture)-v\d+$/),
+  builtAt: z.string().min(1),
+  companies: z.array(
+    z.object({
+      ticker: z.string().regex(/^[A-Z]{1,5}$/),
+      company: z.string().min(1),
+      sector: z.string().min(1),
+      tier: CoverageTierSchema,
+      filings: z.number().int().nonnegative(),
+      periodsCovered: z.array(z.string()),
+      headline: z.string().optional(),
+      mode: z.enum(['llm', 'deterministic', 'fixture']),
+      generationCallCount: z.union([z.literal(0), z.literal(1)]),
+    }),
+  ),
+});
+export type ProfileSetManifest = z.infer<typeof ProfileSetManifestSchema>;

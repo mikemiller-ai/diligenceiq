@@ -11,15 +11,22 @@ import { Button } from '@/components/ui/button';
 import { FILINGS, companyByTicker, fiscalYearLabel } from '@/fixtures';
 import { filingHref } from '@/components/diligence/evidence';
 import { intelligenceHref, newAnalysisHref } from '@/lib/links';
-import { useWorkspace } from '@/lib/workspace-store';
+import { PageSkeleton } from '@/components/diligence/page-skeleton';
+import { ErrorPanel } from '@/components/diligence/states';
+import { NoticeBar } from '@/components/diligence/states';
+import { useProfile, useWorkspace } from '@/lib/workspace-store';
+import * as React from 'react';
 
 export function IntelligenceView() {
   const ticker = (useSearchParams().get('ticker') ?? '').trim().toUpperCase();
-  const { profiles } = useWorkspace();
   if (!ticker) return <CompanySelector />;
+  return <CompanyIntelligence ticker={ticker} />;
+}
 
+function CompanyIntelligence({ ticker }: { ticker: string }) {
   const company = companyByTicker(ticker);
-  const profile = profiles.get(ticker);
+  const { profile, state } = useProfile(company && !company.outsideWindow ? ticker : null);
+  const { status: workspaceStatus } = useWorkspace();
   const back = (
     <Link href={intelligenceHref()} className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
       <ArrowLeft aria-hidden className="size-3.5" /> All companies
@@ -68,6 +75,37 @@ export function IntelligenceView() {
     );
   }
 
+  if (!profile && state === 'loading') {
+    return (
+      <PageContainer className="max-w-[1200px]">
+        {back}
+        <PageSkeleton />
+      </PageContainer>
+    );
+  }
+
+  if (!profile && state === 'error') {
+    return (
+      <PageContainer>
+        {back}
+        <ErrorPanel
+          title="Company Intelligence could not be loaded"
+          message={
+            workspaceStatus === 'error'
+              ? 'Your demo workspace could not be opened, so the profile cannot be loaded. The notice above explains why; use its Retry.'
+              : 'The stored profile could not be read right now. Reload the page to try again; Deep Analysis still works.'
+          }
+          code={workspaceStatus === 'error' ? 'WORKSPACE_UNAVAILABLE' : 'PROFILE_UNAVAILABLE'}
+          action={
+            <Button asChild size="sm" variant="secondary">
+              <Link href={newAnalysisHref({ tickers: [company.ticker] })}>Ask about {company.company}</Link>
+            </Button>
+          }
+        />
+      </PageContainer>
+    );
+  }
+
   if (!profile) {
     // PROFILE_MISSING (architecture §9.1): offer Deep Analysis for that company instead.
     return (
@@ -90,7 +128,34 @@ export function IntelligenceView() {
   return (
     <PageContainer className="max-w-[1200px]">
       {back}
-      <IntelligenceDashboard profile={profile} />
+      <VersionSkew profileIndexVersion={profile!.version.indexVersion} />
+      <IntelligenceDashboard profile={profile!} />
     </PageContainer>
+  );
+}
+
+/**
+ * Index / profile version skew (SPEC §38.2): the profile was built from an older index than the
+ * one Deep Analysis searches. Its citations still open, because profiles carry passage text.
+ */
+function VersionSkew({ profileIndexVersion }: { profileIndexVersion: string }) {
+  const { client } = useWorkspace();
+  const [current, setCurrent] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    client
+      .health()
+      .then((h) => !cancelled && setCurrent(h.indexVersion))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
+  if (!current || current === profileIndexVersion) return null;
+  return (
+    <NoticeBar className="mb-4">
+      Built from index {profileIndexVersion}; Deep Analysis searches {current}. The cited passages below are stored with the profile, so they
+      still open as they were.
+    </NoticeBar>
   );
 }

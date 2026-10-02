@@ -9,17 +9,17 @@ import { Button } from '@/components/ui/button';
 export const metadata: Metadata = { title: 'Architecture and business value' };
 
 /*
- * Architecture and business value (SPEC §18). Phase 1 builds it static: it describes the
- * design and shows no metrics. Measured evaluation, latency and cost numbers arrive in
- * Phase 7, each traceable to docs/evaluation.md or telemetry. Every mechanism that is not
- * built yet is described as designed, with the phase that builds it, never as present fact.
+ * Architecture and business value (SPEC §18). Static: it describes the design and shows no
+ * metrics. Measured evaluation, latency and cost numbers arrive in Phase 7, each traceable to
+ * docs/evaluation.md or telemetry. Every mechanism is stated as what it is: built and deployed,
+ * built but not yet deployed (the Phase 5 api), or designed with the phase that builds it.
  */
 
 /** What exists in this build vs what is designed (implementation plan phases). */
-type BuildStatus = 'Built' | `Designed · Phase ${string}`;
+type BuildStatus = 'Built' | 'Built · not yet deployed' | `Designed · Phase ${string}`;
 
 function StatusBadge({ status }: { status: BuildStatus }) {
-  return <Badge tone={status === 'Built' ? 'success' : 'neutral'}>{status}</Badge>;
+  return <Badge tone={status === 'Built' ? 'success' : status === 'Built · not yet deployed' ? 'info' : 'neutral'}>{status}</Badge>;
 }
 
 /** What the product is for. The "This build" section says what exists today. */
@@ -34,7 +34,7 @@ const VALUE = [
   { title: 'Compares companies', text: 'Common, distinctive and diverging attention areas across two to five companies, composed without a model call.' },
 ];
 
-/** The designed Deep Analysis worker path (architecture §4.1, §5). Built in Phases 3–4. */
+/** The Deep Analysis worker path (architecture §4.1, §5). Built and deployed in Phases 3–4. */
 const FLOW = [
   { step: 'Claim job', detail: 'Conditional QUEUED → RUNNING with a claim token; a redelivered message is acknowledged without work.' },
   { step: 'Analyze query', detail: 'Deterministic: companies, aliases, sectors, fiscal periods, filing types. No model call.' },
@@ -49,30 +49,31 @@ const SYSTEM: { icon: typeof Cloud; title: string; status: BuildStatus; lines: s
   {
     icon: Server,
     title: 'HTTP API → api Lambda',
-    status: 'Built',
-    lines: ['Health and the analysis kill switch today; no Bedrock permission', 'Sessions, findings, profiles and Compare: Phase 5'],
+    status: 'Built · not yet deployed',
+    lines: ['Sessions, findings, stored profiles and Compare; no Bedrock permission', 'Checks the kill switch and the spend caps before it queues an analysis', 'The deployed api is still the earlier build'],
   },
   {
     icon: Database,
     title: 'SQS → worker Lambda',
-    status: 'Designed · Phase 4',
+    status: 'Built',
     lines: ['Hybrid retrieval over the S3 index', 'The one generation call per question', 'Validation, then idle'],
   },
 ];
 
-/** What this build does, plainly (Phase 1). */
+/** What this build does, plainly. "Not yet deployed" is code that is built and tested but not live. */
 const TODAY: { item: string; status: BuildStatus }[] = [
   {
     item: 'Company Intelligence preview profiles for Apple, Microsoft and NVIDIA: every risk heading the extraction rule found in the latest annual report, each cited to the index; everything else a labeled placeholder',
     status: 'Built',
   },
-  { item: 'Compare, Save Finding and the Findings Board, composed in the browser without a model call; findings last for the browser session', status: 'Built' },
-  { item: 'Deep Analysis form with an editable prefill that never runs by itself; Run reaches the API, which answers that analyses are not enabled yet', status: 'Built' },
+  { item: 'Ingestion, chunking and the hybrid keyword and vector index over every filing', status: 'Built' },
+  { item: 'The analysis worker: retrieval, exactly one generation request, deterministic validation of citations and figures', status: 'Built' },
   { item: 'Kill switch on new analyses, and a CDK test that fails the build if an always-on resource appears', status: 'Built' },
-  { item: 'Ingestion, chunking and the hybrid index', status: 'Designed · Phase 2' },
-  { item: 'Retrieval, the one-call generation pipeline and its tests', status: 'Designed · Phase 3–4' },
+  { item: 'Deep Analysis form with an editable prefill that never runs by itself; Run queues the analysis for the worker and the page shows its real stages', status: 'Built · not yet deployed' },
+  { item: 'Demo workspaces without an account, seeded with real pre-run briefs; findings saved on the server with their cited passages', status: 'Built · not yet deployed' },
+  { item: 'Spend caps: per workspace per hour, for the whole demo per day, and on new workspaces per network and per day', status: 'Built · not yet deployed' },
+  { item: 'Profiles served from a stored set selected by one parameter; Compare composed from them without a model call', status: 'Built · not yet deployed' },
   { item: 'Offline profile build: deterministic and model-written sets, build ledger, set switch', status: 'Designed · Phase 4b' },
-  { item: 'Sessions, durable findings, global daily and per-workspace spend caps', status: 'Designed · Phase 5' },
 ];
 
 const FUTURE: { stage: string; scope: string; state: 'In progress' | 'Next' | 'Later' }[] = [
@@ -147,11 +148,12 @@ export default function ArchitecturePage() {
         lede="Everything a user opens is read from storage. Only an explicit Run analysis will reach a model."
       >
         <div className="grid gap-3.5 md:grid-cols-2">
-          <EvidenceCard label="LIVE · DESIGNED, PHASES 3–4" title="One generative call per question">
-            Deep Analysis is designed as retrieval, then exactly one generation request, then validation. Every run,
-            including a re-run after a failure, is a new analysis with its own single call. In this build Run analysis
-            reaches the API, which answers that analyses are not enabled; no model is called. Compare, Save Finding and
-            the Findings Board are deterministic application logic today.
+          <EvidenceCard label="LIVE · BUILT, PHASES 3–5" title="One generative call per question">
+            Deep Analysis is retrieval, then exactly one generation request, then validation, in a worker that runs only
+            when an analysis is queued. Every run, including a re-run after a failure, is a new analysis with its own
+            single call. The api that queues analyses, checks the kill switch and the spend caps, and keeps findings is
+            built and tested but not yet deployed. Compare, Save Finding and the Findings Board are deterministic
+            application logic.
           </EvidenceCard>
           <EvidenceCard label="OFFLINE · DESIGNED, PHASE 4B" title="Profiles computed once per index version">
             Company Intelligence profiles will be built by an admin-run script after indexing: deterministic figures, risks
@@ -173,9 +175,9 @@ export default function ArchitecturePage() {
 
       <Section
         ground="navy"
-        eyebrow="Single-call guarantee · designed, Phase 4"
+        eyebrow="Single-call guarantee · built, Phase 4"
         headline="Six steps. One of them talks to a model."
-        lede="The designed defense in depth: a conditional claim, an SDK client with retries off, a per-analysis gateway that refuses a second call, a persisted call count, and tests planned to assert exactly one call on success, error, malformed output and redelivery. None of it runs yet; the worker is built in Phase 4."
+        lede="Defense in depth: a conditional claim, an SDK client with retries off, a per-analysis gateway that refuses a second call, a persisted call count, and tests that assert exactly one call on success, error, malformed output and redelivery."
       >
         <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {FLOW.map((f, i) => {
@@ -234,7 +236,8 @@ export default function ArchitecturePage() {
           </EvidenceCard>
           <EvidenceCard label="IN USE" title="Proportional to questions asked">
             By design the single generation request dominates the cost of an analysis. Spend is bounded by a kill switch
-            (built), a global daily cap and per-workspace caps (Phase 5), and an AWS Budget alert (Phase 8).
+            (built), a global daily cap, per-workspace caps and a cap on new workspaces (built, not yet deployed), and an
+            AWS Budget alert (Phase 8).
           </EvidenceCard>
         </div>
       </Section>
@@ -243,7 +246,7 @@ export default function ArchitecturePage() {
         tight
         eyebrow="This build"
         headline="What exists today, and what is designed."
-        lede="Phase 1 is the product shell on preview data. Nothing below is marked built unless it runs in this deployment."
+        lede="Built means it runs in this deployment. Built, not yet deployed means the code exists and is tested but is not live yet. Designed means a later phase builds it."
       >
         <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
           {TODAY.map((t) => (

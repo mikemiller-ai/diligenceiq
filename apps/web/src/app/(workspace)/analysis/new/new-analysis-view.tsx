@@ -12,16 +12,20 @@ import { Info, Link2, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { CompanySelect } from '@/components/diligence/company-select';
-import { PageContainer, PageHeader } from '@/components/diligence/page';
+import Link from 'next/link';
+import { AnalysisStatusBadge } from '@/components/diligence/badges';
+import { PageContainer, PageHeader, SectionHeading } from '@/components/diligence/page';
 import { ErrorPanel } from '@/components/diligence/states';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { FieldHint, Label, NativeSelect, Textarea } from '@/components/ui/input';
 import { FILING_TYPES, FISCAL_YEAR_OPTIONS, companies, companyName } from '@/fixtures';
-import { ApiRequestError, apiJson } from '@/lib/api';
+import { ApiRequestError } from '@/lib/api';
 import { FAILURE_COPY } from '@/lib/labels';
 import { analysisHref } from '@/lib/links';
+import { useWorkspace } from '@/lib/workspace-store';
+import { formatDateTime } from '@/lib/format';
 
 const MAX_QUESTION = 1000;
 const COMPANY_OPTIONS = companies().filter((c) => !c.outsideWindow);
@@ -38,6 +42,15 @@ function describeError(err: unknown): SubmitError {
         message: 'The API did not respond with a valid result. Try again shortly.',
         requestId: err.requestId,
         code: err.status ? `HTTP ${err.status}` : err.code,
+      };
+    }
+    if (err.code === 'RATE_LIMITED') {
+      const retryAfter = typeof err.details?.retryAfter === 'string' ? err.details.retryAfter : null;
+      return {
+        title: err.details?.scope === 'workspace_hourly' ? 'This workspace has reached its hourly limit' : 'The demo has reached its daily limit',
+        message: `${err.message} Each analysis makes one paid model request, so the public demo is capped.${retryAfter ? ` Try again after ${formatDateTime(retryAfter)}.` : ''} Company Intelligence, Compare and your findings keep working.`,
+        requestId: err.requestId,
+        code: err.code,
       };
     }
     const copy = FAILURE_COPY[err.code];
@@ -97,6 +110,7 @@ export function NewAnalysisView() {
 
 function NewAnalysisForm({ params }: { params: { get(name: string): string | null } }) {
   const router = useRouter();
+  const { client } = useWorkspace();
   // Read once per URL: the origin describes how the form was prefilled and never changes retrieval.
   const [origin] = React.useState<AnalysisOrigin>(() => parseOrigin(params.get('origin')));
   const initialTickers = (params.get('tickers') ?? '')
@@ -107,9 +121,17 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
 
   const [question, setQuestion] = React.useState(() => (params.get('q') ?? '').slice(0, MAX_QUESTION));
   const [tickers, setTickers] = React.useState<string[]>(initialTickers);
-  const [filingTypes, setFilingTypes] = React.useState<FilingType[]>([...FILING_TYPES]);
-  const [yearFrom, setYearFrom] = React.useState<string>('');
-  const [yearTo, setYearTo] = React.useState<string>('');
+  // Source and fiscal-year filters from the URL (an earlier analysis's "Edit and run again"); unknown values are ignored.
+  const [filingTypes, setFilingTypes] = React.useState<FilingType[]>(() => {
+    const types = (params.get('types') ?? '').split(',').filter((t): t is FilingType => (FILING_TYPES as readonly string[]).includes(t));
+    return types.length ? [...new Set(types)] : [...FILING_TYPES];
+  });
+  const yearParam = (name: string) => {
+    const v = params.get(name) ?? '';
+    return (FISCAL_YEAR_OPTIONS as readonly number[]).map(String).includes(v) ? v : '';
+  };
+  const [yearFrom, setYearFrom] = React.useState<string>(() => yearParam('from'));
+  const [yearTo, setYearTo] = React.useState<string>(() => yearParam('to'));
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<SubmitError | null>(null);
@@ -156,7 +178,7 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
     if (!request) return;
     setSubmitting(true);
     try {
-      const res = await apiJson<{ analysisId: string }>('/api/analyses', { method: 'POST', body: request });
+      const res = await client.createAnalysis(request);
       router.push(analysisHref(res.analysisId));
     } catch (err) {
       setSubmitError(describeError(err));
@@ -175,6 +197,7 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
         description="Ask any business question about the companies in the SEC filing corpus. The answer is a cited Diligence Brief. Filters are optional and only narrow the search."
       />
 
+      <ServiceNotice />
       <form onSubmit={onSubmit} noValidate aria-describedby="one-call-note">
         <Card className="divide-y divide-border">
           {originText && (
@@ -316,6 +339,76 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
           />
         )}
       </form>
+      <RecentAnalyses />
     </PageContainer>
   );
+}
+
+const RECENT_LIMIT = 10;
+
+/** This workspace's analyses, newest first (architecture §9 `GET /api/analyses`): each opens its brief. */
+function RecentAnalyses() {
+  const { analyses, status } = useWorkspace();
+  if (status !== 'ready' || analyses.length === 0) return null;
+  const recent = [...analyses].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, RECENT_LIMIT);
+  return (
+    <section aria-labelledby="recent-analyses" className="mt-10">
+      <SectionHeading id="recent-analyses">Recent analyses</SectionHeading>
+      <ul className="mt-3 divide-y divide-border overflow-hidden rounded-card border border-border bg-card">
+        {recent.map((a) => (
+          <li key={a.analysisId}>
+            <Link href={analysisHref(a.analysisId)} className="group flex flex-col gap-1 px-4 py-3 hover:bg-accent/40 sm:flex-row sm:items-center sm:gap-3">
+              <span className="min-w-0 flex-1 text-sm text-foreground group-hover:text-primary">{a.question}</span>
+              <span className="flex shrink-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                {a.seeded && <span>Example, run in advance</span>}
+                <span>{formatDateTime(a.createdAt)}</span>
+                <AnalysisStatusBadge status={a.status} />
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/**
+ * Missing index or paused analyses (SPEC §38.2), from GET /api/health. Read once per visit; it
+ * never blocks the form (the server decides), it only explains in advance.
+ */
+function ServiceNotice() {
+  const { client } = useWorkspace();
+  const [health, setHealth] = React.useState<{ indexAvailable: boolean; analysesEnabled: boolean } | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    client
+      .health()
+      .then((h) => !cancelled && setHealth(h))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
+  if (!health) return null;
+  if (!health.indexAvailable) {
+    return (
+      <ErrorPanel
+        className="mb-4"
+        title="Filing search is unavailable right now"
+        message="The filing index could not be reached, so new analyses would fail. Company Intelligence, Compare and saved findings still work."
+        code="INDEX_UNAVAILABLE"
+      />
+    );
+  }
+  if (!health.analysesEnabled) {
+    return (
+      <ErrorPanel
+        className="mb-4"
+        title="New analyses are paused"
+        message="Running an analysis is switched off at the moment (each one makes a paid model request). Company Intelligence, Compare and saved findings remain available, and you can still prepare a question."
+        code="ANALYSES_DISABLED"
+      />
+    );
+  }
+  return null;
 }

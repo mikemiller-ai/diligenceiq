@@ -3,3 +3,6 @@ export * from './domain';
 export * from './errors';
 export * from './intelligence';
 export * from './compare';
+export * from './finding-sources';
+export * from './api';
+export * from './catalog';

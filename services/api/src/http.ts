@@ -25,6 +25,11 @@ export function json(
   };
 }
 
+/** 204 with no body (DELETE). */
+export function noContent(requestId: string): HttpResponse {
+  return { statusCode: 204, headers: { 'cache-control': 'no-store', 'x-request-id': requestId }, body: '' };
+}
+
 export function error(
   code: ErrorCode,
   message: string,

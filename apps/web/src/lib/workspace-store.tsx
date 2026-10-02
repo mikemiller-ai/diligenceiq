@@ -1,59 +1,52 @@
 'use client';
 
 import {
-  findingOriginKind,
+  sourceKey,
+  type AnalysisDetail,
+  type AnalysisSummary,
+  type CompaniesResponse,
   type CompanyIntelligenceProfile,
   type Finding,
   type FindingSource,
   type FindingStatus,
+  type PatchFindingRequest,
   type ThemeId,
 } from '@diligenceiq/core';
 import * as React from 'react';
-import { FIXTURE_PROFILES } from '@/fixtures/profiles';
-import type { AnalysisRecord } from '@/fixtures/types';
-import { resolveSource } from './finding-sources';
+import { ApiRequestError } from './api';
+import { httpWorkspaceClient, type WorkspaceClient } from './workspace-client';
 
 /*
- * Phase 1 workspace state: in memory, so saved findings last until the page is reloaded.
- * It starts empty: there are no hand-written analyses or findings (SPEC §2.2,
- * assumptions A5). Phase 5 replaces the internals with the session-scoped API
- * (architecture §9), seeded from real pipeline outputs; the hook surface stays the same.
+ * Workspace state, backed by the session-scoped API (architecture §9; SPEC §40): the analyses
+ * list, loaded analysis details, findings, and the Company Intelligence profiles read from the
+ * active profile set. Every write goes to the server; the server copies finding text and
+ * citations from stored content. The first visit creates (and seeds) a workspace.
  */
 
+export { sourceKey };
+
+export type ProfileState = 'loading' | 'missing' | 'error';
+
 export interface WorkspaceState {
-  analyses: AnalysisRecord[];
+  status: 'loading' | 'ready' | 'error';
+  error: ApiRequestError | null;
+  analyses: AnalysisSummary[];
+  details: ReadonlyMap<string, AnalysisDetail>;
   findings: Finding[];
-  nextId: number;
+  profiles: ReadonlyMap<string, CompanyIntelligenceProfile>;
+  /** Profiles not (yet) loaded: loading, missing for this index version, or failed to load. */
+  profileStates: ReadonlyMap<string, ProfileState>;
+  /** The active profile set's company list; null until loaded. */
+  companies: CompaniesResponse | null;
 }
 
-type FindingPatch = Partial<Pick<Finding, 'status' | 'note' | 'theme' | 'title'>>;
-
-type Action =
-  | { type: 'saveFinding'; finding: Finding }
-  | { type: 'updateFinding'; findingId: string; patch: FindingPatch; at: string }
-  | { type: 'deleteFinding'; findingId: string }
-  | { type: 'reset'; initial: WorkspaceState };
-
-export function emptyState(): WorkspaceState {
-  return { analyses: [], findings: [], nextId: 1 };
-}
-
-export function reducer(state: WorkspaceState, action: Action): WorkspaceState {
-  switch (action.type) {
-    case 'saveFinding':
-      // A stored item is saved at most once, whatever path the save came from.
-      if (state.findings.some((f) => sourceKey(f.origin.source) === sourceKey(action.finding.origin.source))) return state;
-      return { ...state, findings: [action.finding, ...state.findings], nextId: state.nextId + 1 };
-    case 'updateFinding':
-      return {
-        ...state,
-        findings: state.findings.map((f) => (f.findingId === action.findingId ? { ...f, ...action.patch, updatedAt: action.at } : f)),
-      };
-    case 'deleteFinding':
-      return { ...state, findings: state.findings.filter((f) => f.findingId !== action.findingId) };
-    case 'reset':
-      return action.initial;
-  }
+/** State a test (or a future SSR pass) can start from, skipping the initial fetches. */
+export interface WorkspacePreload {
+  analyses?: AnalysisDetail[];
+  findings?: Finding[];
+  profiles?: ReadonlyMap<string, CompanyIntelligenceProfile>;
+  /** The active set's company list; derived from `profiles` when omitted. */
+  companies?: CompaniesResponse;
 }
 
 export interface SaveFindingInput {
@@ -64,98 +57,134 @@ export interface SaveFindingInput {
   note?: string;
 }
 
-/**
- * Same key for the same stored item, so a source can only be saved once. Canonical: the key
- * order is fixed and a compare row's tickers are sorted, so AAPL,MSFT and MSFT,AAPL match.
- */
-export function sourceKey(source: FindingSource): string {
-  switch (source.kind) {
-    case 'keyFinding':
-    case 'consideration':
-    case 'comparisonRow':
-      return `${source.kind}:${source.analysisId}:${source.index}`;
-    case 'compareRow':
-      return `${source.kind}:${[...source.tickers].sort().join(',')}:${source.ref}`;
-    case 'watchEvent':
-      return `${source.kind}:${source.ticker}:${source.signalId}`;
-    default:
-      return `${source.kind}:${source.ticker}:${source.ref}`;
-  }
+function summaryOf(d: AnalysisDetail): AnalysisSummary {
+  return { analysisId: d.analysisId, question: d.question, origin: d.origin, status: d.status, ...(d.stage ? { stage: d.stage } : {}), createdAt: d.createdAt, ...(d.completedAt ? { completedAt: d.completedAt } : {}), ...(d.seeded ? { seeded: true } : {}) };
 }
 
-export function buildFinding(
-  state: WorkspaceState,
-  profiles: ReadonlyMap<string, CompanyIntelligenceProfile>,
-  input: SaveFindingInput,
-  now: string,
-): Finding {
-  if (state.findings.some((f) => sourceKey(f.origin.source) === sourceKey(input.source))) {
-    throw new Error('This item is already saved as a finding.');
-  }
-  // resolveSource returns null for an item with no cited passage, so a finding always has evidence.
-  const resolved = resolveSource(input.source, { analyses: state.analyses, profiles });
-  if (!resolved) throw new Error('The item to save no longer exists or has no cited evidence.');
+function preloadState(p: WorkspacePreload): WorkspaceState {
+  const profiles = p.profiles ?? new Map();
   return {
-    findingId: `fd-local-${state.nextId}`,
-    title: input.title.trim().slice(0, 200) || resolved.title,
-    text: resolved.text,
-    theme: input.theme,
-    tickers: resolved.tickers,
-    citations: resolved.citations,
-    origin: { kind: findingOriginKind(input.source), source: input.source },
-    ...(resolved.analysisId ? { analysisId: resolved.analysisId } : {}),
-    ...(input.note?.trim() ? { note: input.note.trim().slice(0, 2000) } : {}),
-    status: input.status,
-    pinnedToIC: false,
-    isKey: false,
-    createdAt: now,
-    updatedAt: now,
+    status: 'ready',
+    error: null,
+    analyses: (p.analyses ?? []).map(summaryOf),
+    details: new Map((p.analyses ?? []).map((a) => [a.analysisId, a])),
+    findings: p.findings ?? [],
+    profiles,
+    profileStates: new Map(),
+    companies: p.companies ?? { indexVersion: null, profileSetId: [...profiles.values()][0]?.version.profileSetId ?? null, companies: [...profiles.values()].map((x) => ({ ticker: x.ticker, company: x.company, sector: x.sector, tier: x.coverage.tier, filings: x.coverage.filings, periodsCovered: x.version.periodsCovered })) },
   };
 }
 
-function useWorkspaceValue(initial: WorkspaceState, profiles: ReadonlyMap<string, CompanyIntelligenceProfile>) {
-  const [state, dispatch] = React.useReducer(reducer, initial);
-  // saveFinding reads the latest state without re-creating the actions object.
+const EMPTY: WorkspaceState = { status: 'loading', error: null, analyses: [], details: new Map(), findings: [], profiles: new Map(), profileStates: new Map(), companies: null };
+
+const toApiError = (err: unknown) =>
+  err instanceof ApiRequestError ? err : new ApiRequestError('CLIENT', 'An unexpected error occurred.', null);
+
+function useWorkspaceValue(client: WorkspaceClient, preload: WorkspacePreload | undefined) {
+  const [state, setState] = React.useState<WorkspaceState>(() => (preload ? preloadState(preload) : EMPTY));
   const stateRef = React.useRef(state);
   React.useEffect(() => {
     stateRef.current = state;
   }, [state]);
+  const patch = React.useCallback((fn: (s: WorkspaceState) => Partial<WorkspaceState>) => setState((s) => ({ ...s, ...fn(s) })), []);
+
+  const load = React.useCallback(async () => {
+    patch(() => ({ status: 'loading', error: null }));
+    try {
+      await client.session();
+      const [analyses, findings, companies] = await Promise.all([client.listAnalyses(), client.listFindings(), client.companies()]);
+      patch(() => ({ status: 'ready', analyses, findings, companies }));
+    } catch (err) {
+      patch(() => ({ status: 'error', error: toApiError(err) }));
+    }
+  }, [client, patch]);
+
+  React.useEffect(() => {
+    if (!preload) void load();
+    // Preloaded state (tests) never fetches on mount.
+  }, [load, preload]);
 
   const actions = React.useMemo(
     () => ({
-      saveFinding: (input: SaveFindingInput): Finding => {
-        const finding = buildFinding(stateRef.current, profiles, input, new Date().toISOString());
-        dispatch({ type: 'saveFinding', finding });
+      reload: load,
+      /** Saves on the server (which copies the text and evidence) and adds it to the board. */
+      saveFinding: async (input: SaveFindingInput): Promise<Finding> => {
+        const finding = await client.createFinding({ source: input.source, theme: input.theme, status: input.status, ...(input.title.trim() ? { title: input.title.trim() } : {}), ...(input.note?.trim() ? { note: input.note.trim() } : {}) });
+        patch((s) => ({ findings: [finding, ...s.findings.filter((f) => f.findingId !== finding.findingId)] }));
         return finding;
       },
-      updateFinding: (findingId: string, patch: FindingPatch) =>
-        dispatch({ type: 'updateFinding', findingId, patch, at: new Date().toISOString() }),
-      deleteFinding: (findingId: string) => dispatch({ type: 'deleteFinding', findingId }),
-      reset: () => dispatch({ type: 'reset', initial }),
+      updateFinding: async (findingId: string, change: PatchFindingRequest): Promise<Finding> => {
+        const updated = await client.patchFinding(findingId, change);
+        patch((s) => ({ findings: s.findings.map((f) => (f.findingId === findingId ? updated : f)) }));
+        return updated;
+      },
+      deleteFinding: async (findingId: string): Promise<void> => {
+        await client.deleteFinding(findingId);
+        patch((s) => ({ findings: s.findings.filter((f) => f.findingId !== findingId) }));
+      },
+      /** Deletes and reseeds only this workspace, then reloads it. */
+      reset: async (): Promise<void> => {
+        await client.reset();
+        patch(() => ({ details: new Map() }));
+        const [analyses, findings] = await Promise.all([client.listAnalyses(), client.listFindings()]);
+        patch(() => ({ analyses, findings }));
+      },
+      /** Loads one profile once; a missing profile is remembered (PROFILE_MISSING). */
+      loadProfile: async (ticker: string): Promise<void> => {
+        const s = stateRef.current;
+        if (s.profiles.has(ticker) || s.profileStates.get(ticker) === 'loading' || s.profileStates.get(ticker) === 'missing') return;
+        // Not in the active set's company list: missing, with no request.
+        if (s.companies && !s.companies.companies.some((c) => c.ticker === ticker)) {
+          patch((x) => ({ profileStates: new Map(x.profileStates).set(ticker, 'missing') }));
+          return;
+        }
+        patch((x) => ({ profileStates: new Map(x.profileStates).set(ticker, 'loading') }));
+        try {
+          const profile = await client.profile(ticker);
+          patch((x) => {
+            const states = new Map(x.profileStates);
+            if (profile) {
+              states.delete(ticker);
+              return { profiles: new Map(x.profiles).set(ticker, profile), profileStates: states };
+            }
+            return { profileStates: states.set(ticker, 'missing') };
+          });
+        } catch {
+          patch((x) => ({ profileStates: new Map(x.profileStates).set(ticker, 'error') }));
+        }
+      },
+      /** Records a fetched analysis detail (the poll) and keeps the list in step. */
+      putAnalysis: (detail: AnalysisDetail) =>
+        patch((s) => ({
+          details: new Map(s.details).set(detail.analysisId, detail),
+          analyses: s.analyses.some((a) => a.analysisId === detail.analysisId)
+            ? s.analyses.map((a) => (a.analysisId === detail.analysisId ? summaryOf(detail) : a))
+            : [summaryOf(detail), ...s.analyses],
+        })),
     }),
-    [initial, profiles],
+    [client, load, patch],
   );
 
-  const savedKeys = React.useMemo(() => new Set(state.findings.map((f) => sourceKey(f.origin.source))), [state.findings]);
-  return { ...state, profiles, savedKeys, ...actions };
+  // A profile finding counts as saved only for the set it came from: its positional ref names another item in another set.
+  const activeSet = state.companies?.profileSetId ?? null;
+  const savedKeys = React.useMemo(
+    () => new Set(state.findings.filter((f) => !f.profileSetId || f.profileSetId === activeSet).map((f) => sourceKey(f.origin.source))),
+    [state.findings, activeSet],
+  );
+  /** Loaded analyses with briefs, for previewing what a save will copy. */
+  const sourceAnalyses = React.useMemo(() => [...state.details.values()], [state.details]);
+  const profileTickers = React.useMemo(() => new Set(state.companies?.companies.map((c) => c.ticker) ?? []), [state.companies]);
+  return { ...state, client, savedKeys, sourceAnalyses, profileTickers, ...actions };
 }
 
 export type Workspace = ReturnType<typeof useWorkspaceValue>;
 
 const WorkspaceContext = React.createContext<Workspace | null>(null);
 
-export function WorkspaceProvider({
-  children,
-  initial,
-  profiles = FIXTURE_PROFILES,
-}: {
-  children: React.ReactNode;
-  /** Tests inject analyses and findings; the app starts empty. */
-  initial?: WorkspaceState;
-  profiles?: ReadonlyMap<string, CompanyIntelligenceProfile>;
-}) {
-  const [start] = React.useState(() => initial ?? emptyState());
-  const value = useWorkspaceValue(start, profiles);
+export function WorkspaceProvider({ children, client, preload }: { children: React.ReactNode; client?: WorkspaceClient; preload?: WorkspacePreload }) {
+  const [c] = React.useState(() => client ?? httpWorkspaceClient());
+  const [p] = React.useState(() => preload);
+  const value = useWorkspaceValue(c, p);
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }
 
@@ -163,4 +192,20 @@ export function useWorkspace(): Workspace {
   const ctx = React.useContext(WorkspaceContext);
   if (!ctx) throw new Error('useWorkspace must be used inside WorkspaceProvider');
   return ctx;
+}
+
+/** A profile from the active set, loaded on first use. */
+export function useProfile(ticker: string | null): { profile: CompanyIntelligenceProfile | undefined; state: ProfileState | 'ready' | 'none' } {
+  const ws = useWorkspace();
+  const { loadProfile, status } = ws;
+  React.useEffect(() => {
+    if (ticker && status === 'ready') void loadProfile(ticker);
+  }, [ticker, status, loadProfile]);
+  if (!ticker) return { profile: undefined, state: 'none' };
+  const profile = ws.profiles.get(ticker);
+  if (profile) return { profile, state: 'ready' };
+  // No workspace (the session failed): nothing will load until Retry, so it is an error, not an endless skeleton.
+  if (ws.status === 'error') return { profile: undefined, state: 'error' };
+  if (ws.status !== 'ready') return { profile: undefined, state: 'loading' };
+  return { profile: undefined, state: ws.profileStates.get(ticker) ?? 'loading' };
 }

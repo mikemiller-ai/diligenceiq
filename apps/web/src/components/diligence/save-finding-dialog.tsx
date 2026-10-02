@@ -1,6 +1,6 @@
 'use client';
 
-import { THEMES, type FindingSource, type FindingStatus, type ThemeId } from '@diligenceiq/core';
+import { THEMES, resolveSource, type FindingSource, type FindingStatus, type ThemeId } from '@diligenceiq/core';
 import { BookmarkCheck, BookmarkPlus } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { FieldHint, Input, Label, NativeSelect, Textarea } from '@/components/ui/input';
 import { toast } from '@/components/ui/toaster';
-import { resolveSource } from '@/lib/finding-sources';
+import { describeFailure } from '@/lib/api';
 import { FINDING_STATUS } from '@/lib/labels';
 import { sourceKey, useWorkspace } from '@/lib/workspace-store';
 
@@ -35,8 +35,10 @@ export function SaveFindingButton({
   label?: string;
   variant?: 'secondary' | 'ghost';
 }) {
-  const { analyses, profiles, savedKeys, saveFinding } = useWorkspace();
-  const resolved = React.useMemo(() => resolveSource(source, { analyses, profiles }), [source, analyses, profiles]);
+  const { sourceAnalyses, profiles, savedKeys, saveFinding } = useWorkspace();
+  // A preview of what will be saved; the server copies the stored content itself.
+  const resolved = React.useMemo(() => resolveSource(source, { analyses: sourceAnalyses, profiles }), [source, sourceAnalyses, profiles]);
+  const [saving, setSaving] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [title, setTitle] = React.useState(resolved?.title ?? '');
   const [theme, setTheme] = React.useState<ThemeId>(resolved?.defaultTheme ?? 'risk-factors');
@@ -70,9 +72,14 @@ export function SaveFindingButton({
           className="grid gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            saveFinding({ source, theme, title, status, note });
-            setOpen(false);
-            toast.success('Finding saved', { description: 'Added to the Findings Board with its evidence.' });
+            setSaving(true);
+            saveFinding({ source, theme, title, status, note })
+              .then(() => {
+                setOpen(false);
+                toast.success('Finding saved', { description: 'Added to the Findings Board with its evidence.' });
+              })
+              .catch((err) => toast.error('The finding was not saved', { description: describeFailure(err) }))
+              .finally(() => setSaving(false));
           }}
         >
           <DialogHeader>
@@ -119,8 +126,8 @@ export function SaveFindingButton({
             <Button variant="secondary" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim()}>
-              Save finding
+            <Button type="submit" disabled={!title.trim() || saving}>
+              {saving ? 'Saving…' : 'Save finding'}
             </Button>
           </DialogFooter>
         </form>

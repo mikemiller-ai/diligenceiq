@@ -11,9 +11,13 @@ import { TIER_COPY } from '@/fixtures/profiles';
 import { intelligenceHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
 
+const isFixtureSetId = (id: string | null) => id?.startsWith('fixture-') ?? false;
+
 /** Company selector (SPEC §8.1): deep-coverage companies featured, Apple first, search across all. */
 export function CompanySelector() {
-  const { profiles } = useWorkspace();
+  const { profileTickers, companies: active } = useWorkspace();
+  // "Preview" describes the SET (fixture profiles, SPEC §8.6), not the fact that a company has a profile.
+  const preview = isFixtureSetId(active?.profileSetId ?? null);
   const [query, setQuery] = React.useState('');
   const q = query.trim().toLowerCase();
   const all = companies();
@@ -38,7 +42,7 @@ export function CompanySelector() {
               >
                 <span className="flex items-center justify-between gap-2">
                   <span className="font-mono text-xs font-semibold text-primary">{c.ticker}</span>
-                  {profiles.has(c.ticker) && <Badge tone="accent">Preview profile</Badge>}
+                  {profileTickers.has(c.ticker) && preview && <Badge tone="accent">Preview profile</Badge>}
                 </span>
                 <span className="mt-1.5 text-[15px] font-semibold text-foreground group-hover:text-primary">{c.company}</span>
                 <span className="mt-auto pt-2 text-xs text-muted-foreground">{TIER_COPY[c.tier].label}</span>
@@ -70,7 +74,7 @@ export function CompanySelector() {
         ) : (
           <ul className="mt-3 grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
             {matches.map((c) => (
-              <CompanyRow key={c.ticker} company={c} hasProfile={profiles.has(c.ticker)} />
+              <CompanyRow key={c.ticker} company={c} previewProfile={preview && profileTickers.has(c.ticker)} />
             ))}
           </ul>
         )}
@@ -79,7 +83,7 @@ export function CompanySelector() {
   );
 }
 
-function CompanyRow({ company: c, hasProfile }: { company: CompanyRecord; hasProfile: boolean }) {
+function CompanyRow({ company: c, previewProfile }: { company: CompanyRecord; previewProfile: boolean }) {
   return (
     <li className="border-b border-border">
       <Link href={intelligenceHref(c.ticker)} className="group flex items-center gap-3 py-2.5">
@@ -88,7 +92,7 @@ function CompanyRow({ company: c, hasProfile }: { company: CompanyRecord; hasPro
         <span className="text-xs text-muted-foreground">
           {c.outsideWindow
             ? `${fiscalYearLabel(c.latestAnnualPeriodEnd)} · Outside review window`
-            : hasProfile
+            : previewProfile
               ? 'Preview profile'
               : TIER_COPY[c.tier].label}
         </span>

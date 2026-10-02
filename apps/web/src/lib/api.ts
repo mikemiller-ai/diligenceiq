@@ -7,6 +7,7 @@ export class ApiRequestError extends Error {
     message: string,
     readonly status: number | null,
     readonly requestId?: string,
+    readonly details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'ApiRequestError';
@@ -33,6 +34,7 @@ export async function apiJson<T>(path: string, init: { method?: string; body?: u
     throw new ApiRequestError('NETWORK', 'The service could not be reached. Check your connection and try again.', null);
   }
   const headerId = res.headers.get('x-request-id') ?? undefined;
+  if (res.status === 204) return undefined as T;
   let payload: unknown;
   try {
     payload = await res.json();
@@ -48,9 +50,15 @@ export async function apiJson<T>(path: string, init: { method?: string; body?: u
     const parsed = ApiErrorSchema.safeParse(payload);
     if (parsed.success) {
       const e = parsed.data.error;
-      throw new ApiRequestError(e.code, e.message, res.status, e.requestId || headerId);
+      throw new ApiRequestError(e.code, e.message, res.status, e.requestId || headerId, e.details);
     }
     throw new ApiRequestError('UNAVAILABLE', `The service is unavailable (HTTP ${res.status}).`, res.status, headerId);
   }
   return payload as T;
+}
+
+/** Plain-language text for a failed write, with the request ID when the server returned one. */
+export function describeFailure(err: unknown): string {
+  if (err instanceof ApiRequestError) return err.requestId ? `${err.message} (request ID ${err.requestId})` : err.message;
+  return 'An unexpected error occurred.';
 }

@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { FindingRow } from '@/components/diligence/finding-row';
 import { PageContainer, PageHeader, SectionHeading } from '@/components/diligence/page';
+import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { EmptyState } from '@/components/diligence/states';
 import { Button } from '@/components/ui/button';
 import { Input, NativeSelect } from '@/components/ui/input';
@@ -19,7 +20,7 @@ import { useWorkspace } from '@/lib/workspace-store';
 
 export function FindingsView() {
   const params = useSearchParams();
-  const { findings, analyses } = useWorkspace();
+  const { findings, analyses, status } = useWorkspace();
   const initialTheme = params.get('theme');
   const [filters, setFilters] = React.useState<FindingFilters>({
     ...EMPTY_FILTERS,
@@ -105,7 +106,7 @@ export function FindingsView() {
               <option value="">All analyses</option>
               {analysisOptions.map((a) => (
                 <option key={a.analysisId} value={a.analysisId}>
-                  {a.brief?.title ?? a.question}
+                  {a.question}
                 </option>
               ))}
             </NativeSelect>
@@ -144,7 +145,9 @@ export function FindingsView() {
         </div>
       </div>
 
-      {findings.length === 0 ? (
+      {status === 'loading' ? (
+        <PageSkeleton />
+      ) : findings.length === 0 ? (
         <EmptyState
           icon={Bookmark}
           title="No findings yet"

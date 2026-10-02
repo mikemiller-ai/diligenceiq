@@ -505,3 +505,39 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 - **Live monitoring is P2.** The pipeline EventBridge → SEC check → ingestion → index update → change detection → watch match → SNS is drawn in `docs/future-state.md` and on the Architecture page. It is **not built**, because the cost addendum forbids schedules in this deployment.
 
 **Consequences:** Every surface here is plain DynamoDB and S3 reads and writes. A test asserts that no model client is reachable from these handlers.
+
+---
+
+## DD-20 · Phase 5 runtime choices
+**Status:** Accepted (Phase 5, 2026-10-02).
+
+**Context**
+- Phase 5 wires the real api (sessions, workspace, profiles, Compare, analyses, findings) before the Phase 4b profile build exists. Running Phase 5 before Phase 4b is Mike's choice of 2026-10-02, recorded as a SPEC v2 Appendix A.4 amendment to §49 (pending his confirmation at the Phase 5 handoff).
+- The demo needs a seeded workspace, spend caps that hold, and an E2E suite that exercises the real api without spending money.
+
+**Decision**
+- **(a) Preview set through the real profile path.** Until Phase 4b, the active profile set is the preview set `fixture-v2` (the web's fixture profiles, exported unchanged by `pnpm profiles:export-fixture` in the runtime layout and uploaded with `pnpm profiles:upload-set`). The api reads it exactly as it will read `det-v*` and `llm-v*`: the SSM pointer, the manifest (`ProfileSetManifestSchema`) and per-profile schema and integrity checks (architecture §4.4).
+  - *Reason:* the read path, its caching and its failure modes are built and tested now, and Phase 4b becomes a pointer switch with no api change.
+  - *Rejected:* serving profiles from the web bundle until 4b. It would leave the runtime path untested and need a second migration.
+- **(b) One finding per source.** The finding ID is derived from its source (`fd-` + the first 20 hex characters of `sha256(sourceKey)`) and written with a conditional create; a second save is `409 ALREADY_SAVED`. This deviates from the `FINDING#<ulid>` key first planned (architecture §8).
+  - *Reason:* a double click, a retried request or a second tab cannot create duplicates, and the server enforces the same rule the UI shows (its "saved" state is keyed by `sourceKey`).
+  - *Rejected:* ULIDs with only a client-side duplicate check, which a retry or a second tab defeats.
+- **(c) Rate counters survive reset.** Reset deletes every item of the caller's partition except `RATE#` counters.
+  - *Reason:* otherwise reset would zero the per-workspace hourly cap and let one visitor run unlimited analyses.
+  - *Rejected:* a plain delete of the whole partition, which is exactly that bypass. The counters keep their own short TTL (2 days), so keeping them costs nothing.
+- **(d) Seed from replayed recordings.** `seed/demo-workspace.json` is built by `pnpm seed:build` from recorded `da-v4` generations of three eval questions, replayed through `runDeepAnalysis` and the validator over the real index. The build is replay-only and fails if a live call would be needed. Seed findings name only their source and are copied server-side.
+  - *Reason:* the seed is real pipeline output (no hand-written answers, SPEC §40) at no new Bedrock spend, and it is reproducible.
+  - *Rejected:* hand-written example briefs (forbidden: no hardcoded demo answers), and live generation at seed time (spend on every rebuild and non-reproducible).
+- **(e) E2E against the real api in-process, with a test-only stub worker.** `pnpm e2e` runs `tests/e2e/local-server.ts`, which serves the static export and answers `/api/*` with the real `createApp` over in-memory stores, the committed fixture profile set and the real seed. The queue goes to a stub worker that walks the real stage names and completes with the stored seed result about the **same companies** the question asks about; a question no seed covers fails with `NO_RELEVANT_EVIDENCE`, never with an unrelated brief. It never calls a model and is never deployed or bundled. The deployed in-region path (api → SQS → worker → Bedrock) is verified separately with `pnpm analysis:run`, only with Mike's approval (AWS writes and spend).
+  - *Reason:* every route, session, cap and error path the browser uses is the production code; only the stores, the secret and the worker are local.
+  - *Rejected:* mocking `/api/*` per test in the browser (tests a fake contract), and running the real worker (needs the index and Bedrock spend; the worker is unit-tested in `services/api`).
+
+- **(f) Workspace creation is limited per client before the global cap** (Phase 5 adversary H1). `POST /api/session` counts a new workspace first against `GLOBAL / WSCREATE#<day>#<hash16>`, where `hash16` is a salted SHA-256 (HMAC with the session secret) of the request's source IP (`PER_IP_DAILY_WORKSPACE_CAP`, default 20; `429` scope `workspace_creation_client`), and only then against the global `GLOBAL / WSCREATE#<day>` (default 500). The raw IP is never stored or logged.
+  - *Reason:* with only a global counter, one anonymous script could use up the day's 500 workspaces and lock every new visitor out of every page.
+  - *Rejected:* dropping the session requirement for read routes (SPEC §33 keeps it), and storing raw IPs (personal data for no benefit). Accepted trade-off: visitors behind one shared address (an office NAT) share the 20 (assumptions D12).
+- **(g) Workspaces stay alive while used; META is never absent.** A returning visitor's `POST /api/session` moves the workspace's `META` TTL to 30 days from now (at most once a day); a `META` past its TTL is treated as missing before DynamoDB deletes it. Reset rewrites `META` in place instead of deleting and recreating it, so a request that arrives mid-reset keeps its session. Analyses and findings keep their own 30-day TTL from creation; editing a finding restarts its TTL.
+
+**Consequences**
+- Phase 4b ships by writing a set in the same layout and switching `/diligenceiq/active-profile-set`.
+- A finding cannot be saved twice from the same item; deleting it frees the source to be saved again.
+- The E2E suite proves the page-view rule (no POST except the session, and the worker receives nothing) against the real api.

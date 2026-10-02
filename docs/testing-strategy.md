@@ -86,6 +86,8 @@ Tests that need the full corpus (e.g. header parsing over all 246 files) read `C
 - Stale-job handling: poll marks QUEUED past deadline → `QUEUE_TIMEOUT`; RUNNING → `PIPELINE_TIMEOUT` or `GENERATION_TIMEOUT` (depending on `generationStartedAt`); conditional writes don't overwrite COMPLETE; DLQ handler → `WORKER_FAILED`; `SendMessage` failure → `ENQUEUE_FAILED` + 503.
 - Rate limits and spend controls: workspace hourly cap, global daily cap (conditional counter at the boundary), workspace-creation cap, kill switch (api and worker paths, 60 s cache).
 - Session: HMAC cookie sign/verify, tampered cookie rejected, reset touches only the caller's partition.
+- Phase 5 api routes (`services/api/src/app.test.ts`, `phase5-units.test.ts`): `401 SESSION_REQUIRED` on every session route without a valid cookie or with an expired workspace; the workspace-creation cap; a saved item saved again is `409 ALREADY_SAVED`; a missing context snapshot is `404` with `details.snapshot = 'missing'`; reset deletes the partition but not its `RATE#` counters.
+- **No model client from the api:** a unit test walks the api handler's import graph and asserts no Bedrock client, no `@diligenceiq/rag` value import and no worker module.
 - API contract: Zod validation and the error-code → HTTP-status map; `POST /api/findings` copies text and citations server-side.
 - IC Brief assembly mapping (architecture §8.2) and Markdown output, with no model client reachable from those handlers.
 - Profile, compare, thesis, watchlist, and watch-event handlers: Zod limits, partition scoping, `PROFILE_MISSING`, and no model client reachable.
@@ -113,19 +115,28 @@ Plus: no-evidence path (`NO_RELEVANT_EVIDENCE`, count 0, no generation call), ki
 Synthesize all stacks and assert:
 - **Absent:** OpenSearch (domain/serverless), NAT gateways, EC2 instances, ECS services/clusters, RDS/Aurora, WAF web ACLs, provisioned concurrency, reserved concurrency, EventBridge schedules / scheduled rules.
 - **Present:** every log group has explicit 14-day retention; DynamoDB billing mode is PAY_PER_REQUEST with TTL enabled; the worker event source mapping has `batchSize: 1` and `maximumConcurrency: 2`; queue visibility timeout 1080 s and `maxReceiveCount: 3`; the DLQ has its own event source mapping to the dlq-handler.
-- **IAM scoping:** Bedrock actions only on the configured inference profile and its foundation-model ARNs plus the embedding model; S3 read-only on `corpus/processed/*` and `intelligence/*` (api) and `index/*` (worker); no `*` resources on data-plane actions; only the worker can invoke Bedrock; the api Lambda has no Bedrock permission.
+- **IAM scoping:** Bedrock actions only on the configured inference profile and its foundation-model ARNs plus the embedding model; S3 read-only on `intelligence/*` and the index manifest (api; `corpus/processed/*` from Phase 6) and `index/*` (worker); no `*` resources on data-plane actions; only the worker can invoke Bedrock; the api Lambda has no Bedrock permission.
 - **No profile builder deployed:** no Lambda bundle contains `scripts/intelligence`, the profile prompt builder in `packages/rag/profile`, or `prompts/company-intelligence-prompt.md` (bundle-content test over the esbuild metafiles).
-- api Lambda IAM includes `ssm:GetParameter` on `/diligenceiq/active-profile-set` and read-only `index/*/adjacency/*`, and still no Bedrock action.
+- api Lambda IAM (Phase 5): exactly `ssm:GetParameter` (kill switch, active profile set, session secret), `dynamodb:GetItem/PutItem/UpdateItem/DeleteItem/Query/BatchWriteItem`, `sqs:SendMessage`, and `s3:GetObject` on `intelligence/*` and `index/<indexVersion>/manifest.json` only; the environment carries the queue URL, the session-secret and active-profile-set parameter names and the global daily cap; CoreStack creates `/diligenceiq/active-profile-set` as `none`; still no Bedrock action. Read-only `index/*/adjacency/*` and `corpus/processed/*` are added with the Phase 6 routes.
 
 ## 6. End-to-end (Playwright)
 
-- **Local** (`tests/e2e/local`), with keyboard navigation and axe accessibility checks on each page:
-  - **Novice path:** landing → Company Intelligence → select Apple → 30-second view, What's Changed, a signal's Why This Matters and evidence → Recommended Diligence "Investigate" → Deep Analysis prefilled and edited → brief → evidence drawer → save finding.
-  - **Expert path:** Deep Analysis with a typed question.
+**How `pnpm e2e` runs (Phase 5).** Playwright (`playwright.config.ts`, one worker) starts `tests/e2e/local-server.ts` with `tsx`. It serves `apps/web/out` the way Amplify does (trailing-slash `index.html`, `404.html`) and answers `/api/*` with the **real api app** (`createApp` from `services/api`) over in-memory stores, the committed fixture profile set (`tests/fixtures/profile-sets/iv-9cf51c066743/fixture-v2/`) and the real seed. Only the edges are local: the session secret, the stores and the queue. The cookie is not `Secure` on this server only (and so uses the plain name `diq_ws`, not `__Host-diq_ws`). Every browser comes from 127.0.0.1 here, so this server alone lifts the per-client workspace-creation limit. The python `http.server` is no longer used.
+- **Stub worker (TEST-ONLY).** The queue goes to a stub that claims the analysis, walks the real stage names and completes it with the stored result of the seed analysis about the **same companies** the question names (in its text, filters or origin). A question about companies no seed covers fails honestly with `NO_RELEVANT_EVIDENCE`; it never returns an unrelated brief. It never calls a model and is never deployed or bundled; the real worker is unit-tested in `services/api` (DD-20). The deployed in-region path (api → SQS → worker → Bedrock) is verified separately with `pnpm analysis:run`, only with Mike's approval.
+- **Test controls** (this server only): `GET /__e2e/stats` (including `enqueued`, the analyses handed to the worker), `POST /__e2e/kill-switch?enabled=`, `POST /__e2e/worker?mode=complete|fail|hang`.
+- **Page views:** on every P0 page the test asserts that the browser sends only reads plus `POST /api/session`, and that the worker received nothing (`enqueued` unchanged).
+
+**Phase 5 adversary regressions** (unit level): the per-client creation limit, TTL extension and expiry, `META` kept through reset, the `__Host-` cookie, JSON-only bodies, COUNT queries, seed failure, corrupt profiles, seed telemetry, and an esbuild metafile check that the api bundle holds no model client (`services/api/src/app.test.ts`, `phase5-units.test.ts`); the http client's 401 recovery, 204 and absent-resource handling against a mocked fetch (`apps/web/src/lib/workspace-client.test.ts`); poll retry and stop rules, figure badges at every validated location, filters kept by re-runs, the covered-company list (`analysis-states.test.tsx`); a workspace that cannot be opened, cap copy, saved-finding figures and provenance, the missing-source-document state (`phase5-states.test.tsx`).
+
+**Web unit tests** use an in-memory `WorkspaceClient` (`apps/web/src/test/memory-client.ts`) that mirrors the server rules the UI depends on (findings copied with core `resolveSource`, one per source) and records every call, with preloaded workspace state so the first render is synchronous (`apps/web/src/test/render.tsx`).
+
+- **Local** (`tests/e2e/local`: `paths.spec.ts`, `prefill.spec.ts`, `workspace.spec.ts`), with keyboard navigation and axe accessibility checks on each page:
+  - **Novice path:** landing → Company Intelligence → select Apple → 30-second view, What's Changed, a signal's Why This Matters and evidence → the Regulatory risk area's "Investigate" → Deep Analysis prefilled and edited → brief about Apple → evidence drawer → save finding.
+  - **Expert path:** Deep Analysis with a typed NVIDIA revenue question and filters, to a brief about NVIDIA; its follow-up prefills without running (`paths.spec.ts`, which also opens a seeded brief labeled as run in advance, reaches a seeded brief from Recent analyses, and runs an out-of-corpus question to the `NO_RELEVANT_EVIDENCE` screen that lists the covered companies).
   - **Compare:** AAPL, MSFT, NVDA → launch comparative diligence; TSLA + JPM (no shared change signals) still shows common and distinctive attention areas.
   - **Prefill never auto-submits:** loading `/analysis/new?q=…&tickers=…&origin=…` issues **no** `POST /api/analyses` (network assertion); the request is sent only after clicking Run.
   - **Global "Ask a question"** opens an empty Deep Analysis from every P0 page.
-  - **Error and degraded states** (architecture §9.1) with mocked API responses, including network failure and `PROFILE_MISSING`.
+  - **Error and degraded states** (architecture §9.1), driven through the real api and the test controls (hourly cap, kill switch, a failed analysis) or a Playwright-routed request (network failure, a non-JSON 502), plus `PROFILE_MISSING` (a company outside the preview set).
   - **Findings Board:** filters.
   - **Phase 8b (P1):** thesis link and watchlist toggle.
   - **Reset.**
@@ -166,7 +177,7 @@ The SPEC §51.3 expert question ("How have Apple's regulatory disclosures change
 | Unit, component, integration | Yes (`pnpm test`) | | No |
 | Full-corpus tests | Yes when `CORPUS_PATH` is present, otherwise skipped with a message | | No |
 | CDK assertion tests | Yes (`pnpm test` + `pnpm cdk:synth`) | | No |
-| Playwright local (static export, mocked API) | Yes (`pnpm e2e`, after `pnpm build`) | Yes (`pnpm e2e`) | No |
+| Playwright local (static export, real api in-process, stub worker) | Yes (`pnpm e2e`, after `pnpm build`) | Yes (`pnpm e2e`) | No |
 | Playwright prod smoke | | Yes (`pnpm e2e:smoke`) | Yes (deployed app) |
 | Eval harness | | Yes (`pnpm eval`) | Yes (Bedrock, real index) |
 | Profile build + profile evals | | Yes (`pnpm intelligence:build`, `pnpm eval:profiles`) | Yes (Bedrock, real index) |

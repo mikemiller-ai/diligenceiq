@@ -3,41 +3,63 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `ab5de38` (Phase 4 follow-up: da-v4). Phase 4: `9699b3b`. Phase 3: `ba161bb`.
+`main` (no remote yet). Last commit: `ae6057b` (STATE after da-v4). Phase 5 is **uncommitted in the working tree**, pending Mike's go-ahead. Phase 4: `9699b3b`, da-v4 follow-up `ab5de38`.
 
 ## Current phase
-**Phase 4 is complete and gated (`pnpm gate` exit 0, 2026-10-02): the one-call generation pipeline, deterministic validation, the SQS worker plane, and generation evals.** Handoff: `docs/handoffs/phase-04.md`. Evals: `docs/evaluation.md` §4–5. Prompt log: `docs/prompt-iterations.md`.
-- **Decision 1 settled:** a change question that names no period reads each company's last 3 annual reports (SPEC §26.3, Appendix A.4).
-- **Shipped prompt `da-v4`** (after the gate; see the handoff's post-gate addendum), on Sonnet 4.6. Temperature 0.2 with the forced tool is verified.
-  - 20 eval questions: 14/20 pass every check; 1 generation call per question.
-  - Citation validity 1.00; numeric grounding 0.901 (484/537, strict validator) plus 47 unverified "unit_unstated" near matches (da-v3: 0.922, 35).
-  - Abstention 2/2, follow-ups answerable 2/2, injection 1/1, coverage 17/17.
-- **In-region:** cold index load 2.75 s; generation 41–59 s (first token ~1.1 s); enqueue → COMPLETE 42–64 s; ~$0.12–0.13 per analysis.
-- **Deployed:**
-  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm), redeployed from `ab5de38` on 2026-10-02 (16:19 UTC). It runs da-v4 and matches the committed code.
-  - The live site still serves Phase 1. The api still answers `ANALYSES_DISABLED`. The kill switch is `false` (verified).
-- **Spend this phase (approved):** Bedrock ≈ $9.30 estimated: four generation eval runs $8.93 (da-v1–v4), plus 3 in-region analyses ≈ $0.37.
+**Phase 5 is built and gated (`pnpm gate` exit 0, 2026-10-02) but not committed and not deployed.** Handoff: `docs/handoffs/phase-05.md`. Mike chose Phase 5 before Phase 4b on 2026-10-02; SPEC v2 Appendix A.4 records it, **pending his confirmation**.
+- **api** (`services/api`):
+  - HMAC sessions (cookie `__Host-diq_ws`, secret = SSM SecureString `/diligenceiq/session-secret`, admin-created).
+  - Demo workspace seeded from `seed/demo-workspace.json` (3 real pre-run briefs, 4 findings); reset.
+  - Spend controls: workspace hourly / global daily / per-client and global workspace-creation caps, and the kill switch.
+  - `POST /api/analyses` enqueues to the WorkerStack queue; the poll runs `expireIfPastDeadline`.
+  - Findings copied server-side; profiles read from the active set (SSM pointer `/diligenceiq/active-profile-set` + S3); Compare; health `indexAvailable`.
+- **web:** all workspace state comes from the api. The Deep Analysis page polls, shows the worker's real stages, the Interpretation panel, the coverage matrix and numeric badges (including `unit_unstated` near matches), and every SPEC §38.2 state. A Recent analyses list.
+- **Validator:** `preceding_unit` rule (a table's unit caption in the previous chunk of the same section). da-v4 numeric grounding 0.901 → **0.911** (489/537); near matches 47 → 42. Re-scored for free; all 42 remaining are Pfizer tables whose caption is "(MILLIONS)" in the same chunk, a form the detector does not read.
+- **Deployed:** unchanged. `DiligenceIQ-Worker` runs `ab5de38` (da-v4, the OLD validator). The live site and api still serve Phase 1 (`ANALYSES_DISABLED`). The kill switch is `false`.
+- **Spend this phase:** none (seed and rescore are replay-only).
 
 ## Gate
-`pnpm gate` run on 2026-10-02 against the working tree: **exit 0**.
+`pnpm gate` on 2026-10-02 against the working tree: **exit 0**.
 - check-docs OK (14 files); lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 30, cdk 42, corpus 102, web 91, rag 335, api 56 (656).
-- `cdk:synth` and `build` succeeded; **e2e 31 passed**.
+- Unit tests with `REQUIRE_CORPUS=1`: core 33, cdk 43, corpus 102, rag 346, web 145, api 102 (**771**).
+- `cdk:synth` and `build` succeeded; **e2e 39 passed**.
 
-Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fixers (all fixed except M2, which needs a paid prompt run) → `/code-review` medium (2 lows, fixed) → `pnpm gate` green.
+Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all fixed, regression tests) → `/code-review` medium (2 findings: concurrent 401s minted several workspaces; profile finding IDs collided across profile sets; both fixed with tests) → `pnpm gate` green.
 
 ## In flight
-- Nothing running. Phase 4 is committed (`9699b3b`) and the worker is redeployed.
-- Next: Phase 4b (offline profiles; F4 settled 2026-10-02: Mike confirmed the offline build is fine) or Phase 5 (sessions, caps, `POST /api/analyses` enqueue, poll with `expireIfPastDeadline`, Deep Analysis UI).
+- Phase 5 commit: waiting for Mike's go-ahead.
+- Deploy (each needs Mike's OK; none done):
+  1. Create the SecureString `/diligenceiq/session-secret` (≥ 32 bytes) in us-east-1.
+  2. Upload the preview set: `pnpm profiles:upload-set --bucket <data bucket> --set iv-9cf51c066743/fixture-v2 --yes`.
+  3. `pnpm deploy:infra` (CoreStack adds `/diligenceiq/active-profile-set` = "none"; ApiStack gets IAM, env and queue; WorkerStack redeploys with the new validator).
+  4. Point `/diligenceiq/active-profile-set` at `iv-9cf51c066743/fixture-v2`.
+  5. `pnpm deploy:web`.
+  6. One in-region run (`pnpm analysis:run`, about $0.13, kill switch on, then off) to verify api → SQS → worker end to end. It has never run.
+- Next phase: Phase 4b (offline profiles; must write the manifest format in `ProfileSetManifestSchema`), then Phase 6.
 
 ## Decisions pending with Mike
-- **Optional validator improvement:** read a table's "(in millions)" unit header from the adjacent chunk of the same filing. It would verify most of the 47 near matches; a re-score is free.
+- **Confirm SPEC A.4:** Phase 5 before 4b, preview set through the real profile path.
+- **D12 (per-client creation cap keyed on `sourceIp`):** behind the Amplify rewrite, `sourceIp` may be a shared proxy address, so many visitors would share 20 workspaces a day. Before deploy, choose: raise the cap, key on the last untrusted `X-Forwarded-For` hop, or verify in Phase 8.
+- **Validator:** whether to also read a same-chunk "(MILLIONS)" caption (would address the 42 Pfizer near matches; free re-score). Do not loosen anything else.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.
 - **Sonnet 5.5:** still 0 quota (L-94A31E46, L-31AB82D0). Switching needs a SPEC §29.1 change first.
-- Settled 2026-10-02: F4 (Mike: the offline profile build is fine), and the Lambda concurrency increase (10 → 1,000, verified).
 
 ## Known traps
+- **Phase 5 api routes need a session.** Every route except `GET /api/health` and `POST /api/session` returns 401 without the cookie. The cookie is `__Host-diq_ws` in production and `diq_ws` on the local http server (`secureCookies: false`). POST and PATCH bodies must be `content-type: application/json`: the retrieval-debug curl needs `-H 'content-type: application/json'`.
+- **The session secret is not in CDK.** CloudFormation cannot create SecureStrings. Without `/diligenceiq/session-secret` (≥ 32 bytes) every session fails closed with 500 (assumption D11).
+- **The api reads profiles only through the SSM pointer.** "none" (the CDK default) serves no profiles (`PROFILE_MISSING` everywhere). A set is immutable in S3 (If-None-Match; `upload-set` fails loudly on different content); a change is a new version. Phase 4b sets must match `ProfileSetManifestSchema` (core `intelligence.ts`).
+- **Finding IDs are derived from the source** (`fd-` + sha256 of the source key, scoped by `profileSetId` for profile sources), not ULIDs: one finding per stored item; repeat saves are 409 `ALREADY_SAVED`.
+- **Reset keeps META and `RATE#` counters.** Deleting META would strand a concurrent request; deleting `RATE#` would let reset bypass the hourly cap.
+- **Regenerate, never hand-edit:**
+  - `seed/demo-workspace.json`: `pnpm seed:build` (replay of eval questions pdf-2, multi-cloud, expert-1 under da-v4). A prompt or context change means those recordings no longer match, and the build fails until a live run is approved.
+  - `tests/fixtures/profile-sets/`: `pnpm profiles:export-fixture`.
+  - `packages/core/src/generated/catalog.json`: `node scripts/fixtures/build-catalog.mjs`.
+
+  A web fixtures test fails when any of them drifts.
+- **`comparison.columns` in a validated brief has one header per value (no row-label header).** Use core `comparisonHeaders` when rendering or copying rows; a leading row-label header is still accepted.
+- **E2E runs the real api in-process** (`tests/e2e/local-server.ts`), not a Python static server. Its queue goes to a TEST-ONLY stub worker that completes only with a seed brief for a matching company, else fails `NO_RELEVANT_EVIDENCE`. Test controls: `/__e2e/stats`, `/__e2e/kill-switch`, `/__e2e/worker`. `.claude/launch.json` `web-local` serves the same thing on port 4175 for manual checks.
+- **The deployed worker still runs the old validator** until the next `deploy:infra`. The 0.911 numbers are from the re-score.
 - **Sonnet 5.5 is not a drop-in model switch.** It rejects forced `toolChoice` (`any`/`tool`) and a non-default `temperature` with a 400. Moving to it needs a SPEC §29.1 change (`toolChoice: auto` with a strict tool), a prompt version bump and a paid eval run.
 - **The AWS CLI default region on this machine is us-east-2.** Pass `--region us-east-1` to `aws` commands. The scripts default `AWS_REGION` to us-east-1 themselves.
 - **Generation eval spend:**
@@ -82,7 +104,7 @@ Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fix
 - **`GE_10K_2015` is GE Capital's FY2014 10-K.**
 - **Lines reach 287,855 characters.** Never chunk by line.
 - **E2E:**
-  - `pnpm e2e` serves `apps/web/out` with `python3 -m http.server` on port 4174, with **one worker**: parallel workers stall the Python server and pages hang on "Loading…".
+  - `pnpm e2e` serves `apps/web/out` plus the in-process api on port 4174 (`tests/e2e/local-server.ts`), with **one worker**: the in-memory workspace and test controls are shared by the run.
   - It needs a prior `pnpm build`; the gate order handles that.
   - `@playwright/test` is pinned to 1.63.0 to match the cached Chromium 1243. Bumping it triggers a browser download.
 - **Preview profiles (`fixture-v2`) hold the full EXTRACTED heading list, not a vetted one.** Measured precision 0.92 / recall 0.96 on hand-labeled AAPL, MSFT, NVDA (NVDA precision 0.84). While any `profileSetId` is `fixture-*` (`isFixtureProfile`), nothing that depends on a complete list may be stated as a conclusion (common or distinctive areas, ranking, "major attention area", rank). SPEC §8.6.

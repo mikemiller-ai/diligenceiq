@@ -10,6 +10,7 @@ export class CoreStack extends Stack {
   public readonly table: dynamodb.Table;
   public readonly dataBucket: s3.Bucket;
   public readonly killSwitch: ssm.StringParameter;
+  public readonly activeProfileSet: ssm.StringParameter;
 
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
@@ -43,6 +44,14 @@ export class CoreStack extends Stack {
       parameterName: CONFIG.killSwitchParameterName,
       stringValue: 'false',
       description: 'Kill switch for analyses: "true" enables, anything else disables.',
+    });
+
+    // Which Company Intelligence profile set the api serves (DD-16). An admin points it at a
+    // built set with `aws ssm put-parameter --overwrite`; "none" serves no profiles.
+    this.activeProfileSet = new ssm.StringParameter(this, 'ActiveProfileSet', {
+      parameterName: CONFIG.activeProfileSetParameterName,
+      stringValue: 'none',
+      description: 'Active Company Intelligence profile set: "<indexVersion>/<profileSetId>" or "none".',
     });
   }
 }

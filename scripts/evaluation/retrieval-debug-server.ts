@@ -9,11 +9,16 @@
  *   pnpm retrieval:debug --embed             # embeds new questions (Titan v2, ~$0.000001 each)
  *   pnpm retrieval:debug --port 4180 --bucket <name>   # index from S3 instead of .index/build
  *
- *   curl -s localhost:4180/api/retrieval/debug -d '{"question":"How has NVIDIA'\''s revenue changed over the last two years?"}'
+ *   curl -s localhost:4180/api/retrieval/debug -H 'content-type: application/json' -d '{"question":"How has NVIDIA'\''s revenue changed over the last two years?"}'
  */
 import { createServer } from 'node:http';
 import { retrievalDebugView } from '@diligenceiq/rag';
+import { randomBytes } from 'node:crypto';
+import { MemoryAnalysisStore } from '../../services/api/src/analyses/store';
 import { createApp } from '../../services/api/src/app';
+import { createProfileProvider } from '../../services/api/src/profiles/provider';
+import { staticSessionSecret } from '../../services/api/src/session/session';
+import { MemoryWorkspaceStore } from '../../services/api/src/workspace/store';
 import { arg } from '../lib/common';
 import { createQueryEmbedder } from '../lib/query-embed';
 import { openIndex } from '../lib/retrieval';
@@ -24,8 +29,23 @@ const live = arg('embed') === 'true';
 const { retriever, source, index } = await openIndex(bucket && bucket !== 'true' ? { bucket } : {});
 const embedder = createQueryEmbedder({ live });
 
+// Retrieval only: analyses are off, nothing is queued, and no profile set is active.
+const analyses = new MemoryAnalysisStore();
 const app = createApp({
   killSwitch: { analysesEnabled: async () => false },
+  sessionSecret: staticSessionSecret(randomBytes(32).toString('hex')),
+  analyses,
+  workspace: new MemoryWorkspaceStore(analyses),
+  queue: {
+    send: async () => {
+      throw new Error('the retrieval debug server runs no analyses');
+    },
+  },
+  profiles: createProfileProvider({ pointer: async () => null, read: async () => null }),
+  seed: null,
+  indexVersion: index.manifest.indexVersion,
+  indexAvailable: async () => true,
+  secureCookies: false,
   retrievalDebug: async (req) => {
     let mode = req.mode ?? 'hybrid';
     let note: string | null = null;

@@ -1,7 +1,7 @@
 'use client';
 
-import { citationLabel, type Citation } from '@diligenceiq/core';
-import { ArrowLeft, ArrowUpRight, CheckCircle2, FileQuestion, FileText, Printer, ShieldAlert } from 'lucide-react';
+import { citationLabel, comparisonHeaders, type AnalysisDetail, type Citation } from '@diligenceiq/core';
+import { ArrowLeft, ArrowUpRight, FileQuestion, FileText, Printer, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
@@ -10,50 +10,216 @@ import { NavyAtmosphere } from '@/components/evidence/section';
 import { CitationList, CitedText, useEvidence } from '@/components/diligence/evidence';
 import { PageContainer, SectionHeading } from '@/components/diligence/page';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
+import { CoverageMatrix, FigureBadges, InterpretationPanel, ValidationSummary, figuresAt } from '@/components/diligence/brief-panels';
+import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { StageTracker } from '@/components/diligence/stage-tracker';
-import { EmptyState, ErrorPanel } from '@/components/diligence/states';
+import { EmptyState, ErrorPanel, NoticeBar, RetryButton } from '@/components/diligence/states';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
-import type { AnalysisRecord } from '@/fixtures/types';
+import { ApiRequestError } from '@/lib/api';
 import { formatDate, formatDateTime, formatDurationSeconds, pluralize } from '@/lib/format';
 import { FAILURE_COPY } from '@/lib/labels';
-import { newAnalysisHref } from '@/lib/links';
+import { companies } from '@/fixtures';
+import { filtersAsPrefill, newAnalysisHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
 
 export function AnalysisView() {
   const id = useSearchParams().get('id');
-  const { analyses } = useWorkspace();
-  const analysis = analyses.find((a) => a.analysisId === id);
+  return id ? <AnalysisLoader key={id} id={id} /> : <Missing id={null} />;
+}
 
+const TERMINAL = new Set(['COMPLETE', 'FAILED']);
+const POLL_MS = 1_500;
+const OFFLINE_RETRY_MS = 3_000;
+const SERVER_RETRY_MAX_MS = 30_000;
+
+/** A poll failure worth retrying: the network, a gateway or server error, or a throttle. Other 4xx are final. */
+export function isRetryablePollError(err: ApiRequestError): boolean {
+  return err.code === 'NETWORK' || err.code === 'UNAVAILABLE' || err.code === 'INTERNAL' || err.status === 429 || (err.status !== null && err.status >= 500);
+}
+
+/**
+ * Loads an analysis and polls it while it is QUEUED or RUNNING (architecture §4.1). The stages
+ * shown are the ones the worker writes. A failed poll never freezes the page silently (SPEC §38.2):
+ * a network failure shows "Connection lost" and retries every 3 s; a server error (5xx) shows its
+ * request ID and retries with backoff (3 s, doubling, at most 30 s); any other error stops polling
+ * and is shown with a Retry. The analysis continues on the server either way.
+ */
+export function useAnalysis(id: string) {
+  const { details, client, putAnalysis, status } = useWorkspace();
+  const cached = details.get(id);
+  const [error, setError] = React.useState<ApiRequestError | null>(null);
+  const [serverError, setServerError] = React.useState<ApiRequestError | null>(null);
+  const [offline, setOffline] = React.useState(false);
+  const [attempt, setAttempt] = React.useState(0);
+  const terminal = cached ? TERMINAL.has(cached.status) : false;
+
+  React.useEffect(() => {
+    if (terminal || status === 'loading') return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let failures = 0;
+    const tick = async () => {
+      try {
+        const detail = await client.getAnalysis(id);
+        if (cancelled) return;
+        failures = 0;
+        setOffline(false);
+        setServerError(null);
+        setError(null);
+        putAnalysis(detail);
+        if (!TERMINAL.has(detail.status)) timer = setTimeout(tick, POLL_MS);
+      } catch (err) {
+        if (cancelled) return;
+        const e = err instanceof ApiRequestError ? err : new ApiRequestError('CLIENT', 'An unexpected error occurred.', null);
+        if (e.code === 'NETWORK') {
+          setOffline(true);
+          timer = setTimeout(tick, OFFLINE_RETRY_MS);
+        } else if (isRetryablePollError(e)) {
+          setOffline(false);
+          setServerError(e);
+          timer = setTimeout(tick, Math.min(OFFLINE_RETRY_MS * 2 ** failures++, SERVER_RETRY_MAX_MS));
+        } else {
+          setOffline(false);
+          setServerError(null);
+          setError(e);
+        }
+      }
+    };
+    void tick();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [id, terminal, status, client, putAnalysis, attempt]);
+
+  const retry = () => {
+    setError(null);
+    setServerError(null);
+    setAttempt((n) => n + 1);
+  };
+  return { analysis: cached, error, serverError, offline, retry };
+}
+
+/** The passages supplied to the model (the context snapshot), fetched once the brief is complete. */
+function useContext(analysis: AnalysisDetail | undefined) {
+  const { client } = useWorkspace();
+  const [state, setState] = React.useState<{ passages: Citation[]; snapshot: boolean } | null>(null);
+  const complete = analysis?.status === 'COMPLETE';
+  const id = analysis?.analysisId;
+  React.useEffect(() => {
+    if (!complete || !id) return;
+    let cancelled = false;
+    client
+      .getContext(id)
+      .then((ctx) => {
+        if (!cancelled) setState(ctx ? { passages: ctx.passages, snapshot: true } : { passages: [], snapshot: false });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ passages: [], snapshot: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [client, complete, id]);
+  return state;
+}
+
+function AnalysisLoader({ id }: { id: string }) {
+  const { analysis, error, serverError, offline, retry } = useAnalysis(id);
+  if (error?.code === 'NOT_FOUND') return <Missing id={id} />;
+  const problems = <PollProblems offline={offline} serverError={serverError} error={analysis ? error : null} retry={retry} />;
   if (!analysis) {
     return (
-      <PageContainer>
-        <EmptyState
-          icon={FileQuestion}
-          title={id ? 'Analysis not found' : 'No analysis selected'}
-          description={
-            id
-              ? 'It may belong to another workspace, or the link may be out of date.'
-              : 'Ask a question in Deep Analysis; its Diligence Brief opens here.'
-          }
-          action={
-            <Button asChild variant="secondary">
-              <Link href="/analysis/new/">Go to Deep Analysis</Link>
-            </Button>
-          }
-        />
+      <PageContainer className="max-w-[1200px]">
+        {error ? (
+          <ErrorPanel title="The analysis could not be loaded" message={error.message} {...(error.requestId ? { requestId: error.requestId } : {})} code={error.code} action={<RetryButton onClick={retry} />} />
+        ) : (
+          <>
+            {problems}
+            <PageSkeleton />
+          </>
+        )}
       </PageContainer>
     );
   }
-  return <AnalysisDetail analysis={analysis} />;
+  return <AnalysisDetail analysis={analysis} problems={problems} />;
 }
 
-function AnalysisDetail({ analysis }: { analysis: AnalysisRecord }) {
-  const context = React.useMemo(() => new Map(analysis.context.map((c) => [c.chunkId, c])), [analysis.context]);
+/** What went wrong checking on the analysis, shown above it: connection lost, a retried server error, or a stopped poll. */
+function PollProblems({ offline, serverError, error, retry }: { offline: boolean; serverError: ApiRequestError | null; error: ApiRequestError | null; retry: () => void }) {
+  if (offline) return <ConnectionLost />;
+  if (serverError) {
+    return (
+      <div role="status">
+        <NoticeBar className="mb-4">
+          <span className="font-medium text-foreground">Checking on this analysis failed</span> ({serverError.status ? `HTTP ${serverError.status}` : serverError.code}
+          {serverError.requestId ? `, request ID ${serverError.requestId}` : ''}). Trying again automatically; the analysis keeps running on the server.{' '}
+          <Button size="sm" variant="ghost" onClick={retry}>
+            Retry now
+          </Button>
+        </NoticeBar>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <ErrorPanel
+        className="mb-4"
+        title="Updates for this analysis stopped"
+        message={`${error.message} The status below may be out of date.`}
+        {...(error.requestId ? { requestId: error.requestId } : {})}
+        code={error.code}
+        action={<RetryButton onClick={retry} />}
+      />
+    );
+  }
+  return null;
+}
+
+function ConnectionLost() {
+  return (
+    <NoticeBar className="mb-4">
+      <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+        <WifiOff aria-hidden className="size-3.5" /> Connection lost.
+      </span>{' '}
+      Checking again automatically. The analysis keeps running on the server.
+    </NoticeBar>
+  );
+}
+
+function Missing({ id }: { id: string | null }) {
+  return (
+    <PageContainer>
+      <EmptyState
+        icon={FileQuestion}
+        title={id ? 'Analysis not found' : 'No analysis selected'}
+        description={
+          id
+            ? 'It may belong to another workspace, or the link may be out of date.'
+            : 'Ask a question in Deep Analysis; its Diligence Brief opens here.'
+        }
+        action={
+          <Button asChild variant="secondary">
+            <Link href="/analysis/new/">Go to Deep Analysis</Link>
+          </Button>
+        }
+      />
+    </PageContainer>
+  );
+}
+
+function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; problems: React.ReactNode }) {
+  const ctx = useContext(analysis);
+  // Citations resolve against the snapshot; if it is unavailable, against the cited passages the brief stores.
+  const passages = React.useMemo(() => (ctx?.snapshot ? ctx.passages : (analysis.citations ?? [])), [ctx, analysis.citations]);
+  const context = React.useMemo(() => new Map([...(analysis.citations ?? []), ...passages].map((c) => [c.chunkId, c])), [analysis.citations, passages]);
+  const seeded = analysis.seeded === true;
 
   return (
     <PageContainer className="max-w-[1200px]">
+      {problems}
       <div className="no-print mb-4 flex items-center justify-between gap-3">
         <Link href="/analysis/new/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft aria-hidden className="size-3.5" /> Deep Analysis
@@ -77,15 +243,26 @@ function AnalysisDetail({ analysis }: { analysis: AnalysisRecord }) {
           <span className="ml-auto font-mono text-[11px] text-white/50">{analysis.analysisId}</span>
         </div>
         <div className="relative px-6 pb-6 pt-5">
-          <h1 className="max-w-[860px] text-[22px] font-semibold leading-tight tracking-tight sm:text-[26px]">{analysis.brief?.title ?? analysis.question}</h1>
+          <h1 className="max-w-[860px] text-[22px] font-semibold leading-tight tracking-tight sm:text-[26px]">
+            {analysis.brief?.title ?? analysis.question}
+            {analysis.brief && <FigureBadges figures={figuresAt(analysis.validation, 'title')} />}
+          </h1>
           <p className="mt-2 max-w-[860px] text-[15px] text-white/70">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">Question · </span>
             {analysis.question}
           </p>
           <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11.5px] text-white/55">
             <span>{formatDateTime(analysis.createdAt)}</span>
-            {analysis.completedAt && <span>completed in {formatDurationSeconds(analysis.createdAt, analysis.completedAt)}</span>}
-            {analysis.status === 'COMPLETE' && <span>{pluralize(analysis.context.length, 'source passage')} · 1 model call</span>}
+            {/* A seeded analysis is a replayed recording: its durations would not be real, so none is shown. */}
+            {!seeded && analysis.completedAt && <span>completed in {formatDurationSeconds(analysis.createdAt, analysis.completedAt)}</span>}
+            {analysis.status === 'COMPLETE' && (
+              <span>
+                {pluralize(passages.length, 'source passage')}
+                {/* The count comes from the recorded telemetry only; it is never assumed. */}
+                {analysis.telemetry && ` · ${pluralize(analysis.telemetry.generationCallCount, 'model call')}`}
+              </span>
+            )}
+            {seeded && <span className="text-on-navy-accent">Example from the demo workspace: real pipeline output, run in advance</span>}
           </p>
           {analysis.status === 'COMPLETE' && analysis.brief && (
             <section aria-labelledby="exec-summary" className="mt-6 border-t border-white/10 pt-5">
@@ -95,42 +272,15 @@ function AnalysisDetail({ analysis }: { analysis: AnalysisRecord }) {
               <p className="mt-2 max-w-[880px] text-[15.5px] leading-7 text-white/90">
                 <CitedText text={analysis.brief.executiveSummary} context={context} onNavy />
               </p>
+              <FigureBadges figures={figuresAt(analysis.validation, 'executiveSummary')} />
             </section>
-          )}
-          {analysis.interpretation && (
-            <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[12.5px]">
-              <div className="flex items-center gap-2">
-                <dt className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/50">Companies</dt>
-                <dd className="flex gap-1">
-                  {analysis.interpretation.companies.map((t) => (
-                    <span key={t} className="rounded-md border border-white/15 bg-white/[0.06] px-1.5 font-mono text-[11px] font-semibold text-white/90">
-                      {t}
-                    </span>
-                  ))}
-                </dd>
-              </div>
-              <div className="flex items-center gap-2">
-                <dt className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/50">Periods</dt>
-                <dd className="text-white/80">{analysis.interpretation.periods.join(' · ')}</dd>
-              </div>
-              <div className="flex items-center gap-2">
-                <dt className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/50">Sources</dt>
-                <dd className="font-mono text-[11px] text-white/80">{analysis.interpretation.filingTypes.join(' · ')}</dd>
-              </div>
-              {analysis.interpretation.coverageWarnings.length > 0 && (
-                <div className="flex basis-full items-start gap-2">
-                  <dt className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/50">Coverage</dt>
-                  <dd className="text-on-navy-accent">{analysis.interpretation.coverageWarnings.join(' ')}</dd>
-                </div>
-              )}
-            </dl>
           )}
         </div>
       </header>
 
       {(analysis.status === 'QUEUED' || analysis.status === 'RUNNING') && (
         <div className="mt-6 max-w-xl">
-          <StageTracker stage={analysis.stage ?? analysis.status} />
+          <StageTracker stage={analysis.stage ?? 'queued'} />
         </div>
       )}
 
@@ -143,23 +293,29 @@ function AnalysisDetail({ analysis }: { analysis: AnalysisRecord }) {
             code={analysis.error.code}
             action={
               <Button asChild size="sm" variant="secondary">
-                <Link href={newAnalysisHref({ question: analysis.question, ...(analysis.interpretation ? { tickers: analysis.interpretation.companies } : {}) })}>
+                <Link href={newAnalysisHref({ question: analysis.question, ...filtersAsPrefill(analysis.filters) })}>
                   Edit and run again
                 </Link>
               </Button>
             }
           />
+          {analysis.error.code === 'NO_RELEVANT_EVIDENCE' && <NoEvidenceHelp />}
+          {analysis.interpretation && (
+            <div className="mt-6 max-w-xl">
+              <InterpretationPanel analysis={analysis} />
+            </div>
+          )}
         </div>
       )}
 
-      {analysis.status === 'COMPLETE' && analysis.brief && <BriefBody analysis={analysis} context={context} />}
+      {analysis.status === 'COMPLETE' && analysis.brief && <BriefBody analysis={analysis} context={context} passages={passages} snapshot={ctx?.snapshot ?? null} />}
     </PageContainer>
   );
 }
 
-function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: Map<string, Citation> }) {
+function BriefBody({ analysis, context, passages, snapshot }: { analysis: AnalysisDetail; context: Map<string, Citation>; passages: Citation[]; snapshot: boolean | null }) {
   const brief = analysis.brief!;
-  const invalid = analysis.validation?.invalidCitationIds ?? [];
+  const v = analysis.validation;
   const citedIds = new Set([
     ...brief.keyFindings.flatMap((k) => k.citationIds),
     ...brief.investmentConsiderations.flatMap((c) => c.citationIds),
@@ -174,7 +330,7 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
           <SectionHeading id="key-findings">Key findings</SectionHeading>
           <ol className="mt-3 flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
             {brief.keyFindings.map((k, i) => (
-              <li key={k.title} className="px-5 py-4">
+              <li key={`${i}-${k.title}`} className="px-5 py-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -189,6 +345,7 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
                     <h3 className="mt-1.5 text-base font-semibold text-foreground">{k.title}</h3>
                     <p className="mt-1 text-[15px] leading-6 text-foreground/80">
                       {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" />
+                      <FigureBadges figures={figuresAt(v, `keyFindings[${i}].`)} />
                     </p>
                   </div>
                   <SaveFindingButton source={{ kind: 'keyFinding', analysisId: analysis.analysisId, index: i }} />
@@ -206,8 +363,9 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
                 <caption className="sr-only">{brief.title}: comparison</caption>
                 <THead>
                   <tr>
-                    {brief.comparison.columns.map((c) => (
-                      <TH key={c} className="normal-case tracking-normal">
+                    <TH className="normal-case tracking-normal">{comparisonHeaders(brief.comparison).labelHeader ?? (brief.comparison.kind === 'trend' ? 'Measure' : 'Dimension')}</TH>
+                    {comparisonHeaders(brief.comparison).valueColumns.map((c, i) => (
+                      <TH key={`${i}-${c}`} className="normal-case tracking-normal">
                         {c}
                       </TH>
                     ))}
@@ -219,13 +377,15 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
                 </THead>
                 <TBody>
                   {brief.comparison.rows.map((r, rowIndex) => (
-                    <TR key={r.label} className="hover:bg-transparent">
+                    <TR key={`${rowIndex}-${r.label}`} className="hover:bg-transparent">
                       <TH scope="row" className="h-auto whitespace-normal py-2.5 align-top text-sm font-medium normal-case tracking-normal text-foreground">
                         {r.label}
+                        <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].label`)} />
                       </TH>
-                      {r.values.map((v, i) => (
-                        <TD key={`${r.label}-${i}`} className={v.startsWith('Not in') ? 'align-top italic text-muted-foreground' : 'align-top tabular-nums text-foreground'}>
-                          {v}
+                      {r.values.map((value, i) => (
+                        <TD key={i} className={value.startsWith('Not in') ? 'align-top italic text-muted-foreground' : 'align-top tabular-nums text-foreground'}>
+                          {value}
+                          <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
                         </TD>
                       ))}
                       <TD className="align-top">
@@ -246,15 +406,18 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
           <SectionHeading id="considerations">Investment considerations</SectionHeading>
           <ul className="mt-3 flex flex-col gap-3">
             {brief.investmentConsiderations.map((c, i) => (
-              <li key={c.text} className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-3.5 sm:flex-row sm:items-start">
+              <li key={`${i}-${c.text}`} className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-3.5 sm:flex-row sm:items-start">
                 <p className="flex-1 text-[15px] leading-6 text-foreground/80">
                   {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" />
+                  <FigureBadges figures={figuresAt(v, `investmentConsiderations[${i}].`)} />
                 </p>
                 <SaveFindingButton source={{ kind: 'consideration', analysisId: analysis.analysisId, index: i }} />
               </li>
             ))}
           </ul>
         </section>
+
+        <CoverageMatrix analysis={analysis} />
 
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <section aria-labelledby="gaps">
@@ -263,8 +426,11 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
               <p className="mt-2 text-sm text-muted-foreground">None identified.</p>
             ) : (
               <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-sm text-foreground/80 marker:text-risk-med">
-                {brief.evidenceGaps.map((g) => (
-                  <li key={g}>{g}</li>
+                {brief.evidenceGaps.map((g, i) => (
+                  <li key={`${i}-${g}`}>
+                    {g}
+                    <FigureBadges figures={figuresAt(v, `evidenceGaps[${i}]`)} />
+                  </li>
                 ))}
               </ul>
             )}
@@ -273,11 +439,11 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
             <SectionHeading id="follow-ups">Suggested follow-up questions</SectionHeading>
             <ul className="mt-2 flex flex-col gap-1">
               {brief.followUpQuestions.map((q, i) => (
-                <li key={q}>
+                <li key={`${i}-${q}`}>
                   <Link
                     href={newAnalysisHref({
                       question: q,
-                      ...(analysis.interpretation ? { tickers: analysis.interpretation.companies } : {}),
+                      ...filtersAsPrefill(analysis.filters),
                       origin: { kind: 'brief', analysisId: analysis.analysisId, index: i },
                     })}
                     className="group -mx-2 flex items-start gap-2 rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-accent hover:text-foreground"
@@ -292,28 +458,20 @@ function BriefBody({ analysis, context }: { analysis: AnalysisRecord; context: M
         </div>
       </article>
 
-      <aside aria-label="Sources" className="min-w-0 lg:sticky lg:top-20 lg:h-fit">
+      <aside aria-label="Sources and interpretation" className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:h-fit">
+        <InterpretationPanel analysis={analysis} />
         <div className="rounded-lg border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h2 className="text-sm font-semibold text-foreground">Sources</h2>
-            <span className="text-xs text-muted-foreground">{pluralize(analysis.context.length, 'passage')}</span>
+            <span className="text-xs text-muted-foreground">{pluralize(passages.length, 'passage')}</span>
           </div>
-          <div className="flex items-start gap-2 border-b border-border px-4 py-2.5 text-xs">
-            {invalid.length === 0 ? (
-              <>
-                <CheckCircle2 aria-hidden className="mt-px size-3.5 shrink-0 text-ok" />
-                <span className="text-foreground/80">
-                  All {citedIds.size} cited IDs resolve to passages supplied to the model.
-                </span>
-              </>
-            ) : (
-              <>
-                <ShieldAlert aria-hidden className="mt-px size-3.5 shrink-0 text-destructive" />
-                <span className="text-destructive">{pluralize(invalid.length, 'citation')} removed: not in the supplied context.</span>
-              </>
-            )}
-          </div>
-          <SourceList passages={analysis.context} cited={citedIds} />
+          <ValidationSummary validation={v} citedCount={citedIds.size} />
+          {snapshot === false && (
+            <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">
+              The full set of passages supplied to the model is unavailable for this analysis; the passages the brief cites are listed.
+            </p>
+          )}
+          <SourceList passages={passages} cited={citedIds} />
         </div>
       </aside>
     </div>
@@ -351,7 +509,7 @@ function SourceList({ passages, cited }: { passages: Citation[]; cited: Set<stri
   );
 }
 
-function NavyStatus({ status }: { status: AnalysisRecord['status'] }) {
+function NavyStatus({ status }: { status: AnalysisDetail['status'] }) {
   const tone = {
     COMPLETE: { dot: 'bg-ok', label: 'Complete' },
     FAILED: { dot: 'bg-risk-critical', label: 'Failed' },
@@ -363,5 +521,36 @@ function NavyStatus({ status }: { status: AnalysisRecord['status'] }) {
       <span aria-hidden className={`size-1.5 rounded-full ${tone.dot}`} />
       {tone.label}
     </span>
+  );
+}
+
+/** The companies Deep Analysis covers (the static catalog; GE Capital's pre-window filing excluded). */
+const COVERED = companies().filter((c) => !c.outsideWindow);
+
+/**
+ * NO_RELEVANT_EVIDENCE (SPEC §38.2; architecture §9.1): no model call was made. Lists the
+ * covered companies, so a question about a company outside the corpus has an answer.
+ */
+export function NoEvidenceHelp() {
+  return (
+    <section aria-labelledby="covered-companies" className="mt-4 rounded-lg border border-border bg-card px-4 py-3">
+      <h2 id="covered-companies" className="text-sm font-semibold text-foreground">
+        No model request was made. The filings cover these {COVERED.length} companies:
+      </h2>
+      <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground/80" aria-label="Covered companies">
+        {COVERED.map((c) => (
+          <li key={c.ticker}>
+            {c.company} <span className="font-mono text-muted-foreground">{c.ticker}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Which years each company covers:{' '}
+        <Link href="/intelligence/" className="text-primary hover:underline">
+          the company list
+        </Link>
+        .
+      </p>
+    </section>
   );
 }

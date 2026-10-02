@@ -5,8 +5,9 @@
  * - the raw tool input of every recorded response (`.index/cache/generations/<promptVersion>/`)
  *   is matched to its question by brief title and output tokens;
  * - it goes through the current `repairBrief` and `validateBrief` against the question's stored
- *   context passages (text from `.index/build/<indexVersion>/chunks.jsonl`), then
- *   `scoreGeneration`;
+ *   context passages (text from `.index/build/<indexVersion>/chunks.jsonl`), with the same
+ *   preceding-text lookup the worker passes (`precedingFilingText` over the same chunks, as
+ *   `Retriever.precedingText` does), then `scoreGeneration`;
  * - the file's summary, scores, briefs and validation blocks are rewritten. The recorded
  *   telemetry is kept (generation latency, first token, tokens, cost, from the original run);
  *   pipeline totals are not reported (`totalP50: null`), since a re-score measures no latency.
@@ -22,7 +23,7 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import type { AnalysisTelemetry } from '@diligenceiq/core';
 import { parse } from 'yaml';
-import { EvalFileSchema, type GenerationResponse, type GenerationScore, type PipelineOutcome, type SnapshotEntry, repairBrief, scoreGeneration, summarizeGeneration, toCitations, validateBrief } from '@diligenceiq/rag';
+import { type ChunkRecord, EvalFileSchema, type GenerationResponse, type GenerationScore, type PipelineOutcome, type SnapshotEntry, precedingFilingText, repairBrief, scoreGeneration, summarizeGeneration, toCitations, validateBrief } from '@diligenceiq/rag';
 import { BUILD_DIR, CACHE_DIR, ROOT, arg, fail } from '../lib/common';
 import { renderGenerationReport } from '../lib/generation';
 
@@ -51,18 +52,32 @@ const files = readdirSync(outDir).filter((f) => /^generation-.+-da-v\d+\.json$/.
 if (!files.length) fail(`no generation results in evals/results${only ? ` for ${only}` : ''}`);
 const questions = new Map(EvalFileSchema.parse(parse(readFileSync(join(ROOT, 'evals', 'questions.yaml'), 'utf8'))).questions.map((q) => [q.id, q]));
 
-/** Snapshot entries for the given chunk IDs, read from the built index's chunks.jsonl. */
-async function loadChunks(indexVersion: string, ids: ReadonlySet<string>): Promise<Map<string, SnapshotEntry>> {
+/**
+ * Snapshot entries for the given chunk IDs, read from the built index's chunks.jsonl, and the
+ * preceding-text lookup over every chunk in index order (the worker's `Retriever.precedingText`).
+ */
+async function loadChunks(indexVersion: string, ids: ReadonlySet<string>): Promise<{ snapshot: Map<string, SnapshotEntry>; precedingText: (chunkId: string) => string | null }> {
   const path = join(BUILD_DIR, indexVersion, 'chunks.jsonl');
   if (!existsSync(path)) fail(`${path} not found (pnpm index:build)`);
   const out = new Map<string, SnapshotEntry>();
+  const all: ChunkRecord[] = [];
+  const at = new Map<string, number>();
   for await (const line of createInterface({ input: createReadStream(path) })) {
-    const id = /^\{"chunkId":"([^"]+)"/.exec(line)?.[1];
-    if (!id || !ids.has(id)) continue;
-    const c = JSON.parse(line) as Omit<SnapshotEntry, 'laneId' | 'score'>;
-    out.set(id, { chunkId: c.chunkId, documentId: c.documentId, ticker: c.ticker, company: c.company, filingType: c.filingType, filingDate: c.filingDate, periodEnd: c.periodEnd, fiscalLabel: c.fiscalLabel, section: c.section, subsection: c.subsection, charStart: c.charStart, charEnd: c.charEnd, text: c.text, laneId: '', score: 0 });
+    if (!line) continue;
+    const c = JSON.parse(line) as ChunkRecord;
+    at.set(c.chunkId, all.length);
+    all.push(c);
+    if (!ids.has(c.chunkId)) continue;
+    out.set(c.chunkId, { chunkId: c.chunkId, documentId: c.documentId, ticker: c.ticker, company: c.company, filingType: c.filingType, filingDate: c.filingDate, periodEnd: c.periodEnd, fiscalLabel: c.fiscalLabel, section: c.section, subsection: c.subsection, charStart: c.charStart, charEnd: c.charEnd, text: c.text, laneId: '', score: 0 });
   }
-  return out;
+  const precedingText = (chunkId: string): string | null => {
+    const i = at.get(chunkId);
+    return i === undefined ? null : precedingFilingText(all[i]!, (x) => {
+      const j = at.get(x.chunkId);
+      return j ? all[j - 1] : undefined;
+    });
+  };
+  return { snapshot: out, precedingText };
 }
 
 for (const name of files) {
@@ -73,7 +88,7 @@ for (const name of files) {
     .filter((f) => f.endsWith('.json'))
     .map((f) => (JSON.parse(readFileSync(join(recDir, f), 'utf8')) as { response?: GenerationResponse }).response)
     .filter((r): r is GenerationResponse => !!r);
-  const chunks = await loadChunks(stored.indexVersion, new Set(stored.records.flatMap((r) => r.contextChunkIds)));
+  const { snapshot: chunks, precedingText } = await loadChunks(stored.indexVersion, new Set(stored.records.flatMap((r) => r.contextChunkIds)));
 
   const scores: GenerationScore[] = [];
   const records: StoredRecord[] = [];
@@ -95,7 +110,7 @@ for (const name of files) {
     const snapshot = rec.contextChunkIds.map((id) => chunks.get(id) ?? fail(`${name}: ${rec.id}: context chunk ${id} not in ${stored.indexVersion}`));
     const repaired = repairBrief(gen.toolInput);
     if (!repaired.ok) fail(`${name}: ${rec.id}: the recorded response no longer passes repair: ${repaired.issues.join('; ')}`);
-    const { brief, validation, citedChunkIds } = validateBrief(repaired.brief, repaired.repairs, new Map(snapshot.map((e) => [e.chunkId, e.text])));
+    const { brief, validation, citedChunkIds } = validateBrief(repaired.brief, repaired.repairs, new Map(snapshot.map((e) => [e.chunkId, e.text])), precedingText);
     const s = rec.score;
     // The original run's telemetry, as recorded; totalDurationMs is not a re-score measurement.
     const telemetry = {

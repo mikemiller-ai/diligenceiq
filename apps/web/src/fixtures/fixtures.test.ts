@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import {
+  COMPANY_CATALOG,
   CitationSchema,
   CompanyIntelligenceProfileSchema,
   DiligenceBriefSchema,
@@ -9,7 +10,7 @@ import {
 } from '@diligenceiq/core';
 import { chunkFiling, extractRiskHeadings, loadCorpus, processFilings, sectionAt } from '@diligenceiq/corpus';
 import { describe, expect, it } from 'vitest';
-import { SAMPLE_ANALYSES, TEST_PASSAGES } from '@/test/sample-analyses';
+import { SAMPLE_ANALYSES, SAMPLE_CONTEXTS, TEST_PASSAGES } from '@/test/sample-analyses';
 import riskHeadingsJson from './generated/risk-headings.json';
 import { FILINGS, PASSAGES, companies, featuredCompanies } from './index';
 import { FIXTURE_PROFILES, TIER_COPY } from './profiles';
@@ -204,7 +205,7 @@ describe('no hand-written answers in the application', () => {
     for (const a of SAMPLE_ANALYSES) {
       if (!a.brief) continue;
       expect(DiligenceBriefSchema.safeParse(a.brief).success).toBe(true);
-      const ctx = new Set(a.context.map((c) => c.chunkId));
+      const ctx = new Set((SAMPLE_CONTEXTS[a.analysisId] ?? []).map((c) => c.chunkId));
       const ids = [
         ...a.brief.keyFindings.flatMap((k) => k.citationIds),
         ...a.brief.investmentConsiderations.flatMap((c) => c.citationIds),
@@ -230,5 +231,21 @@ describe('no hand-written answers in the application', () => {
     };
     walk(src);
     expect(offenders).toEqual([]);
+  });
+});
+
+describe('artifacts derived from these fixtures stay in step (regenerate, never hand-edit)', () => {
+  it('the exported profile set (tests/fixtures/profile-sets) equals the preview profiles: run `pnpm profiles:export-fixture`', async () => {
+    const p = [...FIXTURE_PROFILES.values()][0]!;
+    const dir = join(process.cwd(), '../../tests/fixtures/profile-sets', p.version.indexVersion, p.version.profileSetId);
+    for (const profile of FIXTURE_PROFILES.values()) {
+      expect(JSON.parse(readFileSync(join(dir, `${profile.ticker}.json`), 'utf8')), profile.ticker).toEqual(JSON.parse(JSON.stringify(profile)));
+    }
+    const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')) as { companies: Array<{ ticker: string }> };
+    expect(manifest.companies.map((c) => c.ticker).sort()).toEqual([...FIXTURE_PROFILES.keys()].sort());
+  });
+
+  it('the core company catalog has exactly the corpus tickers: run `node scripts/fixtures/build-catalog.mjs`', () => {
+    expect(COMPANY_CATALOG.map((c) => c.ticker).sort()).toEqual(companies().map((c) => c.ticker).sort());
   });
 });

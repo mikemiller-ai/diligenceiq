@@ -6,6 +6,8 @@ export const ERROR_STATUS = {
   SESSION_REQUIRED: 401,
   NOT_FOUND: 404,
   LIMIT_REACHED: 409,
+  /** The same stored item is already saved as a finding (one finding per source). */
+  ALREADY_SAVED: 409,
   PROFILE_MISSING: 404,
   SOURCE_MISSING: 404,
   RATE_LIMITED: 429,

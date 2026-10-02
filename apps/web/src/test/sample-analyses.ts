@@ -1,5 +1,4 @@
-import type { Citation } from '@diligenceiq/core';
-import type { AnalysisRecord } from '@/fixtures/types';
+import type { AnalysisDetail, AnalysisFailureCode, BriefValidation, Citation } from '@diligenceiq/core';
 import testPassages from './generated/passages.json';
 
 /*
@@ -20,7 +19,14 @@ const passage = (chunkId: string): Citation => {
 };
 const ctx = (...ids: string[]) => ids.map(passage);
 
-export const SAMPLE_ANALYSES: AnalysisRecord[] = [
+/** The hand-written test briefs in their Phase 1 shape: an analysis plus its context passages. */
+type RawSample = Omit<AnalysisDetail, 'deadlineAt' | 'validation' | 'error'> & {
+  context: Citation[];
+  validation?: { invalidCitationIds: string[]; uncitedFindingIndexes: number[] };
+  error?: { code: AnalysisFailureCode; message: string; requestId: string };
+};
+
+const RAW: RawSample[] = [
   {
     analysisId: 'an-01',
     question:
@@ -147,3 +153,22 @@ export const SAMPLE_ANALYSES: AnalysisRecord[] = [
     },
   },
 ];
+
+const cleanValidation = (citations: number): BriefValidation => ({
+  repairs: [],
+  citations: { returned: citations, valid: citations, removed: [], preValidationRate: 1 },
+  uncited: [],
+  numeric: { figures: [], total: 0, verified: 0, unitUnstated: 0 },
+  comparisonMisaligned: [],
+  notices: [],
+});
+
+/** The samples as the poll returns them (AnalysisDetail); their passages are the context snapshot. */
+export const SAMPLE_ANALYSES: AnalysisDetail[] = RAW.map(({ context, validation: _v, ...a }) => ({
+  ...a,
+  deadlineAt: a.createdAt,
+  ...(a.status === 'COMPLETE' ? { citations: context, validation: cleanValidation(context.length) } : {}),
+}));
+
+/** Context snapshots by analysis ID, for the in-memory client. */
+export const SAMPLE_CONTEXTS: Record<string, Citation[]> = Object.fromEntries(RAW.map((a) => [a.analysisId, a.context]));

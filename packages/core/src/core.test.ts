@@ -70,6 +70,11 @@ describe('CreateAnalysisRequestSchema', () => {
         .success,
     ).toBe(false);
   });
+
+  it('filters are strict: an unknown filter field is rejected, not silently dropped', () => {
+    expect(CreateAnalysisRequestSchema.safeParse({ question: 'q', filters: { tickers: ['AAPL'], sector: 'tech' } }).success).toBe(false);
+    expect(CreateAnalysisRequestSchema.safeParse({ question: 'q', filters: {} }).success).toBe(true);
+  });
 });
 
 const ALL_ORIGINS: AnalysisOrigin[] = [
@@ -145,5 +150,35 @@ describe('apiError', () => {
     expect(ERROR_STATUS.RATE_LIMITED).toBe(429);
     expect(ERROR_STATUS.PROFILE_MISSING).toBe(404);
     expect(ERROR_STATUS.LIMIT_REACHED).toBe(409);
+  });
+});
+
+describe('comparisonHeaders', () => {
+  it('reads validated columns as one per value, and a legacy leading row-label header as a label', async () => {
+    const { comparisonHeaders } = await import('./domain');
+    expect(comparisonHeaders({ columns: ['FY2023', 'FY2024'], rows: [{ label: 'Revenue', values: ['a', 'b'], citationIds: [] }] })).toEqual({ labelHeader: null, valueColumns: ['FY2023', 'FY2024'] });
+    expect(comparisonHeaders({ columns: ['Dimension', 'Apple', 'NVIDIA'], rows: [{ label: 'x', values: ['a', 'b'], citationIds: [] }] })).toEqual({ labelHeader: 'Dimension', valueColumns: ['Apple', 'NVIDIA'] });
+  });
+});
+
+describe('resolveSource keeps a brief item\'s figure checks (M2)', () => {
+  it('copies only the figures at the saved item\'s own locations', async () => {
+    const { resolveSource } = await import('./finding-sources');
+    const cite = { chunkId: 'C-1', indexVersion: 'iv', ticker: 'AAPL', company: 'Apple Inc', filingType: '10-K' as const, filingDate: '2025-10-31', periodEnd: '2025-09-27', fiscalLabel: 'FY2025', section: 'Item 7', documentId: 'd', charStart: 0, charEnd: 1, text: 't' };
+    const fig = (location: string, verified: boolean) => ({ location, figure: '$1 billion', verified, rule: verified ? ('exact' as const) : null, chunkId: verified ? 'C-1' : null });
+    const brief = {
+      title: 't', executiveSummary: 's', answerType: 'single_company' as const,
+      keyFindings: [0, 1, 2].map((i) => ({ title: `k${i}`, finding: 'f', basis: 'reported' as const, tickers: ['AAPL'], citationIds: ['C-1'] })),
+      comparison: { kind: 'table' as const, columns: ['A'], rows: [{ label: 'r', values: ['v'], citationIds: ['C-1'] }] },
+      investmentConsiderations: [{ text: 'c', citationIds: ['C-1'] }],
+      evidenceGaps: [], followUpQuestions: [],
+    };
+    const figures = [fig('keyFindings[1].finding', false), fig('keyFindings[1].title', true), fig('keyFindings[10].finding', false), fig('comparison.rows[0].values[0]', false), fig('investmentConsiderations[0].text', false), fig('executiveSummary', false)];
+    const validation = { repairs: [], citations: { returned: 1, valid: 1, removed: [], preValidationRate: 1 }, uncited: [], numeric: { figures, total: figures.length, verified: 1, unitUnstated: 0 }, comparisonMisaligned: [], notices: [] };
+    const stores = { analyses: [{ analysisId: 'a', brief, citations: [cite], validation }], profiles: new Map() };
+    expect(resolveSource({ kind: 'keyFinding', analysisId: 'a', index: 1 }, stores)?.figures?.map((f) => f.location)).toEqual(['keyFindings[1].finding', 'keyFindings[1].title']);
+    expect(resolveSource({ kind: 'keyFinding', analysisId: 'a', index: 0 }, stores)?.figures).toBeUndefined();
+    expect(resolveSource({ kind: 'comparisonRow', analysisId: 'a', index: 0 }, stores)?.figures?.map((f) => f.location)).toEqual(['comparison.rows[0].values[0]']);
+    expect(resolveSource({ kind: 'consideration', analysisId: 'a', index: 0 }, stores)?.figures?.map((f) => f.location)).toEqual(['investmentConsiderations[0].text']);
   });
 });

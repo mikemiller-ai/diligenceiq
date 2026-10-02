@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page, type Request } from '@playwright/test';
+import seedJson from '../../../seed/demo-workspace.json';
+import { expect, test, type APIRequestContext, type Page, type Request } from '@playwright/test';
 
 /*
  * Shared helpers for the local E2E suite (testing-strategy §6).
@@ -26,6 +27,15 @@ export function recordRequests(page: Page): Request[] {
   return seen;
 }
 
+/**
+ * What opening a page may send: reads (GET) and opening the demo session (POST /api/session).
+ * Never POST /api/analyses: that is the only request that leads to a model call.
+ */
+export const isViewSafe = (r: Request) => {
+  const path = new URL(r.url()).pathname.replace(/\/$/, '');
+  return r.method() === 'GET' ? path.startsWith('/api/') : r.method() === 'POST' && path === '/api/session';
+};
+
 export const isAnalysisPost = (r: Request) =>
   r.method() === 'POST' && new URL(r.url()).pathname.replace(/\/$/, '') === '/api/analyses';
 
@@ -51,7 +61,20 @@ export async function expectNoAxeViolations(page: Page) {
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 }
 
-/** Answers POST /api/analyses the way the Phase 1 api does (no worker yet). */
+/** The local server's counters (tests/e2e/local-server.ts): `enqueued` counts analyses handed to the worker. */
+export async function e2eStats(request: APIRequestContext): Promise<{ enqueued: number; enabled: boolean; mode: string }> {
+  return (await request.get('/__e2e/stats')).json();
+}
+
+export async function setKillSwitch(request: APIRequestContext, enabled: boolean) {
+  await request.post(`/__e2e/kill-switch?enabled=${enabled}`);
+}
+
+export async function setWorker(request: APIRequestContext, mode: 'complete' | 'fail' | 'hang') {
+  await request.post(`/__e2e/worker?mode=${mode}`);
+}
+
+/** Answers POST /api/analyses with ANALYSES_DISABLED in the browser (for flows that must not start one). */
 export async function mockAnalysesDisabled(page: Page) {
   await page.route('**/api/analyses', (route) =>
     route.fulfill({
@@ -61,3 +84,9 @@ export async function mockAnalysesDisabled(page: Page) {
     }),
   );
 }
+
+/** The demo seed every new workspace starts from (real pre-run pipeline output). */
+export const SEED = seedJson as unknown as {
+  analyses: Array<{ analysisId: string; question: string; brief: { title: string } }>;
+  findings: unknown[];
+};

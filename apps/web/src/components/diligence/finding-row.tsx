@@ -19,11 +19,13 @@ import {
 import { NativeSelect, Textarea } from '@/components/ui/input';
 import { toast } from '@/components/ui/toaster';
 import { formatDate } from '@/lib/format';
-import { sourceLabel } from '@/lib/finding-sources';
+import { sourceLabel } from '@diligenceiq/core';
+import { describeFailure } from '@/lib/api';
 import { FINDING_ORIGIN, FINDING_STATUS } from '@/lib/labels';
 import { analysisHref, compareHref, intelligenceHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
 import { FindingStatusBadge, TickerBadge } from './badges';
+import { FigureBadges } from './brief-panels';
 import { useEvidence } from './evidence';
 
 /** Where to go back to for the item a finding was saved from. */
@@ -60,9 +62,15 @@ export function FindingRow({ finding, compact = false }: { finding: Finding; com
               <TickerBadge key={t} ticker={t} />
             ))}
             <span className="text-xs text-muted-foreground">{FINDING_ORIGIN[finding.origin.kind]}</span>
+            {/* Provenance (SPEC §40): saved by the demo seed, not by this analyst. */}
+            {finding.seeded && <span className="text-xs text-muted-foreground">· Example from the demo workspace</span>}
           </div>
           <h3 className="mt-1.5 text-base font-semibold text-foreground">{finding.title}</h3>
-          <p className="mt-1 text-sm text-foreground/80">{finding.text}</p>
+          <p className="mt-1 text-sm text-foreground/80">
+            {finding.text}
+            {/* The brief's numeric-grounding marks travel with the saved item (architecture §6.9). */}
+            {finding.figures && <FigureBadges figures={finding.figures} />}
+          </p>
 
           {finding.citations.length > 0 && (
             <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label="Evidence">
@@ -87,9 +95,12 @@ export function FindingRow({ finding, compact = false }: { finding: Finding; com
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    updateFinding(finding.findingId, { note: note.trim() || undefined });
-                    setEditingNote(false);
-                    toast.success('Note saved');
+                    updateFinding(finding.findingId, { note: note.trim() })
+                      .then(() => {
+                        setEditingNote(false);
+                        toast.success('Note saved');
+                      })
+                      .catch((err) => toast.error('The note was not saved', { description: describeFailure(err) }));
                   }}
                   className="flex flex-col gap-2"
                 >
@@ -132,7 +143,7 @@ export function FindingRow({ finding, compact = false }: { finding: Finding; com
           <p className="mt-2.5 text-xs text-muted-foreground">
             {getTheme(finding.theme).name} · Saved {formatDate(finding.createdAt)} ·{' '}
             {href ? (
-              <Link href={href} className="text-primary hover:underline">
+              <Link href={href} className="text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary">
                 {sourceLabel(finding.origin.source)}
               </Link>
             ) : (
@@ -151,7 +162,7 @@ export function FindingRow({ finding, compact = false }: { finding: Finding; com
             <NativeSelect
               id={statusId}
               value={finding.status}
-              onChange={(e) => updateFinding(finding.findingId, { status: e.target.value as FindingStatus })}
+              onChange={(e) => updateFinding(finding.findingId, { status: e.target.value as FindingStatus }).catch((err) => toast.error('The status was not changed', { description: describeFailure(err) }))}
               className="h-8 text-sm"
             >
               {(Object.keys(FINDING_STATUS) as FindingStatus[]).map((s) => (
@@ -166,7 +177,7 @@ export function FindingRow({ finding, compact = false }: { finding: Finding; com
             <NativeSelect
               id={themeId}
               value={finding.theme}
-              onChange={(e) => updateFinding(finding.findingId, { theme: e.target.value as ThemeId })}
+              onChange={(e) => updateFinding(finding.findingId, { theme: e.target.value as ThemeId }).catch((err) => toast.error('The theme was not changed', { description: describeFailure(err) }))}
               className="h-8 text-sm"
             >
               {THEMES.map((t) => (
@@ -218,8 +229,9 @@ function DeleteFindingButton({ finding }: { finding: Finding }) {
             <Button
               variant="destructive"
               onClick={() => {
-                deleteFinding(finding.findingId);
-                toast('Finding deleted');
+                deleteFinding(finding.findingId)
+                  .then(() => toast('Finding deleted'))
+                  .catch((err) => toast.error('The finding was not deleted', { description: describeFailure(err) }));
               }}
             >
               Delete finding

@@ -2,7 +2,7 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 4 (the one-call Deep Analysis generation pipeline, deterministic validation, the async SQS worker plane and the generation evals) is complete in the repository. Results are in [docs/evaluation.md](docs/evaluation.md) §4–5, and the prompt history is in [docs/prompt-iterations.md](docs/prompt-iterations.md). The worker stack (`DiligenceIQ-Worker`) is deployed in us-east-1, but nothing sends it work yet. The live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build: Company Intelligence on preview profiles for AAPL, MSFT and NVDA, with cited risk headings, labeled placeholders and no figures. The public API still answers `ANALYSES_DISABLED`, because sessions, caps and the enqueue route arrive in Phase 5. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 5 (sessions and the demo workspace, spend caps and the kill switch, the enqueue and poll routes, findings stored server-side, Company Intelligence served from the active profile set, and the real Deep Analysis UI) is built and gated in the repository but **not deployed**. Phase 4's worker stack (`DiligenceIQ-Worker`) is deployed in us-east-1. The live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build, and the deployed api still answers `ANALYSES_DISABLED`. Until Phase 4b builds real profile sets, Company Intelligence shows the preview profiles for AAPL, MSFT and NVDA (cited risk headings, labeled placeholders, no figures). Evaluation results are in [docs/evaluation.md](docs/evaluation.md) §4–5 and the prompt history in [docs/prompt-iterations.md](docs/prompt-iterations.md). The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## Develop
 Node ≥ 22 and pnpm 9.
@@ -43,6 +43,11 @@ Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-c
 - `pnpm eval:chunk-size`: a BM25-only chunk-size experiment. No AWS.
 - `pnpm eval:signals`: the signal go/no-go against the hand labels. No AWS.
 - `pnpm retrieval:debug`: serves `POST /api/retrieval/debug` locally on 127.0.0.1. It is never deployed.
+
+**Demo workspace and profile sets (Phase 5, admin-run):**
+- `pnpm seed:build`: rebuilds `seed/demo-workspace.json` from real pipeline output by replaying recorded generations. Free; it fails rather than call Bedrock.
+- `pnpm profiles:export-fixture`: writes the preview profiles as a profile set to `tests/fixtures/profile-sets/`. No AWS.
+- `pnpm profiles:upload-set --bucket <name> --set <indexVersion>/<profileSetId>`: uploads a set to S3 (dry run unless `--yes`). Switching the active set is a separate SSM parameter change.
 
 **Generation (Phase 4, admin-run):**
 - `pnpm eval:retrieval --generate`: one generation call per eval question through the real pipeline, scored deterministically. It replays recorded responses for free; `--live` calls Bedrock for unrecorded requests (Sonnet 4.6, about $0.11 each); `--only <ids>` limits the run.

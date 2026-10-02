@@ -9,8 +9,8 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | Generation calls per question | 1 (every question) |
 | Citation validity before validation (model's IDs in the context) | 1 |
 | Citation validity after validation (re-check; validation removes the rest) | 1 |
-| Numeric grounding (figures found in cited passages) | 0.8865 (461/520) |
-| Unverified near matches (digits in a table cell; passage states no unit) | 25 |
+| Numeric grounding (figures found in cited passages) | 0.8923 (464/520) |
+| Unverified near matches (digits in a table cell; passage states no unit) | 22 |
 | Briefs with every figure verified | 11/20 |
 | Comparison tables aligned (one value per column in every row) | 16/16 |
 | Abstention | 1/2 |
@@ -38,7 +38,7 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | `cross-wmt-jpm-rates` | fail | comparison | 31/31 | 14/16 | 22067 / 3003 | 42160 | figures grounded: 14/16 figures found in cited passages; unverified: $4.8B (comparison.rows[3].values[0]), 80% (investmentConsiderations[2].text) |
 | `cross-cyber` | pass | comparison | 62/62 | 0/0 | 18926 / 3801 | 51541 | — |
 | `sector-banks-capital` | fail | comparison | 45/45 | 57/58 | 22721 / 3649 | 42519 | figures grounded: 57/58 figures found in cited passages; unverified: $385 billion (executiveSummary) |
-| `ambiguous-meta` | fail | trend | 30/30 | 68/78 (3) | 22869 / 3164 | 38098 | figures grounded: 68/78 figures found in cited passages; unverified: $69.69 billion (executiveSummary), $69.69 billion (keyFindings[2].finding), $37.26 billion (keyFindings[2].finding), $27.05 billion (keyFindings[2].finding), $27,045 (comparison.rows[6].values[0], digits only: passage states no unit), $37,256 (comparison.rows[6].values[1], digits only: passage states no unit), $69,691 (comparison.rows[6].values[2], digits only: passage states no unit), $77,815 (comparison.rows[8].values[1]), $81,592 (comparison.rows[8].values[2]), $69.69 billion (investmentConsiderations[0].text) |
+| `ambiguous-meta` | fail | trend | 30/30 | 71/78 | 22869 / 3164 | 38098 | figures grounded: 71/78 figures found in cited passages; unverified: $69.69 billion (executiveSummary), $69.69 billion (keyFindings[2].finding), $37.26 billion (keyFindings[2].finding), $27.05 billion (keyFindings[2].finding), $77,815 (comparison.rows[8].values[1]), $81,592 (comparison.rows[8].values[2]), $69.69 billion (investmentConsiderations[0].text) |
 | `ambiguous-no-company` | pass | sector | 64/64 | 6/6 | 19685 / 4135 | 50669 | — |
 | `ambiguous-ko-few-years` | fail | trend | 51/51 | 21/22 | 22026 / 3291 | 41235 | figures grounded: 21/22 figures found in cited passages; unverified: 12% (keyFindings[1].finding) |
 | `unsupported-period` | fail | insufficient_evidence | 25/25 | 0/0 | 19502 / 2132 | 28678 | follow-ups answerable: 1 of 4 follow-ups ask about /2015/, which the corpus cannot answer: followUpQuestions[0] |

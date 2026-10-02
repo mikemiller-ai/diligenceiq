@@ -153,6 +153,8 @@ Decision: da-v4 ships. It fixes a correctness problem in the abstention path; th
   Source: `evals/results/generation-iv-9cf51c066743-da-v4.{json,md}`.
 ```
 
+**Re-scored 2026-10-02 with the preceding-unit rule (a validator change, not a prompt change; architecture §6.9).** The recorded da-v4 responses give numeric grounding 0.911 (489/537), up from 0.901 (484/537), with 42 near matches (was 47); everything else is unchanged (14/20 pass every check, every figure verified in 15/20). The five newly verified figures are Meta cash-flow cells whose "(In millions)" caption ends the previous chunk. The prediction above ("it would verify most near matches") was wrong: the 42 remaining near matches are all Pfizer cells whose "(MILLIONS)" caption is printed in the cited chunk itself, in a form the validator does not read. da-v3 re-scores to 0.931 (503/540), 30 near matches, 15/20 passing. Details: [evaluation.md](evaluation.md) §4.
+
 ## Company Intelligence profile prompt (`profilePromptVersion`)
 
 Not written yet. The offline profile prompt is built in Phase 4b (SPEC §29.2, §32).

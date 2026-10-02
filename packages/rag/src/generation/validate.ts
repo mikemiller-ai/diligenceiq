@@ -1,4 +1,5 @@
 import { type BriefValidation, type DiligenceBrief, DiligenceBriefSchema } from '@diligenceiq/core';
+import { isTableRow } from '@diligenceiq/corpus';
 
 /**
  * Deterministic output validation (SPEC §31; architecture §6.9). Nothing here calls a model:
@@ -230,6 +231,12 @@ export interface PassageNumbers {
   unit: Scale | null;
   /** The passage prints a "$" somewhere, so its bare table cells may be currency. */
   dollarSign: boolean;
+  /**
+   * Set only by `withPrecedingUnit`: the passage states no unit, opens with a table, and the line
+   * right before it in the filing (the end of the previous chunk) is that table's unit caption.
+   * `table` is the numbers of that leading table; `rest` is the numbers after it.
+   */
+  preceding?: { unit: Scale; table: PassageNumber[]; rest: PassageNumber[] };
 }
 
 /**
@@ -265,11 +272,58 @@ export function passageNumbers(text: string): PassageNumbers {
   return { numbers, unit, dollarSign: text.includes('$') };
 }
 
+/**
+ * The unit caption that ends the text before a passage: its last non-empty line ends with
+ * "in millions" / "in thousands" / "in billions", optionally inside parentheses and optionally
+ * followed by ", except per share ..." ("CONSOLIDATED STATEMENTS OF CASH FLOWS(In millions)",
+ * "(In millions, except per share amounts)", "(Dollars in billions)"). That line must not be a table
+ * row (no "|"), and nothing may follow the caption but its closing parenthesis. "(in millions of
+ * shares)" is not a currency unit and is not read.
+ */
+const CAPTION_UNIT = /\bin\s+(millions|thousands|billions)\b/gi;
+const CAPTION_TAIL = /^(?:\s*,\s*except\s+per[\s-]+share[^|\d()]{0,40})?\s*\)?\s*$/i;
+export function precedingUnit(precedingText: string | null): Scale | null {
+  const last = precedingText?.split('\n').map((l) => l.trim()).filter(Boolean).at(-1);
+  if (!last || last.includes('|')) return null;
+  const m = [...last.matchAll(CAPTION_UNIT)].at(-1);
+  if (!m || !CAPTION_TAIL.test(last.slice(m.index + m[0].length))) return null;
+  return SCALE_WORDS[m[1]!.toLowerCase().replace(/s$/, '')] ?? null;
+}
+
+/** The table a passage opens with: its leading run of table rows (the chunker's `isTableRow`; blank lines before it skipped), or null if it opens with prose. */
+export function leadingTable(text: string): { table: string; rest: string } | null {
+  const lines = text.split('\n');
+  let i = 0;
+  while (i < lines.length && !lines[i]!.trim()) i++;
+  const start = i;
+  while (i < lines.length && isTableRow(lines[i]!)) i++;
+  if (i === start) return null;
+  const end = lines.slice(0, i).join('\n').length;
+  return { table: text.slice(0, end), rest: text.slice(end) };
+}
+
+/**
+ * The preceding-unit rule's input (architecture §6.9). A passage that states no unit of its own
+ * but opens with a table whose unit caption is the last line of the filing text right before it
+ * (`precedingFilingText`: same filing, same section, at most two chunks back) takes that unit for
+ * the cells of that leading table only, never for anything after it. Why this is still strict:
+ * the caption is the line directly above the table in the filing, as a reader sees it; anything
+ * in between (prose, another table row, a heading) breaks the link.
+ */
+export function withPrecedingUnit(p: PassageNumbers, text: string, precedingText: string | null): PassageNumbers {
+  if (p.unit || !precedingText) return p;
+  const unit = precedingUnit(precedingText);
+  if (!unit) return p;
+  const lead = leadingTable(text);
+  if (!lead) return p;
+  return { ...p, preceding: { unit, table: passageNumbers(lead.table).numbers, rest: passageNumbers(lead.rest).numbers } };
+}
+
 const FACTOR: Record<Scale, number> = { thousand: 1e3, million: 1e6, billion: 1e9, trillion: 1e12 };
 const round = (v: number, d: number) => Math.round(v * 10 ** d) / 10 ** d;
 
 /** How a figure matched a passage. `unit_unstated` is a near match only: it never counts as verified. */
-export type FigureRule = 'exact' | 'scaled' | 'unit_unstated';
+export type FigureRule = 'exact' | 'scaled' | 'preceding_unit' | 'unit_unstated';
 
 /**
  * Does this passage print the figure? The rules, in order (each states only that a number with
@@ -286,8 +340,15 @@ export type FigureRule = 'exact' | 'scaled' | 'unit_unstated';
  *   printed) rounding to it at the figure's own precision, "$416.2 billion" for 416,161 in
  *   millions, never "$1 billion" for 1,234 ('scaled'). Rounding under the same scale word
  *   ("$295B" for "$295.49 billion") is not accepted;
+ * - preceding unit: in a passage that states no unit, a "$" amount or table cell of the table
+ *   the passage opens with, whose unit caption ("(In millions)") is the line right before the
+ *   passage in the same filing section (`withPrecedingUnit`), and whose amount in that unit is
+ *   EXACTLY the figure's amount ('preceding_unit'). No rounding: "$416.2 billion" for 416,161
+ *   is not accepted here. An unscaled figure of 1,000 or more found only in that table is
+ *   refused, as above (the unit was dropped);
  * - a scaled figure whose printed digits equal a bare table cell in a passage that states no
  *   unit (the header is often in another chunk) is 'unit_unstated': reported, not verified.
+ *   Cells of a leading table under a preceding unit are not near matches: their unit is known.
  * A comparison cell's figure takes the unit its row label or column header states (`headerScale`).
  */
 export function matchFigure(f: Figure, p: PassageNumbers): FigureRule | null {
@@ -296,7 +357,10 @@ export function matchFigure(f: Figure, p: PassageNumbers): FigureRule | null {
   const amounts = usable.filter((n) => !n.percent && !n.scale && (n.dollar || (n.cell && p.dollarSign)));
   if (!f.scale) {
     if (!amounts.some((n) => n.value === f.value)) return null;
-    return p.unit && f.value >= 1000 ? null : 'exact';
+    if (p.unit && f.value >= 1000) return null;
+    // Printed only in a table whose caption (in the previous chunk) states a unit: the unit was dropped.
+    if (p.preceding && f.value >= 1000 && !p.preceding.rest.some((n) => !n.excluded && !n.percent && !n.scale && (n.dollar || (n.cell && p.dollarSign)) && n.value === f.value)) return null;
+    return 'exact';
   }
   if (usable.some((n) => n.scale === f.scale && n.value === f.value)) return 'exact';
   const amount = f.value * FACTOR[f.scale];
@@ -310,12 +374,19 @@ export function matchFigure(f: Figure, p: PassageNumbers): FigureRule | null {
     }
     return null;
   }
-  return significantDigits(f.digits) >= 3 && cells.some((n) => n.cell && n.digits === f.digits) ? 'unit_unstated' : null;
+  const cellsOf = (ns: readonly PassageNumber[]) => ns.filter((n) => !n.excluded && !n.percent && !n.scale && (n.dollar || n.cell));
+  if (p.preceding) {
+    const unitFactor = FACTOR[p.preceding.unit];
+    // Exactly equal amounts only (to floating-point noise): 72,220 in millions is $72.22 billion.
+    if (cellsOf(p.preceding.table).some((n) => Math.abs(n.value * unitFactor - amount) < 1e-9 * amount)) return 'preceding_unit';
+  }
+  const loose = p.preceding ? cellsOf(p.preceding.rest) : cells;
+  return significantDigits(f.digits) >= 3 && loose.some((n) => n.cell && n.digits === f.digits) ? 'unit_unstated' : null;
 }
 
 /* ------------------------------------------------------------- validation */
 
-const RULE_RANK: Record<FigureRule, number> = { exact: 0, scaled: 1, unit_unstated: 2 };
+const RULE_RANK: Record<FigureRule, number> = { exact: 0, scaled: 1, preceding_unit: 2, unit_unstated: 3 };
 
 export interface ValidatedBrief {
   brief: DiligenceBrief;
@@ -324,7 +395,12 @@ export interface ValidatedBrief {
   citedChunkIds: string[];
 }
 
-export function validateBrief(brief: DiligenceBrief, repairs: string[], passages: ReadonlyMap<string, string>): ValidatedBrief {
+/**
+ * `precedingText` (optional) gives the filing text right before a cited chunk (the pipeline passes
+ * `Retriever.precedingText`; the re-score builds the same from chunks.jsonl). It only feeds the
+ * preceding-unit rule; without it that rule never applies. It must be pure for a given index.
+ */
+export function validateBrief(brief: DiligenceBrief, repairs: string[], passages: ReadonlyMap<string, string>, precedingText?: (chunkId: string) => string | null): ValidatedBrief {
   const removed: Array<{ location: string; id: string }> = [];
   let returned = 0;
   let valid = 0;
@@ -363,7 +439,12 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
   const numbersCache = new Map<string, PassageNumbers>();
   const numbersOf = (id: string) => {
     let n = numbersCache.get(id);
-    if (!n) numbersCache.set(id, (n = passageNumbers(passages.get(id) ?? '')));
+    if (!n) {
+      const text = passages.get(id) ?? '';
+      n = passageNumbers(text);
+      if (precedingText && passages.has(id)) n = withPrecedingUnit(n, text, precedingText(id));
+      numbersCache.set(id, n);
+    }
     return n;
   };
   const figures: BriefValidation['numeric']['figures'] = [];

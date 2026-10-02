@@ -6,13 +6,18 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import type * as s3 from 'aws-cdk-lib/aws-s3';
+import type * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as ssm from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
 import { CONFIG, PATHS } from './config';
 
 export interface ApiStackProps extends StackProps {
   table: dynamodb.ITable;
+  dataBucket: s3.IBucket;
   killSwitch: ssm.IStringParameter;
+  activeProfileSet: ssm.IStringParameter;
+  queue: sqs.IQueue;
 }
 
 export class ApiStack extends Stack {
@@ -42,7 +47,16 @@ export class ApiStack extends Stack {
       logGroup,
       environment: {
         KILL_SWITCH_PARAM: props.killSwitch.parameterName,
+        ACTIVE_PROFILE_SET_PARAM: props.activeProfileSet.parameterName,
+        SESSION_SECRET_PARAM: CONFIG.sessionSecretParameterName,
         TABLE_NAME: props.table.tableName,
+        DATA_BUCKET: props.dataBucket.bucketName,
+        INDEX_VERSION: CONFIG.indexVersion,
+        QUEUE_URL: props.queue.queueUrl,
+        WORKSPACE_HOURLY_ANALYSIS_CAP: String(CONFIG.caps.workspaceHourlyAnalyses),
+        GLOBAL_DAILY_ANALYSIS_CAP: String(CONFIG.caps.globalDailyAnalyses),
+        DAILY_WORKSPACE_CREATION_CAP: String(CONFIG.caps.dailyWorkspaceCreations),
+        PER_IP_DAILY_WORKSPACE_CAP: String(CONFIG.caps.perClientDailyWorkspaceCreations),
         NODE_OPTIONS: '--enable-source-maps',
       },
       bundling: {
@@ -61,13 +75,34 @@ export class ApiStack extends Stack {
       },
     });
 
-    // Phase 1 reads only the kill switch; table access is granted when routes use it.
-    // A hand-written statement instead of grantRead(), which also adds GetParameters,
-    // GetParameterHistory and DescribeParameters.
-    this.apiFunction.addToRolePolicy(
+    // Least privilege (architecture §11), hand-written instead of grant*(), which add more
+    // actions than the api uses. No Bedrock permission: the api never generates.
+    const account = Stack.of(this).account;
+    const region = Stack.of(this).region;
+    const fn = this.apiFunction;
+    fn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['ssm:GetParameter'],
-        resources: [props.killSwitch.parameterArn],
+        resources: [
+          props.killSwitch.parameterArn,
+          props.activeProfileSet.parameterArn,
+          // The SecureString is decrypted with the AWS-managed aws/ssm key, whose key policy
+          // allows any principal in the account via SSM; no kms statement is needed.
+          `arn:aws:ssm:${region}:${account}:parameter${CONFIG.sessionSecretParameterName}`,
+        ],
+      }),
+    );
+    fn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem', 'dynamodb:Query', 'dynamodb:BatchWriteItem'],
+        resources: [props.table.tableArn],
+      }),
+    );
+    fn.addToRolePolicy(new iam.PolicyStatement({ actions: ['sqs:SendMessage'], resources: [props.queue.queueArn] }));
+    fn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:GetObject'],
+        resources: [props.dataBucket.arnForObjects('intelligence/*'), props.dataBucket.arnForObjects(`index/${CONFIG.indexVersion}/manifest.json`)],
       }),
     );
 

@@ -16,6 +16,7 @@ export * from './retrieval/plan';
 export * from './retrieval/search';
 export * from './retrieval/context';
 export * from './retrieval/retrieve';
+export * from './retrieval/preceding-text';
 export * from './eval/retrieval-eval';
 export * from './retrieval/debug';
 export * from './signals/text';

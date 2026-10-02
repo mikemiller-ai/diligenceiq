@@ -4,14 +4,14 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 
 | Metric | Result |
 |---|---|
-| Questions passing every check | 14/20 |
+| Questions passing every check | 15/20 |
 | Schema-valid briefs | 20/20 |
 | Generation calls per question | 1 (every question) |
 | Citation validity before validation (model's IDs in the context) | 1 |
 | Citation validity after validation (re-check; validation removes the rest) | 1 |
-| Numeric grounding (figures found in cited passages) | 0.9222 (498/540) |
-| Unverified near matches (digits in a table cell; passage states no unit) | 35 |
-| Briefs with every figure verified | 16/20 |
+| Numeric grounding (figures found in cited passages) | 0.9315 (503/540) |
+| Unverified near matches (digits in a table cell; passage states no unit) | 30 |
+| Briefs with every figure verified | 17/20 |
 | Comparison tables aligned (one value per column in every row) | 16/16 |
 | Abstention | 1/2 |
 | Follow-ups answerable (abstention questions) | 0/2 |
@@ -38,7 +38,7 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | `cross-wmt-jpm-rates` | pass | comparison | 31/31 | 15/15 | 22237 / 3158 | 44530 | — |
 | `cross-cyber` | pass | comparison | 66/66 | 0/0 | 19096 / 3791 | 51974 | — |
 | `sector-banks-capital` | fail | comparison | 53/53 | 58/59 | 22891 / 3998 | 47199 | figures grounded: 58/59 figures found in cited passages; unverified: $295B (keyFindings[5].title) |
-| `ambiguous-meta` | fail | trend | 35/35 | 76/81 (5) | 23039 / 3076 | 39722 | figures grounded: 76/81 figures found in cited passages; unverified: $29,906 million (keyFindings[2].finding, digits only: passage states no unit), $27,045 (comparison.rows[6].values[0], digits only: passage states no unit), $37,256 (comparison.rows[6].values[1], digits only: passage states no unit), $69,691 (comparison.rows[6].values[2], digits only: passage states no unit), $69,691 million (investmentConsiderations[0].text, digits only: passage states no unit) |
+| `ambiguous-meta` | pass | trend | 35/35 | 81/81 | 23039 / 3076 | 39722 | — |
 | `ambiguous-no-company` | pass | sector | 60/60 | 8/8 | 19855 / 4478 | 56056 | — |
 | `ambiguous-ko-few-years` | pass | trend | 52/52 | 24/24 | 22196 / 3424 | 41002 | — |
 | `unsupported-period` | fail | insufficient_evidence | 24/24 | 0/0 | 19672 / 2044 | 25405 | abstains: answerType insufficient_evidence; gap stated (/2015/); answers about the missing scope: investmentConsiderations[0] "A diligence team seeking historical risk factor disclosure should obtain the FY2", investmentConsiderations[1] "The FY2025 risk factors reflect materially new risks not present in 2015, most n"; follow-ups answerable: 4 of 4 follow-ups ask about /2015/, which the corpus cannot answer: followUpQuestions[0], followUpQuestions[1], followUpQuestions[2], followUpQuestions[3] |

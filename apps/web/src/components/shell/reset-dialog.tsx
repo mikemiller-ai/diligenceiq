@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toaster';
+import { describeFailure } from '@/lib/api';
 import { useWorkspace } from '@/lib/workspace-store';
 
 export function ResetWorkspaceDialog({ children }: { children: React.ReactNode }) {
@@ -24,8 +25,8 @@ export function ResetWorkspaceDialog({ children }: { children: React.ReactNode }
         <DialogHeader>
           <DialogTitle>Reset demo workspace?</DialogTitle>
           <DialogDescription>
-            Findings you saved, with their status changes and notes, will be discarded. Company Intelligence is not
-            affected, and only your own workspace is reset.
+            Your analyses and the findings you saved, with their status changes and notes, are discarded and the demo
+            examples are restored. Company Intelligence is not affected, and only your own workspace is reset.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -36,8 +37,9 @@ export function ResetWorkspaceDialog({ children }: { children: React.ReactNode }
             <Button
               variant="destructive"
               onClick={() => {
-                reset();
-                toast.success('Workspace reset.');
+                reset()
+                  .then(() => toast.success('Workspace reset.', { description: 'Restored to the demo seed.' }))
+                  .catch((err) => toast.error('The workspace was not reset', { description: describeFailure(err) }));
               }}
             >
               Reset workspace

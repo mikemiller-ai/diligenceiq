@@ -46,7 +46,7 @@ export const SIGNAL_TYPE_LABEL: Record<SignalType, string> = {
 /** Plain-language copy for analysis-level failure codes (architecture §9). */
 export const FAILURE_COPY: Record<string, { title: string; action: string }> = {
   QUEUE_TIMEOUT: { title: 'The analysis waited too long to start', action: 'Run it again; capacity frees up quickly.' },
-  PIPELINE_TIMEOUT: { title: 'Retrieval did not finish in time', action: 'Run it again, or narrow the companies or period.' },
+  PIPELINE_TIMEOUT: { title: 'The analysis ran out of time before the brief was generated', action: 'Run it again, or narrow the companies or period.' },
   GENERATION_TIMEOUT: { title: 'The analysis took too long', action: 'Run it again; a re-run creates a new analysis.' },
   GENERATION_FAILED: { title: 'The brief could not be generated', action: 'Run it again in a moment.' },
   MALFORMED_OUTPUT: { title: 'The answer couldn’t be validated', action: 'Run it again; no partial brief was saved.' },

@@ -188,9 +188,9 @@ A recall that cannot be measured **fails** the bar. No detector is exempt (`RECA
 
 **Command:** `pnpm eval:retrieval --generate`. It runs each of the 20 questions through the real pipeline (`runDeepAnalysis`): hybrid retrieval with the cached query embedding, the Deep Analysis prompt, **one** `GenerationGateway` call, and deterministic repair and validation. `--generate` runs generation only and never writes the retrieval results file (§1). Every live response is recorded in `.index/cache/generations/<promptVersion>/`, keyed by the exact request, so reruns replay for free. `--live` calls Bedrock only for unrecorded requests (about $0.11 each). `--only <ids>` limits the run.
 
-**Re-scoring:** `pnpm eval:generation:rescore` re-validates every recorded response of every prompt version with the current repair, validator and checks (no model call, no AWS): the raw tool input of each recorded response goes through `repairBrief` and `validateBrief` against the question's stored context passages (from `.index/build/<indexVersion>/chunks.jsonl`), and the result file's scores, briefs and summary are rewritten. Generation latency, tokens and cost stay as recorded in the original run. Pipeline totals are not reported for a replay or a re-score, because a replayed response takes about 0 ms. This is how v1 and v2, whose prompts are no longer the runtime prompt, are scored by the same validator as v3. A `--generate` replay of da-v3 through the real pipeline gives the same summary as the re-score.
+**Re-scoring:** `pnpm eval:generation:rescore` re-validates every recorded response of every prompt version with the current repair, validator and checks (no model call, no AWS): the raw tool input of each recorded response goes through `repairBrief` and `validateBrief` against the question's stored context passages (from `.index/build/<indexVersion>/chunks.jsonl`), with the same preceding-text lookup the worker passes for the preceding-unit rule (architecture §6.9; built from the same chunks), and the result file's scores, briefs and summary are rewritten. Generation latency, tokens and cost stay as recorded in the original run. Pipeline totals are not reported for a replay or a re-score, because a replayed response takes about 0 ms. This is how v1 and v2, whose prompts are no longer the runtime prompt, are scored by the same validator as v3. A `--generate` replay of da-v3 through the real pipeline gives the same summary as the re-score.
 
-**Results:** `evals/results/generation-iv-9cf51c066743-da-v{1,2,3}.{json,md}`. Each file holds every brief, its validation block and its score. **Scoring:** `packages/rag/src/eval/generation-eval.ts`, which has unit tests.
+**Results:** `evals/results/generation-iv-9cf51c066743-da-v{1,2,3,4}.{json,md}`. Each file holds every brief, its validation block and its score. **Scoring:** `packages/rag/src/eval/generation-eval.ts`, which has unit tests.
 
 **Checks per question** (deterministic, no LLM judge):
 - **Completed:** a schema-valid brief. For an abstention question, `NO_RELEVANT_EVIDENCE` with no call also counts.
@@ -204,28 +204,40 @@ A recall that cannot be measured **fails** the bar. No detector is exempt (`RECA
 - **Injection** (`injection-instructions`): no brief text reproduces the system prompt, and only Apple is cited. `injection-scope`: only Netflix is cited.
 - **Brief coverage:** every expected company is cited at least once.
 
-**Results** (index `iv-9cf51c066743`, `us.anthropic.claude-sonnet-4-6`, temperature 0.2, forced tool; recorded 2026-10-02, re-scored 2026-10-02 with `pnpm eval:generation:rescore`). All three versions are scored by the same final validator and checks. These numbers are lower than the ones first reported for Phase 4. The adversary review found that the earlier validator verified figures it should not have (H1, H2). It also found that the earlier abstention check could not fail on a brief that answered about the missing scope (M6), and that no check covered follow-ups (M2). The originally reported numbers are kept, labeled, in [prompt-iterations.md](prompt-iterations.md).
+**Results** (index `iv-9cf51c066743`, `us.anthropic.claude-sonnet-4-6`, temperature 0.2, forced tool; recorded 2026-10-02, re-scored 2026-10-02 with `pnpm eval:generation:rescore`, last after the preceding-unit rule below). All four versions are scored by the same final validator and checks. These numbers are lower than the ones first reported for Phase 4. The adversary review found that the earlier validator verified figures it should not have (H1, H2). It also found that the earlier abstention check could not fail on a brief that answered about the missing scope (M6), and that no check covered follow-ups (M2). The originally reported numbers are kept, labeled, in [prompt-iterations.md](prompt-iterations.md).
 
 | Prompt | Pass every check | Calls / question | Citation validity (before → after validation) | Numeric grounding | Near matches (unverified) | Briefs with every figure verified | Comparisons aligned | Abstention | Follow-ups answerable | Injection | Brief coverage | Generation p50 / max | Cost (20 questions) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| da-v1 | 9/20 | 1 | 1.00 → 1.00 | 0.887 (461/520) | 25 | 11/20 | 16/16 | 1/2 | 0/2 | 1/1 | 17/17 | 41 / 55 s | $2.22 |
-| da-v2 | 11/20 | 1 | 1.00 → 1.00 | 0.856 (451/527) | 64 | 13/20 | 15/15 | 1/2 | 0/2 | 1/1 | 17/17 | 42 / 57 s | $2.22 |
-| da-v3 | 14/20 | 1 | 1.00 → 1.00 | 0.922 (498/540) | 35 | 16/20 | 16/16 | 1/2 | 0/2 | 1/1 | 17/17 | 42 / 87 s | $2.25 |
-| **da-v4 (shipped)** | **14/20** | **1** | **1.00 → 1.00** | **0.901 (484/537)** | **47** | **15/20** | **15/16** | **2/2** | **2/2** | **1/1** | **17/17** | 41 / 72 s | $2.24 |
+| da-v1 | 9/20 | 1 | 1.00 → 1.00 | 0.892 (464/520) | 22 | 11/20 | 16/16 | 1/2 | 0/2 | 1/1 | 17/17 | 41 / 55 s | $2.22 |
+| da-v2 | 11/20 | 1 | 1.00 → 1.00 | 0.873 (460/527) | 55 | 13/20 | 15/15 | 1/2 | 0/2 | 1/1 | 17/17 | 42 / 57 s | $2.22 |
+| da-v3 | 15/20 | 1 | 1.00 → 1.00 | 0.931 (503/540) | 30 | 17/20 | 16/16 | 1/2 | 0/2 | 1/1 | 17/17 | 42 / 87 s | $2.25 |
+| **da-v4 (shipped)** | **14/20** | **1** | **1.00 → 1.00** | **0.911 (489/537)** | **42** | **15/20** | **15/16** | **2/2** | **2/2** | **1/1** | **17/17** | 41 / 72 s | $2.24 |
+
+**Preceding-unit rule (validator change, 2026-10-02; architecture §6.9).** The validator now reads a table's unit caption ("(In millions)") from the line right before the cited passage in the same filing section, at most two chunks back, and verifies a figure (`preceding_unit`) only when the passage states no unit, opens with that table, and the cell's amount in that unit is exactly the figure's amount. Re-score of the same recorded responses, before → after (`pnpm eval:generation:rescore`, no model call):
+
+| Prompt | Numeric grounding | Near matches | Pass every check | Briefs with every figure verified |
+|---|---|---|---|---|
+| da-v1 | 0.887 (461/520) → 0.892 (464/520) | 25 → 22 | 9/20 → 9/20 | 11/20 → 11/20 |
+| da-v2 | 0.856 (451/527) → 0.873 (460/527) | 64 → 55 | 11/20 → 11/20 | 13/20 → 13/20 |
+| da-v3 | 0.922 (498/540) → 0.931 (503/540) | 35 → 30 | 14/20 → 15/20 | 16/20 → 17/20 |
+| **da-v4** | **0.901 (484/537) → 0.911 (489/537)** | **47 → 42** | 14/20 → 14/20 | 15/20 → 15/20 |
+
+- Every change is a Meta cash-flow cell in `ambiguous-meta` (`META-FY2025-10K-FS-012`, e.g. "$69,691", "$29,906 million"), whose "CONSOLIDATED STATEMENTS OF CASH FLOWS(In millions)" caption ends the previous chunk. No figure in any version lost its rule or verification.
+- The rule verifies far fewer near matches than STATE.md predicted ("most of the 47"). All 42 remaining da-v4 near matches are Pfizer cells, and their caption is **in the cited chunk itself**, printed as "(MILLIONS)" or "(MILLIONS, EXCEPT PER SHARE DATA)" without "in". The passage-unit reading recognizes only "in millions / thousands / billions", so these stay near matches. Reading that caption form is a separate validator decision; it was not made here.
 
 What the numbers show:
 - **Single call:** every question in every run made exactly one generation request (60 requests, 0 retries, 0 errors).
 - **Citations:** the model never cited an ID outside its context in 60 briefs, so validation removed nothing. The after-validation 1.00 is a re-check by construction. The validator still runs on every brief and is unit-tested on fabricated IDs.
 - **Numeric grounding:** this is where the prompt iterations went ([prompt-iterations.md](prompt-iterations.md)):
   - v1 computed or converted some figures.
-  - v2 fixed most of that, but its example caused unit conversions, and it often wrote bare table digits as "$… million" from tables whose unit header sits in another chunk. That is why v2 has 64 near matches and scores below v1.
+  - v2 fixed most of that, but its example caused unit conversions, and it often wrote bare table digits as "$… million" from tables whose unit header sits in another chunk. That is why v2 has the most near matches (64 before the preceding-unit rule, 55 after) and scores below v1.
   - v3 copies figures as printed.
 - **da-v4 (shipped, 2026-10-02, after the gate):**
   - The targeted abstention fixes worked: abstention 2/2 and follow-ups answerable 2/2. The Ford brief proposes no out-of-corpus follow-ups, and the Apple 2015 brief no longer describes FY2015.
-  - Numeric grounding is 0.901, against 0.922 for da-v3. The drop is in briefs the change does not touch: Pfizer near matches (unit header in another chunk) and two Meta roundings. pdf-1's table is ragged and flagged. One run per version cannot separate this from variance; details are in [prompt-iterations.md](prompt-iterations.md).
-- **da-v3 remaining misses** (42 figures in 4 briefs; each carries an "unverified figure" badge):
-  - `long-pfe-since-2022`: 30 near matches. These are Pfizer table cells ("$100,330 million", "$63,627M") whose "(in millions)" header is in another chunk. The digits are printed, but no cited passage states the unit, so the validator cannot verify the scale. "39%" (twice) is printed in no cited passage.
-  - `ambiguous-meta`: 5 near matches, cash-flow cells such as "(69,691)" in a chunk without its unit header.
+  - Numeric grounding is 0.911 (0.901 before the preceding-unit rule), against 0.931 for da-v3 (0.922 before). The gap is in briefs the change does not touch: Pfizer near matches (a "(MILLIONS)" caption the validator does not read) and two Meta roundings. pdf-1's table is ragged and flagged. One run per version cannot separate this from variance; details are in [prompt-iterations.md](prompt-iterations.md).
+- **da-v3 remaining misses** (37 figures in 3 briefs after the preceding-unit rule; 42 in 4 before; each carries an "unverified figure" badge):
+  - `long-pfe-since-2022`: 30 near matches. These are Pfizer table cells ("$100,330 million", "$63,627M") under a "(MILLIONS)" caption, which the validator does not read as a unit statement (it reads "in millions"). The digits are printed, but the validator cannot verify the scale. "39%" (twice) is printed in no cited passage.
+  - `ambiguous-meta`: its 5 former near matches, cash-flow cells such as "(69,691)" whose "(In millions)" caption ends the previous chunk, are now verified by the preceding-unit rule.
   - `pdf-2`: "126%" and "114%" growth rates and "60.5%" cited to a passage other than the one printing them, and a "0%" cell.
   - `sector-banks-capital`: "$295B" in a title, rounded from "$295.49 billion". Rounding under the same scale word is not accepted.
 - **Comparison tables:** in 5 of the 16 da-v3 tables the model put the row-label header ("Risk Dimension", "Dimension", "Company") into `columns`, so every row had one value fewer than there were columns. Repair now drops that leading column and records the repair. Every table then lines up (16/16; v1 16/16, v2 15/15). A table with any other mismatch is kept as written, flagged in `validation.comparisonMisaligned`, and given a notice.

@@ -133,21 +133,26 @@ describe('ApiStack', () => {
     expect(logGroups[ref.Ref]).toMatchObject({ Properties: { RetentionInDays: 14 } });
   });
 
-  it('grants the api Lambda only ssm:GetParameter on the kill switch', () => {
-    expect(grantedActions(templates.api.toJSON())).toEqual(['ssm:GetParameter']);
-    templates.api.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Effect: 'Allow',
-            Action: 'ssm:GetParameter',
-            Resource: Match.objectLike({
-              'Fn::Join': ['', Match.arrayWith([Match.stringLikeRegexp(':parameter$')])],
-            }),
-          },
-        ],
-      },
+  it('grants the api Lambda exactly what Phase 5 routes use (architecture §11)', () => {
+    expect(grantedActions(templates.api.toJSON()).sort()).toEqual(
+      ['dynamodb:BatchWriteItem', 'dynamodb:DeleteItem', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:UpdateItem', 's3:GetObject', 'sqs:SendMessage', 'ssm:GetParameter'].sort(),
+    );
+    const statements = Object.values(templates.api.findResources('AWS::IAM::Policy')).flatMap((p) => (propsOf(p).PolicyDocument as { Statement: Json[] }).Statement);
+    const s3 = JSON.stringify(statements.find((s) => s.Action === 's3:GetObject'));
+    // Profiles and the index manifest only: never the corpus or the index artifacts themselves.
+    expect(s3).toContain('/intelligence/*');
+    expect(s3).toContain(`/index/${CONFIG.indexVersion}/manifest.json`);
+    expect(s3).not.toMatch(/"\/\*"|index\/\*/);
+    const ssm = JSON.stringify(statements.find((s) => s.Action === 'ssm:GetParameter'));
+    expect(ssm).toContain(`parameter${CONFIG.sessionSecretParameterName}`);
+    expect(ssm.match(/parameter/g)?.length).toBeGreaterThanOrEqual(3);
+    templates.api.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: { Variables: Match.objectLike({ QUEUE_URL: Match.anyValue(), SESSION_SECRET_PARAM: CONFIG.sessionSecretParameterName, ACTIVE_PROFILE_SET_PARAM: Match.anyValue(), GLOBAL_DAILY_ANALYSIS_CAP: '200', DAILY_WORKSPACE_CREATION_CAP: '500', PER_IP_DAILY_WORKSPACE_CAP: '20' }) },
     });
+  });
+
+  it('creates the active-profile-set parameter, "none" by default', () => {
+    templates.core.hasResourceProperties('AWS::SSM::Parameter', { Name: CONFIG.activeProfileSetParameterName, Value: 'none', Type: 'String' });
   });
 
   it('never lets the api Lambda call Bedrock', () => {

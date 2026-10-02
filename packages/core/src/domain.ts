@@ -41,6 +41,18 @@ export const FindingSchema = z.object({
   isKey: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  /**
+   * Numeric grounding copied from the brief's validation for this item (architecture §6.9), so a
+   * saved finding keeps its "unverified figure" markers. Set only for findings saved from a brief.
+   */
+  figures: z.array(z.lazy(() => FigureCheckSchema)).optional(),
+  /** Set only by the demo seed (SPEC §40): an example finding, labeled as such. */
+  seeded: z.literal(true).optional(),
+  /**
+   * The profile set a Company Intelligence or Compare finding was saved from. Profile refs are
+   * positional (`risk-1`, `rec-2`), so they name a different item in another set.
+   */
+  profileSetId: z.string().min(1).optional(),
 });
 export type Finding = z.infer<typeof FindingSchema>;
 
@@ -55,6 +67,8 @@ export const AnalysisSummarySchema = z.object({
   stage: z.string().optional(),
   createdAt: z.string(),
   completedAt: z.string().optional(),
+  /** Copied from the seed: real pipeline output, run in advance (SPEC §40). */
+  seeded: z.boolean().optional(),
 });
 export type AnalysisSummary = z.infer<typeof AnalysisSummarySchema>;
 
@@ -202,12 +216,14 @@ export const DiligenceBriefSchema = z.object({
 });
 export type DiligenceBrief = z.infer<typeof DiligenceBriefSchema>;
 
-export const AnalysisFiltersSchema = z.object({
-  tickers: z.array(TickerSchema).max(10).optional(),
-  filingTypes: z.array(FilingTypeSchema).min(1).optional(),
-  fiscalYearFrom: z.number().int().min(2000).max(2100).optional(),
-  fiscalYearTo: z.number().int().min(2000).max(2100).optional(),
-});
+export const AnalysisFiltersSchema = z
+  .object({
+    tickers: z.array(TickerSchema).max(10).optional(),
+    filingTypes: z.array(FilingTypeSchema).min(1).optional(),
+    fiscalYearFrom: z.number().int().min(2000).max(2100).optional(),
+    fiscalYearTo: z.number().int().min(2000).max(2100).optional(),
+  })
+  .strict();
 export type AnalysisFilters = z.infer<typeof AnalysisFiltersSchema>;
 
 export const CreateAnalysisRequestSchema = z
@@ -265,6 +281,24 @@ export interface AnalysisInterpretation {
   retrievalMode?: 'hybrid' | 'bm25';
 }
 
+/** One currency or percentage figure checked against its cited passages (architecture §6.9). */
+export const FigureCheckSchema = z.object({
+  location: z.string(),
+  figure: z.string(),
+  verified: z.boolean(),
+  /**
+   * How it matched a cited passage (packages/rag validate.ts matchFigure): `exact` (same value and
+   * unit printed), `scaled` (an equal amount under another scale word, or a table that states its
+   * unit), `preceding_unit` (an exactly equal amount in a table cell of a passage that opens with
+   * a table whose unit caption ends the previous chunk of the same filing section), or
+   * `unit_unstated`: the digits are a table cell in a passage that states no unit. A
+   * `unit_unstated` figure is NOT verified.
+   */
+  rule: z.enum(['exact', 'scaled', 'preceding_unit', 'unit_unstated']).nullable(),
+  chunkId: z.string().nullable(),
+});
+export type FigureCheck = z.infer<typeof FigureCheckSchema>;
+
 /** Deterministic validation of one brief (SPEC §31; architecture §6.9). Never a second model call. */
 export const BriefValidationSchema = z.object({
   /** Deterministic repairs applied before the schema parse (empty when none were needed). */
@@ -281,21 +315,7 @@ export const BriefValidationSchema = z.object({
   /** Items left with no valid citation (findings, comparison rows, considerations). */
   uncited: z.array(z.string()),
   numeric: z.object({
-    figures: z.array(
-      z.object({
-        location: z.string(),
-        figure: z.string(),
-        verified: z.boolean(),
-        /**
-         * How it matched a cited passage (packages/rag validate.ts matchFigure): `exact` (same value and
-         * unit printed), `scaled` (an equal amount under another scale word, or a table that states its
-         * unit), or `unit_unstated`: the digits are a table cell in a passage that states no unit. A
-         * `unit_unstated` figure is NOT verified.
-         */
-        rule: z.enum(['exact', 'scaled', 'unit_unstated']).nullable(),
-        chunkId: z.string().nullable(),
-      }),
-    ),
+    figures: z.array(FigureCheckSchema),
     total: z.number().int().nonnegative(),
     verified: z.number().int().nonnegative(),
     /** Unverified figures whose digits match a table cell in a passage that states no unit (reported separately). */
@@ -345,4 +365,16 @@ export interface AnalysisTelemetry {
   contextTokenEstimate?: number;
   /** The generation was sent but returned no usage (timeout or error): inputTokens is estimated from the prompt and output is unknown, so estimatedCostUsd is a lower bound. */
   costIncomplete?: boolean;
+  /** A replayed recording (the demo seed): the duration fields are 0, not measurements (architecture §8). */
+  replayed?: boolean;
+}
+
+/**
+ * A brief comparison's headers. After validation (packages/rag validate.ts), `columns` holds one
+ * header per value: the companies or periods, without a row-label header. A table whose columns
+ * still carry a leading row-label header (one more column than values) is read that way too.
+ */
+export function comparisonHeaders(c: Pick<NonNullable<DiligenceBrief['comparison']>, 'columns' | 'rows'>): { labelHeader: string | null; valueColumns: string[] } {
+  const width = Math.max(0, ...c.rows.map((r) => r.values.length));
+  return c.columns.length === width + 1 && width > 0 ? { labelHeader: c.columns[0] ?? null, valueColumns: c.columns.slice(1) } : { labelHeader: null, valueColumns: c.columns };
 }

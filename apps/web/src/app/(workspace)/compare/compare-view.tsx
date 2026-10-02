@@ -3,6 +3,7 @@
 import {
   COMPARE_MAX,
   COMPARE_MIN,
+  compareRowRef,
   composeCompare,
   isFixtureProfile,
   type Citation,
@@ -19,6 +20,7 @@ import { CompanySelect } from '@/components/diligence/company-select';
 import { CitationList } from '@/components/diligence/evidence';
 import { PageContainer, PageHeader } from '@/components/diligence/page';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
+import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { EmptyState, NoticeBar } from '@/components/diligence/states';
 import { PlaceholderBadge, PlaceholderSlot } from '@/components/intelligence/placeholder';
 import { Button } from '@/components/ui/button';
@@ -28,7 +30,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { companies, companyName } from '@/fixtures';
 import { TIER_COPY } from '@/fixtures/profiles';
 import { formatDate } from '@/lib/format';
-import { compareRowRef } from '@/lib/finding-sources';
+
 import { TRAJECTORY_LABEL } from '@/lib/labels';
 import { compareHref, newAnalysisHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
@@ -45,7 +47,7 @@ const RANK_RULE =
 
 export function CompareView() {
   const router = useRouter();
-  const { profiles } = useWorkspace();
+  const { profiles, profileStates, loadProfile, status } = useWorkspace();
   const tickers = (useSearchParams().get('tickers') ?? '')
     .split(',')
     .map((t) => t.trim().toUpperCase())
@@ -53,7 +55,17 @@ export function CompareView() {
     .slice(0, COMPARE_MAX);
   const setTickers = (next: string[]) => router.replace(compareHref(next));
 
-  const outcome = tickers.length >= COMPARE_MIN ? composeCompare(tickers, profiles) : null;
+  // Profiles come from the active set on the server, loaded once each; Compare composes them
+  // deterministically (DD-19). Nothing here can generate.
+  const key = tickers.join(',');
+  React.useEffect(() => {
+    if (status === 'ready') for (const t of key.split(',').filter(Boolean)) void loadProfile(t);
+  }, [key, status, loadProfile]);
+  // No workspace (the session failed): the banner explains and offers Retry; never an endless skeleton.
+  const noWorkspace = status === 'error';
+  const loading = !noWorkspace && (status !== 'ready' || tickers.some((t) => !profiles.has(t) && (profileStates.get(t) ?? 'loading') === 'loading'));
+  const failed = tickers.filter((t) => profileStates.get(t) === 'error');
+  const outcome = tickers.length >= COMPARE_MIN && !loading && !noWorkspace ? composeCompare(tickers, profiles) : null;
 
   return (
     <PageContainer className="max-w-[1200px]">
@@ -76,6 +88,15 @@ export function CompareView() {
         )}
       </div>
 
+      {tickers.length >= COMPARE_MIN && loading && <PageSkeleton />}
+      {tickers.length >= COMPARE_MIN && noWorkspace && (
+        <NoticeBar className="mb-4">Company profiles cannot be loaded because your demo workspace could not be opened. The notice above explains why; use its Retry.</NoticeBar>
+      )}
+      {failed.length > 0 && (
+        <NoticeBar className="mb-4">
+          Intelligence for {failed.map(companyName).join(', ')} could not be loaded right now. Reload the page to try again.
+        </NoticeBar>
+      )}
       {outcome && !outcome.ok && (
         <EmptyState
           icon={Columns3}

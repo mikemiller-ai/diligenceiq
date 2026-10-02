@@ -143,16 +143,16 @@ So every dashboard has a performance view, a cited risk section, drivers, and re
 
 ## 4. Request flows
 
-### 4.1 Run an analysis *(worker built in Phase 4; the api routes, sessions and caps in Phase 5)*
+### 4.1 Run an analysis *(worker built in Phase 4; the api routes, sessions and caps built in Phase 5: `services/api/src/app.ts`)*
 
 ```text
 Browser                         api Lambda                         SQS        worker Lambda                     Bedrock
-  │ POST /api/analyses  ───────▶ kill switch (SSM, cached 60 s)
-  │                              validate (Zod, ≤1,000 chars)
+  │ POST /api/analyses  ───────▶ validate (body ≤16 KB, Zod, ≤1,000 chars, tickers in the catalog)
+  │                              kill switch (SSM, cached 60 s)
   │                              caps: workspace hourly, global daily (conditional counters)
   │                              put ANALYSIS (QUEUED, queuedAt, deadlineAt = queuedAt + 240 s)
   │                              send message ─────────────────────▶ │
-  │ ◀── 202 {analysisId}         (send fails → mark FAILED ENQUEUE_FAILED, 503 + requestId)
+  │ ◀── 202 {analysisId, pollAfterMs: 1500}  (send fails → mark FAILED ENQUEUE_FAILED, 503 + requestId)
   │                                                                 └──▶ claim (QUEUED→RUNNING + claimToken, conditional)
   │ GET /api/analyses/:id (poll ~1.5 s)                                  stage=analyzing   query analysis + lane plan
   │ ◀── {status, stage}  (past deadlineAt → lazily mark FAILED)          stage=retrieving  embed query ───────▶ embed (retrieval)
@@ -165,13 +165,23 @@ Browser                         api Lambda                         SQS        wo
   │ ◀── {status: COMPLETE, brief, interpretation, coverage, telemetry}   persist (conditional on claimToken)
 ```
 
-The stages shown in the UI are the stages the worker actually writes (Phase 4): `claimed`, `loading_index` (cold start only), `analyzing`, `retrieving`, `balancing`, `context`, `generating`, `validating`, then `complete` or `failed`. There is no fake progress. Each stage is written when its work starts (`packages/rag/src/retrieval/retrieve.ts`; SPEC §38.1):
+The stages shown in the UI are the stages the worker actually writes (Phase 4): `queued` (before the claim), `claimed`, `loading_index` (cold start only), `analyzing`, `retrieving`, `balancing`, `context`, `generating`, `validating`, then `complete` or `failed`. There is no fake progress. Each stage is written when its work starts (`packages/rag/src/retrieval/retrieve.ts`; SPEC §38.1):
 - `analyzing` ("Interpreting the question…"): deterministic query analysis and the company × period lane plan. The plan is part of reading the question: it decides which filings each lane may search, so it must precede the search.
 - `retrieving` ("Searching SEC filings…"): the one query embedding (10 s timeout, BM25 fallback) and the filtered hybrid search of every lane.
 - `balancing` ("Balancing evidence across companies and periods…"): the context builder fills each lane's quota (companies before periods), applies per-company caps, removes near-duplicates and keeps the token budget.
 - `context` ("Preparing source context…"): the lane report and snapshot, then the scope description and user message with the `<filing_excerpts>` block.
 
 The deterministic steps take milliseconds; the embedding and the generation dominate, so `retrieving` and `generating` are the stages a user actually sees for long. Cold-start index loading happens inside the async job and shows as the first stage; its duration is measured in Phase 2. A user-triggered prewarm is a documented future option, not part of v1.
+
+**Phase 5 implementation (`POST /api/analyses`).** In order:
+1. Body ≤ 16 KB and Zod (`CreateAnalysisRequestSchema`). Every ticker in `filters` and in `origin` must be in the core company catalog (`packages/core/src/generated/catalog.json`, 54 tickers, built by `scripts/fixtures/build-catalog.mjs`); otherwise `400 VALIDATION_ERROR`.
+2. Kill switch: off → `503 ANALYSES_DISABLED`, before any counter moves.
+3. Workspace hourly counter `WS#<id> / RATE#<yyyy-mm-ddThh>` (default 10), then the global daily counter `GLOBAL / RATE#<yyyy-mm-dd>` (default 200). Each is a conditional `ADD` (`attribute_not_exists(n) OR n < :cap`); at the cap the answer is `429 RATE_LIMITED` with `details: { scope: 'workspace_hourly' | 'global_daily', retryAfter }`. Counters are never refunded.
+4. `createQueued`. The analysis ID is 9 base36 characters of milliseconds plus 10 random base64url characters, so IDs sort by creation time (`services/api/src/ids.ts`).
+5. `SendMessage` (IDs only). On failure, `failQueued` marks it `ENQUEUE_FAILED` and the response is `503 ENQUEUE_FAILED` with `details.analysisId`.
+6. `202 { analysisId, status: 'QUEUED', pollAfterMs: 1500 }`.
+
+The Deep Analysis page polls every 1.5 s while the analysis is QUEUED or RUNNING and shows the stage the record carries. A failed poll (network) shows "Connection lost" and retries every 3 s; the analysis continues server-side.
 
 ### 4.2 Everything else at runtime is deterministic and LLM-free
 
@@ -205,7 +215,7 @@ All of the following run as plain api-Lambda reads and writes against DynamoDB a
 | Context snapshot write fails after `complete` | Worker | The analysis stays `COMPLETE`. The snapshot is written only after the conditional `complete` succeeds (so a lost claim leaves no orphan snapshot), retried once, then logged (`context_snapshot_missing`; the summary carries `contextStored: false`). A missing `CONTEXT#` item means "snapshot unavailable"; the cited passages are still in `citations[]`. |
 | Worker finishes after the record was marked FAILED | Worker | Final write is conditional on `status = RUNNING AND claimToken = mine`, so it is rejected; the outcome is logged. |
 
-**Phase 4 implementation.** Every transition above is a conditional write in `DynamoAnalysisStore` (a `MemoryAnalysisStore` with the same conditions backs the tests). The worker claims before any fallible work; only a failure of the claim write itself throws (SQS redelivers, at most 3 times, then the DLQ handler). Before generation it checks that the time left (the earlier of `deadlineAt` and the Lambda's remaining time, less 5 s) covers the 120 s generation budget plus a 10 s finish margin; the request is aborted at 120 s (`GENERATION_TIMEOUT`). A failing query embedding falls back to BM25-only retrieval, stated in the Interpretation panel (assumptions A1). `expireIfPastDeadline` is the poll path's lazy expiry; Phase 5 wires it into `GET /api/analyses/:id`.
+**Phase 4 implementation.** Every transition above is a conditional write in `DynamoAnalysisStore` (a `MemoryAnalysisStore` with the same conditions backs the tests). The worker claims before any fallible work; only a failure of the claim write itself throws (SQS redelivers, at most 3 times, then the DLQ handler). Before generation it checks that the time left (the earlier of `deadlineAt` and the Lambda's remaining time, less 5 s) covers the 120 s generation budget plus a 10 s finish margin; the request is aborted at 120 s (`GENERATION_TIMEOUT`). A failing query embedding falls back to BM25-only retrieval, stated in the Interpretation panel (assumptions A1). `expireIfPastDeadline` is the poll path's lazy expiry; since Phase 5 `GET /api/analyses/:id` runs it for a QUEUED or RUNNING record past `deadlineAt`.
 
 **Redelivery and the DLQ in practice.** With a 1080 s visibility timeout, every SQS redelivery arrives after the 240 s `deadlineAt`, so a redelivered message can never be claimed. A worker that throws before its claim is therefore not "retried" in any useful sense: the next poll after `deadlineAt` marks the job `QUEUE_TIMEOUT` (or, once claimed, `PIPELINE_TIMEOUT` / `GENERATION_TIMEOUT`). The DLQ handler only records poison messages whose claim write itself failed three times, and usually finds the analysis already FAILED. **The poll's lazy expiry is the real recovery path.**
 
@@ -236,6 +246,12 @@ index/<indexVersion>/ ──▶ for each company (--max-calls budget required; n
 ```
 
 At runtime the api Lambda reads the active set named by the SSM parameter `/diligenceiq/active-profile-set` (`<indexVersion>/<profileSetId>`, cached 60 s; read-only IAM on `intelligence/*`) and caches profiles in memory. Switching between the `llm-v*` and `det-v*` sets is a parameter change, with no rebuild or deploy. A profile is never regenerated because someone opened a page. It is regenerated only when the index version or the profile prompt version changes. An admin "refresh" (SPEC §32.5) is a `profilePromptVersion` bump, which is a new ledger key; the same key is never called twice.
+
+**Runtime read path (built in Phase 5: `services/api/src/profiles/provider.ts`).** The builder above is still Phase 4b; the read side exists now.
+- **Pointer.** CDK `CoreStack` creates `/diligenceiq/active-profile-set` with the value `none` (no set active). A value must match `iv-…/(llm|det|fixture)-vN`; anything else reads as no set. The pointer is cached 60 s, and a read error keeps the last good value.
+- **Manifest.** `intelligence/<indexVersion>/<profileSetId>/manifest.json`, validated by `ProfileSetManifestSchema` in `packages/core`: `indexVersion`, `profileSetId`, `builtAt`, `companies[{ ticker, company, sector, tier, filings, periodsCovered, headline?, mode: llm | deterministic | fixture, generationCallCount: 0 | 1 }]`. Unknown fields are ignored, so the Phase 4b builder can add its per-company telemetry; **Phase 4b must write this format.** A manifest whose `indexVersion`/`profileSetId` disagree with the pointer is rejected.
+- **Profiles.** `<TICKER>.json` in the same folder, schema- and integrity-checked on load (and its ticker and `profileSetId` must match). A bad file reads as missing (`PROFILE_MISSING`), never as content. A set is immutable once built, so the manifest and profiles are cached per warm container while the set stays active.
+- **Preview set until Phase 4b.** The active set is the preview set `fixture-v2`: the web's fixture profiles, exported unchanged by `pnpm profiles:export-fixture` to `tests/fixtures/profile-sets/iv-9cf51c066743/fixture-v2/` and uploaded with `pnpm profiles:upload-set` (dry run unless `--yes`; each object `If-None-Match: *`; the manifest last; it does not switch the pointer, which is a separate `aws ssm put-parameter`). Phase 4b's `det-v*` and `llm-v*` sets use the same layout; switching is the pointer (DD-20).
 
 ---
 
@@ -442,7 +458,8 @@ TEXT:
     - *Currency with no scale word* ("$6.11"): the same value after a "$", or in a table cell of a passage that prints a "$", with no scale word (`exact`). It is refused at 1,000 or more when the passage states a unit, because the unit was dropped.
     - *Currency with a scale word* ("$25.0 billion"): the same value with the same scale word (`exact`). Or the exactly equal amount under another scale word, "$72,220 million" for "$72.22 billion" (`scaled`). Or, in a passage that states its unit, a "$" amount or table cell equal to the figure in that unit, or rounding to it at the figure's own precision when the figure is in a coarser unit and has at least 3 significant digits as printed: "$416.2 billion" for 416,161 in millions, never "$1 billion" for 1,234 (`scaled`). Precision is read from the printed text: "5.0" is not "5". Rounding under the same scale word ("$295B" for "$295.49 billion") is not accepted.
     - *Comparison cells* take the unit their row label or column header states ("Total Revenue ($M)"): "$134,902" in that row is checked as $134,902 million.
-    - *Near match* (`unit_unstated`): a scaled figure whose printed digits equal a table cell in a passage that states no unit, typically a table whose "(in millions)" header is in another chunk. It is reported, counted separately, and **not verified**.
+    - *Preceding unit* (`preceding_unit`, verified): a passage that states no unit but opens with a table, where the last non-empty line of the filing text right before the passage is that table's unit caption ("CONSOLIDATED STATEMENTS OF CASH FLOWS(In millions)", "(In millions, except per share amounts)", "(Dollars in billions)"). The caption line must not be a table row and nothing may follow the caption but its closing parenthesis; "(in millions of shares)" is not read. The preceding text comes only from the same filing (`documentId`), the same section, consecutive chunks (`chunkIndex`) that are contiguous by character offsets, at most two chunks back (`precedingFilingText`; the worker passes `Retriever.precedingText`, the re-score builds the same lookup from `chunks.jsonl`, and the validator stays pure). The unit covers only the cells of that leading table (the chunker's `isTableRow` lines), and the cell's amount in that unit must **exactly** equal the figure's amount: "$69.691 billion" or "$69,691 million" for 69,691, never "$69.7 billion" (no rounding, unlike a unit stated in the passage). An unscaled figure of 1,000 or more found only in that table is refused, as the unit was dropped. Why this is still strict: the caption is the line a reader sees directly above the table; any heading, prose or table row in between breaks the link, and a passage that states its own unit ignores the caption. The context snapshot and citations are unchanged.
+    - *Near match* (`unit_unstated`): a scaled figure whose printed digits equal a table cell in a passage that states no unit (outside a leading table covered by a preceding unit), typically a table whose unit header is elsewhere or printed in a form the validator does not read ("(MILLIONS)"). It is reported, counted separately, and **not verified**.
   - **Scope:** an item's figures are checked against that item's own valid citations. The title, summary and evidence gaps are checked against every passage some item cites, because they summarize the items. Follow-up questions are not checked.
   - **What it does not prove:** a verified figure means a number with these digits and this unit is printed in a cited passage, not that it means what the sentence says. A computed "about 2%" can still verify against an unrelated "2%" in the same passage, and a figure can verify against the wrong row of a table. This is a deterministic check against invented, converted and rescaled numbers, not semantic grounding.
   - **Validation block:** removed citations, uncited items, misaligned comparison rows, every figure with its rule and chunk, and plain-language notices for the brief.
@@ -480,6 +497,10 @@ The server, not the model, adds:
 - `interpretation`: the resolved query scope (companies, periods including "last N years" / current-view resolution, filters, coverage warnings).
 - `coverage`: the company × period evidence matrix.
 - `telemetry`.
+
+**Comparison headers (bug fixed in Phase 5).** In a validated brief, `comparison.columns` has one header per value: repair drops a leading row-label header (§6.9). The web table header and the text of a finding saved from a comparison row now use core `comparisonHeaders`, which returns the value columns and still accepts a leading row-label header (`columns.length = values + 1`) if one is present.
+
+**How the web shows a brief (Phase 5, `apps/web/src/app/(workspace)/analysis/analysis-view.tsx`, `components/diligence/brief-panels.tsx`).** The real stage names while QUEUED/RUNNING; the Interpretation panel; the company × period coverage matrix; numeric badges per figure ("Unverified figure", and "Unit not stated" for `unit_unstated` near matches); the validation summary; and citations resolved against the context snapshot, falling back to `citations[]` when the snapshot is missing. A seeded analysis is labeled as real pipeline output run in advance, and its durations are hidden.
 
 **P0 on every brief** (assumptions B4, B5, C1, C2, C5; DD-06): the Interpretation panel (`interpretation`), the company × period coverage matrix (`coverage`), and numeric-grounding badges (`validation`) are always shown. Only the richer versions (per-company Diligence Gaps matrix, SPEC §19; Analysis Audit Trail, SPEC §23.2) are P1.
 
@@ -542,21 +563,24 @@ Labels are descriptive only. Scores, ratings and recommendations are not part of
 
 ---
 
-## 8. Data model — DynamoDB single table `diligenceiq` (on-demand) *(planned: Phase 5)*
+## 8. Data model — DynamoDB single table `diligenceiq` (on-demand) *(built in Phase 5: `services/api/src/workspace/store.ts`, `analyses/store.ts`; `THESIS#` and `WATCH#` in Phase 8b)*
 
 | PK | SK | Contents |
 |---|---|---|
-| `WS#<workspaceId>` | `META` | workspace label, createdAt, seed version, `ttl` (30 days) |
-| `WS#<workspaceId>` | `ANALYSIS#<ulid>` | question, filters, `origin` (`AnalysisOrigin`, §9: what prefilled it, recorded for provenance only; retrieval uses only the question and filters), status (QUEUED/RUNNING/COMPLETE/FAILED), stage, `queuedAt`, `claimedAt`, `claimToken`, `deadlineAt` (queuedAt + 240 s), `generationStartedAt`, `generationCallCount`, error, interpretation, coverage, brief, validation, telemetry, `ttl` |
+| `WS#<workspaceId>` | `META` | workspace label, createdAt, seed version, `ttl` (30 days, moved out on a returning visit; see Demo sessions) |
+| `WS#<workspaceId>` | `ANALYSIS#<analysisId>` (time-ordered, §4.1) | question, filters, `origin` (`AnalysisOrigin`, §9: what prefilled it, recorded for provenance only; retrieval uses only the question and filters), status (QUEUED/RUNNING/COMPLETE/FAILED), stage, `queuedAt`, `claimedAt`, `claimToken`, `deadlineAt` (queuedAt + 240 s), `generationStartedAt`, `generationCallCount`, error, interpretation, coverage, brief, validation, telemetry, `ttl` |
 | `WS#<workspaceId>` | `CONTEXT#<analysisId>` | **Context snapshot**: the passages sent to the model (text + metadata + `indexVersion`), ≤350 KB guard. A separate item so polls and lists stay small. |
-| `WS#<workspaceId>` | `FINDING#<ulid>` | title, text, `theme` (one of the six theme IDs, §8.1), tickers, citations (**passage text + source metadata + `indexVersion`**), `origin` (`FindingOrigin`, §9), analysisId?, note, status (Active / Needs Follow-Up / Resolved), `pinnedToIC`, `isKey`, timestamps, `ttl` |
+| `WS#<workspaceId>` | `FINDING#<findingId>` (derived from the source, see below) | title, text, `theme` (one of the six theme IDs, §8.1), tickers, citations (**passage text + source metadata + `indexVersion`**), `origin` (`FindingOrigin`, §9), analysisId?, note, status (Active / Needs Follow-Up / Resolved), `pinnedToIC`, `isKey`, `figures?` (the brief's figure checks for the saved item, §6.9), `seeded?` (saved by the demo seed), timestamps, `ttl` (30 days from creation; restarted by an edit) |
 | `WS#<workspaceId>` | `THESIS#<ulid>` | statement (≤ 1,000), tickers (catalog-validated), `links: Array<{ kind: 'finding' \| 'signal', ref, stance: 'supporting' \| 'challenging' }>` (≤ 50), openQuestions (≤ 20 × 500 chars), watchedCategories, `pinnedToIC`, timestamps, `ttl`. ≤ 20 theses per workspace (P1) |
 | `WS#<workspaceId>` | `WATCH#<ticker>` | categories (subset of the signal categories plus `new_filings`, which selects filing events from the filing catalog, and `anything_material`, which selects every intelligence event), createdAt, `ttl`. `ticker` must be in the company catalog; ≤ 25 watches per workspace (P1) |
 | `WS#<workspaceId>` | `RATE#<yyyy-mm-ddThh>` | Per-workspace hourly analysis counter, `ttl` |
 | `GLOBAL` | `RATE#<yyyy-mm-dd>` | Global daily analysis counter (spend cap), `ttl` |
 | `GLOBAL` | `WSCREATE#<yyyy-mm-dd>` | Daily workspace-creation counter, `ttl` |
+| `GLOBAL` | `WSCREATE#<yyyy-mm-dd>#<hash16>` | Per-client daily workspace-creation counter: `hash16` is a salted SHA-256 (HMAC with the session secret) of the source IP, never the IP itself (DD-20 (f)), `ttl` |
 
-The context snapshot uses `CONTEXT#` rather than `ANALYSIS#<id>#CONTEXT` so that listing analyses (`begins_with(SK, "ANALYSIS#")`) never reads snapshot items. Polls use a projection (status, stage, error, deadline fields, and the brief once complete), never the snapshot.
+**Finding IDs (a deviation from `FINDING#<ulid>`).** A finding's ID is derived from its source: `fd-` plus the first 20 hex characters of `sha256(sourceKey(source))`, written with a conditional create. One stored item (a key finding, a signal, a compare row) is therefore saved at most once per workspace; a second save is `409 ALREADY_SAVED` (DD-20).
+
+The context snapshot uses `CONTEXT#` rather than `ANALYSIS#<id>#CONTEXT` so that listing analyses (`begins_with(SK, "ANALYSIS#")`) never reads snapshot items. The list query uses a projection (the summary fields only). A poll (`GET /api/analyses/:id`) reads the whole `ANALYSIS#` item, which holds the brief, citations and validation once complete, and strips internal fields (`claimToken`, `ttl`, the partition) before answering; it never reads the `CONTEXT#` snapshot. Counts (`stats.analyses`, the findings cap) are `Select: COUNT` queries.
 
 The **telemetry** stored on each analysis and emitted as one summary log event (SPEC §30.1 and §35.10):
 - `requestId`, `analysisId`, `query` (the user's question is logged; prompts and chunk text are not)
@@ -564,13 +588,17 @@ The **telemetry** stored on each analysis and emitted as one summary log event (
 - `retrievalRequests`, `chunksRetrieved`, `contextChunksUsed`, `companiesRepresented`, `filingsRepresented`
 - `embeddingCallCount`, `rerankCallCount`, `generationCallCount`, `inputTokens`, `outputTokens`
 - `modelId`, `promptVersion` (the Deep Analysis prompt), `indexVersion`, `estimatedCostUsd`. The cost comes from the configured pricing table and is labeled an estimate.
+- `replayed` (seed analyses only): the record is a replay of a recorded generation, so every duration field is 0 rather than a measurement.
 
-**Demo sessions.** No account is required:
-- On first visit `POST /api/session` creates a random 128-bit workspace ID. It is stored in an httpOnly, Secure, SameSite=Lax cookie with an HMAC signature. The secret lives in SSM Parameter Store as a SecureString.
-- The workspace is seeded from `seed/demo-workspace.json`, labeled with provenance:
-  - real, pre-run analyses and findings;
-  - from Phase 8b (P1): a watchlist (AAPL, MSFT, NVDA) and one example thesis. The thesis text is analyst-written and labeled as an example; its links point to real findings.
-- Reset deletes and reseeds **only the caller's own partition**.
+**Demo sessions** (built in Phase 5: `services/api/src/session/session.ts`). No account is required:
+- **Cookie.** `__Host-diq_ws` = `<workspaceId>.<signature>`, where the workspace ID is 16 random bytes base64url (128 bits) and the signature is HMAC-SHA256, base64url, over `ws.v1.<workspaceId>` (constant-time check). Attributes: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, no `Domain`, `Max-Age` 30 days. The `__Host-` prefix makes the browser refuse the cookie unless it is Secure, host-only and `Path=/`, so a sibling subdomain cannot set or shadow it. The local test server, which is not HTTPS, uses the plain name `diq_ws` without `Secure`; each server reads only its own name. The cookie holds nothing else.
+- **Secret.** The SSM SecureString `/diligenceiq/session-secret`, created by the admin before the api deploy (CloudFormation cannot create SecureStrings; assumptions D11). It is read `WithDecryption`, cached per warm container, and must be ≥ 32 bytes; a missing, short or unreadable secret fails closed with `500 INTERNAL` ("Sessions are unavailable"), never a weak signature.
+- **`POST /api/session`** is idempotent for a valid cookie whose `META` exists and whose `ttl` is still in the future (`created: false`). A returning visit moves `META`'s `ttl` to 30 days from now with one conditional `UpdateItem`, at most once a day (only when under 29 days remain). Otherwise it increments the caller's per-client counter `GLOBAL / WSCREATE#<yyyy-mm-dd>#<hash16>` (cap `PER_IP_DAILY_WORKSPACE_CAP`, default 20; at the cap `429 RATE_LIMITED`, `details: { scope: 'workspace_creation_client', retryAfter }`), then the global `GLOBAL / WSCREATE#<yyyy-mm-dd>` (cap `DAILY_WORKSPACE_CREATION_CAP`, default 500; `scope: 'workspace_creation'`). The per-client check runs first, so one client's refused attempts never reach the global counter (DD-20 (f); assumptions D12). It then creates `META` and seeds the workspace. A seed that fails is logged and the session is still returned: the workspace is usable (empty or partly seeded), and the visitor does not spend a second slot.
+- **Every other route** except `/api/health` requires the session. A valid signature whose `META` is missing or past its `ttl` (DynamoDB deletes expired items lazily, up to days later) is `401 SESSION_REQUIRED`; the web client then opens a new session once and retries the request once.
+- **TTLs of the other items.** Analyses, their snapshots and findings keep their own 30-day `ttl` from creation, so a workspace kept alive by visits loses analyses older than 30 days; editing a finding (`PATCH`) restarts that finding's `ttl`.
+- **Seed.** `seed/demo-workspace.json` (`seed-v1`), built by `pnpm seed:build` (`scripts/seed/build-seed.ts`) from real pipeline output: the eval questions `pdf-2`, `multi-cloud` and `expert-1`, replayed from their recorded `da-v4` generations through `runDeepAnalysis` and the validator over `iv-9cf51c066743`. The build is replay-only and fails if a live call would be needed (DD-20). Run times are the recording times. Seeded analyses carry `seeded: true`, and the UI labels them as run in advance and hides their durations; their telemetry names the seed record's own `analysisId`, is marked `replayed: true`, and has every duration set to 0 (a replay measures nothing). The four seed findings name only a source; their text and citations are copied server-side by the same code as `POST /api/findings`, and they carry `seeded: true`, which the Findings Board shows as "Example from the demo workspace" (SPEC §40).
+- From Phase 8b (P1) the seed adds a watchlist (AAPL, MSFT, NVDA) and one example thesis. The thesis text is analyst-written and labeled as an example; its links point to real findings.
+- **Reset** (`POST /api/workspace/reset`) deletes every item of **the caller's own partition except `META` and its `RATE#` counters**, so a reset cannot bypass the hourly cap (DD-20), then rewrites `META` in place (an unconditional `PutItem`, same workspace ID) and reseeds. `META` is never absent, so a request that arrives mid-reset keeps its session rather than minting a new workspace.
 - DynamoDB TTL expires abandoned workspaces, so no scheduled cleanup is needed.
 
 ### 8.1 Finding themes (formerly workstreams, DD-15)
@@ -590,9 +618,9 @@ IDs: `financial-performance`, `growth-outlook`, `risk-factors`, `regulatory-comp
 
 ---
 
-## 9. API contract *(planned: Phases 4–6)*
+## 9. API contract *(Phase 5 built the health, session, workspace, companies, compare, analyses and findings routes in `services/api/src/app.ts`; the rows marked Phase 6 or Phase 8b are not built yet)*
 
-All bodies and query strings are validated with Zod. Every response carries `x-request-id`. Errors return `ApiError` and never a stack trace. All routes except `/api/health` and `/api/session` require a valid session cookie.
+All bodies and query strings are validated with Zod; a request body is at most 16 KB and must be sent as `content-type: application/json` (a charset parameter is allowed; anything else is `400 VALIDATION_ERROR`, which also keeps a cross-site form post from reaching a write route). Every response carries `x-request-id`. Errors return `ApiError` and never a stack trace. All routes except `/api/health` and `/api/session` require a valid session cookie (§8 Demo sessions). Every ticker in a path, query or body is checked against the core company catalog. The Phase 1 `GET /api/diagnostics/cookie` probe is removed.
 
 ```ts
 type ApiError = { error: { code: ErrorCode; message: string; requestId: string; details?: Record<string, unknown> } };
@@ -623,51 +651,55 @@ type FindingOrigin = { kind: 'analysis' | 'intelligence' | 'compare' | 'watch'; 
 // 'compare' ⇐ compareRow; 'watch' ⇐ watchEvent. A thesis links findings; it does not create them.
 type Finding = { findingId: string; title: string; text: string; theme: ThemeId; tickers: string[];
   citations: Citation[]; origin: FindingOrigin; analysisId?: string; note?: string; status: FindingStatus;
-  pinnedToIC: boolean; isKey: boolean; createdAt: string; updatedAt: string };
+  pinnedToIC: boolean; isKey: boolean; createdAt: string; updatedAt: string;
+  figures?: FigureCheck[];   // the brief's numeric-grounding checks at the saved item's locations (§6.9)
+  seeded?: true };           // saved by the demo seed (SPEC §40)
 type AnalysisSummary = { analysisId: string; question: string; origin: AnalysisOrigin;
-  status: 'QUEUED' | 'RUNNING' | 'COMPLETE' | 'FAILED'; stage?: string; createdAt: string; completedAt?: string };
+  status: 'QUEUED' | 'RUNNING' | 'COMPLETE' | 'FAILED'; stage?: string; createdAt: string; completedAt?: string;
+  seeded?: boolean };        // copied from the seed: real pipeline output, run in advance
 ```
 
 | Method & path | Request | Response |
 |---|---|---|
 | `POST /api/session` | — | `200 { workspaceId, created: boolean, expiresAt }` + `Set-Cookie` |
-| `GET /api/workspace` | — | `200 { stats, recentAnalyses: AnalysisSummary[], recentFindings: Finding[], watchlist: string[] }` |
-| `POST /api/workspace/reset` | — | `200` workspace (reseeded) |
+| `GET /api/workspace` | — | `200 { workspaceId, createdAt, seedVersion, stats, recentAnalyses: AnalysisSummary[], recentFindings: Finding[], watchlist: string[] }`. `stats.analyses` is a COUNT of every analysis; `recentAnalyses` holds the 10 newest. (`watchlist` is empty until Phase 8b) |
+| `POST /api/workspace/reset` | — | `200 { workspaceId, reset: true, seedVersion }`. Deletes the caller's partition except `META` and its `RATE#` counters, rewrites `META` in place, reseeds (§8). |
 | `GET /api/companies` | — | `200 { indexVersion, profileSetId, companies: Array<{ ticker, company, sector, tier, filings, periodsCovered, headline? }> }` (selector; from the active set's manifest) |
-| `GET /api/companies/:ticker/intelligence` | — | `200 CompanyIntelligenceProfile` (§7.1) from the active profile set. Read from S3, cached in memory; `404 PROFILE_MISSING` if absent. Never generates. |
-| `GET /api/compare` | `?tickers=AAPL,MSFT,NVDA` (2–5) | `200 { companies, missing: string[], trajectories, common, distinctive, diverging, managementEmphasis, attentionRanking, recommendedDiligence, notes, citations }`, composed deterministically from profiles (DD-19). Fewer than two profiles available → `404 PROFILE_MISSING` with `details.missing` |
-| `POST /api/analyses` | `{ question: string /* 1–1,000 */, origin?: AnalysisOrigin /* default { kind: 'direct' } */, filters?: { tickers?: string[] /* ≤ 10 */, filingTypes?: ('10-K'\|'10-Q')[], fiscalYearFrom?: number, fiscalYearTo?: number } }` | `202 { analysisId, status: 'QUEUED', pollAfterMs }` |
-| `GET /api/analyses` | `?status&cursor&limit` | `200 Page<AnalysisSummary>` |
-| `GET /api/analyses/:id` | — | `200 AnalysisSummary & { stage, deadlineAt, error?, interpretation?, coverage?, brief?, citations?, validation?, telemetry? }` |
-| `GET /api/analyses/:id/context` | — | `200 { indexVersion, passages: Citation[] }` (evidence drawer; reads the snapshot) |
-| `GET /api/findings` | `?theme&ticker&status&origin&analysisId&from&to&pinned&cursor&limit` (`from`/`to` are ISO dates on `createdAt`) | `200 Page<Finding>` |
-| `POST /api/findings` | `{ source: FindingSource, theme?, title?, note?, status? }` | `201 Finding`. Text and citations are copied server-side from the stored brief, context snapshot, or profile, never from the client. `origin.kind` is derived from `source.kind`. |
-| `PATCH /api/findings/:id` | `{ status?, note? /* ≤ 2,000 */, pinnedToIC?, isKey?, theme?, title? }` | `200 Finding` |
+| `GET /api/companies/:ticker/intelligence` | — | `200 CompanyIntelligenceProfile` (§7.1) from the active profile set (§4.4 runtime read path). Read from S3, cached in memory. `400 VALIDATION_ERROR` for a ticker outside the catalog; `404 PROFILE_MISSING` for a catalog ticker without a valid profile. Never generates. |
+| `GET /api/compare` | `?tickers=AAPL,MSFT,NVDA` (2–5) | `200 { companies, missing: string[], trajectories, common, distinctive, diverging, managementEmphasis, attentionRanking, recommendedDiligence, notes, citations }`, composed deterministically from profiles (DD-19) by core `composeCompare`; the web composes the same way from the profiles it loaded. Fewer than two profiles available → `404 PROFILE_MISSING` with `details.missing` |
+| `POST /api/analyses` | `{ question: string /* 1–1,000 */, origin?: AnalysisOrigin /* default { kind: 'direct' } */, filters?: { tickers?: string[] /* ≤ 10 */, filingTypes?: ('10-K'\|'10-Q')[], fiscalYearFrom?: number, fiscalYearTo?: number } }` | `202 { analysisId, status: 'QUEUED', pollAfterMs: 1500 }`. Order of checks and failures: §4.1 |
+| `GET /api/analyses` | `?status&cursor&limit` | `200 Page<AnalysisSummary>`, newest first (a descending Query). The cursor is opaque base64url and is rejected unless it belongs to the caller's partition; `limit` ≤ 100. |
+| `GET /api/analyses/:id` | — | `200 AnalysisSummary & { stage, deadlineAt, filters?, error?, interpretation?, coverage?, brief?, citations?, validation?, telemetry?, seeded? }`. A QUEUED or RUNNING record past `deadlineAt` is failed first (`expireIfPastDeadline`, §4.3). Never returns `claimToken`, `ttl` or `workspaceId`. |
+| `GET /api/analyses/:id/context` | — | `200 { indexVersion, passages: Citation[] }` (evidence drawer; reads the snapshot and adds `indexVersion` to each entry). No snapshot → `404 NOT_FOUND` with `details.snapshot = 'missing'`; the web then falls back to the brief's `citations[]`. |
+| `GET /api/findings` | `?theme&ticker&status&origin&analysisId&from&to&pinned&cursor&limit` (`from`/`to` are ISO dates on `createdAt`) | `200 Page<Finding>`. Filtered in memory over the capped list (≤ 500); the cursor is an offset. |
+| `POST /api/findings` | `{ source: FindingSource, theme?, title?, note?, status? }` | `201 Finding`. Text and citations are copied server-side from the stored brief, context snapshot, or profile, never from the client. `origin.kind` is derived from `source.kind`. The copy is core `resolveSource` (`packages/core/src/finding-sources.ts`, shared with the web); a brief item also copies the validation's figure checks at its own locations (`keyFindings[i].`, `investmentConsiderations[i].`, `comparison.rows[i].`) into `figures`, so the board keeps its "unverified figure" marks. Only a COMPLETE analysis can be saved from; a missing item is `404 NOT_FOUND`. The ID is derived from the source (§8), so a second save of the same item is `409 ALREADY_SAVED`; past 500 findings (a `Select: COUNT` query) `409 LIMIT_REACHED`. `watchEvent` sources are rejected (`400`) until Phase 8b. |
+| `PATCH /api/findings/:id` | `{ status?, note? /* ≤ 2,000 */, pinnedToIC?, isKey?, theme?, title? }` (strict: no other field) | `200 Finding`. Restarts the finding's 30-day `ttl`. |
 | `DELETE /api/findings/:id` | — | `204` |
-| `GET /api/theses`, `POST /api/theses`, `PATCH /api/theses/:id`, `DELETE /api/theses/:id` (P1) | `{ statement, tickers, links?, openQuestions?, watchedCategories?, pinnedToIC? }` | `200/201 Thesis` · `204`. No LLM. Never returns a verdict. |
-| `GET /api/watchlist`, `PUT /api/watchlist/:ticker`, `DELETE /api/watchlist/:ticker` (P1) | `{ categories }`. `:ticker` must match `^[A-Z]{1,5}$` and exist in the company catalog (else `400 VALIDATION_ERROR`); categories must be known values | `200 Watch[]` / `200 Watch` / `204`; `409 LIMIT_REACHED` past 25 watches |
-| `GET /api/watchlist/events` (P1) | `?ticker&category&kind&cursor&limit` | `200 Page<{ kind: 'filing' \| 'intelligence', ticker, filedAt, filingType, period, signalId?, type?, category?, headline? }>`: filing events from the filing catalog and intelligence events from stored profiles, filtered by watches. No polling. |
-| `GET /api/evidence/adjacent` | `?chunkId=` | `200 { chunkId, previous: { filing, passages: Citation[] } \| null, next: { filing, passages: Citation[] } \| null }` from `index/<v>/adjacency/` (§6.4): the same section in the adjacent comparable filings. Deterministic, no model call. |
-| `GET /api/ic-brief` | — | `200 { sections: Array<{ id, title, items }>, supportingEvidence: Citation[], markdown }` (§8.2) |
-| `GET /api/sources` | — | `200 { indexVersion, companies, filings: Array<{ documentId, ticker, company, filingType, filingDate, periodEnd, fiscalLabel, flags }> }` |
-| `GET /api/sources/:documentId` | — | `200 { filing, sections: Array<{ code, title, charStart, charEnd }>, text }` |
+| `GET /api/theses`, `POST /api/theses`, `PATCH /api/theses/:id`, `DELETE /api/theses/:id` (P1, Phase 8b) | `{ statement, tickers, links?, openQuestions?, watchedCategories?, pinnedToIC? }` | `200/201 Thesis` · `204`. No LLM. Never returns a verdict. |
+| `GET /api/watchlist`, `PUT /api/watchlist/:ticker`, `DELETE /api/watchlist/:ticker` (P1, Phase 8b) | `{ categories }`. `:ticker` must match `^[A-Z]{1,5}$` and exist in the company catalog (else `400 VALIDATION_ERROR`); categories must be known values | `200 Watch[]` / `200 Watch` / `204`; `409 LIMIT_REACHED` past 25 watches |
+| `GET /api/watchlist/events` (P1, Phase 8b) | `?ticker&category&kind&cursor&limit` | `200 Page<{ kind: 'filing' \| 'intelligence', ticker, filedAt, filingType, period, signalId?, type?, category?, headline? }>`: filing events from the filing catalog and intelligence events from stored profiles, filtered by watches. No polling. |
+| `GET /api/evidence/adjacent` (Phase 6) | `?chunkId=` | `200 { chunkId, previous: { filing, passages: Citation[] } \| null, next: { filing, passages: Citation[] } \| null }` from `index/<v>/adjacency/` (§6.4): the same section in the adjacent comparable filings. Deterministic, no model call. |
+| `GET /api/ic-brief` (P1, Phase 8b) | — | `200 { sections: Array<{ id, title, items }>, supportingEvidence: Citation[], markdown }` (§8.2) |
+| `GET /api/sources` (P1, Phase 8b) | — | `200 { indexVersion, companies, filings: Array<{ documentId, ticker, company, filingType, filingDate, periodEnd, fiscalLabel, flags }> }` |
+| `GET /api/sources/:documentId` (Phase 6) | — | `200 { filing, sections: Array<{ code, title, charStart, charEnd }>, text }` |
 | `POST /api/retrieval/debug` | `{ question, filters?, mode?, includeText? }` | Retrieval-only inspection (Phase 3): interpretation, plan (strategy, target, notes such as an endpoint reduction), per-lane candidates with tier, quota, and BM25 and cosine ranks, context and telemetry. The local server answers 500 JSON on an internal error. The route exists only when a retrieval dependency is injected (`pnpm retrieval:debug`, 127.0.0.1); the deployed handler never injects one, so production answers 404. |
-| `GET /api/health` | — | `200 { status: 'ok', indexVersion, profileSetId, profileIndexVersion, analysesEnabled }` |
+| `GET /api/health` | — | `200 { status: 'ok', indexVersion, indexAvailable, profileSetId, profileIndexVersion, analysesEnabled }`. `indexAvailable` is a `HeadObject` on `index/<indexVersion>/manifest.json`, cached 60 s; it drives the Deep Analysis missing-index banner. |
 
 **Error codes → HTTP status** (request-level errors):
 
 | Code | HTTP | When |
 |---|---|---|
-| `VALIDATION_ERROR` | 400 | Body or query fails Zod validation |
-| `SESSION_REQUIRED` | 401 | Missing or invalid session cookie |
+| `VALIDATION_ERROR` | 400 | Body or query fails Zod validation, body over 16 KB, or a ticker outside the catalog |
+| `SESSION_REQUIRED` | 401 | Missing or invalid session cookie, or its workspace has expired (the web client opens a new session once and retries) |
 | `NOT_FOUND` | 404 | Analysis, finding, thesis, watch, or workspace not in the caller's partition |
-| `LIMIT_REACHED` | 409 | Per-workspace cap on theses (20) or watches (25) reached |
+| `LIMIT_REACHED` | 409 | Per-workspace cap on findings (500), theses (20) or watches (25) reached |
+| `ALREADY_SAVED` | 409 | The same stored item is already saved as a finding (one finding per source; added in Phase 5) |
 | `PROFILE_MISSING` | 404 | No Company Intelligence profile for the ticker at the current version |
 | `SOURCE_MISSING` | 404 | Unknown `documentId` or missing processed filing |
-| `RATE_LIMITED` | 429 | Workspace hourly, global daily, or workspace-creation cap reached (`details.scope`) |
+| `RATE_LIMITED` | 429 | Workspace hourly, global daily, or workspace-creation cap reached (`details.scope`: `workspace_hourly`, `global_daily`, `workspace_creation_client` or `workspace_creation`; `details.retryAfter`) |
 | `ANALYSES_DISABLED` | 503 | Kill switch is off |
 | `ENQUEUE_FAILED` | 503 | `SendMessage` failed; the analysis is marked FAILED and its ID is returned in `details` |
-| `INTERNAL` | 500 | Anything unexpected |
+| `INTERNAL` | 500 | Anything unexpected, or the session secret is missing, short or unreadable (sessions fail closed) |
 
 **Analysis-level failures** are returned as `status: 'FAILED'` with `error: { code, message, requestId }` inside a `200` poll response: `QUEUE_TIMEOUT`, `PIPELINE_TIMEOUT`, `GENERATION_TIMEOUT`, `GENERATION_FAILED`, `MALFORMED_OUTPUT`, `NO_RELEVANT_EVIDENCE` (retrieval returned nothing; generation is not called), `INDEX_UNAVAILABLE`, `WORKER_FAILED` (DLQ), `ANALYSES_DISABLED` (kill switch turned off while queued), and `ENQUEUE_FAILED`.
 
@@ -683,19 +715,22 @@ Each state has a designed screen with a plain-language message, a request ID whe
 | Malformed output | `MALFORMED_OUTPUT` | "The answer couldn't be validated." Re-run. |
 | Unsupported query | `VALIDATION_ERROR` (empty, over 1,000 characters), or a question about companies outside the corpus (assumptions A4) | Inline form error; for out-of-corpus companies, an `insufficient_evidence` brief or `NO_RELEVANT_EVIDENCE` with the list of covered companies. |
 | Missing source document | `SOURCE_MISSING` | "This filing isn't available." Back to the brief; the finding keeps its copied passage. |
-| Missing corpus or index | `INDEX_UNAVAILABLE` on analyses; `GET /api/health` reports it | Banner on Deep Analysis; dashboards still load from profiles. |
+| Missing corpus or index | `INDEX_UNAVAILABLE` on analyses; `GET /api/health` reports `indexAvailable: false` | Banner on Deep Analysis; dashboards still load from profiles. |
 | Invalid citation | Removed and counted by validation | "1 citation removed: not in the supplied evidence" badge on the brief. |
-| Network failure | Client `fetch` fails or the browser is offline | "Connection lost." Polling resumes automatically; the analysis continues server-side. |
+| Network failure | Client `fetch` fails or the browser is offline | "Connection lost." Polling retries every 3 s and resumes automatically; the analysis continues server-side. |
+| Poll server error | `GET /api/analyses/:id` answers 5xx, `INTERNAL`, a non-JSON gateway error or 429 | "Checking on this analysis failed" with the status and request ID; polling retries with backoff (3 s doubling to 30 s) and a Retry now button. Any other 4xx stops polling and says "Updates for this analysis stopped", with the request ID and Retry. The page never freezes silently. |
+| Workspace not opened | `POST /api/session` fails (a creation cap, `INTERNAL`, network) | A banner with the reason, the request ID, when to come back (`retryAfter`) and Retry. The landing page and the company list (static catalog) still render; Company Intelligence and Compare say the workspace could not be opened instead of loading forever. |
 | Profile missing | `PROFILE_MISSING` | "Intelligence for {company} isn't built for this index version." Offers Deep Analysis for that company. |
-| Index / profile version skew | Active profile set's `indexVersion` ≠ current index version (`GET /api/health`) | Notice on the dashboard: "Built from index {v}." Citations still open because profiles carry passage text. |
+| Index / profile version skew | The profile's `indexVersion` ≠ `health.indexVersion` (`GET /api/health`) | Notice on the dashboard: "Built from index {v}." Citations still open because profiles carry passage text. |
 | Partial compare | `missing` non-empty, or a limited-history company selected | Missing tickers listed; limited-history columns labeled. |
-| Rate limited / disabled | `RATE_LIMITED`, `ANALYSES_DISABLED` | Cap or pause explained, with when to try again. Dashboards keep working. |
+| Rate limited / disabled | `RATE_LIMITED`, `ANALYSES_DISABLED` | Cap or pause explained, with when to try again (`details.retryAfter`). Dashboards keep working. |
+| Session expired | `SESSION_REQUIRED` (workspace TTL passed) | The web client opens a new (reseeded) session once and retries the request. |
 
 ---
 
 ## 10. Frontend routes *(planned: Phase 1)*
 
-Static export, so detail views use query parameters (ResolveIQ pattern). Primary nav, in order (DD-15): **Company Intelligence | Compare | Deep Analysis | Findings**, then **Thesis | Watchlist** once Phase 8b builds them. Until then those two are **omitted from the nav** (no stub pages). A global **"Ask a question"** action in the top bar opens Deep Analysis empty from any page.
+Static export, so detail views use query parameters (ResolveIQ pattern). Since Phase 5 all workspace state (analyses, findings, the workspace itself) comes from the api through `apps/web/src/lib/workspace-client.ts` and `workspace-store.tsx`; nothing is kept in browser storage. Primary nav, in order (DD-15): **Company Intelligence | Compare | Deep Analysis | Findings**, then **Thesis | Watchlist** once Phase 8b builds them. Until then those two are **omitted from the nav** (no stub pages). A global **"Ask a question"** action in the top bar opens Deep Analysis empty from any page.
 
 | Route | Page | Priority / phase |
 |---|---|---|
@@ -715,11 +750,12 @@ Static export, so detail views use query parameters (ResolveIQ pattern). Primary
 
 ---
 
-## 11. Security and spend protection *(planned: Phases 5–7)*
+## 11. Security and spend protection *(sessions, api IAM, caps and the api kill-switch check built in Phase 5; security headers, CSP and the IAM review in Phase 7)*
 
 - Bedrock is called only from the worker Lambda; the browser never holds AWS credentials.
 - **Least-privilege IAM:**
-  - api Lambda: its own table, read-only on `corpus/processed/*`, `intelligence/*` and `index/*/adjacency/*`, send to the queue, read the kill-switch and active-profile-set parameters. **No Bedrock permission**, because profiles are only read.
+  - api Lambda (Phase 5, CDK test-enforced): `ssm:GetParameter` on the kill-switch, active-profile-set and session-secret parameters (the SecureString uses the AWS-managed `aws/ssm` key, so there is no kms statement); `dynamodb:GetItem`, `PutItem`, `UpdateItem`, `DeleteItem`, `Query` and `BatchWriteItem` on its table; `sqs:SendMessage` on the WorkerStack queue (WorkerStack is now created before ApiStack, because the api imports the queue); `s3:GetObject` on `intelligence/*` and `index/<indexVersion>/manifest.json` only. **No Bedrock permission**, because profiles are only read. Read-only `corpus/processed/*` and `index/*/adjacency/*` arrive with the Phase 6 source view and adjacent-evidence routes. Environment: `TABLE_NAME`, `DATA_BUCKET`, `INDEX_VERSION`, `QUEUE_URL`, `KILL_SWITCH_PARAM`, `ACTIVE_PROFILE_SET_PARAM`, `SESSION_SECRET_PARAM` and the four caps (`WORKSPACE_HOURLY_ANALYSIS_CAP`, `GLOBAL_DAILY_ANALYSIS_CAP`, `DAILY_WORKSPACE_CREATION_CAP`, `PER_IP_DAILY_WORKSPACE_CAP`).
+  - A unit test (`services/api/src/phase5-units.test.ts`) bundles the api handler with esbuild, as CDK does, and asserts from the bundle's metafile that no input or import is a Bedrock client, `packages/rag` or `@diligenceiq/rag`, or the worker.
   - Profile builder: not deployed. It runs with the admin's own credentials (DD-16).
   - worker Lambda: its own table, read-only on `index/*`, read the kill-switch parameter, `bedrock:InvokeModel*` scoped to the configured inference-profile ARN and the foundation-model ARNs it routes to (for `us.anthropic.claude-sonnet-4-6`: us-east-1, us-east-2, us-west-2) plus the embedding model.
   - dlq-handler Lambda: conditional update on its own table only.
@@ -730,9 +766,10 @@ Static export, so detail views use query parameters (ResolveIQ pattern). Primary
   - **Kill switch:** SSM parameter `/diligenceiq/analyses-enabled`, cached ~60 s. Checked on `POST /api/analyses` and again by the worker before generation.
   - **Global daily cap:** `GLOBAL / RATE#<yyyy-mm-dd>` counter, incremented by a conditional update that fails at the cap (`GLOBAL_DAILY_ANALYSIS_CAP`, default 200).
   - **Per-workspace hourly cap:** `WS#<id> / RATE#<yyyy-mm-ddThh>` (`WORKSPACE_HOURLY_ANALYSIS_CAP`).
-  - **Workspace-creation cap:** `GLOBAL / WSCREATE#<yyyy-mm-dd>` (`DAILY_WORKSPACE_CREATION_CAP`), so cookie-clearing can't mint unlimited workspaces.
+  - **Workspace-creation caps:** first per client, `GLOBAL / WSCREATE#<yyyy-mm-dd>#<hash16>` (`PER_IP_DAILY_WORKSPACE_CAP`, default 20; a salted hash of the source IP, never the IP), then global, `GLOBAL / WSCREATE#<yyyy-mm-dd>` (`DAILY_WORKSPACE_CREATION_CAP`, default 500). Cookie-clearing can't mint unlimited workspaces, and one client can't use up everyone's (DD-20 (f); assumptions D12).
   - HTTP API stage throttling, and the worker's event-source `maximumConcurrency: 2`.
   - Counters are not refunded when a later step fails, so the caps err on the conservative side.
+- **Sessions:** an HMAC-signed workspace cookie (§8 Demo sessions). The secret is an admin-created SSM SecureString; without a valid one, sessions fail closed.
 - No secrets in source. Logs never contain secrets, full prompts, or chunk text unless `DEBUG_LOG_PROMPTS=true` (off in prod).
 
 ---

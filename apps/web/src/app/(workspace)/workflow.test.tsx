@@ -9,13 +9,13 @@ import { unsourcedFigures } from '@/test/figures';
 import { nav, setRoute } from '@/test/navigation-mock';
 import { builtProfiles, profileWithSignal } from '@/test/profiles';
 import { renderInWorkspace } from '@/test/render';
-import { SAMPLE_ANALYSES } from '@/test/sample-analyses';
+import { SAMPLE_ANALYSES, SAMPLE_CONTEXTS } from '@/test/sample-analyses';
 import { AnalysisView } from './analysis/analysis-view';
 import { CompareView } from './compare/compare-view';
 import { FindingsView } from './findings/findings-view';
 import { IntelligenceView } from './intelligence/intelligence-view';
 
-const withSamples = { initial: { analyses: SAMPLE_ANALYSES, findings: [], nextId: 1 } };
+const withSamples = { initial: { analyses: SAMPLE_ANALYSES, findings: [] }, contexts: SAMPLE_CONTEXTS };
 const hrefParams = (el: HTMLElement) => new URLSearchParams((el.getAttribute('href') ?? '').split('?')[1] ?? '');
 /** The first (lowest-rank) current risk of a preview profile in a category. */
 const firstRisk = (ticker: string, category: string) => FIXTURE_PROFILES.get(ticker)!.currentRisks.find((r) => r.category === category)!;
@@ -393,7 +393,7 @@ describe('Diligence Brief', () => {
       expect(screen.getByRole('heading', { name })).toBeInTheDocument();
     }
     expect(screen.getByRole('table')).toHaveTextContent('Single-source exposure');
-    expect(screen.getByText(/All \d+ cited IDs resolve to passages supplied to the model/)).toBeInTheDocument();
+    expect(screen.getByText(/All \d+ cited passages were among the passages supplied to the model/)).toBeInTheDocument();
     const followUp = within(screen.getByRole('heading', { name: 'Suggested follow-up questions' }).closest('section')!).getAllByRole('link')[0]!;
     expect(hrefParams(followUp).get('origin')).toBe('brief:an-01:0');
   });
@@ -427,10 +427,10 @@ describe('Diligence Brief', () => {
     expect(within(alert).getByRole('link', { name: 'Edit and run again' }).getAttribute('href')).toMatch(/^\/analysis\/new\/?\?/);
   });
 
-  it('shows not-found for an unknown analysis and a prompt with no ID', () => {
+  it('shows not-found for an unknown analysis and a prompt with no ID', async () => {
     setRoute('/analysis/', 'id=nope');
     const { unmount } = renderInWorkspace(<AnalysisView />);
-    expect(screen.getByText('Analysis not found')).toBeInTheDocument();
+    expect(await screen.findByText('Analysis not found')).toBeInTheDocument();
     unmount();
     setRoute('/analysis/', '');
     renderInWorkspace(<AnalysisView />);

@@ -9,8 +9,8 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | Generation calls per question | 1 (every question) |
 | Citation validity before validation (model's IDs in the context) | 1 |
 | Citation validity after validation (re-check; validation removes the rest) | 1 |
-| Numeric grounding (figures found in cited passages) | 0.8558 (451/527) |
-| Unverified near matches (digits in a table cell; passage states no unit) | 64 |
+| Numeric grounding (figures found in cited passages) | 0.8729 (460/527) |
+| Unverified near matches (digits in a table cell; passage states no unit) | 55 |
 | Briefs with every figure verified | 13/20 |
 | Comparison tables aligned (one value per column in every row) | 15/15 |
 | Abstention | 1/2 |
@@ -38,7 +38,7 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | `cross-wmt-jpm-rates` | fail | comparison | 35/35 | 13/15 | 22193 / 3353 | 46501 | figures grounded: 13/15 figures found in cited passages; unverified: 80% (comparison.rows[3].values[0]), $674.5 billion (investmentConsiderations[0].text) |
 | `cross-cyber` | pass | comparison | 62/62 | 0/0 | 19052 / 3808 | 49802 | — |
 | `sector-banks-capital` | pass | comparison | 47/47 | 63/63 | 22847 / 3762 | 44493 | — |
-| `ambiguous-meta` | fail | trend | 34/34 | 76/86 (9) | 22995 / 3190 | 40781 | figures grounded: 76/86 figures found in cited passages; unverified: $69,691M (keyFindings[2].title, digits only: passage states no unit), $69,691 million (keyFindings[2].finding, digits only: passage states no unit), $37,256 million (keyFindings[2].finding, digits only: passage states no unit), $29,906 million (keyFindings[2].finding, digits only: passage states no unit), $27,045 (comparison.rows[7].values[0], digits only: passage states no unit), $37,256 (comparison.rows[7].values[1], digits only: passage states no unit), $69,691 (comparison.rows[7].values[2], digits only: passage states no unit), $77,815 (comparison.rows[9].values[1]), $69,691 million (investmentConsiderations[0].text, digits only: passage states no unit), $29,906 million (investmentConsiderations[0].text, digits only: passage states no unit) |
+| `ambiguous-meta` | fail | trend | 34/34 | 85/86 | 22995 / 3190 | 40781 | figures grounded: 85/86 figures found in cited passages; unverified: $77,815 (comparison.rows[9].values[1]) |
 | `ambiguous-no-company` | fail | sector | 61/61 | 6/11 | 19811 / 4209 | 51563 | figures grounded: 6/11 figures found in cited passages; unverified: $600 million (executiveSummary), $600 million (keyFindings[1].finding), 80% (keyFindings[1].finding), $600M (comparison.rows[4].values[1]), $600 million (investmentConsiderations[0].text) |
 | `ambiguous-ko-few-years` | pass | trend | 50/50 | 18/18 | 22152 / 3392 | 39108 | — |
 | `unsupported-period` | fail | insufficient_evidence | 12/12 | 0/0 | 19628 / 1429 | 18635 | abstains: answerType insufficient_evidence; gap stated (/2015/); answers about the missing scope: keyFindings[0] "These reflect the company's current operating environment, including tariffs, AI", keyFindings[1] "These tariff-related risks are specific to the 2025 environment and were not pre", keyFindings[3] "These risks did not exist in Apple's FY2015 disclosures.", investmentConsiderations[0] "Diligence teams requiring FY2015 risk factor analysis should obtain that filing ", investmentConsiderations[1] "The FY2025 risk factors that are available reflect a substantially more complex "; follow-ups answerable: 4 of 4 follow-ups ask about /2015/, which the corpus cannot answer: followUpQuestions[0], followUpQuestions[1], followUpQuestions[2], followUpQuestions[3] |
