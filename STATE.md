@@ -3,7 +3,7 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `ba161bb` (Phase 3). Phase 4 is **staged for commit, awaiting Mike's go-ahead** (see `git log` for the hash once committed).
+`main` (no remote yet). Last code commit: `9699b3b` (Phase 4). Previous: `ba161bb` (Phase 3).
 
 ## Current phase
 **Phase 4 is complete and gated (`pnpm gate` exit 0, 2026-10-02): the one-call generation pipeline, deterministic validation, the SQS worker plane, and generation evals.** Handoff: `docs/handoffs/phase-04.md`. Evals: `docs/evaluation.md` §4–5. Prompt log: `docs/prompt-iterations.md`.
@@ -14,7 +14,7 @@ _Last updated: 2026-10-02 (local)_
   - Abstention 1/2, follow-ups answerable 0/2 (the da-v4 candidate), injection 1/1, coverage 17/17.
 - **In-region:** cold index load 2.75 s; generation 41–59 s (first token ~1.1 s); enqueue → COMPLETE 42–64 s; ~$0.12–0.13 per analysis.
 - **Deployed:**
-  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm). It was last deployed with da-v3 **before** the adversary, fixer and code-review fixes, so redeploy before relying on it.
+  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm), redeployed from `9699b3b` on 2026-10-02 (15:58 UTC). It matches the committed code.
   - The live site still serves Phase 1. The api still answers `ANALYSES_DISABLED`. The kill switch is `false` (verified).
 - **Spend this phase (approved):** Bedrock ≈ $7.06 estimated: generation evals $6.69, plus 3 in-region analyses ≈ $0.37.
 
@@ -27,7 +27,7 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fixers (all fixed except M2, which needs a paid prompt run) → `/code-review` medium (2 lows, fixed) → `pnpm gate` green.
 
 ## In flight
-- Nothing running. Phase 4 commit awaits Mike's go-ahead.
+- Nothing running. Phase 4 is committed (`9699b3b`) and the worker is redeployed.
 - Next: Phase 4b (offline profiles; ask Eliza about F4 first) or Phase 5 (sessions, caps, `POST /api/analyses` enqueue, poll with `expireIfPastDeadline`, Deep Analysis UI).
 
 ## Decisions pending with Mike
@@ -35,7 +35,6 @@ Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fix
   - Follow-ups must not target out-of-corpus companies or missing periods, nor use outside knowledge (Ford "Model e").
   - The Apple 2015 brief must not claim things about a filing it never saw.
   - Optional: a validator look-up of a table's unit header in the adjacent chunk, which would verify the 35 near matches.
-- **Redeploy `DiligenceIQ-Worker`** with the post-review code.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **Ask Eliza** about F4 (before Phase 4b). F1 (rerank): the Phase 4 evals show no need.
 - **Lambda concurrency quota increase:** recommended before the demo (the account limit is 10, shared).

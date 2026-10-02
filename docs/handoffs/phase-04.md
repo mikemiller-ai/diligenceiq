@@ -139,7 +139,7 @@ Phase 4 builds the generation half of Deep Analysis. One generative request per 
 - **In-region measurement:** 3 analyses, about $0.37 estimated, plus 3 Titan calls. In DynamoDB, 3 `ANALYSIS#` items and 3 `CONTEXT#` items in workspace `admin-phase4`, each with a 30-day TTL.
 - **Deploys:**
   - `DiligenceIQ-Worker` created; Core gained 3 CloudFormation exports for it.
-  - Redeployed once with da-v3. **The deployed worker predates the adversary, fixer and code-review changes:** redeploy before Phase 5 relies on it.
+  - Redeployed once with da-v3, then again from commit `9699b3b` after the gate (2026-10-02, 15:58 UTC). The deployed worker matches the committed code.
 - **Kill switch:** `/diligenceiq/analyses-enabled` was set to `true` for the 3 runs, then back to `false` (verified `false`).
 - **Idle cost added:** the alarm (about $0.10/month) and the two SQS event-source pollers (a few cents a month).
 
@@ -154,10 +154,9 @@ Phase 4 builds the generation half of Deep Analysis. One generative request per 
    - Apple 2015 briefs ask about the FY2015 10-K.
 
    It would also fix the Apple 2015 brief's claim about a filing it never saw. Optional: the validator could look up a table's "(in millions)" header in the adjacent chunk of the same filing, which would verify the 35 near matches.
-2. **Redeploy `DiligenceIQ-Worker`** with the post-review code (an AWS write).
-3. **Still open from Phase 3:** the PERSISTENT go basis; asking Eliza about F4 (before Phase 4b) and F1 (rerank). The Phase 4 evals show no evidence ranked just outside the context that would justify rerank. The weak spots are numeric unit headers and follow-ups.
-4. **Lambda concurrency quota increase** (the account limit is 10, shared): recommended before the demo.
-5. **Sonnet 5.5:** the quota is still 0 (L-94A31E46 cross-region, L-31AB82D0 global; re-read 2026-10-02). Switching also needs a SPEC §29.1 change: 5.5 rejects forced `toolChoice` and `temperature`.
+2. **Still open from Phase 3:** the PERSISTENT go basis; asking Eliza about F4 (before Phase 4b) and F1 (rerank). The Phase 4 evals show no evidence ranked just outside the context that would justify rerank. The weak spots are numeric unit headers and follow-ups.
+3. **Lambda concurrency quota increase** (the account limit is 10, shared): recommended before the demo.
+4. **Sonnet 5.5:** the quota is still 0 (L-94A31E46 cross-region, L-31AB82D0 global; re-read 2026-10-02). Switching also needs a SPEC §29.1 change: 5.5 rejects forced `toolChoice` and `temperature`.
 
 ## Known limitations
 - One eval run per prompt version, at temperature 0.2, so reruns can differ.
@@ -165,7 +164,6 @@ Phase 4 builds the generation half of Deep Analysis. One generative request per 
 - Non-numeric groundedness and completeness are not machine-checked; Phase 7 adds a manual review.
 - Numeric grounding is a deterministic co-occurrence check ("these digits and unit are printed in a cited passage"), not semantic verification.
 - Generation dominates latency (about 98%). A full 8,192-token brief could exceed the 120 s budget; the eval maximum was 87 s.
-- The deployed worker is one revision behind the repository (see Spend).
 
 ## Next-phase objective (Phase 4b or 5, per Mike and the Eliza answer on F4)
 - **Phase 4b:** the offline Company Intelligence build (SPEC §32), after asking Eliza. It uses the same `GenerationGateway` with `purpose: 'profile'`.
