@@ -3,10 +3,10 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `13b6ee9` (Phase 2). Phase 3 is staged for commit (pending Mike's go-ahead at the time of writing; check `git log`).
+`main` (no remote yet). Last code commit: `ba161bb` (Phase 3). Previous: `13b6ee9` (Phase 2).
 
 ## Current phase
-**Phase 3 is complete and gated: query analysis, hybrid retrieval, context builder, retrieval debug endpoint, retrieval evals, signal go/no-go.** Nothing new is deployed. Handoff: `docs/handoffs/phase-03.md`. Eval write-up: `docs/evaluation.md`.
+**Phase 3 is complete, gated and committed (`ba161bb`): query analysis, hybrid retrieval, context builder, retrieval debug endpoint, retrieval evals, signal go/no-go.** Nothing new is deployed. Handoff: `docs/handoffs/phase-03.md`. Eval write-up: `docs/evaluation.md`.
 - The live site https://diligenceiq.mikemiller.ai still serves the Phase 1 build.
 - Index `iv-9cf51c066743` is in S3 (verified 2026-10-01, read-only) and locally in `.index/build/` (gitignored); details in `docs/handoffs/phase-02.md`.
 - **Retrieval** (20 questions, `pnpm eval:retrieval`): hybrid passes 19/20, evidence hit rate 0.99, gold recall@context 0.62 (40/74), search ~26 ms p50 plus one Titan query embedding. BM25 alone passes 16/20.
