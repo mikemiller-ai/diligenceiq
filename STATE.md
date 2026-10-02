@@ -3,10 +3,10 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `950a021` (product landing). Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
+`main` (no remote yet). Last code commit: `dfff25e` (Phase 4b). Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
 
 ## Current phase
-**Phase 4b (offline Company Intelligence profiles) is built and gated (`pnpm gate` exit 0, 2026-10-02), not committed, not uploaded, not switched.** Handoff: `docs/handoffs/phase-04b.md`.
+**Phase 4b (offline Company Intelligence profiles) is built, gated (`pnpm gate` exit 0, 2026-10-02) and committed (`dfff25e`). Both sets are uploaded; production serves det-v2; llm-v3 waits for the api deploy.** Handoff: `docs/handoffs/phase-04b.md`.
 - Sets built locally in `.index/intelligence/iv-9cf51c066743/`: **det-v2** (53 profiles, zero calls, every bar met) and **llm-v3** (42 model-written, 11 deterministic fallbacks; deep-tier fallback 3/12 = 25%: the provisional 10% bar was missed, and Mike revised it to ≤ 25% (SPEC A.4)). 53 = every corpus company but GE Capital (G2).
 - Spend (each approved by Mike): 59 profile calls, about $6.0 (v1 trial 3, v2 trial 3, v3 53). Ledger: `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/ledger/iv-9cf51c066743/{1,2,3}/`.
 - Mike's decisions 2026-10-02: F4 settled (build both sets); cited-passage figure rule (SPEC A.4); active set will be **llm-v3** with det-v2 uploaded as the instant fallback.
@@ -22,7 +22,14 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (1 blocker: the deep-tier bar; 5 high: citations to passages the model never read, dead partial-upload guard, landing claim before the switch, unshown headline, unshown outlook) → fresh fixer (all fixed with tests; det-v2; validator v2; request hash; bucket pin; local outcome copies) → `/code-review` medium (no findings) → `pnpm gate` green.
 
 ## In flight
-- **Phase 4b deploy, in order, each needing Mike's go-ahead:** commit → `pnpm profiles:upload-set --root .index/intelligence --set iv-9cf51c066743/det-v2 --yes` → same for `llm-v3` → `aws ssm put-parameter --region us-east-1 --name /diligenceiq/active-profile-set --value iv-9cf51c066743/llm-v3 --type String --overwrite` → production smoke (health, companies, a profile, compare) → `pnpm deploy:web` (landing copy, dashboard outlook and summary).
+- **Done 2026-10-02 (Mike approved):** `det-v2` and `llm-v3` uploaded to `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/iv-9cf51c066743/` (54 objects each, manifest last).
+- **Incident, 2026-10-02:** the pointer was switched to `llm-v3` before the api was redeployed. The deployed api still runs the pre-4b strict `CompanyIntelligenceProfileSchema`, which has no `headline`, so the 42 model-written profiles read as `PROFILE_MISSING` and Compare 404'd. It lasted a few minutes. The pointer was switched to `det-v2`: production smoke then showed 53/53 profiles 200, Compare 200 and `POST /api/analyses` → `ANALYSES_DISABLED`.
+- **Production now:** `/diligenceiq/active-profile-set` = `iv-9cf51c066743/det-v2` (parameter version 4); kill switch `false`. The deployed web is still the `950a021` landing ("Preview today: Apple, Microsoft and NVIDIA"), which now understates det-v2.
+- **To finish (each step needs Mike's go-ahead, in this order):**
+  1. `pnpm deploy:infra`, so the api gets the core schema with the optional `headline` field.
+  2. `aws ssm put-parameter --region us-east-1 --name /diligenceiq/active-profile-set --value iv-9cf51c066743/llm-v3 --type String --overwrite`.
+  3. Smoke: every company 200, Compare 200, a profile with `headline` and `managementOutlook`.
+  4. `pnpm deploy:web`.
 - Next phase: Phase 6.
 
 ## Decisions pending with Mike
@@ -107,3 +114,4 @@ Gate record: adversary (1 blocker: the deep-tier bar; 5 high: citations to passa
 - **Corpus company names have no trailing period** ("Apple Inc", "Tesla Inc"). GE's display name is overridden to "General Electric Capital Corp (GE Capital)" (G2).
 - **`cdk diff` is not side-effect free.** It publishes template and Lambda assets to the CDK bootstrap bucket.
 - **Profile build (Phase 4b):** `pnpm intelligence:build` never calls without `--yes` and never calls a company twice at one `profilePromptVersion` (S3 ledger). `--llm --max-calls 0` rebuilds the LLM set from stored outcomes for free. Changing anything that alters the request (evidence, blocks, prompt) marks new-format outcomes `stale_outcome`; the v3 outcomes have no hash (`promptVerified: false`), so keep `assemble`'s block-relevant output, `evidence.ts` and `prompt.ts` unchanged or bump the version.
+- **Deploy the api before activating a profile set that uses new schema fields.** The api validates profiles with its own bundled core schema (strict); an unknown field makes the profile read as `PROFILE_MISSING`, with no error surfaced to the user. Order: deploy:infra → pointer → smoke → deploy:web.
