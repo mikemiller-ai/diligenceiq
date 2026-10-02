@@ -117,6 +117,42 @@ Decision: da-v3 ships (prompts/final-diligence-prompt.md). Earlier versions are 
   - The Apple 2015 brief says the FY2025 risks were "not present in 2015", a claim about a filing the model never saw.
 - Source: `evals/results/generation-iv-9cf51c066743-da-v3.{json,md}`.
 
+### da-v4 (2026-10-02)
+
+```text
+Version: da-v4
+Problem observed: da-v3 (strict re-score) failed the abstention follow-up checks: every
+  follow-up for the Ford and Apple 2015 questions asked about what the corpus lacks (Ford's
+  own filings, its "Model e" segment, Apple's FY2015 10-K), and the Apple 2015 brief said the
+  FY2025 risks were "not present in 2015", a claim about a filing it never saw.
+Change:
+  - Rule 7: say nothing about a missing company, period or topic beyond its absence; do not
+    describe what a missing filing contains or compare a supplied period with one that has
+    no excerpt (with the "new since 2015" example).
+  - followUpQuestions: questions this corpus can answer; name only companies and periods the
+    excerpts or <retrieval_scope> cover; never an out-of-corpus company or a gap period, and
+    no product, segment or event names that no excerpt mentions.
+Why: both are correctness problems (outside knowledge, claims about unseen filings), and a
+  follow-up starts a new paid analysis, so an unanswerable one wastes a run.
+Test questions: all 20 (approved by Mike, $2.24).
+Result (2026-10-02, strict validator): abstention 2/2 (da-v3: 1/2) and follow-ups answerable
+  2/2 (da-v3: 0/2): the Ford brief abstains with no out-of-corpus follow-ups, and the Apple
+  2015 brief no longer describes FY2015. 14/20 pass every check (same as da-v3), one call per
+  question, citation validity 1.00 → 1.00, injection 1/1, coverage 17/17, generation p50 41 s,
+  max 72 s.
+  Numeric grounding 0.901 (484/537), down from 0.922, with 47 near matches (da-v3: 35). The
+  drop is in briefs the change does not touch: Pfizer has more cells whose "(in millions)"
+  header is in another chunk (near matches, not wrong figures), Meta rounded two figures
+  ("$72 Billion", "$19"), and pdf-1's comparison table is ragged (15/16 aligned; flagged with a
+  notice). One run per version at temperature 0.2 cannot separate this from run-to-run variance.
+Decision: da-v4 ships. It fixes a correctness problem in the abstention path; the numeric
+  difference is in unrelated briefs and within what one run can show. The next numeric lever
+  is the validator reading a table's unit header from the adjacent chunk of the same filing
+  (it would verify most near matches), not another prompt change. Earlier versions are in
+  prompts/versions/da-v1.md … da-v3.md. Total Phase 4 generation spend: $8.93 (four runs).
+  Source: `evals/results/generation-iv-9cf51c066743-da-v4.{json,md}`.
+```
+
 ## Company Intelligence profile prompt (`profilePromptVersion`)
 
 Not written yet. The offline profile prompt is built in Phase 4b (SPEC §29.2, §32).

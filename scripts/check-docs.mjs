@@ -102,7 +102,8 @@ const required = {
     '### Known corpus anomalies',
     '## G. Company Intelligence',
     '**Interpretation, not a stated fact.**', // H3: A6 relabeled
-    '**Ask Eliza before Phase 4b.**', // H3: F4 default
+    '**Ask Eliza before Phase 4b.**', // H3: F4 default (kept as history; settled 2026-10-02)
+    '**Settled 2026-10-02:** Mike confirmed the offline profile build is fine',
     '**Phase 3 go/no-go**', // weakest assumption G4
   ],
   'docs/design-decisions.md': [

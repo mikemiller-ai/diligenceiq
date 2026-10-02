@@ -1169,7 +1169,7 @@ For each analysis, persist and log one summary event with: `requestId`, `analysi
 
 | Layer | Mechanism | What it prevents |
 |---|---|---|
-| Queue | SQS event source mapping `batchSize: 1`, `maximumConcurrency: 2`; visibility timeout 1080 s; `maxReceiveCount: 3` → DLQ; **no reserved concurrency** (the account limit of 10 is shared) | Unbounded redelivery |
+| Queue | SQS event source mapping `batchSize: 1`, `maximumConcurrency: 2`; visibility timeout 1080 s; `maxReceiveCount: 3` → DLQ; **no reserved concurrency** (the account limit, 1,000 since 2026-10-01 and shared, is never reserved; the mapping cap bounds this app) | Unbounded redelivery |
 | Worker | **Conditional claim** `QUEUED → RUNNING` with a fresh `claimToken`, only before `deadlineAt`. A delivery whose analysis is not QUEUED is acknowledged without work. | Duplicate delivery or redelivery producing a second generation. **The guarantee rests on this layer.** |
 | SDK | Generation client with `maxAttempts: 1` | Silent SDK retries, each a new API request |
 | Code | `GenerationGateway`, a per-analysis counter that throws on a second call | Any code path invoking the model twice |
@@ -2188,6 +2188,7 @@ Changes made to this specification after its consolidation, each decided by Mike
 
 | Date | § | Change | Reason |
 |---|---|---|---|
+| 2026-10-02 | §30.2 | The concurrency note reads 1,000 (raised from 10); the no-reserved-concurrency rule is unchanged. | The quota increase was approved (assumptions D7). |
 | 2026-10-02 | §26.3 | A change question that names no period reads each company's last 3 annual reports instead of the current view. | Phase 3 adversary H3: "How has Visa changed?" answered from one filing could not show change. Pending decision 1, settled at the start of Phase 4. |
 
 ---

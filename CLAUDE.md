@@ -23,7 +23,7 @@ Guidance for Claude Code in this repository.
 ## Non-negotiables
 - **Exactly one generative LLM request per analysis** (Deep Analysis). No query rewriting, planning, critique, repair, or summarizer LLM calls. Query embeddings are retrieval and are counted separately; rerank is off by default (assumptions A1).
   - The guarantee rests on the **conditional claim** (`QUEUED → RUNNING` with a `claimToken`, only before `deadlineAt`). A delivery whose analysis is not QUEUED is acknowledged without work.
-  - SQS: event source mapping `batchSize: 1`, `maximumConcurrency: 2`; visibility timeout 1080 s; `maxReceiveCount: 3` → DLQ. **No reserved concurrency** (account limit is 10, shared).
+  - SQS: event source mapping `batchSize: 1`, `maximumConcurrency: 2`; visibility timeout 1080 s; `maxReceiveCount: 3` → DLQ. **No reserved concurrency** (the account limit, raised from 10 to 1,000 on 2026-10-01, is shared; `maximumConcurrency` bounds this app).
   - Generation client `maxAttempts: 1`; `GenerationGateway` counter; `generationStartedAt` + `generationCallCount` persisted before the call. See docs/architecture.md §4.3 and §5.
 - **No hardcoded demo answers.** Every answer flows through retrieval and generation.
   - Phase 1 fixture profiles carry no figures and no narrative presented as fact: labeled placeholders, or values copied verbatim from filing rows with `chunkId` and `rawRow` (test enforced).

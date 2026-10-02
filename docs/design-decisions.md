@@ -91,7 +91,7 @@ Lightweight decision records. Format: **Context → Decision → Alternatives co
 - Progress stages map to real execution (SPEC §38.1).
 - Poll traffic is cheap, a few requests per analysis.
 - The UI must handle QUEUED, RUNNING, FAILED, and timeout states.
-- No reserved concurrency: the account limit is 10 and shared with other apps (assumptions D7), so the event source mapping's `maximumConcurrency` bounds this app instead.
+- No reserved concurrency: the account limit was 10 and shared with other apps when this was decided, and is now 1,000 (raised 2026-10-01, assumptions D7). The event source mapping's `maximumConcurrency` still bounds this app instead.
 
 ---
 
@@ -102,7 +102,7 @@ Lightweight decision records. Format: **Context → Decision → Alternatives co
 - The AWS SDK retries throttled calls up to 3 times by default.
 - SQS redelivers a message whose processing fails or exceeds the visibility timeout, and can occasionally deliver a message twice.
 
-An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved concurrency is off the table because the account limit of 10 is shared. The guarantee therefore rests on the claim, not on the queue.
+An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved concurrency was off the table because the account limit of 10 was shared (raised to 1,000 on 2026-10-01; the rule stands, assumptions D7). The guarantee therefore rests on the claim, not on the queue.
 
 **Redelivery is not a recovery path.** The visibility timeout (1080 s) is far longer than the job deadline (240 s), so any redelivered message arrives after `deadlineAt`. Its claim fails and it is acknowledged without work. Specifically:
 - The worker claims **first**, before any fallible work such as the index load. Every failure after the claim persists a specific error code (e.g. `INDEX_UNAVAILABLE`).

@@ -210,7 +210,8 @@ A recall that cannot be measured **fails** the bar. No detector is exempt (`RECA
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | da-v1 | 9/20 | 1 | 1.00 → 1.00 | 0.887 (461/520) | 25 | 11/20 | 16/16 | 1/2 | 0/2 | 1/1 | 17/17 | 41 / 55 s | $2.22 |
 | da-v2 | 11/20 | 1 | 1.00 → 1.00 | 0.856 (451/527) | 64 | 13/20 | 15/15 | 1/2 | 0/2 | 1/1 | 17/17 | 42 / 57 s | $2.22 |
-| **da-v3 (shipped)** | **14/20** | **1** | **1.00 → 1.00** | **0.922 (498/540)** | **35** | **16/20** | **16/16** | **1/2** | **0/2** | **1/1** | **17/17** | 42 / 87 s | $2.25 |
+| da-v3 | 14/20 | 1 | 1.00 → 1.00 | 0.922 (498/540) | 35 | 16/20 | 16/16 | 1/2 | 0/2 | 1/1 | 17/17 | 42 / 87 s | $2.25 |
+| **da-v4 (shipped)** | **14/20** | **1** | **1.00 → 1.00** | **0.901 (484/537)** | **47** | **15/20** | **15/16** | **2/2** | **2/2** | **1/1** | **17/17** | 41 / 72 s | $2.24 |
 
 What the numbers show:
 - **Single call:** every question in every run made exactly one generation request (60 requests, 0 retries, 0 errors).
@@ -219,6 +220,9 @@ What the numbers show:
   - v1 computed or converted some figures.
   - v2 fixed most of that, but its example caused unit conversions, and it often wrote bare table digits as "$… million" from tables whose unit header sits in another chunk. That is why v2 has 64 near matches and scores below v1.
   - v3 copies figures as printed.
+- **da-v4 (shipped, 2026-10-02, after the gate):**
+  - The targeted abstention fixes worked: abstention 2/2 and follow-ups answerable 2/2. The Ford brief proposes no out-of-corpus follow-ups, and the Apple 2015 brief no longer describes FY2015.
+  - Numeric grounding is 0.901, against 0.922 for da-v3. The drop is in briefs the change does not touch: Pfizer near matches (unit header in another chunk) and two Meta roundings. pdf-1's table is ragged and flagged. One run per version cannot separate this from variance; details are in [prompt-iterations.md](prompt-iterations.md).
 - **da-v3 remaining misses** (42 figures in 4 briefs; each carries an "unverified figure" badge):
   - `long-pfe-since-2022`: 30 near matches. These are Pfizer table cells ("$100,330 million", "$63,627M") whose "(in millions)" header is in another chunk. The digits are printed, but no cited passage states the unit, so the validator cannot verify the scale. "39%" (twice) is printed in no cited passage.
   - `ambiguous-meta`: 5 near matches, cash-flow cells such as "(69,691)" in a chunk without its unit header.

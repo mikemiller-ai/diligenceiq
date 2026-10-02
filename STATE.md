@@ -8,15 +8,15 @@ _Last updated: 2026-10-02 (local)_
 ## Current phase
 **Phase 4 is complete and gated (`pnpm gate` exit 0, 2026-10-02): the one-call generation pipeline, deterministic validation, the SQS worker plane, and generation evals.** Handoff: `docs/handoffs/phase-04.md`. Evals: `docs/evaluation.md` §4–5. Prompt log: `docs/prompt-iterations.md`.
 - **Decision 1 settled:** a change question that names no period reads each company's last 3 annual reports (SPEC §26.3, Appendix A.4).
-- **Shipped prompt `da-v3`**, on Sonnet 4.6. Temperature 0.2 with the forced tool is verified.
+- **Shipped prompt `da-v4`** (after the gate; see the handoff's post-gate addendum), on Sonnet 4.6. Temperature 0.2 with the forced tool is verified.
   - 20 eval questions: 14/20 pass every check; 1 generation call per question.
-  - Citation validity 1.00; numeric grounding 0.922 (498/540, strict validator) plus 35 unverified "unit_unstated" near matches.
-  - Abstention 1/2, follow-ups answerable 0/2 (the da-v4 candidate), injection 1/1, coverage 17/17.
+  - Citation validity 1.00; numeric grounding 0.901 (484/537, strict validator) plus 47 unverified "unit_unstated" near matches (da-v3: 0.922, 35).
+  - Abstention 2/2, follow-ups answerable 2/2, injection 1/1, coverage 17/17.
 - **In-region:** cold index load 2.75 s; generation 41–59 s (first token ~1.1 s); enqueue → COMPLETE 42–64 s; ~$0.12–0.13 per analysis.
 - **Deployed:**
-  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm), redeployed from `9699b3b` on 2026-10-02 (15:58 UTC). It matches the committed code.
+  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm), redeployed from `9699b3b` on 2026-10-02 (15:58 UTC). It runs da-v3; redeploying with da-v4 awaits Mike's go-ahead.
   - The live site still serves Phase 1. The api still answers `ANALYSES_DISABLED`. The kill switch is `false` (verified).
-- **Spend this phase (approved):** Bedrock ≈ $7.06 estimated: generation evals $6.69, plus 3 in-region analyses ≈ $0.37.
+- **Spend this phase (approved):** Bedrock ≈ $9.30 estimated: four generation eval runs $8.93 (da-v1–v4), plus 3 in-region analyses ≈ $0.37.
 
 ## Gate
 `pnpm gate` run on 2026-10-02 against the working tree: **exit 0**.
@@ -28,17 +28,15 @@ Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fix
 
 ## In flight
 - Nothing running. Phase 4 is committed (`9699b3b`) and the worker is redeployed.
-- Next: Phase 4b (offline profiles; ask Eliza about F4 first) or Phase 5 (sessions, caps, `POST /api/analyses` enqueue, poll with `expireIfPastDeadline`, Deep Analysis UI).
+- Next: Phase 4b (offline profiles; F4 settled 2026-10-02: Mike confirmed the offline build is fine) or Phase 5 (sessions, caps, `POST /api/analyses` enqueue, poll with `expireIfPastDeadline`, Deep Analysis UI).
 
 ## Decisions pending with Mike
-- **da-v4 prompt run (~$2.25):**
-  - Follow-ups must not target out-of-corpus companies or missing periods, nor use outside knowledge (Ford "Model e").
-  - The Apple 2015 brief must not claim things about a filing it never saw.
-  - Optional: a validator look-up of a table's unit header in the adjacent chunk, which would verify the 35 near matches.
+- **Redeploy `DiligenceIQ-Worker` with da-v4** (an AWS write; the deployed worker runs da-v3).
+- **Optional validator improvement:** read a table's "(in millions)" unit header from the adjacent chunk of the same filing. It would verify most of the 47 near matches; a re-score is free.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
-- **Ask Eliza** about F4 (before Phase 4b). F1 (rerank): the Phase 4 evals show no need.
-- **Lambda concurrency quota increase:** recommended before the demo (the account limit is 10, shared).
+- **F1 (rerank) to Eliza:** the Phase 4 evals show no need.
 - **Sonnet 5.5:** still 0 quota (L-94A31E46, L-31AB82D0). Switching needs a SPEC §29.1 change first.
+- Settled 2026-10-02: F4 (Mike: the offline profile build is fine), and the Lambda concurrency increase (10 → 1,000, verified).
 
 ## Known traps
 - **Sonnet 5.5 is not a drop-in model switch.** It rejects forced `toolChoice` (`any`/`tool`) and a non-default `temperature` with a 400. Moving to it needs a SPEC §29.1 change (`toolChoice: auto` with a strict tool), a prompt version bump and a paid eval run.
@@ -70,7 +68,7 @@ Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fix
 - **Profile build ledger:** a failed profile call is never retried at the same version. The company keeps its deterministic fallback until a genuine prompt-version bump. Never bump the version just to retry; that would fabricate prompt history.
 - **SPEC section numbers changed in v2.** Docs cite v2 numbers. Historical references say "SPEC v1 §N (archived)". SPEC v2 Appendix B maps old to new.
 - **`scripts/check-docs.mjs` locks in many Phase 0b phrases and the phase-row order (8 → 8b → 9).** Rewording those docs means updating the checks too.
-- **Lambda account concurrency is 10 (shared).** No reserved concurrency; worker `maximumConcurrency: 2`.
+- **Lambda account concurrency is 1,000 (shared; raised from 10 on 2026-10-01).** Still no reserved concurrency (a design rule); worker `maximumConcurrency: 2`.
 - **Claude Sonnet 5.5 has 0 tokens/minute quota here.** The default is `us.anthropic.claude-sonnet-4-6`. IAM needs the us-east-1, us-east-2 and us-west-2 foundation-model ARNs.
 - **Cohere Embed v4 is capped at 16.2M tokens/day,** below the ~20M-token corpus. Titan v2 is the default. The indexer must checkpoint and cache.
 - **Bedrock invoke entitlement verified 2026-10-01** (Titan v2 and Sonnet 4.6, us-east-1). Re-check with `pnpm check:bedrock` (tiny spend; ask first).

@@ -1,4 +1,4 @@
-# Final Deep Analysis prompt (da-v4)
+# Final Deep Analysis prompt (da-v3)
 
 <!-- Rendered from packages/rag/src/generation/prompt.ts by `pnpm prompts:render`. Do not edit by hand: a test asserts this file matches the runtime prompt. -->
 
@@ -6,7 +6,7 @@ The one generative request of a Deep Analysis (SPEC §14.3, §29.1). Changes are
 
 ## Generation settings
 
-- **Version:** `da-v4`
+- **Version:** `da-v3`
 - **Model:** `GENERATION_MODEL_ID` (default `us.anthropic.claude-sonnet-4-6`), Amazon Bedrock `ConverseStream`, one request, SDK `maxAttempts: 1`.
 - **Temperature:** 0.2
 - **Max output tokens:** 8192
@@ -25,7 +25,7 @@ Evidence rules
 4. Do not invent numbers. State a currency amount or a percentage only if that exact figure is printed in an excerpt you cite in the same item (finding, row or consideration). Copy it exactly as printed, with its unit: "$72.22 billion" stays "$72.22 billion", and "26%" stays "26%". Only when a table prints a bare cell under a stated unit, add that unit: 39,331 under "(in millions)" becomes "$39,331 million". Never round, never convert between thousands, millions and billions, never drop a unit word, and never add, subtract or compute a growth rate, share or difference; if the excerpts do not print the number you want, describe the direction in words instead.
 5. Separate filing facts from synthesis. Use basis "reported" when a finding restates what a filing says, and "analysis" when it is your inference across excerpts, periods or companies. Analysis still cites the excerpts it rests on.
 6. Compare companies or periods only where the excerpts support each side. If one side has no supporting excerpt, say so in evidenceGaps instead of filling it in.
-7. If the excerpts do not answer the question (a company outside the corpus, a topic the filings do not cover), set answerType to "insufficient_evidence" and say what is missing in executiveSummary and evidenceGaps, not as a key finding. Include only findings the excerpts do support, possibly none, and say nothing about the missing company, period or topic beyond its absence: do not describe what a missing filing contains, and do not compare a supplied period with one you have no excerpt for (for example, do not call a risk "new since 2015" without a 2015 excerpt). Do not pad.
+7. If the excerpts do not answer the question (a company outside the corpus, a topic the filings do not cover), set answerType to "insufficient_evidence" and say what is missing in executiveSummary and evidenceGaps, not as a key finding. Include only findings the excerpts do support, possibly none, and say nothing about the missing company or topic beyond its absence. Do not pad.
 8. List evidence gaps: companies, periods or topics the question asks about that the excerpts do not cover, including the gaps listed in <retrieval_scope>.
 
 How to write
@@ -36,7 +36,7 @@ How to write
 - keyFindings: three to six findings, most important first. Each title is at most twelve words; each finding is one to three sentences; tickers names the companies it is about.
 - comparison: include it only when a side-by-side table (kind "table", columns are the companies) or a period-by-period trend (kind "trend", columns are the periods) helps answer the question. Each row is one dimension with its own citationIds and one short cell per column (at most twelve words) stating what the filings say. Do not grade cells (no "High", "Moderate", "Low" or similar severity labels): the filings do not rank their risks, so a grade would be your rating. Omit comparison otherwise.
 - investmentConsiderations: two to four implications a diligence team should weigh, each citing the excerpts it rests on. Frame them as considerations, not recommendations.
-- followUpQuestions: two to four specific next questions this corpus can answer. Name only companies and periods that appear in the excerpts or in <retrieval_scope> as covered; never a company outside the corpus or a period listed as a gap, and no product, segment or event names that no excerpt mentions.
+- followUpQuestions: two to four specific next questions that SEC filings could answer.
 - Submit the brief by calling submit_diligence_brief exactly once.
 ````
 
