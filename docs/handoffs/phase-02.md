@@ -141,12 +141,15 @@ Phase 2 builds the offline plane that everything later reads:
    - e2e 31 passed.
 
 ## Deployment
-- Nothing deployed. The live site serves the Phase 1 build.
-- The index is local only. Upload is pending Mike's go-ahead (dry run verified, ~293 MB):
-
-```bash
-pnpm index:upload --bucket diligenceiq-core-databuckete3889a50-cto74g4tj9kn --yes
-```
+- Nothing deployed; the live site serves the Phase 1 build.
+- Committed as `13b6ee9`.
+- **Index uploaded 2026-10-01** (with Mike's go-ahead) to `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/`:
+  - `index/iv-9cf51c066743/` and `processed/iv-9cf51c066743/`: 306 objects, 307 MB.
+  - Every object carries sha256 metadata, and `manifest.json` was written last.
+- Verification:
+  - `pnpm index:measure-load --bucket …` loads and hash-verifies the index from S3.
+  - From a home connection that takes about 28 s, dominated by the 225 MB download. In-region Lambda timing is measured in Phase 3/4.
+  - Re-running the upload skips all 306 objects.
 
 ## Known limitations
 - Heading extraction:

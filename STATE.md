@@ -3,13 +3,13 @@
 _Last updated: 2026-10-01 (local)_
 
 ## Branch
-`main` (no remote yet). Last commit: `fdee7d8` (STATE after Phase 1 `716181a`). **Phase 2 is uncommitted in the working tree.**
+`main` (no remote yet). Last code commit: `13b6ee9` (Phase 2).
 
 ## Current phase
-**Phase 2 (ingestion, chunking, embeddings, index, extraction) is complete locally and gated, not committed, not uploaded, not deployed.** Handoff: `docs/handoffs/phase-02.md`.
+**Phase 2 (ingestion, chunking, embeddings, index, extraction) is complete, gated and committed (`13b6ee9`); the index is in S3; nothing new is deployed.** Handoff: `docs/handoffs/phase-02.md`.
 - Live site https://diligenceiq.mikemiller.ai still serves the Phase 1 build.
 - Bedrock invoke entitlement verified (Titan v2, `us.anthropic.claude-sonnet-4-6`).
-- Index `iv-9cf51c066743` built and validated in `.index/build/` (gitignored): 246 documents, 25,404 chunks (chunker c2, tokenizer t2), 54 companies; vectors 104 MB, chunks 93 MB, BM25 28 MB; local cold load ~420 ms, ~900 MB resident.
+- Index `iv-9cf51c066743` built, validated and **uploaded 2026-10-01** to `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/index/iv-9cf51c066743/` (+ `processed/iv-9cf51c066743/`, 246 filings; 306 objects, 307 MB; a re-upload skips all 306). Local copy in `.index/build/` (gitignored): 246 documents, 25,404 chunks (chunker c2, tokenizer t2), 54 companies; vectors 104 MB, chunks 93 MB, BM25 28 MB; local cold load ~420 ms, ~900 MB resident; from S3 over a home connection ~28 s (download-bound; to re-measure inside a us-east-1 Lambda in Phase 3/4).
 - Embedding spend this phase: 22.1M Titan v2 tokens ≈ $0.44.
 - Web preview profiles (AAPL 28, MSFT 24, NVDA 25 headings) cite real index chunks.
 
@@ -22,12 +22,10 @@ _Last updated: 2026-10-01 (local)_
 Gate record for the phase: adversary (2 blockers, 4 high, 7 medium, lows) → two fresh fixers (all fixed or partly fixed with measured numbers) → `/code-review` medium (2 low findings, fixed) → e2e axe regression fixed → `pnpm gate` green.
 
 ## In flight
-- Nothing running. Awaiting Mike: S3 upload and commit.
+- Nothing running.
 - Next is **Phase 3** (query analysis, lanes, hybrid retrieval, context builder, retrieval evals, change detection and signal go/no-go).
 
 ## Decisions pending with Mike
-- **Upload index `iv-9cf51c066743` to S3?** `pnpm index:upload --bucket diligenceiq-core-databuckete3889a50-cto74g4tj9kn --yes` (296 index objects + 246 processed filings, ~293 MB; dry run verified). Needed before Phase 3's worker can load it.
-- **Commit Phase 2** (waiting for go-ahead).
 - **Ask Eliza** about the offline profile generation (F4), before Phase 4b.
 - **Lambda concurrency quota increase:** recommended before the demo (the account limit is 10, shared).
 - **Sonnet 5.5 quota increase:** optional (L-94A31E46). The app ships on Sonnet 4.6 otherwise.
