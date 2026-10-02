@@ -79,8 +79,9 @@ test('Investigate on Company Intelligence prefills Deep Analysis without running
   expect((await e2eStats(request)).enqueued).toBe(before);
 });
 
-const PAGES: Array<{ path: string; ask: string }> = [
-  { path: '/', ask: 'Ask any question' },
+/** `scope` narrows the link to one region: the landing repeats "Ask any question" in later sections. */
+const PAGES: Array<{ path: string; ask: string; scope?: string }> = [
+  { path: '/', ask: 'Ask any question', scope: 'landing-hero' },
   { path: '/architecture/', ask: 'Ask a question' },
   { path: '/intelligence/', ask: 'Ask a question' },
   { path: '/intelligence/?ticker=MSFT', ask: 'Ask a question' },
@@ -91,7 +92,7 @@ const PAGES: Array<{ path: string; ask: string }> = [
   { path: '/sources/filing/?id=AAPL_10K_2025-10-31', ask: 'Ask a question' },
 ];
 
-for (const { path, ask } of PAGES) {
+for (const { path, ask, scope } of PAGES) {
   test(`${path}: opening the page sends only reads and the session, starts no analysis, and ${ask} opens an empty Deep Analysis`, async ({ page, request }) => {
     const before = (await e2eStats(request)).enqueued;
     const requests = recordRequests(page);
@@ -99,7 +100,8 @@ for (const { path, ask } of PAGES) {
     await settle(page);
     expect(requests.filter((r) => !isViewSafe(r)).map((r) => `${r.method()} ${r.url()}`)).toEqual([]);
     expect((await e2eStats(request)).enqueued).toBe(before);
-    await page.getByRole('link', { name: ask, exact: true }).click();
+    const region = scope ? page.getByTestId(scope) : page;
+    await region.getByRole('link', { name: ask, exact: true }).click();
     await expect(page).toHaveURL(/\/analysis\/new\/$/);
     await expect(page.getByRole('textbox', { name: 'Question', exact: true })).toHaveValue('');
   });

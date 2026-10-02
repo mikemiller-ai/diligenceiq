@@ -734,7 +734,7 @@ Static export, so detail views use query parameters (ResolveIQ pattern). Since P
 
 | Route | Page | Priority / phase |
 |---|---|---|
-| `/` | Compact landing: "Know what changed. Know what matters. Know what to investigate next." CTAs "Open Company Intelligence", "Ask any question" and "How it works" (Architecture) | P0 / 1 |
+| `/` | Product landing (SPEC §7): hero "Know what changed. Know what matters. Know what to investigate next." with CTAs "Open Company Intelligence", "Ask any question" and "How it works" (Architecture); the launch film (`#film`) under it; then problem, how it works, shows its work, two ways in, how it is built, closing CTA | P0 / 1 |
 | `/intelligence` | Company selector: deep-coverage companies featured (Apple first), plus search across all 54 | P0 / 1 |
 | `/intelligence?ticker=AAPL` | Company Intelligence dashboard: 30-second view, Performance, drivers, current risks, What's Changed, Attention Signals with Why This Matters, Recommended Diligence, coverage note | P0 / 1 (fixtures), 5 (real) |
 | `/compare?tickers=AAPL,MSFT,NVDA` | Compare: trajectories, common and distinctive attention areas, diverging trends, management emphasis, comparative diligence | P0 / 1, 5 |

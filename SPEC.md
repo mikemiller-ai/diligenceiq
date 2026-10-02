@@ -239,7 +239,7 @@ Static export, so detail views use query parameters.
 
 | Route | Page | Priority |
 |---|---|---|
-| `/` | Compact landing (§7) | P0 |
+| `/` | Product landing with the launch film (§7) | P0 |
 | `/intelligence` | Company selector | P0 |
 | `/intelligence?ticker=AAPL` | Company Intelligence dashboard | P0 |
 | `/compare?tickers=AAPL,MSFT,NVDA` | Compare | P0 |
@@ -326,14 +326,17 @@ SPEC v1 "IC Brief works" becomes P1 (if Phase 8b does not land, the IC Brief is 
 
 # 7. Landing (P0)
 
-A compact product introduction precedes the workspace. The panel must reach the working product immediately. Do not make them scroll through a large marketing site.
+A product landing in the family layout of Mike's other products (ResolveIQ, TrustResponse, ArchIQ and CareerOps; GenAIQ, which has its own design system and no film, was also surveyed): a navy hero, the launch film directly under it, then a short run of sections. The panel must still reach the working product in one click from the first screen: the primary CTA sits in the hero, above the fold.
 
 - **Hero:** **DiligenceIQ.** "Know what changed. Know what matters. Know what to investigate next."
-- **Supporting line:** the private-equity client problem in one or two sentences: understand companies, notice what changed, investigate with evidence, and prepare for the Investment Committee.
-- **Primary CTA:** "Open Company Intelligence".
-- **Secondary CTAs:** "Ask any question" (an empty Deep Analysis) and "How it works" (the Architecture and business-value page).
-
-Keep this compact.
+  - **Supporting line:** the private-equity client problem in one or two sentences: understand companies, notice what changed, investigate with evidence, and prepare for the Investment Committee.
+  - **Primary CTA:** "Open Company Intelligence".
+  - **Secondary CTAs:** "Ask any question" (an empty Deep Analysis), "How it works" (the Architecture and business-value page), and "Watch the launch film" (`#film`) once the film is present.
+  - **Product preview:** real filing content only, for example the latest Apple 10-K's risk headings verbatim, each with canonical citation chips that open the passage in the source view. Never a sample figure, invented company or narrative presented as fact.
+- **Launch film** (`#film`), the first section after the hero: a native `<video>` (controls, no autoplay, 16:9, poster, WebVTT captions when present) from `apps/web/public/media/diligenceiq-launch-film.mp4`. Until the file exists, a labeled placeholder holds the slot and the header's "Launch film" link is hidden; the page detects the files at build time, and a video without captions builds with a warning.
+- **Then, in order:** the client problem; how it works (the journey, §5.1); a navy "shows its work" band (citations, dollar and percentage figures checked against their cited passages, descriptive labels from the product's own vocabulary, no ratings); two ways in (Company Intelligence without a question, with an honest status line naming the companies that have a profile today until Phase 4b covers every company, and a link to Compare; Deep Analysis for any question, with the demo workspace's pre-run questions as real examples); how it is built (at most one generation call per analysis, offline profiles, scale to zero, spend controls) linking to `/architecture`; a closing CTA; the footer. All copy must be true of the current build.
+- **Copy rules:** plain language; no Eliza, FDE or assessment wording (the client framing); no measured or invented numbers other than corpus counts derived from the filing rows (plus the digits inside the seeded questions, the preview filing's fiscal label and the citation labels); no ratings or recommendation language (§32.6).
+- **Opening the landing never calls the api.**
 
 ---
 
@@ -2191,6 +2194,7 @@ Changes made to this specification after its consolidation, each decided by Mike
 | 2026-10-02 | §30.2 | The concurrency note reads 1,000 (raised from 10); the no-reserved-concurrency rule is unchanged. | The quota increase was approved (assumptions D7). |
 | 2026-10-02 | §26.3 | A change question that names no period reads each company's last 3 annual reports instead of the current view. | Phase 3 adversary H3: "How has Visa changed?" answered from one filing could not show change. Pending decision 1, settled at the start of Phase 4. |
 | 2026-10-02 | §49 | Phase 5 runs before Phase 4b. Phase 5 serves Company Intelligence through the real runtime profile path (the SSM pointer `/diligenceiq/active-profile-set` and an S3 profile set), with the preview set `fixture-v2` active until Phase 4b publishes the `det-v*` and `llm-v*` sets. The "Company Intelligence on real profiles" exit content lands with Phase 4b, which then needs only a pointer switch. Nothing else in §49 changes. Confirmed by Mike at the Phase 5 handoff (2026-10-02). | Mike chose to run Phase 5 first on 2026-10-02. The workflows, sessions, caps and the profile read path can be built and tested without the offline build (DD-20). |
+| 2026-10-02 | §7, §5.3 | The landing becomes a product landing in the family layout (navy hero with a real-filing preview, the launch film under it, then problem, how it works, shows its work, two ways in, how it is built, closing CTA). The primary CTA stays in the hero. Built before Phase 4b. | Mike asked for a richer landing matching ResolveIQ, GenAIQ, TrustResponse, ArchIQ and CareerOps, with the launch film in the same position as theirs. |
 
 ---
 

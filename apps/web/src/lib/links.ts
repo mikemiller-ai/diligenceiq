@@ -41,3 +41,8 @@ export function filtersAsPrefill(filters: AnalysisFilters | undefined): PrefillF
     ...(filters?.fiscalYearTo !== undefined ? { fiscalYearTo: filters.fiscalYearTo } : {}),
   };
 }
+
+/** A filing's source view, optionally scrolled to one passage (`#chunk-<id>`). */
+export function filingHref(documentId: string, chunkId?: string): string {
+  return `/sources/filing/?id=${encodeURIComponent(documentId)}${chunkId ? `#chunk-${chunkId}` : ''}`;
+}

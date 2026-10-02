@@ -27,6 +27,13 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all fixed, regression tests) → `/code-review` medium (2 findings: concurrent 401s minted several workspaces; profile finding IDs collided across profile sets; both fixed with tests) → `pnpm gate` green.
 
 ## In flight
+- **Product landing (uncommitted, gated 2026-10-02):** Mike asked for a richer landing before Phase 4b, matching ResolveIQ, TrustResponse, ArchIQ and CareerOps (GenAIQ surveyed; no film). SPEC §7 rewritten, A.4 row added; design-tokens navy rule extended to the landing's "Shows its work" and closing bands.
+  - Navy hero with a real-filing preview (Apple FY2025 risk headings verbatim, canonical chips linking to the source view). The launch film sits under the hero (`#film`).
+  - Then: problem, how it works, shows its work, two ways in (with an honest "Preview today: Apple, Microsoft and NVIDIA" status line and a Compare link), how it is built, closing CTA, footer.
+  - **Launch film:** drop `apps/web/public/media/diligenceiq-launch-film.mp4` (plus `-poster.jpg` and `.vtt` captions) and rebuild. It is detected at build time; until then a labeled placeholder holds the slot.
+  - **Update at Phase 4b:** the status line and the "Notice" journey copy (tests pin the preview companies to fixture-v2).
+  - Gate record: adversary (1 blocker: e2e strict-mode on three "Ask any question" links; 5 high: copy overclaiming the pre-4b build, wrong signal vocabulary, measured heading count, a film test depending on the working tree) → fresh fixer (all fixed with tests; `filingHref` moved to `lib/links.ts`) → `/code-review` medium (1 low: GenAIQ wrongly cited as having a film; fixed) → `pnpm gate` exit 0 (unit 795: core 33, cdk 43, corpus 102, rag 346, web 169, api 102; e2e 39).
+  - Not deployed: `pnpm deploy:web` needs Mike's go-ahead.
 - **Verified in-region 2026-10-02 (Mike approved; about $0.11):** one analysis through the **production api**: session → `POST /api/analyses` (AAPL risk factors since 2023) → SQS → worker → COMPLETE. Stages queued → loading_index (cold, 3.5 s) → balancing → generating; queued to complete 50.4 s (generation 45.5 s); 1 generation call, 1 embedding; 20,117 in / 3,478 out tokens, $0.1125 estimated; 39/39 citations valid, none removed; context snapshot readable. Kill switch back to `false`. Note: a shell poller that `echo`es the JSON breaks on escaped newlines in the brief; parse the response with Python or jq directly.
 - Next phase: Phase 4b (offline profiles; must write the manifest format in `ProfileSetManifestSchema`), then Phase 6.
 

@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { Tooltip } from '@/components/ui/tooltip';
 import { chipLabel } from '@/lib/citations';
 import { formatDate } from '@/lib/format';
+import { filingHref } from '@/lib/links';
 import { cn } from '@/lib/utils';
 import { MicroLabel } from '@/components/evidence/section';
 
@@ -84,9 +85,7 @@ export function useEvidence() {
   return ctx;
 }
 
-export function filingHref(documentId: string, chunkId?: string): string {
-  return `/sources/filing/?id=${encodeURIComponent(documentId)}${chunkId ? `#chunk-${chunkId}` : ''}`;
-}
+export { filingHref };
 
 function EvidencePanel({ target }: { target: EvidenceTarget }) {
   if (target.kind === 'periods') return <PeriodsPanel title={target.title} periods={target.periods} />;
