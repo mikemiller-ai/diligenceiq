@@ -3,10 +3,10 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `fb54e18` (Phase 5). Phase 4: `9699b3b`, da-v4 follow-up `ab5de38`.
+`main` (no remote yet). Last code commit: `2a4524c` (per-client creation cap 20 → 100). Phase 5: `fb54e18`. Phase 4: `9699b3b`, da-v4 follow-up `ab5de38`.
 
 ## Current phase
-**Phase 5 is built, gated (`pnpm gate` exit 0, 2026-10-02) and committed (`fb54e18`), but not deployed.** Handoff: `docs/handoffs/phase-05.md`. Mike chose Phase 5 before Phase 4b on 2026-10-02; SPEC v2 Appendix A.4 records it (confirmed by Mike, 2026-10-02).
+**Phase 5 is built, gated (`pnpm gate` exit 0, 2026-10-02) committed (`fb54e18`, cap change `2a4524c`) and **deployed 2026-10-02**.** Handoff: `docs/handoffs/phase-05.md`. Mike chose Phase 5 before Phase 4b on 2026-10-02; SPEC v2 Appendix A.4 records it (confirmed by Mike, 2026-10-02).
 - **api** (`services/api`):
   - HMAC sessions (cookie `__Host-diq_ws`, secret = SSM SecureString `/diligenceiq/session-secret`, admin-created).
   - Demo workspace seeded from `seed/demo-workspace.json` (3 real pre-run briefs, 4 findings); reset.
@@ -15,8 +15,8 @@ _Last updated: 2026-10-02 (local)_
   - Findings copied server-side; profiles read from the active set (SSM pointer `/diligenceiq/active-profile-set` + S3); Compare; health `indexAvailable`.
 - **web:** all workspace state comes from the api. The Deep Analysis page polls, shows the worker's real stages, the Interpretation panel, the coverage matrix and numeric badges (including `unit_unstated` near matches), and every SPEC §38.2 state. A Recent analyses list.
 - **Validator:** `preceding_unit` rule (a table's unit caption in the previous chunk of the same section). da-v4 numeric grounding 0.901 → **0.911** (489/537); near matches 47 → 42. Re-scored for free; all 42 remaining are Pfizer tables whose caption is "(MILLIONS)" in the same chunk, a form the detector does not read.
-- **Deployed:** unchanged. `DiligenceIQ-Worker` runs `ab5de38` (da-v4, the OLD validator). The live site and api still serve Phase 1 (`ANALYSES_DISABLED`). The kill switch is `false`.
-- **Spend this phase:** none (seed and rescore are replay-only).
+- **Deployed 2026-10-02 from `2a4524c` (Mike approved each step):** SecureString `/diligenceiq/session-secret` created; `fixture-v2` uploaded to `intelligence/iv-9cf51c066743/fixture-v2/`; `pnpm deploy:infra` (Core, Worker with the `preceding_unit` validator, Api; Web unchanged); `/diligenceiq/active-profile-set` = `iv-9cf51c066743/fixture-v2`; `pnpm deploy:web`. Production smoke (read-only, no spend) passed: health (indexAvailable, fixture-v2), session (`__Host-diq_ws`, idempotent), seeded workspace (3 analyses, 4 findings), companies, profile, PROFILE_MISSING, compare, 401 without a session, `POST /api/analyses` → `ANALYSES_DISABLED`. The kill switch stays `false`.
+- **Spend this phase:** one in-region analysis ≈ $0.11 (seed and rescore are replay-only).
 
 ## Gate
 `pnpm gate` on 2026-10-02 against the working tree: **exit 0**.
@@ -27,13 +27,7 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all fixed, regression tests) → `/code-review` medium (2 findings: concurrent 401s minted several workspaces; profile finding IDs collided across profile sets; both fixed with tests) → `pnpm gate` green.
 
 ## In flight
-- Deploy (each needs Mike's OK; none done):
-  1. Create the SecureString `/diligenceiq/session-secret` (≥ 32 bytes) in us-east-1.
-  2. Upload the preview set: `pnpm profiles:upload-set --bucket <data bucket> --set iv-9cf51c066743/fixture-v2 --yes`.
-  3. `pnpm deploy:infra` (CoreStack adds `/diligenceiq/active-profile-set` = "none"; ApiStack gets IAM, env and queue; WorkerStack redeploys with the new validator).
-  4. Point `/diligenceiq/active-profile-set` at `iv-9cf51c066743/fixture-v2`.
-  5. `pnpm deploy:web`.
-  6. One in-region run (`pnpm analysis:run`, about $0.13, kill switch on, then off) to verify api → SQS → worker end to end. It has never run.
+- **Verified in-region 2026-10-02 (Mike approved; about $0.11):** one analysis through the **production api**: session → `POST /api/analyses` (AAPL risk factors since 2023) → SQS → worker → COMPLETE. Stages queued → loading_index (cold, 3.5 s) → balancing → generating; queued to complete 50.4 s (generation 45.5 s); 1 generation call, 1 embedding; 20,117 in / 3,478 out tokens, $0.1125 estimated; 39/39 citations valid, none removed; context snapshot readable. Kill switch back to `false`. Note: a shell poller that `echo`es the JSON breaks on escaped newlines in the brief; parse the response with Python or jq directly.
 - Next phase: Phase 4b (offline profiles; must write the manifest format in `ProfileSetManifestSchema`), then Phase 6.
 
 ## Decisions pending with Mike
@@ -57,7 +51,6 @@ Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all
   A web fixtures test fails when any of them drifts.
 - **`comparison.columns` in a validated brief has one header per value (no row-label header).** Use core `comparisonHeaders` when rendering or copying rows; a leading row-label header is still accepted.
 - **E2E runs the real api in-process** (`tests/e2e/local-server.ts`), not a Python static server. Its queue goes to a TEST-ONLY stub worker that completes only with a seed brief for a matching company, else fails `NO_RELEVANT_EVIDENCE`. Test controls: `/__e2e/stats`, `/__e2e/kill-switch`, `/__e2e/worker`. `.claude/launch.json` `web-local` serves the same thing on port 4175 for manual checks.
-- **The deployed worker still runs the old validator** until the next `deploy:infra`. The 0.911 numbers are from the re-score.
 - **Sonnet 5.5 is not a drop-in model switch.** It rejects forced `toolChoice` (`any`/`tool`) and a non-default `temperature` with a 400. Moving to it needs a SPEC §29.1 change (`toolChoice: auto` with a strict tool), a prompt version bump and a paid eval run.
 - **The AWS CLI default region on this machine is us-east-2.** Pass `--region us-east-1` to `aws` commands. The scripts default `AWS_REGION` to us-east-1 themselves.
 - **Generation eval spend:**
