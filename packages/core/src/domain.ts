@@ -330,7 +330,16 @@ export type BriefValidation = z.infer<typeof BriefValidationSchema>;
 
 /** Company × period coverage matrix (SPEC §15.2): every resolved cell, with context and cited chunk counts. */
 export const BriefCoverageSchema = z.object({
-  cells: z.array(z.object({ ticker: z.string(), period: z.string(), contextChunks: z.number().int().nonnegative(), citedChunks: z.number().int().nonnegative() })),
+  cells: z.array(
+    z.object({
+      ticker: z.string(),
+      period: z.string(),
+      contextChunks: z.number().int().nonnegative(),
+      citedChunks: z.number().int().nonnegative(),
+      /** The context passages in this cell (Phase 6), so the matrix can open them; absent on older analyses. */
+      chunkIds: z.array(z.string()).optional(),
+    }),
+  ),
 });
 export type BriefCoverage = z.infer<typeof BriefCoverageSchema>;
 

@@ -150,7 +150,8 @@ describe('hero product preview: real filing content only', () => {
       for (const id of r.chunkIds) {
         const chip = within(preview).getByRole('link', { name: `View passage ${id}` });
         // next/link drops the trailing slash before the query outside a real build.
-        expect(chip.getAttribute('href')!.replace('/?', '?')).toBe(filingHref(company.documentId, id).replace('/?', '?'));
+        expect(chip.getAttribute('href')!.replace('/?', '?')).toBe(filingHref(company.documentId, id, passage(id).indexVersion).replace('/?', '?'));
+        expect(chip.getAttribute('href')).toContain(`iv=${passage(id).indexVersion}#chunk-${id}`);
         expect(chip).toHaveTextContent(chipLabel(passage(id)));
       }
     }

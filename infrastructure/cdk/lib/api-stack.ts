@@ -102,7 +102,16 @@ export class ApiStack extends Stack {
     fn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['s3:GetObject'],
-        resources: [props.dataBucket.arnForObjects('intelligence/*'), props.dataBucket.arnForObjects(`index/${CONFIG.indexVersion}/manifest.json`)],
+        // Profiles, the index manifest, and (Phase 6) the processed filings and adjacency files behind
+        // the source view and adjacent-period evidence, for this index version only. Deliberately no
+        // s3:ListBucket: a missing key then answers 403, which the api reads as "missing" with a
+        // warning (services/api/src/s3-missing.ts), so the role cannot enumerate the bucket.
+        resources: [
+          props.dataBucket.arnForObjects('intelligence/*'),
+          props.dataBucket.arnForObjects(`index/${CONFIG.indexVersion}/manifest.json`),
+          props.dataBucket.arnForObjects(`index/${CONFIG.indexVersion}/adjacency/*`),
+          props.dataBucket.arnForObjects(`processed/${CONFIG.indexVersion}/*`),
+        ],
       }),
     );
 

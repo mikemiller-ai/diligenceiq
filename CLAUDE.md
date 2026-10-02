@@ -74,6 +74,9 @@ pnpm gate
   - `pnpm intelligence:build --max-calls 0` builds the deterministic set `det-v<templateVersion>` locally (free, no AWS). With `--llm --bucket <data bucket>` it builds the LLM set too: it reads the S3 build ledger, and is a dry run (calls and estimated cost) unless `--yes`. `--yes` makes Bedrock calls (about $0.13 each, one per company per `profilePromptVersion`, never repeated) and ledger writes: ask first. `--llm --max-calls 0` rebuilds the LLM set from stored outcomes only (free).
   - `pnpm eval:profiles` scores the built sets against `evals/profiles.yaml` (no AWS).
   - Upload with `pnpm profiles:upload-set --root .index/intelligence --set <iv>/<set>` (S3 write, ask first); switching `/diligenceiq/active-profile-set` is a separate `aws ssm put-parameter` (ask first).
+- **Phase 6 tools (never in the gate):**
+  - `pnpm evidence:check` checks citation integrity over the local index build (every chunk, adjacency reference, and seed, live-brief and profile-set citation resolves); writes `evals/results/evidence-<iv>.json` (no AWS).
+  - `pnpm fixtures:evidence` regenerates the committed adjacency subset `tests/fixtures/evidence/<iv>/adjacency/` from `.index/build` (no AWS); the api tests and the e2e server process filings from the corpus themselves.
 - **Generation tools (Phase 4, never in the gate):**
   - `pnpm eval:retrieval --generate` replays recorded generations (free). `--live` makes Bedrock generation calls, about $0.11 each, about $2.25 per run: ask first.
   - `pnpm eval:generation:rescore` re-validates stored briefs (no AWS).

@@ -3,29 +3,25 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `dfff25e` (Phase 4b). Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
+`main` (no remote yet). Last code commit: `dfff25e` (Phase 4b); go-live recorded `059ebbd`. Phase 6 is in the working tree, uncommitted (awaiting Mike's go-ahead). Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
 
 ## Current phase
-**Phase 4b (offline Company Intelligence profiles) is built, gated (`pnpm gate` exit 0, 2026-10-02) and committed (`dfff25e`). Both sets are uploaded and **llm-v3 is live** (2026-10-02).** Handoff: `docs/handoffs/phase-04b.md`.
-- Sets built locally in `.index/intelligence/iv-9cf51c066743/`: **det-v2** (53 profiles, zero calls, every bar met) and **llm-v3** (42 model-written, 11 deterministic fallbacks; deep-tier fallback 3/12 = 25%: the provisional 10% bar was missed, and Mike revised it to ≤ 25% (SPEC A.4)). 53 = every corpus company but GE Capital (G2).
-- Spend (each approved by Mike): 59 profile calls, about $6.0 (v1 trial 3, v2 trial 3, v3 53). Ledger: `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/ledger/iv-9cf51c066743/{1,2,3}/`.
-- Mike's decisions 2026-10-02: F4 settled (build both sets); cited-passage figure rule (SPEC A.4); active set will be **llm-v3** with det-v2 uploaded as the instant fallback.
-- The landing (committed `950a021`, deployed) still says "Preview today"; the working tree's new landing copy says every company has a profile and must deploy **after** the pointer switch.
-- Phase 5 remains deployed (2026-10-02, from `2a4524c`): active set `fixture-v2`, kill switch `false`.
+**Phase 6 (evidence: adjacent periods, readable source view, coverage matrix linked to evidence, citation integrity) is built and gated (`pnpm gate` exit 0, 2026-10-02), not yet committed or deployed.** Handoff: `docs/handoffs/phase-06.md`.
+- Production runs the Phase 4b go-live build: active profile set `iv-9cf51c066743/llm-v3` (SSM parameter version 5, re-verified read-only 2026-10-02), kill switch `false`, `/api/health` 200. Instant fallback: set the pointer to `iv-9cf51c066743/det-v2`.
+- Exit criteria: AAPL and JNJ adjacency tested in the gate; seed and fixture-profile citations resolve in the gate; `pnpm evidence:check` (offline) resolves every index chunk, adjacency reference, recorded live-brief citation and det-v2/llm-v3 citation (`evals/results/evidence-iv-9cf51c066743.json`). Production DynamoDB analyses are not covered by a repo check (adversary ID check: all resolve).
 
 ## Gate
-`pnpm gate` on 2026-10-02 against the Phase 4b working tree: **exit 0**.
+`pnpm gate` on 2026-10-02 against the Phase 6 working tree: **exit 0**.
 - check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 75, cdk 43, corpus 102, rag 393, web 172, api 116 (**901**).
-- `cdk:synth` and `build` succeeded; **e2e 39 passed**.
+- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 394, web 189, api 135 (**941**).
+- `cdk:synth` and `build` succeeded; **e2e 44 passed**.
 
-Gate record: adversary (1 blocker: the deep-tier bar; 5 high: citations to passages the model never read, dead partial-upload guard, landing claim before the switch, unshown headline, unshown outlook) → fresh fixer (all fixed with tests; det-v2; validator v2; request hash; bucket pin; local outcome copies) → `/code-review` medium (no findings) → `pnpm gate` green.
+Gate record: adversary (1 blocker: typecheck; 2 high: source view ignored the index version, missing-key 403 → 500; 5 medium; 10 low) → fresh fixer (all fixed with tests) → `/code-review` medium (no findings) → `pnpm gate` green.
 
 ## In flight
-- **Done 2026-10-02 (Mike approved):** `det-v2` and `llm-v3` uploaded to `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/iv-9cf51c066743/` (54 objects each, manifest last).
-- **Incident, 2026-10-02:** the pointer was switched to `llm-v3` before the api was redeployed. The deployed api still runs the pre-4b strict `CompanyIntelligenceProfileSchema`, which has no `headline`, so the 42 model-written profiles read as `PROFILE_MISSING` and Compare 404'd. It lasted a few minutes. The pointer was switched to `det-v2`: production smoke then showed 53/53 profiles 200, Compare 200 and `POST /api/analyses` → `ANALYSES_DISABLED`.
-- **Finished 2026-10-02 (Mike approved):** `pnpm deploy:infra` (Worker and Api updated; Core and Web unchanged) → pointer `iv-9cf51c066743/llm-v3` (parameter version 5) → production smoke (53/53 profiles 200, Compare 200, MSFT llm with headline and outlook, `POST /api/analyses` 503 `ANALYSES_DISABLED`) → `pnpm deploy:web` (landing "Every company in the review window has a profile (53 companies)…"; NVDA dashboard shows the model-written summary, Management outlook and footer "Generation: llm · 1 model call to build · profile set llm-v3"). Kill switch `false`. Instant fallback: set the pointer to `iv-9cf51c066743/det-v2`.
-- Next phase: Phase 6.
+- **Commit Phase 6** after Mike's go-ahead.
+- **Deploy Phase 6** (ask Mike first; AWS writes): `pnpm deploy:infra` (api routes + IAM `index/<iv>/adjacency/*`, `processed/<iv>/*`; worker records coverage `chunkIds`) → `pnpm deploy:web` → read-only production smoke: `GET /api/sources/<doc>` span equals a seeded citation's text; `GET /api/evidence/adjacent` on AAPL and JNJ; the JPM 10-K (~1.36 MB) within the 10 s api timeout (record cold latency); a missing document answers `404 SOURCE_MISSING`, not 500 (confirms the 403 mapping on the real role). The S3 data is already in place (adversary: sha256 of all 246 processed and 54 adjacency objects match local).
+- Next phase after the deploy: Phase 7.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
@@ -35,6 +31,10 @@ Gate record: adversary (1 blocker: the deep-tier bar; 5 high: citations to passa
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
 
 ## Known traps
+- **Evidence routes recompute chunks at runtime.** `GET /api/sources` and `/api/evidence/adjacent` re-chunk `processed/<iv>/<doc>.json` with the bundled `chunkFiling`; the adjacency file holds chunk IDs only. The store refuses (`index_unavailable`) when the index manifest's `chunkerVersion` differs from the bundled `CHUNKER_VERSION`, so a chunker change needs a re-index before the api deploy. `pnpm evidence:check` proves byte-identity over the whole build.
+- **Without `s3:ListBucket`, S3 answers a missing key with 403 AccessDenied.** The api role deliberately has no ListBucket; `isMissingObject` (`services/api/src/s3-missing.ts`) reads 403 as missing and logs a warn with the key. A prefix missing from the IAM policy therefore shows as "not found" plus that warn, not as a 500.
+- **Source-view links carry the citation's index version** (`/sources/filing/?id=&iv=#chunk-`, `filingHref`). A citation from another version opens the current text with a notice and is never highlighted.
+- **Committed evidence fixtures:** `tests/fixtures/evidence/<iv>/` (adjacency subset + the real build manifest), regenerated with `pnpm fixtures:evidence` from `.index/build`, never hand-edited. The api tests and the e2e server process filings from the corpus themselves.
 - **Phase 5 api routes need a session.** Every route except `GET /api/health` and `POST /api/session` returns 401 without the cookie. The cookie is `__Host-diq_ws` in production and `diq_ws` on the local http server (`secureCookies: false`). POST and PATCH bodies must be `content-type: application/json`: the retrieval-debug curl needs `-H 'content-type: application/json'`.
 - **The session secret is not in CDK.** CloudFormation cannot create SecureStrings. Without `/diligenceiq/session-secret` (≥ 32 bytes) every session fails closed with 500 (assumption D11).
 - **The api reads profiles only through the SSM pointer.** "none" (the CDK default) serves no profiles (`PROFILE_MISSING` everywhere). A set is immutable in S3 (If-None-Match; `upload-set` fails loudly on different content); a change is a new version. Phase 4b sets match `ProfileSetManifestSchema` (core `intelligence.ts`); extra telemetry fields are allowed.

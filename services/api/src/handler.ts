@@ -8,6 +8,7 @@ import seedJson from '../../../seed/demo-workspace.json';
 import { sqsAnalysisQueue } from './analyses/queue';
 import { DynamoAnalysisStore } from './analyses/store';
 import { type AppCaps, DEFAULT_CAPS, createApp } from './app';
+import { createEvidenceStore, s3EvidenceReader } from './evidence/store';
 import { log } from './http';
 import { createKillSwitch } from './kill-switch';
 import { createProfileProvider, s3SetReader, ssmPointerReader } from './profiles/provider';
@@ -17,7 +18,8 @@ import { DynamoWorkspaceStore } from './workspace/store';
 
 /**
  * The api Lambda (architecture §4.2, §9). Module scope holds the clients and caches so a warm
- * container reuses them. It reads DynamoDB, S3 (`intelligence/*`, the index manifest) and SSM,
+ * container reuses them. It reads DynamoDB, S3 (`intelligence/*`, the index manifest, processed
+ * filings and adjacency files for the evidence routes) and SSM,
  * and sends to the analysis queue. It has no Bedrock permission and imports no model client.
  */
 const env = (name: string) => {
@@ -74,6 +76,7 @@ const app = createApp({
   seed: seed.success ? seed.data : null,
   indexVersion,
   indexAvailable,
+  evidence: indexVersion ? createEvidenceStore({ indexVersion, read: s3EvidenceReader(s3, bucket) }) : null,
   caps,
 });
 

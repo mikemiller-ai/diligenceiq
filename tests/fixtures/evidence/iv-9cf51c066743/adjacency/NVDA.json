@@ -1,0 +1,1397 @@
+{
+ "NVDA-FY2024-10K-FS-004": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-FS-004",
+     "score": 0.9703
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-FS-007",
+     "score": 0.8545
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-FS-006",
+     "score": 0.7803
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-FS-004",
+     "score": 0.9947
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-FS-006",
+     "score": 0.901
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-FS-007",
+     "score": 0.8674
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-FS-008": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-FS-008",
+     "score": 0.9636
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-FS-009",
+     "score": 0.815
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-FS-034",
+     "score": 0.7632
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-FS-008",
+     "score": 0.9669
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-FS-006",
+     "score": 0.7675
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-FS-035",
+     "score": 0.7672
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-MDA-004": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-010",
+     "score": 0.7743
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-009",
+     "score": 0.7661
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-008",
+     "score": 0.7436
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-004",
+     "score": 0.843
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-005",
+     "score": 0.7888
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-010",
+     "score": 0.7668
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-MDA-005": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-004",
+     "score": 0.817
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-008",
+     "score": 0.7748
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-010",
+     "score": 0.7625
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-005",
+     "score": 0.8727
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-009",
+     "score": 0.767
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-001",
+     "score": 0.7605
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-MDA-008": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-007",
+     "score": 0.8554
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-006",
+     "score": 0.8259
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-008",
+     "score": 0.8195
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-007",
+     "score": 0.8449
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-011",
+     "score": 0.7894
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-010",
+     "score": 0.7766
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-MDA-009": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-008",
+     "score": 0.7595
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-004",
+     "score": 0.7407
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-010",
+     "score": 0.7376
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-009",
+     "score": 0.8001
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-005",
+     "score": 0.7605
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-008",
+     "score": 0.7572
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-MDA-010": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-009",
+     "score": 0.8884
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-010",
+     "score": 0.8062
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-004",
+     "score": 0.7821
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-009",
+     "score": 0.8768
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-010",
+     "score": 0.8416
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-005",
+     "score": 0.7831
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2024-10K-MDA-012": {
+  "previous": {
+   "documentId": "NVDA_10K_2023Q1_2023-02-24",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-01-29",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-011",
+     "score": 0.9124
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-012",
+     "score": 0.8176
+    },
+    {
+     "chunkId": "NVDA-FY2023-10K-MDA-013",
+     "score": 0.7906
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10K_2025-02-26",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-01-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-011",
+     "score": 0.9169
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-012",
+     "score": 0.7855
+    },
+    {
+     "chunkId": "NVDA-FY2025-10K-MDA-013",
+     "score": 0.7767
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-001": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.9932
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-021",
+     "score": 0.9152
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-002",
+     "score": 0.8978
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-002": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-002",
+     "score": 0.9778
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.8912
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-029",
+     "score": 0.8593
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-003": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-003",
+     "score": 0.9901
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-004",
+     "score": 0.8625
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-002",
+     "score": 0.852
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-004": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-004",
+     "score": 0.9621
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-006",
+     "score": 0.9071
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-008",
+     "score": 0.8449
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-008": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-009",
+     "score": 0.9768
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-010",
+     "score": 0.905
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-008",
+     "score": 0.8892
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-009": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-010",
+     "score": 0.9873
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-009",
+     "score": 0.9286
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.857
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-010": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-011",
+     "score": 0.9765
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.876
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-019",
+     "score": 0.8703
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-011": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-012",
+     "score": 0.9588
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-014",
+     "score": 0.898
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.8491
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-013": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-014",
+     "score": 0.9944
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-013",
+     "score": 0.8755
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-012",
+     "score": 0.8707
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-015": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-016",
+     "score": 0.9616
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-017",
+     "score": 0.8999
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-015",
+     "score": 0.8764
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-016": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-017",
+     "score": 0.9712
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-018",
+     "score": 0.8961
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.8854
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-017": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-018",
+     "score": 0.9781
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-019",
+     "score": 0.8752
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.8444
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-018": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-019",
+     "score": 0.9347
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-020",
+     "score": 0.8014
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-011",
+     "score": 0.7946
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-019": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-020",
+     "score": 0.9627
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-021",
+     "score": 0.895
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.8811
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-020": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-021",
+     "score": 0.9818
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.915
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-022",
+     "score": 0.8819
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-022": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-023",
+     "score": 0.9619
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-022",
+     "score": 0.9052
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-024",
+     "score": 0.8958
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-026": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-026",
+     "score": 0.8343
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-025",
+     "score": 0.7937
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-024",
+     "score": 0.7908
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-028": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-027",
+     "score": 0.9686
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-024",
+     "score": 0.9328
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-026",
+     "score": 0.8859
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-029": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-028",
+     "score": 0.941
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-022",
+     "score": 0.8738
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-017",
+     "score": 0.8621
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-030": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-029",
+     "score": 0.9531
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-028",
+     "score": 0.8643
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-022",
+     "score": 0.8631
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-034": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-033",
+     "score": 0.9548
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-022",
+     "score": 0.8251
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-021",
+     "score": 0.8055
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-1A-035": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-033",
+     "score": 0.9097
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-034",
+     "score": 0.8423
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-1A-001",
+     "score": 0.8243
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-FS-008": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-008",
+     "score": 0.9669
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-011",
+     "score": 0.7587
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-034",
+     "score": 0.74
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-FS-023": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-004",
+     "score": 0.8554
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-007",
+     "score": 0.8398
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-036",
+     "score": 0.8385
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-FS-035": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-036",
+     "score": 0.8337
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-004",
+     "score": 0.8179
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-FS-035",
+     "score": 0.8128
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-MDA-001": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-001",
+     "score": 0.973
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-005",
+     "score": 0.7605
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-004",
+     "score": 0.6972
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-MDA-005": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-005",
+     "score": 0.8727
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-006",
+     "score": 0.7954
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-004",
+     "score": 0.7888
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-MDA-008": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-009",
+     "score": 0.7572
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-008",
+     "score": 0.685
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-005",
+     "score": 0.6499
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-MDA-009": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-010",
+     "score": 0.8768
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-009",
+     "score": 0.8001
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-005",
+     "score": 0.767
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2025-10K-MDA-010": {
+  "previous": {
+   "documentId": "NVDA_10K_2024Q1_2024-02-21",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-01-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-010",
+     "score": 0.8416
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-011",
+     "score": 0.808
+    },
+    {
+     "chunkId": "NVDA-FY2024-10K-MDA-008",
+     "score": 0.7766
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "NVDA-FY2026Q1-10Q-MDA-004": {
+  "previous": {
+   "documentId": "NVDA_10Q_2024Q4_2024-11-20",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2024-10-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-007",
+     "score": 0.8114
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-004",
+     "score": 0.8053
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-005",
+     "score": 0.7958
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10Q_2025Q3_2025-08-27",
+   "fiscalLabel": "FY2026Q2",
+   "periodEnd": "2025-07-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-004",
+     "score": 0.9158
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-003",
+     "score": 0.8662
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-002",
+     "score": 0.8173
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q2_2024-05-29",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-04-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q1-10Q-MDA-005",
+     "score": 0.8875
+    },
+    {
+     "chunkId": "NVDA-FY2025Q1-10Q-MDA-006",
+     "score": 0.8634
+    },
+    {
+     "chunkId": "NVDA-FY2025Q1-10Q-MDA-004",
+     "score": 0.8305
+    }
+   ]
+  }
+ },
+ "NVDA-FY2026Q1-10Q-MDA-006": {
+  "previous": {
+   "documentId": "NVDA_10Q_2024Q4_2024-11-20",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2024-10-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-007",
+     "score": 0.9327
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-008",
+     "score": 0.8594
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-010",
+     "score": 0.7798
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10Q_2025Q3_2025-08-27",
+   "fiscalLabel": "FY2026Q2",
+   "periodEnd": "2025-07-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-006",
+     "score": 0.9478
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-007",
+     "score": 0.8532
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-004",
+     "score": 0.8243
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q2_2024-05-29",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-04-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q1-10Q-MDA-008",
+     "score": 0.8725
+    },
+    {
+     "chunkId": "NVDA-FY2025Q1-10Q-MDA-006",
+     "score": 0.8559
+    },
+    {
+     "chunkId": "NVDA-FY2025Q1-10Q-MDA-005",
+     "score": 0.8202
+    }
+   ]
+  }
+ },
+ "NVDA-FY2026Q2-10Q-MDA-004": {
+  "previous": {
+   "documentId": "NVDA_10Q_2025Q2_2025-05-28",
+   "fiscalLabel": "FY2026Q1",
+   "periodEnd": "2025-04-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-004",
+     "score": 0.9158
+    },
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-006",
+     "score": 0.8243
+    },
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-001",
+     "score": 0.797
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10Q_2025Q4_2025-11-19",
+   "fiscalLabel": "FY2026Q3",
+   "periodEnd": "2025-10-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-004",
+     "score": 0.9456
+    },
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-003",
+     "score": 0.8292
+    },
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-001",
+     "score": 0.7992
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q3_2024-08-28",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2024-07-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-005",
+     "score": 0.8272
+    },
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-006",
+     "score": 0.8059
+    },
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-009",
+     "score": 0.802
+    }
+   ]
+  }
+ },
+ "NVDA-FY2026Q2-10Q-MDA-006": {
+  "previous": {
+   "documentId": "NVDA_10Q_2025Q2_2025-05-28",
+   "fiscalLabel": "FY2026Q1",
+   "periodEnd": "2025-04-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-006",
+     "score": 0.9478
+    },
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-007",
+     "score": 0.8856
+    },
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-004",
+     "score": 0.7925
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10Q_2025Q4_2025-11-19",
+   "fiscalLabel": "FY2026Q3",
+   "periodEnd": "2025-10-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-006",
+     "score": 0.975
+    },
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-007",
+     "score": 0.8678
+    },
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-004",
+     "score": 0.8273
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q3_2024-08-28",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2024-07-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-008",
+     "score": 0.9277
+    },
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-009",
+     "score": 0.8818
+    },
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-005",
+     "score": 0.75
+    }
+   ]
+  }
+ },
+ "NVDA-FY2026Q2-10Q-MDA-007": {
+  "previous": {
+   "documentId": "NVDA_10Q_2025Q2_2025-05-28",
+   "fiscalLabel": "FY2026Q1",
+   "periodEnd": "2025-04-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-007",
+     "score": 0.9741
+    },
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-006",
+     "score": 0.8532
+    },
+    {
+     "chunkId": "NVDA-FY2026Q1-10Q-MDA-004",
+     "score": 0.7955
+    }
+   ]
+  },
+  "next": {
+   "documentId": "NVDA_10Q_2025Q4_2025-11-19",
+   "fiscalLabel": "FY2026Q3",
+   "periodEnd": "2025-10-26",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-007",
+     "score": 0.9692
+    },
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-006",
+     "score": 0.8804
+    },
+    {
+     "chunkId": "NVDA-FY2026Q3-10Q-MDA-004",
+     "score": 0.7924
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q3_2024-08-28",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2024-07-28",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-009",
+     "score": 0.9493
+    },
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-008",
+     "score": 0.8067
+    },
+    {
+     "chunkId": "NVDA-FY2025Q2-10Q-MDA-005",
+     "score": 0.7414
+    }
+   ]
+  }
+ },
+ "NVDA-FY2026Q3-10Q-MDA-004": {
+  "previous": {
+   "documentId": "NVDA_10Q_2025Q3_2025-08-27",
+   "fiscalLabel": "FY2026Q2",
+   "periodEnd": "2025-07-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-004",
+     "score": 0.9456
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-006",
+     "score": 0.8273
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-003",
+     "score": 0.8228
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q4_2024-11-20",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2024-10-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-007",
+     "score": 0.8583
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-010",
+     "score": 0.8291
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-008",
+     "score": 0.7988
+    }
+   ]
+  }
+ },
+ "NVDA-FY2026Q3-10Q-MDA-006": {
+  "previous": {
+   "documentId": "NVDA_10Q_2025Q3_2025-08-27",
+   "fiscalLabel": "FY2026Q2",
+   "periodEnd": "2025-07-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-006",
+     "score": 0.975
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-007",
+     "score": 0.8804
+    },
+    {
+     "chunkId": "NVDA-FY2026Q2-10Q-MDA-004",
+     "score": 0.7924
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": {
+   "documentId": "NVDA_10Q_2024Q4_2024-11-20",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2024-10-27",
+   "matches": [
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-007",
+     "score": 0.8939
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-008",
+     "score": 0.8897
+    },
+    {
+     "chunkId": "NVDA-FY2025Q3-10Q-MDA-006",
+     "score": 0.7363
+    }
+   ]
+  }
+ }
+}

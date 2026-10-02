@@ -1,0 +1,163 @@
+{
+ "AMZN-FY2025-10K-BUS-001": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-001",
+     "score": 0.9874
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-002",
+     "score": 0.8623
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-003",
+     "score": 0.7671
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AMZN-FY2025-10K-BUS-002": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-002",
+     "score": 0.9703
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-001",
+     "score": 0.8513
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-003",
+     "score": 0.8172
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AMZN-FY2025-10K-BUS-003": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-003",
+     "score": 0.962
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-002",
+     "score": 0.8162
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-001",
+     "score": 0.7552
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AMZN-FY2025-10K-BUS-004": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-004",
+     "score": 0.9642
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-005",
+     "score": 0.7713
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-BUS-003",
+     "score": 0.7411
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AMZN-FY2025-10K-FS-034": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-FS-031",
+     "score": 0.7862
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-FS-033",
+     "score": 0.7572
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-FS-032",
+     "score": 0.699
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AMZN-FY2025-10K-FS-040": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-FS-039",
+     "score": 0.8739
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-FS-040",
+     "score": 0.8412
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-FS-037",
+     "score": 0.7225
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AMZN-FY2025-10K-MDA-008": {
+  "previous": {
+   "documentId": "AMZN_10K_2024Q4_2025-02-07",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "AMZN-FY2024-10K-MDA-008",
+     "score": 0.9761
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-MDA-007",
+     "score": 0.8221
+    },
+    {
+     "chunkId": "AMZN-FY2024-10K-MDA-006",
+     "score": 0.811
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ }
+}

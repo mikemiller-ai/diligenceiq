@@ -6,7 +6,7 @@ import { TOKENIZER_VERSION } from '../index/tokenize';
 import { Retriever } from '../retrieval/retrieve';
 import { BedrockGenerationClient, type BedrockSend, collectStream, createBedrockRuntime, createTitanQueryEmbedder } from './bedrock';
 import { GenerationGateway } from './gateway';
-import { type PipelineDeps, runDeepAnalysis } from './pipeline';
+import { type PipelineDeps, runDeepAnalysis, toCoverage } from './pipeline';
 import { buildUserMessage, defangQuestion, describePeriodRequest } from './prompt';
 import { FakeGenerationClient, type Script, briefCiting, fixtureChunks, fixtureRetriever } from './testing';
 
@@ -247,5 +247,22 @@ describe('code review fixes (Phase 4)', () => {
       expect(o.telemetry.inputTokens).toBeGreaterThan(500);
       expect(o.telemetry.estimatedCostUsd).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('toCoverage (SPEC §15.2; Phase 6)', () => {
+  it('records each cell’s context passages, so the matrix can open them', () => {
+    const entry = (chunkId: string, documentId: string, fiscalLabel: string) =>
+      ({ chunkId, documentId, ticker: 'AAPL', company: 'Apple Inc', filingType: '10-K', filingDate: '', periodEnd: '', fiscalLabel, section: 'Item 1A — Risk Factors', subsection: null, charStart: 0, charEnd: 1, text: 'x', laneId: 'l', score: 1 }) as const;
+    const analysis = {
+      scoped: true,
+      scopes: [{ ticker: 'AAPL', buckets: [{ label: 'FY2025', documentIds: ['D25'] }, { label: 'FY2024', documentIds: ['D24'] }] }],
+    } as unknown as Parameters<typeof toCoverage>[0];
+    const cov = toCoverage(analysis, [entry('A-1', 'D25', 'FY2025'), entry('A-2', 'D25', 'FY2025'), entry('A-3', 'D23', 'FY2023')], ['A-2']);
+    expect(cov.cells).toEqual([
+      { ticker: 'AAPL', period: 'FY2025', contextChunks: 2, citedChunks: 1, chunkIds: ['A-1', 'A-2'] },
+      { ticker: 'AAPL', period: 'FY2024', contextChunks: 0, citedChunks: 0, chunkIds: [] },
+      { ticker: 'AAPL', period: 'FY2023', contextChunks: 1, citedChunks: 0, chunkIds: ['A-3'] },
+    ]);
   });
 });

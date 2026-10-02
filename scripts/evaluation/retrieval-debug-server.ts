@@ -45,6 +45,7 @@ const app = createApp({
   seed: null,
   indexVersion: index.manifest.indexVersion,
   indexAvailable: async () => true,
+  evidence: null,
   secureCookies: false,
   retrievalDebug: async (req) => {
     let mode = req.mode ?? 'hybrid';

@@ -259,6 +259,9 @@ importers:
       '@diligenceiq/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@diligenceiq/corpus':
+        specifier: workspace:*
+        version: link:../../packages/corpus
       '@diligenceiq/rag':
         specifier: workspace:*
         version: link:../../packages/rag

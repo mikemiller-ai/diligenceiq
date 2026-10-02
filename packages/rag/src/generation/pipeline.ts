@@ -134,7 +134,7 @@ export function toCoverage(analysis: QueryAnalysis, snapshot: readonly SnapshotE
   const cell = (ticker: string, period: string) => {
     const k = `${ticker}|${period}`;
     let c = cells.get(k);
-    if (!c) cells.set(k, (c = { ticker, period, contextChunks: 0, citedChunks: 0 }));
+    if (!c) cells.set(k, (c = { ticker, period, contextChunks: 0, citedChunks: 0, chunkIds: [] }));
     return c;
   };
   if (analysis.scoped) for (const s of analysis.scopes) for (const b of s.buckets) cell(s.ticker, b.label);
@@ -142,6 +142,7 @@ export function toCoverage(analysis: QueryAnalysis, snapshot: readonly SnapshotE
   for (const e of snapshot) {
     const c = cell(e.ticker, bucketOfDoc.get(`${e.ticker}|${e.documentId}`) ?? e.fiscalLabel);
     c.contextChunks++;
+    c.chunkIds?.push(e.chunkId);
     if (cited.has(e.chunkId)) c.citedChunks++;
   }
   return { cells: [...cells.values()] };

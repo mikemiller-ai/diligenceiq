@@ -2,7 +2,7 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 5 (sessions and the demo workspace, spend caps and the kill switch, the enqueue and poll routes, findings stored server-side, Company Intelligence served from the active profile set, and the real Deep Analysis UI) is built, gated and deployed to <https://diligenceiq.mikemiller.ai> (us-east-1). New analyses are paused (the kill switch is off), so the site shows the seeded example briefs and refuses new runs with `ANALYSES_DISABLED`. Production still serves the preview profiles for AAPL, MSFT and NVDA (cited risk headings, labeled placeholders, no figures). Phase 4b (offline Company Intelligence profiles for all 53 companies in the review window: a zero-call deterministic set `det-v2` and a model-written set `llm-v3` with per-company deterministic fallback) is built and gated but not yet uploaded or switched to; see `STATE.md` and [docs/evaluation.md](docs/evaluation.md) §6. Evaluation results are in [docs/evaluation.md](docs/evaluation.md) §4–5 and the prompt history in [docs/prompt-iterations.md](docs/prompt-iterations.md). The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 6 (evidence: adjacent-period comparison for citations, the readable source view with the cited passage highlighted, the coverage matrix linked to evidence, citation-integrity checks) is built and gated, not yet deployed. Production at <https://diligenceiq.mikemiller.ai> (us-east-1) runs Phases 1–5 plus Phase 4b: Company Intelligence for all 53 companies in the review window from the model-written profile set `llm-v3` (with per-company deterministic fallback; the zero-call set `det-v2` is the instant fallback). New analyses are paused (the kill switch is off), so the site shows the seeded example briefs and refuses new runs with `ANALYSES_DISABLED`. See `STATE.md`. Evaluation results are in [docs/evaluation.md](docs/evaluation.md) §4–6 and the prompt history in [docs/prompt-iterations.md](docs/prompt-iterations.md). The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## Develop
 Node ≥ 22 and pnpm 9.
@@ -53,6 +53,10 @@ Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-c
 - `pnpm intelligence:build --max-calls 0`: builds the deterministic profile set locally (zero model calls, no AWS). With `--llm` it also builds the model-written set: it reads the S3 build ledger, is a dry run unless `--yes`, and never calls a company twice at one prompt version (about $0.10 per call). `--llm --max-calls 0` rebuilds it from stored outputs for free.
 - `pnpm eval:profiles`: scores the built sets against `evals/profiles.yaml`. No AWS.
 - Upload with `pnpm profiles:upload-set --root .index/intelligence --set <indexVersion>/<set>`.
+
+**Evidence (Phase 6, admin-run):**
+- `pnpm evidence:check`: citation integrity over the local index build. Every chunk, adjacency reference, seed and recorded live-brief citation, and built profile-set citation must resolve to its passage. No AWS; writes `evals/results/evidence-<iv>.json`.
+- `pnpm fixtures:evidence`: regenerates the committed adjacency subset in `tests/fixtures/evidence/` from `.index/build`. No AWS.
 
 **Generation (Phase 4, admin-run):**
 - `pnpm eval:retrieval --generate`: one generation call per eval question through the real pipeline, scored deterministically. It replays recorded responses for free; `--live` calls Bedrock for unrecorded requests (Sonnet 4.6, about $0.11 each); `--only <ids>` limits the run.

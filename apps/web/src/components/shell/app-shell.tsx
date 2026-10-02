@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { EvidenceProvider } from '@/components/diligence/evidence';
+import { useRecordPageViews } from '@/lib/in-app-history';
 import { cn } from '@/lib/utils';
 import { WorkspaceProvider } from '@/lib/workspace-store';
 import { BrandMark, Wordmark } from './brand';
@@ -14,6 +15,7 @@ import { Sidebar } from './sidebar';
 import { WorkspaceBanner } from './workspace-banner';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  useRecordPageViews();
   return (
     <TooltipProvider>
       <WorkspaceProvider>

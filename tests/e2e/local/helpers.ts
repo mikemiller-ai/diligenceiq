@@ -87,6 +87,13 @@ export async function mockAnalysesDisabled(page: Page) {
 
 /** The demo seed every new workspace starts from (real pre-run pipeline output). */
 export const SEED = seedJson as unknown as {
-  analyses: Array<{ analysisId: string; question: string; brief: { title: string } }>;
+  indexVersion: string;
+  analyses: Array<{
+    analysisId: string;
+    question: string;
+    brief: { title: string };
+    citations: Array<{ chunkId: string; text: string }>;
+    coverage: { cells: Array<{ ticker: string; period: string; contextChunks: number; citedChunks: number; chunkIds?: string[] }> };
+  }>;
   findings: unknown[];
 };

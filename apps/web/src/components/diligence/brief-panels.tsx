@@ -1,6 +1,9 @@
-import type { AnalysisDetail, BriefValidation } from '@diligenceiq/core';
+'use client';
+
+import type { AnalysisDetail, BriefCoverage, BriefValidation, Citation } from '@diligenceiq/core';
 import { AlertTriangle, CheckCircle2, Compass, Grid3x3, ShieldAlert } from 'lucide-react';
 import { TickerBadge } from '@/components/diligence/badges';
+import { useEvidence } from '@/components/diligence/evidence';
 import { SectionHeading } from '@/components/diligence/page';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip } from '@/components/ui/tooltip';
@@ -118,10 +121,57 @@ export function InterpretationPanel({ analysis }: { analysis: AnalysisDetail }) 
   );
 }
 
-/** Company × period: how many passages the brief had for each cell, and how many it cited. */
-export function CoverageMatrix({ analysis }: { analysis: AnalysisDetail }) {
+type CoverageCell = BriefCoverage['cells'][number];
+
+/**
+ * Whether a passage falls in a coverage cell's period, for an analysis recorded before cells carried
+ * their chunk IDs. Mirrors how the pipeline buckets passages (`toCoverage` over the query's period
+ * buckets, packages/rag/src/query/periods.ts): `FY2025` is that fiscal year's annual report,
+ * `FY2026 YTD` and `FY2026 quarters` are that fiscal year's quarterly reports (FY2026Q1–Q3), and a
+ * passage outside every bucket is filed under its own fiscal label (`FY2025Q3`).
+ */
+function inPeriod(p: Citation, period: string): boolean {
+  if (p.fiscalLabel === period) return true;
+  const ytd = /^FY(\d{4}) (?:YTD|quarters)$/.exec(period);
+  return ytd !== null && p.filingType === '10-Q' && new RegExp(`^FY${ytd[1]}Q[1-4]$`).test(p.fiscalLabel);
+}
+
+/**
+ * The supplied passages in a coverage cell: the cell's own chunk IDs (recorded from Phase 6), or,
+ * for an older analysis, the passages of that company in the cell's period. The result is only
+ * shown as the cell's evidence when it accounts for every passage the cell counts (`complete`):
+ * a partial list would present "supplied, not cited" as fewer passages than the model had.
+ */
+export function cellPassages(cell: CoverageCell, passages: ReadonlyMap<string, Citation>): { found: Citation[]; complete: boolean } {
+  const found = cell.chunkIds
+    ? cell.chunkIds.flatMap((id) => passages.get(id) ?? [])
+    : [...passages.values()].filter((p) => p.ticker === cell.ticker && inPeriod(p, cell.period));
+  return { found, complete: found.length > 0 && found.length === cell.contextChunks };
+}
+
+/**
+ * Company × period: how many passages the brief had for each cell, and how many it cited. A cell
+ * with passages opens them in the evidence drawer, cited first (SPEC §15.2, §16.2).
+ */
+export function CoverageMatrix({ analysis, passages }: { analysis: AnalysisDetail; passages: ReadonlyMap<string, Citation> }) {
+  const show = useEvidence();
   const cells = analysis.coverage?.cells ?? [];
   if (cells.length === 0) return null;
+  const cited = new Set((analysis.citations ?? []).map((c) => c.chunkId));
+  const open = (c: CoverageCell, found: Citation[]) =>
+    show({
+      kind: 'periods',
+      eyebrow: 'Evidence coverage',
+      title: `${companyName(c.ticker)} · ${c.period}`,
+      description: 'The passages supplied to the model for this company and period.',
+      provenance: 'brief',
+      empty: 'None.',
+      periods: [
+        { period: 'Cited in the brief', citations: found.filter((p) => cited.has(p.chunkId)), provenance: 'brief' },
+        // Supplied but not cited: nothing in the brief rests on these, so they never read as validated citations.
+        { period: 'Supplied, not cited', citations: found.filter((p) => !cited.has(p.chunkId)), provenance: 'context' },
+      ],
+    });
   const tickers = [...new Set(cells.map((c) => c.ticker))];
   return (
     <section aria-labelledby="coverage" className="mt-8">
@@ -151,20 +201,42 @@ export function CoverageMatrix({ analysis }: { analysis: AnalysisDetail }) {
                   <ul className="flex flex-wrap gap-1.5">
                     {cells
                       .filter((c) => c.ticker === t)
-                      .map((c) => (
-                        <li
-                          key={c.period}
-                          className={cn(
-                            'rounded-md border px-2 py-1 text-xs',
-                            c.contextChunks === 0 ? 'border-risk-med/40 bg-risk-med/10 text-foreground' : 'border-border bg-background text-foreground/85',
-                          )}
-                        >
-                          <span className="font-medium">{c.period}</span>{' '}
-                          <span className="tabular-nums text-muted-foreground">
-                            {c.contextChunks === 0 ? 'no evidence' : `${c.contextChunks} · ${c.citedChunks} cited`}
-                          </span>
-                        </li>
-                      ))}
+                      .map((c) => {
+                        const { found, complete } = c.contextChunks === 0 ? { found: [], complete: false } : cellPassages(c, passages);
+                        const label = (
+                          <>
+                            <span className="font-medium">{c.period}</span>{' '}
+                            <span className="tabular-nums text-muted-foreground">
+                              {c.contextChunks === 0 ? 'no evidence' : `${c.contextChunks} · ${c.citedChunks} cited`}
+                            </span>
+                          </>
+                        );
+                        return (
+                          <li key={c.period}>
+                            {complete ? (
+                              // The accessible name starts with the visible text (WCAG 2.5.3 label in name).
+                              <button
+                                type="button"
+                                onClick={() => open(c, found)}
+                                className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground/85 transition-colors hover:border-primary hover:bg-primary/[0.06]"
+                              >
+                                {label}
+                                {' '}
+                                <span className="sr-only">(view {pluralize(found.length, 'passage')} for {c.ticker})</span>
+                              </button>
+                            ) : (
+                              <span
+                                className={cn(
+                                  'inline-block rounded-md border px-2 py-1 text-xs',
+                                  c.contextChunks === 0 ? 'border-risk-med/40 bg-risk-med/10 text-foreground' : 'border-border bg-background text-foreground/85',
+                                )}
+                              >
+                                {label}
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
                   </ul>
                 </td>
               </tr>

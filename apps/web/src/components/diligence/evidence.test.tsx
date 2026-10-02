@@ -27,8 +27,10 @@ describe('CitedText and the evidence drawer', () => {
     expect(dialog).toHaveTextContent('single-source partners');
     // A brief's citation is a passage supplied to the model; profile citations say otherwise (finding 4).
     expect(screen.getByTestId('evidence-provenance')).toHaveTextContent('Validated — supplied to the model');
+    // The link carries the citation's index version (`iv`), so the source view never highlights another version's span.
+    const iv = ctx.get('AAPL-FY2025-10K-1A-F01')!.indexVersion;
     expect(screen.getByRole('link', { name: /open filing/i }).getAttribute('href')).toMatch(
-      /^\/sources\/filing\/?\?id=AAPL_10K_2025-10-31#chunk-AAPL-FY2025-10K-1A-F01$/,
+      new RegExp(`^/sources/filing/?\\?id=AAPL_10K_2025-10-31&iv=${iv}#chunk-AAPL-FY2025-10K-1A-F01$`),
     );
     await userEvent.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

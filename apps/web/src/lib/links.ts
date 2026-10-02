@@ -42,7 +42,14 @@ export function filtersAsPrefill(filters: AnalysisFilters | undefined): PrefillF
   };
 }
 
-/** A filing's source view, optionally scrolled to one passage (`#chunk-<id>`). */
-export function filingHref(documentId: string, chunkId?: string): string {
-  return `/sources/filing/?id=${encodeURIComponent(documentId)}${chunkId ? `#chunk-${chunkId}` : ''}`;
+/**
+ * A filing's source view, optionally scrolled to one passage (`#chunk-<id>`). A citation's link
+ * also carries its index version (`iv`): chunk IDs and offsets are only meaningful within one
+ * version, so the source view asks for that version and never highlights a passage from another
+ * one. The hash stays last.
+ */
+export function filingHref(documentId: string, chunkId?: string, indexVersion?: string): string {
+  const params = new URLSearchParams({ id: documentId });
+  if (indexVersion) params.set('iv', indexVersion);
+  return `/sources/filing/?${params.toString()}${chunkId ? `#chunk-${chunkId}` : ''}`;
 }

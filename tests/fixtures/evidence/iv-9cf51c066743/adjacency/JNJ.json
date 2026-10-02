@@ -1,0 +1,958 @@
+{
+ "JNJ-FY2021-10K-1A-001": {
+  "previous": null,
+  "next": {
+   "documentId": "JNJ_10K_2023Q1_2023-02-16",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2023-01-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022-10K-1A-001",
+     "score": 0.9954
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-1A-009",
+     "score": 0.7872
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-1A-010",
+     "score": 0.7548
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2021-10K-MDA-001": {
+  "previous": null,
+  "next": {
+   "documentId": "JNJ_10K_2023Q1_2023-02-16",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2023-01-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022-10K-MDA-001",
+     "score": 0.9768
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-MDA-002",
+     "score": 0.8178
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-MDA-004",
+     "score": 0.724
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2022-10K-1A-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2022Q1_2022-02-17",
+   "fiscalLabel": "FY2021",
+   "periodEnd": "2022-01-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2021-10K-1A-001",
+     "score": 0.9954
+    },
+    {
+     "chunkId": "JNJ-FY2021-10K-1A-009",
+     "score": 0.7889
+    },
+    {
+     "chunkId": "JNJ-FY2021-10K-1A-004",
+     "score": 0.7688
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10K_2023Q4_2024-02-16",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-12-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023-10K-1A-001",
+     "score": 0.987
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-1A-012",
+     "score": 0.8077
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-1A-008",
+     "score": 0.7966
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2022-10K-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2022Q1_2022-02-17",
+   "fiscalLabel": "FY2021",
+   "periodEnd": "2022-01-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2021-10K-MDA-001",
+     "score": 0.9768
+    },
+    {
+     "chunkId": "JNJ-FY2021-10K-MDA-002",
+     "score": 0.7986
+    },
+    {
+     "chunkId": "JNJ-FY2021-10K-MDA-004",
+     "score": 0.7065
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10K_2023Q4_2024-02-16",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-12-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023-10K-MDA-001",
+     "score": 0.9312
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-MDA-002",
+     "score": 0.7889
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-MDA-003",
+     "score": 0.7176
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2022Q1-10Q-MDA-001": {
+  "previous": null,
+  "next": {
+   "documentId": "JNJ_10Q_2022Q3_2022-07-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-07-03",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-001",
+     "score": 0.9171
+    },
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-003",
+     "score": 0.8683
+    },
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-005",
+     "score": 0.8237
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2022Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2022Q2_2022-04-29",
+   "fiscalLabel": "FY2022Q1",
+   "periodEnd": "2022-04-03",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q1-10Q-MDA-001",
+     "score": 0.9171
+    },
+    {
+     "chunkId": "JNJ-FY2022Q1-10Q-MDA-006",
+     "score": 0.7347
+    },
+    {
+     "chunkId": "JNJ-FY2022Q1-10Q-MDA-002",
+     "score": 0.7312
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2022Q4_2022-10-27",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-10-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-001",
+     "score": 0.9843
+    },
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-005",
+     "score": 0.7955
+    },
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-003",
+     "score": 0.7814
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2022Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2022Q3_2022-07-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-07-03",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-001",
+     "score": 0.9843
+    },
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-005",
+     "score": 0.7818
+    },
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-010",
+     "score": 0.7731
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2023Q2_2023-04-28",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2023-04-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-001",
+     "score": 0.7558
+    },
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-007",
+     "score": 0.7243
+    },
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-002",
+     "score": 0.6954
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2023-10K-1A-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2023Q1_2023-02-16",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2023-01-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022-10K-1A-001",
+     "score": 0.987
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-1A-009",
+     "score": 0.7764
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-1A-007",
+     "score": 0.7381
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10K_2024Q4_2025-02-13",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024-10K-1A-001",
+     "score": 0.9957
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-1A-007",
+     "score": 0.8336
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-1A-012",
+     "score": 0.7733
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2023-10K-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2023Q1_2023-02-16",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2023-01-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022-10K-MDA-001",
+     "score": 0.9312
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-MDA-002",
+     "score": 0.8178
+    },
+    {
+     "chunkId": "JNJ-FY2022-10K-MDA-010",
+     "score": 0.7033
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10K_2024Q4_2025-02-13",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024-10K-MDA-001",
+     "score": 0.9454
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-MDA-002",
+     "score": 0.7785
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-MDA-003",
+     "score": 0.7185
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2023Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2022Q4_2022-10-27",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-10-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-002",
+     "score": 0.8873
+    },
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-003",
+     "score": 0.7573
+    },
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-001",
+     "score": 0.7558
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2023Q3_2023-07-31",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-07-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-002",
+     "score": 0.8904
+    },
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-013",
+     "score": 0.808
+    },
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-014",
+     "score": 0.7826
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2022Q2_2022-04-29",
+   "fiscalLabel": "FY2022Q1",
+   "periodEnd": "2022-04-03",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q1-10Q-MDA-001",
+     "score": 0.8062
+    },
+    {
+     "chunkId": "JNJ-FY2022Q1-10Q-MDA-008",
+     "score": 0.7989
+    },
+    {
+     "chunkId": "JNJ-FY2022Q1-10Q-MDA-005",
+     "score": 0.7824
+    }
+   ]
+  }
+ },
+ "JNJ-FY2023Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2023Q2_2023-04-28",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2023-04-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-001",
+     "score": 0.7792
+    },
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-007",
+     "score": 0.7509
+    },
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-002",
+     "score": 0.7362
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2023Q4_2023-10-27",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-10-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-001",
+     "score": 0.978
+    },
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-002",
+     "score": 0.7774
+    },
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-004",
+     "score": 0.7457
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2022Q3_2022-07-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-07-03",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-001",
+     "score": 0.931
+    },
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-005",
+     "score": 0.743
+    },
+    {
+     "chunkId": "JNJ-FY2022Q2-10Q-MDA-003",
+     "score": 0.732
+    }
+   ]
+  }
+ },
+ "JNJ-FY2023Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2023Q3_2023-07-31",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-07-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-001",
+     "score": 0.978
+    },
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-005",
+     "score": 0.7599
+    },
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-010",
+     "score": 0.75
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2024Q1_2024-05-01",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2024-03-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-001",
+     "score": 0.889
+    },
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-005",
+     "score": 0.7078
+    },
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-009",
+     "score": 0.6852
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2022Q4_2022-10-27",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-10-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-001",
+     "score": 0.9226
+    },
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-005",
+     "score": 0.7826
+    },
+    {
+     "chunkId": "JNJ-FY2022Q3-10Q-MDA-003",
+     "score": 0.7731
+    }
+   ]
+  }
+ },
+ "JNJ-FY2024-10K-1A-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2023Q4_2024-02-16",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-12-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023-10K-1A-001",
+     "score": 0.9957
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-1A-012",
+     "score": 0.8118
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-1A-008",
+     "score": 0.809
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10K_2026-02-11",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-12-28",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025-10K-1A-001",
+     "score": 0.9978
+    },
+    {
+     "chunkId": "JNJ-FY2025-10K-1A-007",
+     "score": 0.817
+    },
+    {
+     "chunkId": "JNJ-FY2025-10K-1A-009",
+     "score": 0.7806
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2024-10K-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2023Q4_2024-02-16",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-12-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023-10K-MDA-001",
+     "score": 0.9454
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-MDA-002",
+     "score": 0.7934
+    },
+    {
+     "chunkId": "JNJ-FY2023-10K-MDA-003",
+     "score": 0.7346
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10K_2026-02-11",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-12-28",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025-10K-MDA-001",
+     "score": 0.9585
+    },
+    {
+     "chunkId": "JNJ-FY2025-10K-MDA-002",
+     "score": 0.7808
+    },
+    {
+     "chunkId": "JNJ-FY2025-10K-MDA-003",
+     "score": 0.7106
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2024Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2023Q4_2023-10-27",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-10-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-001",
+     "score": 0.889
+    },
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-002",
+     "score": 0.8267
+    },
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-004",
+     "score": 0.7629
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2024Q2_2024-07-25",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-001",
+     "score": 0.961
+    },
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-002",
+     "score": 0.9408
+    },
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-008",
+     "score": 0.7725
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2023Q2_2023-04-28",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2023-04-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-007",
+     "score": 0.7771
+    },
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-002",
+     "score": 0.7683
+    },
+    {
+     "chunkId": "JNJ-FY2023Q1-10Q-MDA-001",
+     "score": 0.7368
+    }
+   ]
+  }
+ },
+ "JNJ-FY2024Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2024Q1_2024-05-01",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2024-03-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-001",
+     "score": 0.961
+    },
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-005",
+     "score": 0.7325
+    },
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-009",
+     "score": 0.722
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2024Q3_2024-10-23",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-09-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-001",
+     "score": 0.9846
+    },
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-002",
+     "score": 0.9088
+    },
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-008",
+     "score": 0.7403
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2023Q3_2023-07-31",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-07-02",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-001",
+     "score": 0.9219
+    },
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-005",
+     "score": 0.7371
+    },
+    {
+     "chunkId": "JNJ-FY2023Q2-10Q-MDA-015",
+     "score": 0.7149
+    }
+   ]
+  }
+ },
+ "JNJ-FY2024Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2024Q2_2024-07-25",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-001",
+     "score": 0.9846
+    },
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-002",
+     "score": 0.9092
+    },
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-008",
+     "score": 0.7438
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2025Q1_2025-04-23",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2025-03-30",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025Q1-10Q-MDA-001",
+     "score": 0.856
+    },
+    {
+     "chunkId": "JNJ-FY2025Q1-10Q-MDA-005",
+     "score": 0.6861
+    },
+    {
+     "chunkId": "JNJ-FY2025Q1-10Q-MDA-008",
+     "score": 0.6731
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2023Q4_2023-10-27",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-10-01",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-001",
+     "score": 0.9256
+    },
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-002",
+     "score": 0.7654
+    },
+    {
+     "chunkId": "JNJ-FY2023Q3-10Q-MDA-004",
+     "score": 0.7003
+    }
+   ]
+  }
+ },
+ "JNJ-FY2025-10K-1A-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2024Q4_2025-02-13",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024-10K-1A-001",
+     "score": 0.9978
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-1A-007",
+     "score": 0.8308
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-1A-012",
+     "score": 0.7834
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2025-10K-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10K_2024Q4_2025-02-13",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-12-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024-10K-MDA-001",
+     "score": 0.9585
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-MDA-002",
+     "score": 0.7321
+    },
+    {
+     "chunkId": "JNJ-FY2024-10K-MDA-003",
+     "score": 0.716
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "JNJ-FY2025Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2024Q3_2024-10-23",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-09-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-002",
+     "score": 0.8702
+    },
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-001",
+     "score": 0.856
+    },
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-005",
+     "score": 0.7687
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2025Q2_2025-07-24",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2025-06-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025Q2-10Q-MDA-001",
+     "score": 0.9563
+    },
+    {
+     "chunkId": "JNJ-FY2025Q2-10Q-MDA-002",
+     "score": 0.9372
+    },
+    {
+     "chunkId": "JNJ-FY2025Q2-10Q-MDA-005",
+     "score": 0.8029
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2024Q1_2024-05-01",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2024-03-31",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-001",
+     "score": 0.9118
+    },
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-003",
+     "score": 0.7769
+    },
+    {
+     "chunkId": "JNJ-FY2024Q1-10Q-MDA-005",
+     "score": 0.7444
+    }
+   ]
+  }
+ },
+ "JNJ-FY2025Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2025Q1_2025-04-23",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2025-03-30",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025Q1-10Q-MDA-001",
+     "score": 0.9563
+    },
+    {
+     "chunkId": "JNJ-FY2025Q1-10Q-MDA-005",
+     "score": 0.7558
+    },
+    {
+     "chunkId": "JNJ-FY2025Q1-10Q-MDA-003",
+     "score": 0.74
+    }
+   ]
+  },
+  "next": {
+   "documentId": "JNJ_10Q_2025Q3_2025-10-22",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2025-09-28",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025Q3-10Q-MDA-001",
+     "score": 0.9742
+    },
+    {
+     "chunkId": "JNJ-FY2025Q3-10Q-MDA-002",
+     "score": 0.9197
+    },
+    {
+     "chunkId": "JNJ-FY2025Q3-10Q-MDA-008",
+     "score": 0.7436
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2024Q2_2024-07-25",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-001",
+     "score": 0.873
+    },
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-002",
+     "score": 0.8587
+    },
+    {
+     "chunkId": "JNJ-FY2024Q2-10Q-MDA-005",
+     "score": 0.7355
+    }
+   ]
+  }
+ },
+ "JNJ-FY2025Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "JNJ_10Q_2025Q2_2025-07-24",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2025-06-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2025Q2-10Q-MDA-001",
+     "score": 0.9742
+    },
+    {
+     "chunkId": "JNJ-FY2025Q2-10Q-MDA-002",
+     "score": 0.9072
+    },
+    {
+     "chunkId": "JNJ-FY2025Q2-10Q-MDA-005",
+     "score": 0.7749
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": {
+   "documentId": "JNJ_10Q_2024Q3_2024-10-23",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-09-29",
+   "matches": [
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-001",
+     "score": 0.8655
+    },
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-002",
+     "score": 0.8499
+    },
+    {
+     "chunkId": "JNJ-FY2024Q3-10Q-MDA-008",
+     "score": 0.7194
+    }
+   ]
+  }
+ }
+}

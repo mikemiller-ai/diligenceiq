@@ -175,5 +175,10 @@ describe('no model client is reachable from the api handler (SPEC §33, §35.12)
     expect(inputs.some((p) => p.includes('packages/core/'))).toBe(true); // sanity: workspace packages are followed
     expect([...inputs, ...imported].filter((p) => /client-bedrock|packages\/rag\/|@diligenceiq\/rag/.test(p))).toEqual([]);
     expect(inputs.filter((p) => /analyses\/worker\.ts$|worker-handler\.ts$/.test(p))).toEqual([]);
+    // The evidence store imports the corpus chunker by subpath: the corpus loader (node:zlib) and
+    // the financial extraction stay out of the api bundle (Phase 6 L8).
+    expect(inputs.some((p) => p.includes('packages/corpus/src/chunker.ts'))).toBe(true);
+    expect(inputs.filter((p) => /packages\/corpus\/src\/(?:load|index)\.ts$|packages\/corpus\/src\/financials\//.test(p))).toEqual([]);
+    expect(imported.filter((p) => /zlib/.test(p))).toEqual([]);
   }, 30_000);
 });

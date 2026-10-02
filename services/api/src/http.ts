@@ -11,13 +11,13 @@ export function json(
   statusCode: number,
   body: unknown,
   requestId: string,
-  extra: { cookies?: string[] } = {},
+  extra: { cookies?: string[]; /** Overrides the default `no-store` (only the evidence routes' 200s do). */ cacheControl?: string } = {},
 ): HttpResponse {
   return {
     statusCode,
     headers: {
       'content-type': 'application/json',
-      'cache-control': 'no-store',
+      'cache-control': extra.cacheControl ?? 'no-store',
       'x-request-id': requestId,
     },
     body: JSON.stringify(body),

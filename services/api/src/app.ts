@@ -1,9 +1,11 @@
 import type { APIGatewayProxyEventV2 } from 'aws-lambda';
 import {
+  AdjacentEvidenceQuerySchema,
   type AnalysisDetail,
   type AnalysisContextResponse,
   type CompaniesResponse,
   CompareQuerySchema,
+  DOCUMENT_ID_PATTERN,
   type CompanyIntelligenceProfile,
   CreateAnalysisRequestSchema,
   type CreateAnalysisResponse,
@@ -20,12 +22,14 @@ import {
   type WorkspaceResponse,
   composeCompare,
   isCatalogTicker,
+  tickerOfDocumentId,
 } from '@diligenceiq/core';
-import type { ZodType } from 'zod';
+import { type ZodType, z } from 'zod';
 import type { AnalysisQueue } from './analyses/queue';
 import type { AnalysisRecord, AnalysisStore } from './analyses/store';
 import { error, json, log, noContent, type HttpResponse } from './http';
 import { newAnalysisId } from './ids';
+import type { EvidenceStore } from './evidence/store';
 import type { KillSwitch } from './kill-switch';
 import type { ProfileProvider } from './profiles/provider';
 import {
@@ -43,6 +47,16 @@ import {
 import { createFinding } from './workspace/findings';
 import { type Seed, applySeed } from './workspace/seed';
 import { InvalidCursorError, WORKSPACE_TTL_DAYS, type WorkspaceMeta, type WorkspaceStore, ttlFrom, wsPk } from './workspace/store';
+
+const SourceQuerySchema = z.object({ indexVersion: z.string().regex(/^iv-[a-z0-9]+$/).optional() }).strict();
+
+/**
+ * The evidence routes answer content that is immutable within an index version (the version is
+ * part of the request when the citation carries one, and the response names it), so the browser
+ * may reuse a 200 for an hour. `private`: responses sit behind the session cookie. Errors stay
+ * `no-store`, so a later fix (an index upload) is never masked.
+ */
+export const EVIDENCE_CACHE_CONTROL = 'private, max-age=3600';
 
 export const MAX_BODY_BYTES = 16 * 1024;
 const MAX_REPORTED_ISSUES = 10;
@@ -87,6 +101,8 @@ export interface AppDeps {
   /** False only for the local http server; production cookies are always Secure. */
   secureCookies?: boolean;
   retrievalDebug?: RetrievalDebug;
+  /** Source view and adjacent-period evidence (Phase 6); null answers both routes 404 `index_unavailable`. */
+  evidence: EvidenceStore | null;
   now?: () => Date;
 }
 
@@ -360,6 +376,56 @@ export function createApp(deps: AppDeps) {
     const passages = (snapshot.passages as Array<Record<string, unknown>>).map((p) => ({ ...p, indexVersion: snapshot.indexVersion })) as unknown as AnalysisContextResponse['passages'];
     const body: AnalysisContextResponse = { indexVersion: snapshot.indexVersion, passages };
     return json(200, body, requestId);
+  });
+
+  /* -------------------------------------------------------------- evidence */
+
+  /**
+   * Shared 404s of the evidence routes: no index configured, or one whose manifest is missing or
+   * names another chunker (`details.reason = 'index_unavailable'`), and a citation from another
+   * index version (`'index_version'`; chunk offsets mean nothing across versions). Otherwise the
+   * store that can serve the request.
+   */
+  const evidenceFor = async (indexVersion: string | undefined, requestId: string, message: string): Promise<{ store: EvidenceStore } | { response: HttpResponse }> => {
+    const store = deps.evidence;
+    if (!store || !(await store.ready(requestId))) return { response: fail('NOT_FOUND', message, requestId, { reason: 'index_unavailable' }) };
+    if (indexVersion && indexVersion !== store.indexVersion) {
+      return { response: fail('NOT_FOUND', 'This citation belongs to an earlier index version.', requestId, { reason: 'index_version', indexVersion: store.indexVersion }) };
+    }
+    return { store };
+  };
+
+  /**
+   * The readable source view (SPEC §16.2): a filing's processed text, sections and chunk spans,
+   * read from the index's own build outputs. `?indexVersion=` (optional) must match the index the
+   * api serves; chunk offsets mean nothing in another version.
+   */
+  add('GET', '/api/sources/:documentId', true, async ({ params, query, requestId }) => {
+    const documentId = params.documentId ?? '';
+    const q = parse(SourceQuerySchema, query, requestId);
+    if (!q.ok) return q.response;
+    if (!DOCUMENT_ID_PATTERN.test(documentId)) return validation(requestId, [{ path: ['documentId'], code: 'invalid_format', message: 'Not a document ID.' }]);
+    if (!isCatalogTicker(tickerOfDocumentId(documentId) ?? '')) return fail('VALIDATION_ERROR', 'Unknown company ticker.', requestId);
+    const ev = await evidenceFor(q.data.indexVersion, requestId, 'Filing text is unavailable.');
+    if ('response' in ev) return ev.response;
+    const body = await ev.store.source(documentId, requestId);
+    // A well-formed catalog document that this index has no processed text for (§9.1 "Missing source document").
+    if (!body) return fail('SOURCE_MISSING', 'This filing isn’t available.', requestId);
+    return json(200, body, requestId, { cacheControl: EVIDENCE_CACHE_CONTROL });
+  });
+
+  /**
+   * Adjacent-period comparison for a citation (SPEC §16.2): the same section in the previous and
+   * next comparable filing, from the offline adjacency file. Deterministic; no model call.
+   */
+  add('GET', '/api/evidence/adjacent', true, async ({ query, requestId }) => {
+    const q = parse(AdjacentEvidenceQuerySchema, query, requestId);
+    if (!q.ok) return q.response;
+    const ev = await evidenceFor(q.data.indexVersion, requestId, 'Adjacent-period evidence is unavailable.');
+    if ('response' in ev) return ev.response;
+    const body = await ev.store.adjacent(q.data.chunkId, requestId);
+    if (!body) return fail('NOT_FOUND', 'No adjacent-period evidence for this passage.', requestId);
+    return json(200, body, requestId, { cacheControl: EVIDENCE_CACHE_CONTROL });
   });
 
   /* -------------------------------------------------------------- findings */

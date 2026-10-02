@@ -1,0 +1,608 @@
+{
+ "MSFT-FY2025-10K-1A-001": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-001",
+     "score": 0.9881
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-002",
+     "score": 0.8834
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-003",
+     "score": 0.8055
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-003": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-003",
+     "score": 0.9557
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-004",
+     "score": 0.854
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-012",
+     "score": 0.833
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-004": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-004",
+     "score": 0.9115
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-005",
+     "score": 0.8159
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-001",
+     "score": 0.7638
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-005": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-005",
+     "score": 0.925
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-007",
+     "score": 0.8015
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-004",
+     "score": 0.7721
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-008": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-009",
+     "score": 0.9073
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-008",
+     "score": 0.8594
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-007",
+     "score": 0.84
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-009": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-009",
+     "score": 0.8676
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-010",
+     "score": 0.8167
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-007",
+     "score": 0.7994
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-010": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-011",
+     "score": 0.9142
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-010",
+     "score": 0.9016
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-009",
+     "score": 0.7641
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-011": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-012",
+     "score": 0.9229
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-004",
+     "score": 0.804
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-003",
+     "score": 0.8032
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-012": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-012",
+     "score": 0.9305
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-003",
+     "score": 0.782
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-004",
+     "score": 0.7806
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-013": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-013",
+     "score": 0.8842
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-014",
+     "score": 0.8078
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-022",
+     "score": 0.7438
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-014": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-014",
+     "score": 0.8965
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-018",
+     "score": 0.8605
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-017",
+     "score": 0.8137
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-017": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-020",
+     "score": 0.8515
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-019",
+     "score": 0.8
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-018",
+     "score": 0.7977
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-018": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-019",
+     "score": 0.8931
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-020",
+     "score": 0.8786
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-023",
+     "score": 0.7811
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-019": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-021",
+     "score": 0.9595
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-020",
+     "score": 0.7854
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-014",
+     "score": 0.7411
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-020": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-022",
+     "score": 0.9321
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-023",
+     "score": 0.8776
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-013",
+     "score": 0.7891
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-021": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-023",
+     "score": 0.9658
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-022",
+     "score": 0.8996
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-001",
+     "score": 0.7435
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-1A-022": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-024",
+     "score": 0.8816
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-023",
+     "score": 0.8345
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-1A-016",
+     "score": 0.7972
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-BUS-001": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-001",
+     "score": 0.935
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-003",
+     "score": 0.759
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-002",
+     "score": 0.7489
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-BUS-002": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-001",
+     "score": 0.8443
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-008",
+     "score": 0.7447
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-005",
+     "score": 0.7326
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-BUS-003": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-008",
+     "score": 0.8368
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-001",
+     "score": 0.6959
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-005",
+     "score": 0.63
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-BUS-006": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-011",
+     "score": 0.9245
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-012",
+     "score": 0.8168
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-BUS-010",
+     "score": 0.8086
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2025-10K-MDA-004": {
+  "previous": {
+   "documentId": "MSFT_10K_2024Q2_2024-07-30",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-06-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2024-10K-MDA-004",
+     "score": 0.9205
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-MDA-005",
+     "score": 0.8199
+    },
+    {
+     "chunkId": "MSFT-FY2024-10K-MDA-003",
+     "score": 0.8039
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "MSFT-FY2026Q1-10Q-MDA-002": {
+  "previous": {
+   "documentId": "MSFT_10Q_2025Q1_2025-04-30",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2025-03-31",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2025Q3-10Q-MDA-002",
+     "score": 0.9068
+    },
+    {
+     "chunkId": "MSFT-FY2025Q3-10Q-MDA-005",
+     "score": 0.8003
+    },
+    {
+     "chunkId": "MSFT-FY2025Q3-10Q-MDA-001",
+     "score": 0.796
+    }
+   ]
+  },
+  "next": {
+   "documentId": "MSFT_10Q_2025Q4_2026-01-28",
+   "fiscalLabel": "FY2026Q2",
+   "periodEnd": "2025-12-31",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2026Q2-10Q-MDA-002",
+     "score": 0.9885
+    },
+    {
+     "chunkId": "MSFT-FY2026Q2-10Q-MDA-008",
+     "score": 0.8585
+    },
+    {
+     "chunkId": "MSFT-FY2026Q2-10Q-MDA-009",
+     "score": 0.8368
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "MSFT_10Q_2024Q3_2024-10-30",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-09-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2025Q1-10Q-MDA-002",
+     "score": 0.8956
+    },
+    {
+     "chunkId": "MSFT-FY2025Q1-10Q-MDA-006",
+     "score": 0.8259
+    },
+    {
+     "chunkId": "MSFT-FY2025Q1-10Q-MDA-001",
+     "score": 0.7888
+    }
+   ]
+  }
+ },
+ "MSFT-FY2026Q2-10Q-MDA-004": {
+  "previous": {
+   "documentId": "MSFT_10Q_2025Q3_2025-10-29",
+   "fiscalLabel": "FY2026Q1",
+   "periodEnd": "2025-09-30",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2026Q1-10Q-MDA-004",
+     "score": 0.8537
+    },
+    {
+     "chunkId": "MSFT-FY2026Q1-10Q-MDA-003",
+     "score": 0.8332
+    },
+    {
+     "chunkId": "MSFT-FY2026Q1-10Q-MDA-002",
+     "score": 0.7183
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": {
+   "documentId": "MSFT_10Q_2024Q4_2025-01-29",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2024-12-31",
+   "matches": [
+    {
+     "chunkId": "MSFT-FY2025Q2-10Q-MDA-004",
+     "score": 0.9399
+    },
+    {
+     "chunkId": "MSFT-FY2025Q2-10Q-MDA-003",
+     "score": 0.8019
+    },
+    {
+     "chunkId": "MSFT-FY2025Q2-10Q-MDA-008",
+     "score": 0.7732
+    }
+   ]
+  }
+ }
+}

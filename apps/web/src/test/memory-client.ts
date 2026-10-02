@@ -1,4 +1,6 @@
 import {
+  type AdjacentEvidenceResponse,
+  type SourceDocumentResponse,
   findingOriginKind,
   resolveSource,
   sourceKey,
@@ -23,6 +25,9 @@ export function createMemoryClient(opts: {
   health?: { indexAvailable: boolean; analysesEnabled: boolean };
   /** The index Deep Analysis searches (health); defaults to the fixture profiles' index. */
   indexVersion?: string;
+  /** Readable filings by document ID, and adjacent-period passages by chunk ID (Phase 6). */
+  sources?: Record<string, SourceDocumentResponse>;
+  adjacent?: Record<string, AdjacentEvidenceResponse>;
 } = {}) {
   const analyses = new Map((opts.analyses ?? []).map((a) => [a.analysisId, structuredClone(a)]));
   const findings = new Map((opts.findings ?? []).map((f) => [f.findingId, structuredClone(f)]));
@@ -122,6 +127,18 @@ export function createMemoryClient(opts: {
     async profile(ticker) {
       record('profile', ticker);
       return profiles.get(ticker) ?? null;
+    },
+    async source(documentId, indexVersion) {
+      record('source', documentId, indexVersion);
+      const iv = opts.indexVersion ?? 'iv-9cf51c066743';
+      if (indexVersion && indexVersion !== iv) return { unavailable: 'index_version' };
+      return opts.sources?.[documentId] ?? { unavailable: 'not_found' };
+    },
+    async adjacent(chunkId, indexVersion) {
+      record('adjacent', chunkId, indexVersion);
+      const iv = opts.indexVersion ?? 'iv-9cf51c066743';
+      if (indexVersion && indexVersion !== iv) return { unavailable: 'index_version' };
+      return opts.adjacent?.[chunkId] ?? { unavailable: 'not_found' };
     },
   };
   return {

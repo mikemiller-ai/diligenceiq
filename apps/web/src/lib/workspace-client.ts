@@ -1,4 +1,5 @@
 import type {
+  AdjacentEvidenceResponse,
   AnalysisContextResponse,
   AnalysisDetail,
   AnalysisSummary,
@@ -12,6 +13,7 @@ import type {
   Page,
   PatchFindingRequest,
   SessionResponse,
+  SourceDocumentResponse,
 } from '@diligenceiq/core';
 import { ApiRequestError, apiJson } from './api';
 
@@ -34,7 +36,31 @@ export interface WorkspaceClient {
   companies(): Promise<CompaniesResponse>;
   /** Null when the active profile set has no profile for the ticker (PROFILE_MISSING). */
   profile(ticker: string): Promise<CompanyIntelligenceProfile | null>;
+  /** A filing's readable text (Phase 6). A 404 is a result, not an error: see `EvidenceUnavailable`. */
+  source(documentId: string, indexVersion?: string): Promise<SourceDocumentResponse | EvidenceUnavailable>;
+  /** Adjacent-period passages for a citation (Phase 6). */
+  adjacent(chunkId: string, indexVersion?: string): Promise<AdjacentEvidenceResponse | EvidenceUnavailable>;
 }
+
+/**
+ * Why a source or adjacent-period lookup has nothing to show: the item is not in the index
+ * (`not_found`: `SOURCE_MISSING` for a filing, `NOT_FOUND` for an adjacency entry), the citation
+ * belongs to another index version (`index_version`), or the server has no usable index
+ * (`index_unavailable`).
+ */
+export interface EvidenceUnavailable {
+  unavailable: 'not_found' | 'index_version' | 'index_unavailable';
+}
+
+export const isUnavailable = (r: object): r is EvidenceUnavailable => 'unavailable' in r;
+
+function unavailableFrom(err: unknown): EvidenceUnavailable {
+  if (!(err instanceof ApiRequestError) || (err.code !== 'NOT_FOUND' && err.code !== 'SOURCE_MISSING')) throw err;
+  const reason = err.details?.reason;
+  return { unavailable: reason === 'index_version' || reason === 'index_unavailable' ? reason : 'not_found' };
+}
+
+const withVersion = (indexVersion?: string) => (indexVersion ? `indexVersion=${encodeURIComponent(indexVersion)}` : '');
 
 const LIST_LIMIT = 100;
 
@@ -105,6 +131,22 @@ export function httpWorkspaceClient(): WorkspaceClient {
       } catch (err) {
         if (err instanceof ApiRequestError && err.code === 'PROFILE_MISSING') return null;
         throw err;
+      }
+    },
+    async source(documentId, indexVersion) {
+      const q = withVersion(indexVersion);
+      try {
+        return await call<SourceDocumentResponse>(`/api/sources/${encodeURIComponent(documentId)}${q ? `?${q}` : ''}`);
+      } catch (err) {
+        return unavailableFrom(err);
+      }
+    },
+    async adjacent(chunkId, indexVersion) {
+      const q = withVersion(indexVersion);
+      try {
+        return await call<AdjacentEvidenceResponse>(`/api/evidence/adjacent?chunkId=${encodeURIComponent(chunkId)}${q ? `&${q}` : ''}`);
+      } catch (err) {
+        return unavailableFrom(err);
       }
     },
   };

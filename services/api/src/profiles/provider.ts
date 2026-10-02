@@ -9,6 +9,7 @@ import {
 } from '@diligenceiq/core';
 import { log } from '../http';
 import type { SsmLike } from '../kill-switch';
+import { isMissingObject } from '../s3-missing';
 
 /**
  * Company Intelligence profiles at runtime (DD-16; architecture §4.4). The api only READS: the
@@ -38,17 +39,20 @@ export interface ProfileProvider {
   get(ticker: string, requestId: string): Promise<CompanyIntelligenceProfile | null>;
 }
 
-/** Reads set files by key relative to `intelligence/`. Null when the object does not exist. */
+/**
+ * Reads set files by key relative to `intelligence/`. Null when the object does not exist,
+ * including the 403 S3 returns for a missing key to a role without `s3:ListBucket`.
+ */
 export type SetReader = (key: string) => Promise<string | null>;
 
 export function s3SetReader(s3: Pick<S3Client, 'send'>, bucket: string): SetReader {
   return async (key) => {
+    const full = `intelligence/${key}`;
     try {
-      const out = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: `intelligence/${key}` }));
+      const out = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: full }));
       return (await out.Body?.transformToString('utf8')) ?? null;
     } catch (err) {
-      const name = (err as { name?: string })?.name;
-      if (name === 'NoSuchKey' || name === 'NotFound') return null;
+      if (isMissingObject(err, full)) return null;
       throw err;
     }
   };

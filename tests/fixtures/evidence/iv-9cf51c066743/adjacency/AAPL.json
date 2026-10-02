@@ -1,0 +1,2431 @@
+{
+ "AAPL-FY2022-10K-1A-001": {
+  "previous": null,
+  "next": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-001",
+     "score": 0.9937
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-005",
+     "score": 0.7801
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-007",
+     "score": 0.7756
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2022-10K-MDA-001": {
+  "previous": null,
+  "next": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-001",
+     "score": 0.8504
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-002",
+     "score": 0.6753
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-004",
+     "score": 0.6439
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2022Q2-10Q-1A-001": {
+  "previous": null,
+  "next": {
+   "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-06-25",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-1A-001",
+     "score": 0.979
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2022Q2-10Q-MDA-001": {
+  "previous": null,
+  "next": {
+   "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-06-25",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-001",
+     "score": 0.995
+    },
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-002",
+     "score": 0.706
+    },
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-005",
+     "score": 0.6508
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2022Q3-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2022Q1_2022-04-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-03-26",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-1A-001",
+     "score": 0.979
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2022-12-31",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-1A-001",
+     "score": 0.9865
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2022Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2022Q1_2022-04-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-03-26",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-MDA-001",
+     "score": 0.995
+    },
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-MDA-002",
+     "score": 0.6688
+    },
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-MDA-005",
+     "score": 0.6473
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2022-12-31",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-001",
+     "score": 0.9944
+    },
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-002",
+     "score": 0.7596
+    },
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-006",
+     "score": 0.6896
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-001",
+     "score": 0.9937
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-002",
+     "score": 0.8483
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-012",
+     "score": 0.8123
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.9888
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-022",
+     "score": 0.7819
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-013",
+     "score": 0.7709
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-010": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-011",
+     "score": 0.9478
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-018",
+     "score": 0.7506
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-012",
+     "score": 0.7396
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-010",
+     "score": 0.9458
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-017",
+     "score": 0.8131
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-011",
+     "score": 0.798
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-014": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-015",
+     "score": 0.8629
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-014",
+     "score": 0.8307
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-016",
+     "score": 0.829
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.9828
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8749
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-017",
+     "score": 0.8241
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-016": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-017",
+     "score": 0.9599
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-018",
+     "score": 0.8133
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-019",
+     "score": 0.767
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.9451
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8679
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.776
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-017": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-018",
+     "score": 0.9591
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-017",
+     "score": 0.8256
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-016",
+     "score": 0.791
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-017",
+     "score": 0.8827
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.8499
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.8088
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-018": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-019",
+     "score": 0.929
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-017",
+     "score": 0.7785
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-018",
+     "score": 0.7628
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-018",
+     "score": 0.9558
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.7876
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.7796
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-019": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-020",
+     "score": 0.9684
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-019",
+     "score": 0.8285
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-014",
+     "score": 0.7474
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-019",
+     "score": 0.972
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.7746
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-018",
+     "score": 0.7667
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-1A-022": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-023",
+     "score": 0.9013
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-022",
+     "score": 0.8265
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-1A-001",
+     "score": 0.7753
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-022",
+     "score": 0.9616
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-021",
+     "score": 0.8315
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.7701
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-MDA-001",
+     "score": 0.8504
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-MDA-002",
+     "score": 0.7595
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-MDA-003",
+     "score": 0.649
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-001",
+     "score": 0.8763
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-003",
+     "score": 0.7353
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-004",
+     "score": 0.7001
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023-10K-MDA-006": {
+  "previous": {
+   "documentId": "AAPL_10K_2022Q3_2022-10-28",
+   "fiscalLabel": "FY2022",
+   "periodEnd": "2022-09-24",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022-10K-MDA-006",
+     "score": 0.6474
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-MDA-005",
+     "score": 0.5555
+    },
+    {
+     "chunkId": "AAPL-FY2022-10K-MDA-001",
+     "score": 0.5081
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-008",
+     "score": 0.7362
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-007",
+     "score": 0.6449
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-002",
+     "score": 0.5407
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023Q1-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-06-25",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-1A-001",
+     "score": 0.9865
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-04-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-1A-001",
+     "score": 0.9964
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-06-25",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-001",
+     "score": 0.9944
+    },
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-002",
+     "score": 0.7054
+    },
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-005",
+     "score": 0.648
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-04-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-001",
+     "score": 0.9918
+    },
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-004",
+     "score": 0.6637
+    },
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-002",
+     "score": 0.6502
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2023Q2-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2022-12-31",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-1A-001",
+     "score": 0.9964
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-07-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-1A-001",
+     "score": 0.9822
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2022Q1_2022-04-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-03-26",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-1A-001",
+     "score": 0.9758
+    }
+   ]
+  }
+ },
+ "AAPL-FY2023Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2022-12-31",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-001",
+     "score": 0.9918
+    },
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-002",
+     "score": 0.7571
+    },
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-006",
+     "score": 0.7043
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-07-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-001",
+     "score": 0.9961
+    },
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-004",
+     "score": 0.6642
+    },
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-002",
+     "score": 0.6616
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2022Q1_2022-04-29",
+   "fiscalLabel": "FY2022Q2",
+   "periodEnd": "2022-03-26",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-MDA-001",
+     "score": 0.9854
+    },
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-MDA-002",
+     "score": 0.652
+    },
+    {
+     "chunkId": "AAPL-FY2022Q2-10Q-MDA-005",
+     "score": 0.6438
+    }
+   ]
+  }
+ },
+ "AAPL-FY2023Q3-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-04-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-1A-001",
+     "score": 0.9822
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2023-12-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-1A-001",
+     "score": 0.8419
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-1A-002",
+     "score": 0.7179
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-06-25",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-1A-001",
+     "score": 0.9683
+    }
+   ]
+  }
+ },
+ "AAPL-FY2023Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-04-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-001",
+     "score": 0.9961
+    },
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-004",
+     "score": 0.6707
+    },
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-002",
+     "score": 0.649
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2023-12-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-001",
+     "score": 0.9753
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-002",
+     "score": 0.7013
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-005",
+     "score": 0.6334
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2022Q2_2022-07-29",
+   "fiscalLabel": "FY2022Q3",
+   "periodEnd": "2022-06-25",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-001",
+     "score": 0.9883
+    },
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-002",
+     "score": 0.6967
+    },
+    {
+     "chunkId": "AAPL-FY2022Q3-10Q-MDA-005",
+     "score": 0.6481
+    }
+   ]
+  }
+ },
+ "AAPL-FY2024-10K-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-001",
+     "score": 0.9888
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-007",
+     "score": 0.7797
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-003",
+     "score": 0.7786
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-001",
+     "score": 0.9821
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-006",
+     "score": 0.7879
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-020",
+     "score": 0.7853
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-1A-010": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-010",
+     "score": 0.9458
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-009",
+     "score": 0.7893
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-005",
+     "score": 0.7344
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-009",
+     "score": 0.7677
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-010",
+     "score": 0.76
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-005",
+     "score": 0.6854
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-1A-013": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-013",
+     "score": 0.962
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-012",
+     "score": 0.8471
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-014",
+     "score": 0.8146
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-012",
+     "score": 0.8485
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-013",
+     "score": 0.8446
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-019",
+     "score": 0.7689
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-1A-014": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-014",
+     "score": 0.9828
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-015",
+     "score": 0.8485
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-017",
+     "score": 0.8088
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-013",
+     "score": 0.9098
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-014",
+     "score": 0.8432
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-016",
+     "score": 0.8094
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-1A-016": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-016",
+     "score": 0.9451
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-017",
+     "score": 0.8499
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-015",
+     "score": 0.8105
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-016",
+     "score": 0.9023
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-015",
+     "score": 0.881
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-018",
+     "score": 0.8119
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-1A-017": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-017",
+     "score": 0.8827
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-014",
+     "score": 0.8241
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-1A-010",
+     "score": 0.8131
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-017",
+     "score": 0.8849
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-016",
+     "score": 0.8184
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-1A-013",
+     "score": 0.8119
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-001",
+     "score": 0.8763
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-002",
+     "score": 0.6077
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-004",
+     "score": 0.5785
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-001",
+     "score": 0.8808
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-004",
+     "score": 0.6163
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-005",
+     "score": 0.574
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-MDA-007": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-005",
+     "score": 0.6737
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-006",
+     "score": 0.6449
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-001",
+     "score": 0.6421
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-008",
+     "score": 0.8621
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-009",
+     "score": 0.7673
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-007",
+     "score": 0.7394
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024-10K-MDA-008": {
+  "previous": {
+   "documentId": "AAPL_10K_2023Q3_2023-11-03",
+   "fiscalLabel": "FY2023",
+   "periodEnd": "2023-09-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-006",
+     "score": 0.7362
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-005",
+     "score": 0.5282
+    },
+    {
+     "chunkId": "AAPL-FY2023-10K-MDA-004",
+     "score": 0.5002
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10K_2025-10-31",
+   "fiscalLabel": "FY2025",
+   "periodEnd": "2025-09-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-009",
+     "score": 0.7949
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-007",
+     "score": 0.581
+    },
+    {
+     "chunkId": "AAPL-FY2025-10K-MDA-008",
+     "score": 0.5456
+    }
+   ]
+  },
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2024Q1-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-07-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-1A-001",
+     "score": 0.8419
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-03-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-1A-001",
+     "score": 0.991
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-1A-002",
+     "score": 0.8682
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2022-12-31",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-1A-001",
+     "score": 0.8269
+    }
+   ]
+  }
+ },
+ "AAPL-FY2024Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-07-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-001",
+     "score": 0.9753
+    },
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-002",
+     "score": 0.647
+    },
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-004",
+     "score": 0.6461
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-03-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-001",
+     "score": 0.9756
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-007",
+     "score": 0.6456
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-006",
+     "score": 0.6388
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2022Q4_2023-02-03",
+   "fiscalLabel": "FY2023Q1",
+   "periodEnd": "2022-12-31",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-001",
+     "score": 0.9723
+    },
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-002",
+     "score": 0.7651
+    },
+    {
+     "chunkId": "AAPL-FY2023Q1-10Q-MDA-006",
+     "score": 0.7174
+    }
+   ]
+  }
+ },
+ "AAPL-FY2024Q2-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2023-12-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-1A-001",
+     "score": 0.991
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-1A-002",
+     "score": 0.8257
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-06-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-1A-001",
+     "score": 0.8594
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-04-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-1A-001",
+     "score": 0.8419
+    }
+   ]
+  }
+ },
+ "AAPL-FY2024Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2023-12-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-001",
+     "score": 0.9756
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-002",
+     "score": 0.7535
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-005",
+     "score": 0.6878
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-06-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-001",
+     "score": 0.9433
+    },
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-007",
+     "score": 0.6987
+    },
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-006",
+     "score": 0.6963
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2023Q2_2023-05-05",
+   "fiscalLabel": "FY2023Q2",
+   "periodEnd": "2023-04-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-001",
+     "score": 0.9568
+    },
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-004",
+     "score": 0.6684
+    },
+    {
+     "chunkId": "AAPL-FY2023Q2-10Q-MDA-002",
+     "score": 0.6616
+    }
+   ]
+  }
+ },
+ "AAPL-FY2024Q3-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-03-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-1A-001",
+     "score": 0.8594
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-1A-002",
+     "score": 0.7407
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-12-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-001",
+     "score": 0.8369
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-003",
+     "score": 0.6391
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-002",
+     "score": 0.6013
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-07-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-1A-001",
+     "score": 0.9557
+    }
+   ]
+  }
+ },
+ "AAPL-FY2024Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-03-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-001",
+     "score": 0.9433
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-006",
+     "score": 0.6636
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-007",
+     "score": 0.6573
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-12-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-001",
+     "score": 0.9278
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-003",
+     "score": 0.7362
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-002",
+     "score": 0.7119
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2023Q3_2023-08-04",
+   "fiscalLabel": "FY2023Q3",
+   "periodEnd": "2023-07-01",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-001",
+     "score": 0.9136
+    },
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-002",
+     "score": 0.6681
+    },
+    {
+     "chunkId": "AAPL-FY2023Q3-10Q-MDA-004",
+     "score": 0.6578
+    }
+   ]
+  }
+ },
+ "AAPL-FY2025-10K-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.9821
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-002",
+     "score": 0.8052
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-022",
+     "score": 0.7804
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-002": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-002",
+     "score": 0.98
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.7757
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-003",
+     "score": 0.7381
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-004": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-004",
+     "score": 0.8501
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-003",
+     "score": 0.8011
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.7607
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-005": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-004",
+     "score": 0.9454
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-005",
+     "score": 0.7827
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-013",
+     "score": 0.7507
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-006": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-006",
+     "score": 0.8939
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-007",
+     "score": 0.8828
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-005",
+     "score": 0.8647
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-007": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-007",
+     "score": 0.9504
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-006",
+     "score": 0.8262
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-003",
+     "score": 0.8036
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-008": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-008",
+     "score": 0.9822
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-007",
+     "score": 0.8202
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.7731
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-009": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-009",
+     "score": 0.9446
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-010",
+     "score": 0.7677
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-011",
+     "score": 0.7177
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-010": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-011",
+     "score": 0.8741
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-010",
+     "score": 0.76
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-004",
+     "score": 0.7325
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-011": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-012",
+     "score": 0.9051
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-011",
+     "score": 0.8218
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-003",
+     "score": 0.7824
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-012": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-012",
+     "score": 0.8767
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-013",
+     "score": 0.8485
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-019",
+     "score": 0.6974
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-013": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.9098
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-013",
+     "score": 0.8446
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8416
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-014": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8809
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.8432
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.7699
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-015": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8956
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.881
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.7925
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-016": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.9023
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8257
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-017",
+     "score": 0.8184
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-017": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-017",
+     "score": 0.8849
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.8
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.7894
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-018": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-018",
+     "score": 0.8894
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.8119
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-015",
+     "score": 0.7906
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-019": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-019",
+     "score": 0.8844
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-016",
+     "score": 0.7948
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-014",
+     "score": 0.7922
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-020": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-020",
+     "score": 0.9618
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.7853
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-019",
+     "score": 0.7285
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-021": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-021",
+     "score": 0.966
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-022",
+     "score": 0.7805
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-019",
+     "score": 0.7406
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-1A-022": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-022",
+     "score": 0.9551
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-021",
+     "score": 0.7903
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-1A-001",
+     "score": 0.7508
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-001",
+     "score": 0.8808
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-005",
+     "score": 0.608
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-007",
+     "score": 0.6067
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-MDA-008": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-007",
+     "score": 0.8621
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-006",
+     "score": 0.6966
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-005",
+     "score": 0.6117
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025-10K-MDA-009": {
+  "previous": {
+   "documentId": "AAPL_10K_2024Q3_2024-11-01",
+   "fiscalLabel": "FY2024",
+   "periodEnd": "2024-09-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-008",
+     "score": 0.7949
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-007",
+     "score": 0.7673
+    },
+    {
+     "chunkId": "AAPL-FY2024-10K-MDA-005",
+     "score": 0.6223
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": null
+ },
+ "AAPL-FY2025Q1-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-06-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-1A-001",
+     "score": 0.8369
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2025Q1_2025-05-02",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2025-03-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-1A-001",
+     "score": 0.8616
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-1A-004",
+     "score": 0.7804
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-1A-003",
+     "score": 0.7329
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2023-12-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-1A-001",
+     "score": 0.8572
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-1A-002",
+     "score": 0.8196
+    }
+   ]
+  }
+ },
+ "AAPL-FY2025Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-06-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-001",
+     "score": 0.9278
+    },
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-007",
+     "score": 0.6531
+    },
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-006",
+     "score": 0.6515
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2025Q1_2025-05-02",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2025-03-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-MDA-001",
+     "score": 0.9834
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-MDA-002",
+     "score": 0.7241
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-MDA-008",
+     "score": 0.6571
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2023Q4_2024-02-02",
+   "fiscalLabel": "FY2024Q1",
+   "periodEnd": "2023-12-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-001",
+     "score": 0.9526
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-002",
+     "score": 0.7273
+    },
+    {
+     "chunkId": "AAPL-FY2024Q1-10Q-MDA-007",
+     "score": 0.6455
+    }
+   ]
+  }
+ },
+ "AAPL-FY2025Q2-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-12-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-001",
+     "score": 0.8616
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-003",
+     "score": 0.7244
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-002",
+     "score": 0.7147
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2025Q2_2025-08-01",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2025-06-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-1A-001",
+     "score": 0.8817
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-03-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-1A-001",
+     "score": 0.8331
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-1A-002",
+     "score": 0.7709
+    }
+   ]
+  }
+ },
+ "AAPL-FY2025Q2-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-12-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-001",
+     "score": 0.9834
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-003",
+     "score": 0.7913
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-002",
+     "score": 0.7321
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2025Q2_2025-08-01",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2025-06-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-MDA-001",
+     "score": 0.9596
+    },
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-MDA-002",
+     "score": 0.7446
+    },
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-MDA-007",
+     "score": 0.6496
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2024Q1_2024-05-03",
+   "fiscalLabel": "FY2024Q2",
+   "periodEnd": "2024-03-30",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-001",
+     "score": 0.9403
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-006",
+     "score": 0.6266
+    },
+    {
+     "chunkId": "AAPL-FY2024Q2-10Q-MDA-002",
+     "score": 0.6134
+    }
+   ]
+  }
+ },
+ "AAPL-FY2025Q3-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2025Q1_2025-05-02",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2025-03-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-1A-001",
+     "score": 0.8817
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-1A-004",
+     "score": 0.7997
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-1A-003",
+     "score": 0.7379
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2025Q4_2026-01-30",
+   "fiscalLabel": "FY2026Q1",
+   "periodEnd": "2025-12-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2026Q1-10Q-1A-001",
+     "score": 0.9635
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-06-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-1A-001",
+     "score": 0.942
+    }
+   ]
+  }
+ },
+ "AAPL-FY2025Q3-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2025Q1_2025-05-02",
+   "fiscalLabel": "FY2025Q2",
+   "periodEnd": "2025-03-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-MDA-001",
+     "score": 0.9596
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-MDA-002",
+     "score": 0.7346
+    },
+    {
+     "chunkId": "AAPL-FY2025Q2-10Q-MDA-008",
+     "score": 0.6642
+    }
+   ]
+  },
+  "next": {
+   "documentId": "AAPL_10Q_2025Q4_2026-01-30",
+   "fiscalLabel": "FY2026Q1",
+   "periodEnd": "2025-12-27",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2026Q1-10Q-MDA-001",
+     "score": 0.9474
+    },
+    {
+     "chunkId": "AAPL-FY2026Q1-10Q-MDA-002",
+     "score": 0.7073
+    },
+    {
+     "chunkId": "AAPL-FY2026Q1-10Q-MDA-003",
+     "score": 0.6595
+    }
+   ]
+  },
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2024Q2_2024-08-02",
+   "fiscalLabel": "FY2024Q3",
+   "periodEnd": "2024-06-29",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-001",
+     "score": 0.9415
+    },
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-002",
+     "score": 0.6754
+    },
+    {
+     "chunkId": "AAPL-FY2024Q3-10Q-MDA-007",
+     "score": 0.6683
+    }
+   ]
+  }
+ },
+ "AAPL-FY2026Q1-10Q-1A-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2025Q2_2025-08-01",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2025-06-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-1A-001",
+     "score": 0.9635
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-12-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-001",
+     "score": 0.8328
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-003",
+     "score": 0.6369
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-1A-002",
+     "score": 0.5925
+    }
+   ]
+  }
+ },
+ "AAPL-FY2026Q1-10Q-MDA-001": {
+  "previous": {
+   "documentId": "AAPL_10Q_2025Q2_2025-08-01",
+   "fiscalLabel": "FY2025Q3",
+   "periodEnd": "2025-06-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-MDA-001",
+     "score": 0.9474
+    },
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-MDA-002",
+     "score": 0.7247
+    },
+    {
+     "chunkId": "AAPL-FY2025Q3-10Q-MDA-007",
+     "score": 0.6264
+    }
+   ]
+  },
+  "next": null,
+  "sameQuarterPriorYear": {
+   "documentId": "AAPL_10Q_2024Q4_2025-01-31",
+   "fiscalLabel": "FY2025Q1",
+   "periodEnd": "2024-12-28",
+   "matches": [
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-001",
+     "score": 0.9763
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-003",
+     "score": 0.7695
+    },
+    {
+     "chunkId": "AAPL-FY2025Q1-10Q-MDA-002",
+     "score": 0.7165
+    }
+   ]
+  }
+ }
+}

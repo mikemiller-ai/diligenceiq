@@ -417,7 +417,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
           </ul>
         </section>
 
-        <CoverageMatrix analysis={analysis} />
+        <CoverageMatrix analysis={analysis} passages={context} />
 
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <section aria-labelledby="gaps">

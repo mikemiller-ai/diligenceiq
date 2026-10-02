@@ -13,3 +13,4 @@ export * from './financials/metrics';
 export * from './financials/extract';
 export * from './financials/trends';
 export * from './financials/drivers';
+export * from './citation';

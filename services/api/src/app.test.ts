@@ -88,7 +88,7 @@ describe('sessions (SPEC §40, §39)', () => {
     const { app } = testApp();
     const { workspaceId } = await newSession(app);
     const forged = `${SESSION_COOKIE_SECURE}=${workspaceId}.AAAA`;
-    for (const [m, p] of [['GET', '/api/workspace'], ['POST', '/api/analyses'], ['GET', '/api/analyses'], ['GET', '/api/findings'], ['GET', '/api/companies'], ['POST', '/api/workspace/reset']] as const) {
+    for (const [m, p] of [['GET', '/api/workspace'], ['POST', '/api/analyses'], ['GET', '/api/analyses'], ['GET', '/api/findings'], ['GET', '/api/companies'], ['POST', '/api/workspace/reset'], ['GET', '/api/sources/AAPL_10K_2025-10-31'], ['GET', '/api/evidence/adjacent']] as const) {
       expectApiError(await app(makeEvent(m, p)), 401, 'SESSION_REQUIRED');
       expectApiError(await app(makeEvent(m, p, { cookies: [forged] })), 401, 'SESSION_REQUIRED');
     }

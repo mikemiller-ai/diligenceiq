@@ -144,7 +144,9 @@ describe('Missing source document (architecture §9.1)', () => {
 
     setRoute('/sources/filing/', 'id=AAPL_10K_2030-10-31');
     renderInWorkspace(<FilingView />);
-    expect(screen.getByText('Filing not found')).toBeInTheDocument();
+    expect(await screen.findByText('This filing isn’t available.')).toBeInTheDocument();
+    // No history to go back to in a fresh render: the recovery is the company's intelligence page.
+    expect(screen.getByRole('link', { name: 'Open Company Intelligence' })).toHaveAttribute('href', expect.stringMatching(/\/intelligence\/?\?ticker=AAPL$/));
   });
 });
 

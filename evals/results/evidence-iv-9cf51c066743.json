@@ -1,0 +1,36 @@
+{
+  "indexVersion": "iv-9cf51c066743",
+  "checkedAt": "2026-10-02T23:44:32.248Z",
+  "chunks": {
+    "index": 25404,
+    "reproduced": 25404,
+    "filings": 246
+  },
+  "adjacency": {
+    "entries": 25404,
+    "references": 106571
+  },
+  "citations": {
+    "seed brief citations": 41,
+    "seed context passages": 72,
+    "live brief citations": 1047,
+    "live brief context": 1976,
+    "profiles det-v2": 1344,
+    "profiles llm-v3": 1573,
+    "profiles fixture-v2": 59
+  },
+  "liveBriefRuns": [
+    "generation-iv-9cf51c066743-da-v1.json",
+    "generation-iv-9cf51c066743-da-v2.json",
+    "generation-iv-9cf51c066743-da-v3.json",
+    "generation-iv-9cf51c066743-da-v4.json"
+  ],
+  "profileSets": [
+    "det-v2",
+    "llm-v3",
+    "fixture-v2"
+  ],
+  "sourceRouteSpotChecks": 246,
+  "failures": [],
+  "pass": true
+}

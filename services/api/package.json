@@ -19,6 +19,7 @@
     "@aws-sdk/client-ssm": "3.1144.0",
     "@aws-sdk/lib-dynamodb": "3.1144.0",
     "@diligenceiq/core": "workspace:*",
+    "@diligenceiq/corpus": "workspace:*",
     "@diligenceiq/rag": "workspace:*",
     "zod": "4.6.5"
   },

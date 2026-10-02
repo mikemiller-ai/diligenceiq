@@ -91,4 +91,25 @@ describe('httpWorkspaceClient', () => {
     expect(await client.getContext('a1')).toBeNull();
     await expect(client.companies()).rejects.toMatchObject({ code: 'INTERNAL', requestId: 'req-INTERNAL' });
   });
+
+  it('evidence 404s are results: SOURCE_MISSING is not_found, details.reason is kept; other errors still throw', async () => {
+    const withReason = (reason: string) => json(404, { error: { code: 'NOT_FOUND', message: 'x', requestId: 'r', details: { reason } } });
+    handler = (url) =>
+      url.startsWith('/api/sources/AAPL_10K_2001-01-01')
+        ? apiError(404, 'SOURCE_MISSING')
+        : url.includes('iv=') || url.includes('indexVersion=iv-0')
+          ? withReason('index_version')
+          : url.startsWith('/api/sources/MSFT')
+            ? withReason('index_unavailable')
+            : url.startsWith('/api/evidence/adjacent')
+              ? apiError(404, 'NOT_FOUND')
+              : apiError(500, 'INTERNAL');
+    const client = httpWorkspaceClient();
+    expect(await client.source('AAPL_10K_2001-01-01')).toEqual({ unavailable: 'not_found' });
+    expect(await client.source('AAPL_10K_2025-10-31', 'iv-000000000000')).toEqual({ unavailable: 'index_version' });
+    expect(calls()).toContain('GET /api/sources/AAPL_10K_2025-10-31?indexVersion=iv-000000000000');
+    expect(await client.source('MSFT_10K_2025-07-30')).toEqual({ unavailable: 'index_unavailable' });
+    expect(await client.adjacent('AAPL-FY2025-10K-1A-001')).toEqual({ unavailable: 'not_found' });
+    await expect(client.source('NVDA_10K_2026-02-25')).rejects.toMatchObject({ code: 'INTERNAL' });
+  });
 });

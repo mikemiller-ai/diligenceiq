@@ -65,7 +65,7 @@ export function RiskPreview() {
                 {r.chunkIds.map((id) => (
                   <Link
                     key={id}
-                    href={filingHref(company.documentId, id)}
+                    href={filingHref(company.documentId, id, passage(id).indexVersion)}
                     aria-label={`View passage ${id}`}
                     data-citation-chip=""
                     className="rounded-md border border-primary/40 bg-primary/15 px-1.5 py-0.5 font-mono text-[10.5px] text-[#c7d2fe] hover:border-on-navy-accent hover:text-white"

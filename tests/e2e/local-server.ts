@@ -23,7 +23,7 @@ import { MemoryAnalysisStore } from '../../services/api/src/analyses/store';
 import { DEFAULT_CAPS, createApp } from '../../services/api/src/app';
 import { createProfileProvider, dirSetReader } from '../../services/api/src/profiles/provider';
 import { staticSessionSecret } from '../../services/api/src/session/session';
-import { PROFILE_SET_ROOT, SEED } from '../../services/api/src/test-helpers';
+import { PROFILE_SET_ROOT, SEED, corpusEvidence } from '../../services/api/src/test-helpers';
 import { MemoryWorkspaceStore } from '../../services/api/src/workspace/store';
 
 const PORT = Number(process.env.E2E_PORT ?? 4174);
@@ -113,6 +113,8 @@ const app = createApp({
   seed: SEED,
   indexVersion: 'iv-9cf51c066743',
   indexAvailable: async () => true,
+  // The source view and adjacent periods: filings processed from the corpus (the gate requires it), committed adjacency subset.
+  evidence: corpusEvidence(),
   secureCookies: false,
   // Every test browser comes from 127.0.0.1, so the per-client creation limit is lifted here only.
   caps: { ...DEFAULT_CAPS, perClientDailyWorkspaceCreations: 100_000, dailyWorkspaceCreations: 100_000 },

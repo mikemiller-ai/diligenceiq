@@ -133,16 +133,21 @@ describe('ApiStack', () => {
     expect(logGroups[ref.Ref]).toMatchObject({ Properties: { RetentionInDays: 14 } });
   });
 
-  it('grants the api Lambda exactly what Phase 5 routes use (architecture §11)', () => {
+  it('grants the api Lambda exactly what its routes use (architecture §11; evidence reads from Phase 6)', () => {
     expect(grantedActions(templates.api.toJSON()).sort()).toEqual(
       ['dynamodb:BatchWriteItem', 'dynamodb:DeleteItem', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:UpdateItem', 's3:GetObject', 'sqs:SendMessage', 'ssm:GetParameter'].sort(),
     );
     const statements = Object.values(templates.api.findResources('AWS::IAM::Policy')).flatMap((p) => (propsOf(p).PolicyDocument as { Statement: Json[] }).Statement);
     const s3 = JSON.stringify(statements.find((s) => s.Action === 's3:GetObject'));
-    // Profiles and the index manifest only: never the corpus or the index artifacts themselves.
+    // Profiles, the index manifest, and this index version's adjacency files and processed filings:
+    // never the raw corpus, the other index artifacts (vectors, BM25, chunks) or another version.
+    const resources = ((statements.find((s) => s.Action === 's3:GetObject')?.Resource ?? []) as Json[]).map((r) => JSON.stringify(r));
+    expect(resources).toHaveLength(4);
     expect(s3).toContain('/intelligence/*');
     expect(s3).toContain(`/index/${CONFIG.indexVersion}/manifest.json`);
-    expect(s3).not.toMatch(/"\/\*"|index\/\*/);
+    expect(s3).toContain(`/index/${CONFIG.indexVersion}/adjacency/*`);
+    expect(s3).toContain(`/processed/${CONFIG.indexVersion}/*`);
+    expect(s3).not.toMatch(/"\/\*"|index\/\*|corpus\//);
     const ssm = JSON.stringify(statements.find((s) => s.Action === 'ssm:GetParameter'));
     expect(ssm).toContain(`parameter${CONFIG.sessionSecretParameterName}`);
     expect(ssm.match(/parameter/g)?.length).toBeGreaterThanOrEqual(3);
