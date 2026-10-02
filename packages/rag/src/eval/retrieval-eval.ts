@@ -1,3 +1,4 @@
+import { GenerationExpectSchema } from './generation-eval';
 import { z } from 'zod';
 import type { ChunkRecord } from '../index/format';
 import type { RetrievalResult } from '../retrieval/retrieve';
@@ -67,6 +68,8 @@ export const EvalQuestionSchema = z
         periodKind: z.enum(['current', 'last_n', 'years', 'since', 'quarters', 'range']).optional(),
         /** Hand-picked chunk IDs that answer the question (recall@context; informational). */
         gold: z.array(z.string().regex(/^[A-Z]{1,5}-FY\d{4}(?:Q[1-4])?-10[KQ]-[A-Z0-9]+-\d{3}$/)).min(1).optional(),
+        /** Phase 4 generation checks (eval/generation-eval.ts). */
+        generation: GenerationExpectSchema.optional(),
       })
       .strict(),
   })

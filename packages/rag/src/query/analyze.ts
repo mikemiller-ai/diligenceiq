@@ -36,9 +36,67 @@ export const TOPIC_RULES: Readonly<Record<Topic, { pattern: RegExp; sections: re
   },
 };
 
-/** Words that ask how something changed over time (longitudinal intent). */
+/** Words that ask how something changed over time (longitudinal intent). Tested on `withoutChangeNouns(question)`. */
 const CHANGE_INTENT =
   /\bchang\w*|\bevolv\w*|\bover time\b|\bover the (?:last|past)\b|\btrends?\b|\btrajector\w*|\byear[- ]over[- ]year\b|\bshift\w*|\bsince\b|\bhistor\w*|\bfrom (?:FY)?\d{4}\b|\bthrough (?:FY)?\d{4}\b|\bacross (?:the )?(?:years|filings|periods)\b|\bcompared? (?:to|with) (?:prior|previous|earlier|last)\b|\bdevelop\w*/i;
+
+/**
+ * Noun phrases that contain a change word but do not ask how something changed (Phase 4
+ * adversary H4): "climate change", "change of control", "changes in accounting principles",
+ * "changes in tax law", "shift supervisors", "history of litigation". Removed before the
+ * change regexes are tested. ("Exchange" never matches: the change words need a word start.)
+ */
+const CHANGE_NOUN_PHRASES: readonly RegExp[] = [
+  /\bclimate[- ]change\w*/gi,
+  /\bchanges? (?:of|in) control\b/gi,
+  /\bchange-(?:of|in)-control\b/gi,
+  /\bchanges? in (?:the )?accounting (?:principles?|standards?|estimates?|polic(?:y|ies)|methods?|guidance)\b/gi,
+  /\baccounting changes?\b/gi,
+  /\bchanges? in (?:the )?(?:\w+ )?tax (?:laws?|rates?|rules?|legislation|regulations?|policy)\b/gi,
+  /\btax (?:law|rate|rule) changes?\b/gi,
+  /\bshift (?:supervisors?|managers?|leads?|leaders?|workers?|employees?|schedules?|scheduling|differentials?|work)\b/gi,
+  /\b(?:night|day|morning|evening|overnight|late|early|split|double|work) shifts?\b/gi,
+  /\bhistory of\b/gi,
+];
+
+function withoutChangeNouns(question: string): string {
+  return CHANGE_NOUN_PHRASES.reduce((text, re) => text.replace(re, ' '), question);
+}
+
+/**
+ * Change wording that sets the default period when the question names none (SPEC §26.3,
+ * decision 2026-10-02): "How has Visa changed?" reads each company's last
+ * `CHANGE_DEFAULT_YEARS` annual reports instead of the current view. Narrower than
+ * CHANGE_INTENT: it needs wording that asks how the subject changed ("how has … changed",
+ * "what (has) changed", "trends in", "over time", "across years"), so a bare change word
+ * ("What does Exxon say about climate change?", "staff its shift supervisors") keeps the
+ * current view. "develop…", "since …" and "from FY…" are left out, because a period phrase
+ * already sets the period and "developer" or "developments" do not ask about change over time.
+ * Tested on `withoutChangeNouns(question)`.
+ */
+const CHANGE_DEFAULT = new RegExp(
+  [
+    // "How has Visa changed?", "Has Visa's strategy changed?" (a participle: "has … the change in fees" is a noun)
+    String.raw`\b(?:has|have|had)\b[^.?!;]{0,80}?\b(?:changed|evolved|shifted|trended)\b`,
+    // "How did Microsoft shift its strategy?", "Did Apple's margins change?"
+    String.raw`\bdid\b[^.?!;]{0,80}?\b(?:change|evolve|shift|trend)\b`,
+    // "How are Nike's margins changing?"
+    String.raw`\bhow\s+(?:is|are|was|were)\b[^.?!;]{0,80}?\b(?:changing|evolving|shifting|trending)\b`,
+    // "What changed in Apple's risk factors?", "What has changed", "What's changed"
+    String.raw`\bwhat(?:'s|’s|\s+has|\s+have)?\s+(?:chang|evolv|shift)ed\b`,
+    String.raw`\bchanges?\s+over\s+time\b|\bover\s+time\b`,
+    String.raw`\btrends?\s+(?:in|of|for|across)\b|\btrended\b|\btrajector\w*`,
+    String.raw`\bevolution\s+(?:of|in)\b`,
+    String.raw`\bacross\s+(?:the\s+)?(?:years|filings|periods|annual reports)\b`,
+    String.raw`\bcompared?\s+(?:to|with)\s+(?:prior|previous|earlier)\s+(?:years|filings|periods)\b`,
+  ].join('|'),
+  'i',
+);
+
+/** A question about the latest quarter or the quarterly reports keeps the (quarterly) current view. */
+const QUARTERLY_SCOPE = /\b(?:latest|most recent|last|recent|this|current|past|prior|previous)\s+(?:fiscal\s+)?quarters?\b|\bquarterly\b|\b10-?Q\b/i;
+
+export const CHANGE_DEFAULT_YEARS = 3;
 
 export interface QueryFilters {
   /** Hard filters chosen by the user; they override the analysis (SPEC §26.3, §27.1). */
@@ -117,12 +175,25 @@ export class QueryAnalyzer {
     } else if (parsed.ignoredYears.length) {
       notes.push(`Not read as a period (no time phrase such as "in 2024" or "FY2024"): ${parsed.ignoredYears.map((y) => `"${y}"`).join(', ')}.`);
     }
+    let filingTypes = parseFilingTypes(question);
+    if (filters.filingTypes?.length) filingTypes = [...new Set(filters.filingTypes)];
+
+    const changeText = withoutChangeNouns(question);
+    const quarterly = QUARTERLY_SCOPE.test(question) || (filingTypes.length === 1 && filingTypes[0] === '10-Q');
+    const changeMatch = period.kind === 'current' && !quarterly ? CHANGE_DEFAULT.exec(changeText) : null;
+    if (changeMatch) {
+      const phrase = changeMatch[0].replace(/\s+/g, ' ').trim();
+      period = {
+        kind: 'last_n',
+        n: CHANGE_DEFAULT_YEARS,
+        phrase,
+        assumption: `A change question with no period named ("${phrase}"): read as each company's last ${CHANGE_DEFAULT_YEARS} annual reports. Name years (e.g. "from 2023 through 2025") to choose others.`,
+        changeDefault: true,
+      };
+    }
     if (period.kind === 'last_n' && period.assumption) notes.push(period.assumption);
     if (period.kind === 'current') notes.push('No period named: each company is read in its current view (latest annual report plus later quarterly reports).');
     else if (period.kind !== 'quarters') notes.push('Years are read as each company’s own fiscal years.');
-
-    let filingTypes = parseFilingTypes(question);
-    if (filters.filingTypes?.length) filingTypes = [...new Set(filters.filingTypes)];
 
     const topics = TOPICS.filter((t) => TOPIC_RULES[t].pattern.test(question));
     const scoped = filtered.length > 0;
@@ -191,9 +262,10 @@ export class QueryAnalyzer {
     }
 
     const changeIntent =
-      CHANGE_INTENT.test(question) || period.kind === 'since' || (period.kind === 'years' && period.years.length > 1) || period.kind === 'last_n';
+      CHANGE_INTENT.test(changeText) || period.kind === 'since' || (period.kind === 'years' && period.years.length > 1) || period.kind === 'last_n';
     // H3: change intent but only one period bucket in scope for a named company: say how to compare.
-    if (changeIntent && scoped) {
+    // "Last N years" states a short history as a gap per company (resolvePeriod), so it gets no extra note.
+    if (changeIntent && scoped && period.kind !== 'last_n') {
       const single = new Map<string, string[]>();
       for (const s of scopes) if (s.buckets.length === 1) single.set(s.buckets[0]!.label, [...(single.get(s.buckets[0]!.label) ?? []), s.ticker]);
       for (const [label, ts] of single) {

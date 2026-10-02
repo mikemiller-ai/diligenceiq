@@ -1031,6 +1031,7 @@ A static, documented sector map (for example "major pharmaceutical companies" �
 - Regex and range parsing: `2023`, `2023-2025`, `since 2023`, `last two years`.
 - "Last N years" is ambiguous, so do not silently guess. It resolves **per company and corpus-relative** to the N most recent complete fiscal years (by 10-K), plus any later quarters shown separately as "FY<next> YTD".
 - **No period named:** per company, the latest 10-K plus subsequent 10-Qs ("current view").
+- **Change question, no period named** (amended 2026-10-02, Mike's decision): a question asking how something changed ("How has Visa changed?", "What changed in Apple's risk factors?") reads each company's **last 3 annual reports** (resolved like "last 3 years", with later quarters shown separately) instead of the current view, stated as an assumption. A company with fewer 10-Ks gets a stated gap. A named period or a user filter always wins.
 - The resolution is always shown in the Interpretation panel. User filters override it.
 
 ## 26.4 Filing types
@@ -2179,6 +2180,15 @@ Every SPEC v1 requirement either appears in this specification or is listed here
 | §33: process to update the plan and consolidate | Done in Phase 0b (§49) | Historical. |
 | §34: relationship to SPEC.md, precedence rules | Replaced by §1.2 | This consolidated specification is canonical. |
 | §35: quality gate | Kept (§48) | No change. |
+
+
+## A.4 Amendments to SPEC v2
+
+Changes made to this specification after its consolidation, each decided by Mike.
+
+| Date | § | Change | Reason |
+|---|---|---|---|
+| 2026-10-02 | §26.3 | A change question that names no period reads each company's last 3 annual reports instead of the current view. | Phase 3 adversary H3: "How has Visa changed?" answered from one filing could not show change. Pending decision 1, settled at the start of Phase 4. |
 
 ---
 

@@ -19,7 +19,11 @@ export interface RetrieverOptions {
   mode?: RetrievalMode;
   budget?: number;
   targetChunks?: number;
+  /** Called as each real stage starts (SPEC §38.1): the worker persists it for the UI. */
+  onStage?: (stage: RetrievalStage) => Promise<void> | void;
 }
+
+export type RetrievalStage = 'analyzing' | 'retrieving' | 'balancing' | 'context';
 
 export interface LaneResult {
   id: string;
@@ -99,8 +103,16 @@ export class Retriever {
   async retrieve(question: string, filters: QueryFilters = {}, embedQuery: EmbedQuery | null = null, options: RetrieverOptions = {}): Promise<RetrievalResult> {
     const t0 = performance.now();
     const mode = options.mode ?? (embedQuery ? 'hybrid' : 'bm25');
+    const stage = async (s: RetrievalStage) => {
+      if (options.onStage) await options.onStage(s);
+    };
+    // Stages (SPEC §38.1; architecture §4.1) are written as each piece of work starts.
+    // Analyzing: the deterministic reading of the question and its company × period lanes.
+    await stage('analyzing');
     const analysis = this.analyzer.analyze(question, filters);
     const plan = planLanes(analysis, options.targetChunks);
+    // Retrieving: the one query embedding, then the filtered hybrid search of every lane.
+    await stage('retrieving');
 
     let queryVector: Float32Array | null = null;
     let embeddingDurationMs = 0;
@@ -119,7 +131,13 @@ export class Retriever {
       const candidates = searchLane({ index: this.index, docs, text: laneQueryText(analysis, lane.ticker), queryVector, boostSections: boost, mode, limit: lane.candidates });
       return { lane, candidates };
     });
+    // Balancing: the context builder fills each lane's quota (companies before periods), applies
+    // per-company caps, removes near-duplicates and keeps the token budget.
+    await stage('balancing');
     const context = buildContext(this.index.chunks, laneCandidates, options.budget ? { budget: options.budget } : {});
+    // Context: the lane report and snapshot here, then the caller's source context for the model
+    // (the pipeline's scope description and user message).
+    await stage('context');
     const inContext = new Set(context.blocks.map((b) => b.doc));
 
     const lanes: LaneResult[] = laneCandidates.map(({ lane, candidates }) => ({

@@ -136,7 +136,7 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 - Each lane runs a filtered hybrid search.
 - The context builder enforces lane quotas before filling by score.
 - Topics only boost, never filter.
-- Period rules are explicit and shown to the user: "last N years" = the N most recent complete fiscal years per company plus a separate "FY<next> YTD"; no period named = latest 10-K plus subsequent 10-Qs (assumptions C1, C5).
+- Period rules are explicit and shown to the user: "last N years" = the N most recent complete fiscal years per company plus a separate "FY<next> YTD"; no period named = latest 10-K plus subsequent 10-Qs, except a change question, which reads the last 3 annual reports (assumptions C1, C5; SPEC §26.3 amended 2026-10-02).
 - Name and ticker collisions with English words are resolved by case-sensitive rules (assumptions C3).
 
 **Consequences**
@@ -186,7 +186,7 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 ---
 
 ## DD-08 · Model choices
-**Status:** Accepted for embeddings and rerank (Phase 3 evals: Titan v2 kept, rerank off, [evaluation.md](evaluation.md) §2). Generation stays Provisional until the Phase 4 temperature and forced-tool check.
+**Status:** Accepted. Embeddings and rerank: Phase 3 evals (Titan v2 kept, rerank off, [evaluation.md](evaluation.md) §2). Generation: Phase 4 verified that Sonnet 4.6 accepts temperature 0.2 with the forced tool, and measured it over 60 eval briefs ([evaluation.md](evaluation.md) §4–5).
 
 **Context:** Phase 0 read the account's Bedrock quotas (assumptions D3, D8). Claude Sonnet 5.5 has a cross-region quota of 0 tokens/minute; Sonnet 4.6 has 6,000,000. Cohere Embed v4 is capped at 8.1M tokens/day on-demand and 16.2M cross-region (non-adjustable), below the ~20M-token corpus.
 

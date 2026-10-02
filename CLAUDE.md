@@ -45,7 +45,7 @@ Guidance for Claude Code in this repository.
 ## Architecture (house pattern; see docs/architecture.md)
 - **Region:** us-east-1, CDK TypeScript.
 - **Frontend:** Amplify Hosting with a static Next.js export. `/api/<*>` is rewritten to the HTTP API.
-- **Backend:** HTTP API → api Lambda. SQS → worker Lambda runs the RAG pipeline plus the one Bedrock generation call. DLQ → dlq-handler Lambda marks failed jobs. Stuck jobs are failed lazily on poll past `deadlineAt`; no schedules.
+- **Backend:** HTTP API → api Lambda. SQS → worker Lambda runs the RAG pipeline plus the one Bedrock generation call. DLQ → dlq-handler Lambda marks failed jobs. Stuck jobs are failed lazily on poll past `deadlineAt`; no schedules. Stacks: `CoreStack`, `ApiStack`, `WebStack`, `WorkerStack` (queue, DLQ, worker, dlq-handler; Phase 4).
 - **Data:** DynamoDB on-demand, single table. S3 holds the corpus, processed filings, the pre-built hybrid index that the worker loads into memory (plus its adjacency file), and `intelligence/` profile sets with their manifests and build ledger, which the api Lambda reads.
 - **No Docker on this machine.** Lambdas ship as esbuild zip bundles.
 
@@ -66,6 +66,11 @@ pnpm gate
 - **From Phase 1:** `pnpm gate` runs `pnpm check:docs && pnpm lint && pnpm typecheck && REQUIRE_CORPUS=1 pnpm test && pnpm cdk:synth && pnpm build && pnpm e2e`. `pnpm e2e` is Playwright (`tests/e2e/local`) against the static export, including the prefill-never-auto-submits test; it uses the cached Chromium for `@playwright/test` 1.63.0. `typecheck` also covers `tests/e2e` and `scripts/` (the TypeScript CLIs). The test step runs as `REQUIRE_CORPUS=1 pnpm test`, so the corpus-backed exit-criteria tests fail loudly instead of skipping when `edgar_corpus/` (or `CORPUS_PATH`) is missing; plain `pnpm test` still skips them with a warning. Keep this section accurate when the gate changes.
 - **Offline CLIs (Phase 2, admin-run, never in the gate):** `pnpm ingest` (no AWS), `pnpm extract` (no AWS), `pnpm fixtures:risks` (regenerates the web preview headings), `pnpm index:embed` (Bedrock spend: ask first; `--dry-run` is free), `pnpm index:build` (no AWS), `pnpm index:upload` (S3 write: dry run unless `--yes`; ask first), `pnpm index:measure-load` (read-only), `pnpm check:bedrock` (Bedrock entitlement check; tiny spend, ask first). Outputs go to `.index/` (gitignored).
 - **Offline evals and retrieval tools (Phase 3, never in the gate):** `pnpm eval:retrieval` (20 questions × BM25 / cosine / hybrid; cached query embeddings only, `--embed` makes Titan calls for new questions: ask first), `pnpm eval:chunk-size` (BM25-only chunk-size experiment, no AWS), `pnpm eval:signals` (signal go/no-go against the hand labels, no AWS), `pnpm retrieval:debug` (local `POST /api/retrieval/debug` on 127.0.0.1; `--embed` spends: ask first). Results go to `evals/results/` (committed) and `docs/evaluation.md`.
+- **Generation tools (Phase 4, never in the gate):**
+  - `pnpm eval:retrieval --generate` replays recorded generations (free). `--live` makes Bedrock generation calls, about $0.11 each, about $2.25 per run: ask first.
+  - `pnpm eval:generation:rescore` re-validates stored briefs (no AWS).
+  - `pnpm prompts:render` (no AWS).
+  - `pnpm analysis:run` runs one in-region analysis through the deployed worker. It writes to DynamoDB and SQS, spends about $0.13 on Bedrock, and needs the kill switch on: ask first.
 
 ## Phase process (SPEC §48, adapted in DD-12)
 Implementation → tests → `adversary` agent report → **fresh** general-purpose fixer agent fixes the findings and adds regression tests → `/code-review` and fix findings → `pnpm gate` → `/handoff` (commit after Mike's go-ahead) plus `docs/handoffs/phase-XX.md`. Never skip a step.
@@ -84,7 +89,7 @@ The adversary also asks the SPEC §48.2 product questions:
 
 ## Conventions
 - Package manager: pnpm 9. Node ≥ 22. TypeScript strict. Zod at every boundary.
-- **Prompt changes:** every real change to either prompt (Deep Analysis, Company Intelligence profile) gets an entry in `docs/prompt-iterations.md`. Never fabricate history. `prompts/final-diligence-prompt.md` must match the runtime prompt (enforced by a test once it exists).
+- **Prompt changes:** every real change to either prompt (Deep Analysis, Company Intelligence profile) gets an entry in `docs/prompt-iterations.md`. Never fabricate history. `prompts/final-diligence-prompt.md` must match the runtime prompt (`packages/rag/src/generation/prompt.ts`; enforced by a test). Regenerate it with `pnpm prompts:render`, bump `DEEP_ANALYSIS_PROMPT_VERSION`, and keep the superseded file in `prompts/versions/`.
 - **Corpus:** `edgar_corpus/` is gitignored (79 MB, public domain). Ingestion reads `CORPUS_PATH`. Corpus numbers in docs must match `node scripts/ingestion/probe-corpus.mjs`; anomalies are in `docs/assumptions.md` (Known corpus anomalies).
 - `UPDATED_FDE-AI-RAG-Assessment.pdf` is gitignored (Eliza's document).
 - **Dates:** use the local date for handoffs and STATE.md.

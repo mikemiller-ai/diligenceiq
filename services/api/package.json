@@ -12,8 +12,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "3.1144.0",
+    "@aws-sdk/client-dynamodb": "3.1144.0",
+    "@aws-sdk/client-s3": "3.1144.0",
+    "@aws-sdk/client-sqs": "3.1144.0",
     "@aws-sdk/client-ssm": "3.1144.0",
+    "@aws-sdk/lib-dynamodb": "3.1144.0",
     "@diligenceiq/core": "workspace:*",
+    "@diligenceiq/rag": "workspace:*",
     "zod": "4.6.5"
   },
   "devDependencies": {

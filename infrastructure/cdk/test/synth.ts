@@ -22,6 +22,7 @@ export function synthAll() {
     core: Template.fromStack(stacks.core),
     api: Template.fromStack(stacks.api),
     web: Template.fromStack(stacks.web),
+    worker: Template.fromStack(stacks.worker),
   };
-  return { app, stacks, templates, guardInput: toGuardTemplates([stacks.core, stacks.api, stacks.web]) };
+  return { app, stacks, templates, guardInput: toGuardTemplates([stacks.core, stacks.api, stacks.web, stacks.worker]) };
 }

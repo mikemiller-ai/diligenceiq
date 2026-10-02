@@ -17,7 +17,8 @@ import type { CatalogCompany, CatalogFiling } from './catalog';
  *
  * Resolution, per company and corpus-relative (never relative to today):
  * - **No period named ("current view", C5):** the latest 10-K plus the 10-Qs that end after
- *   it. JPM → its FY2025 10-K only (its 10-Qs precede it); MCD and PEP drop their stray 2023
+ *   it. A CHANGE question naming no period is not a current view: the analyzer reads it as the
+ *   last 3 annual reports (`last_n`, `changeDefault`; SPEC §26.3). JPM → its FY2025 10-K only (its 10-Qs precede it); MCD and PEP drop their stray 2023
  *   10-Qs.
  * - **Last N years (C1):** the N most recent complete fiscal years by 10-K, plus any later
  *   10-Qs shown separately as "FY<next> YTD". NVDA "last two years" → FY2024, FY2025 and
@@ -34,7 +35,8 @@ import type { CatalogCompany, CatalogFiling } from './catalog';
  */
 export type PeriodSpec =
   | { kind: 'current' }
-  | { kind: 'last_n'; n: number; phrase: string; assumption?: string }
+  /** `changeDefault`: set by the analyzer for a change question naming no period (SPEC §26.3), not parsed from a phrase. */
+  | { kind: 'last_n'; n: number; phrase: string; assumption?: string; changeDefault?: boolean }
   | { kind: 'years'; years: number[]; phrase: string }
   | { kind: 'since'; from: number; phrase: string }
   | { kind: 'quarters'; quarters: Array<{ fiscalYear: number; quarter: number }>; phrase: string }
@@ -250,6 +252,20 @@ function finish(ticker: string, buckets: PeriodBucket[], description: string, ga
   return { ticker, buckets: nonEmpty, documentIds: nonEmpty.flatMap((b) => b.documentIds), description, gaps };
 }
 
+/**
+ * The gap for "last N years" with fewer 10-Ks. The change default (SPEC §26.3) was not
+ * requested by the user, so its gap says what is missing without "requested".
+ */
+function lastNGap(t: string, take: readonly CatalogFiling[], spec: Extract<PeriodSpec, { kind: 'last_n' }>): string {
+  const labels = take.map((k) => k.fiscalLabel).join(', ');
+  if (spec.changeDefault) {
+    return take.length === 1
+      ? `${t}: only 1 annual report in the corpus (${labels}), so change over time cannot be shown.`
+      : `${t}: only ${take.length} annual reports in the corpus (${labels}), not ${spec.n}.`;
+  }
+  return `${t}: only ${take.length} of the ${spec.n} requested fiscal years ${take.length === 1 ? 'has' : 'have'} an annual report in the corpus (${labels}).`;
+}
+
 export function resolvePeriod(company: CatalogCompany, spec: PeriodSpec, types: readonly FilingTypeFilter[] = []): ResolvedScope {
   const t = company.ticker;
   const ks = tenKs(company);
@@ -278,7 +294,7 @@ export function resolvePeriod(company: CatalogCompany, spec: PeriodSpec, types: 
     }
     case 'last_n': {
       const take = ks.slice(-spec.n);
-      const gaps = take.length < spec.n ? [`${t}: only ${take.length} of the ${spec.n} requested fiscal years have an annual report in the corpus.`] : [];
+      const gaps = take.length < spec.n && take.length ? [lastNGap(t, take, spec)] : [];
       if (!take.length) return finish(t, [], `${t}: no annual report in the corpus.`, [`${t}: no annual report in the corpus.`]);
       const buckets: PeriodBucket[] = onlyQ
         ? take.map((k) => yearBucket(company, k.fiscalYear, types)).filter((b): b is PeriodBucket => b !== null)

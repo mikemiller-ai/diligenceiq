@@ -29,13 +29,20 @@
     "index:measure-load": "tsx scripts/indexing/measure-load.ts",
     "check:bedrock": "tsx scripts/check-bedrock-entitlement.ts",
     "eval:retrieval": "tsx scripts/evaluation/retrieval-eval.ts",
+    "eval:generation:rescore": "tsx scripts/evaluation/generation-rescore.ts",
     "eval:chunk-size": "tsx scripts/evaluation/chunk-size-experiment.ts",
     "retrieval:debug": "tsx scripts/evaluation/retrieval-debug-server.ts",
-    "eval:signals": "tsx scripts/evaluation/signal-eval.ts"
+    "eval:signals": "tsx scripts/evaluation/signal-eval.ts",
+    "prompts:render": "tsx scripts/prompts/render-prompts.ts",
+    "analysis:run": "tsx scripts/analysis/run-analysis.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "3.1144.0",
+    "@aws-sdk/client-cloudformation": "3.1144.0",
+    "@aws-sdk/client-dynamodb": "3.1144.0",
     "@aws-sdk/client-s3": "3.1144.0",
+    "@aws-sdk/client-sqs": "3.1144.0",
+    "@aws-sdk/lib-dynamodb": "3.1144.0",
     "@axe-core/playwright": "4.13.0",
     "@diligenceiq/core": "workspace:*",
     "@diligenceiq/corpus": "workspace:*",

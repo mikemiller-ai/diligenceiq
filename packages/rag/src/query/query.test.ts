@@ -245,6 +245,36 @@ describe.skipIf(!HAVE_CORPUS)('period resolution on the real corpus (C1, C5)', (
     expect(resolve('PEP', 'risks').buckets.map((b) => b.label)).toEqual(['FY2025']);
   });
 
+  it('decision 1: "How has Apple changed?" reads FY2023–FY2025 10-Ks (plus later quarters shown separately)', () => {
+    const a = new QueryAnalyzer(catalog).analyze('How has Apple changed?');
+    const labels = a.scopes[0]!.buckets.map((b) => b.label);
+    expect(labels.slice(0, 3)).toEqual(['FY2023', 'FY2024', 'FY2025']);
+    expect(labels.slice(3).every((l) => /YTD$/.test(l))).toBe(true);
+  });
+
+  it('Phase 4 H4: noun-phrase change words keep the current view on the real corpus', () => {
+    const analyzer = new QueryAnalyzer(catalog);
+    const xom = analyzer.analyze('What does Exxon say about climate change?');
+    expect(xom.period.kind).toBe('current');
+    expect(xom.scopes[0]!.buckets[0]!.label).toBe(catalog.byTicker.get('XOM')!.filings.filter((f) => f.filingType === '10-K').at(-1)!.fiscalLabel);
+    for (const question of ['What change of control provisions does Visa disclose?', 'How does Starbucks staff its shift supervisors?']) {
+      const a = analyzer.analyze(question);
+      expect(a.period.kind).toBe('current');
+      expect(a.gaps).toEqual([]);
+    }
+  });
+
+  it('Phase 4 H4: quarterly scope keeps the current view on the real corpus', () => {
+    const analyzer = new QueryAnalyzer(catalog);
+    const v = analyzer.analyze('How has Visa changed in its latest quarterly report?');
+    expect(v.period.kind).toBe('current');
+    expect(v.gaps.join(' ')).not.toMatch(/annual report/);
+    if (!catalog.byTicker.get('V')!.filings.some((f) => f.filingType === '10-Q')) expect(v.gaps).toContain('V: no quarterly reports in the corpus.');
+    const aapl = analyzer.analyze('What changed in the most recent quarter for Apple?');
+    expect(aapl.period.kind).toBe('current');
+    expect(aapl.scopes[0]!.buckets.filter((b) => /^FY\d{4}$/.test(b.label))).toHaveLength(1);
+  });
+
   it('the expert question resolves AAPL to FY2023, FY2024 and FY2025 10-Ks', () => {
     const r = resolve('AAPL', "How have Apple's regulatory disclosures changed from 2023 through 2025?");
     expect(r.buckets.map((b) => b.label)).toEqual(['FY2023', 'FY2024', 'FY2025']);
@@ -357,10 +387,133 @@ describe('Phase 3 adversary regressions (query analysis)', () => {
       expect(analyzer.analyze('How did Apple revenue change compared to the previous year?').notes.join(' ')).toMatch(/read as the last 2 fiscal years/);
     });
 
-    it('change intent with one period bucket says how to compare', () => {
-      const a = analyzer.analyze('How have Apple and Tesla risk factors changed?');
-      expect(a.changeIntent).toBe(true);
-      expect(a.notes).toContain("AAPL, TSLA: only one period is in scope (FY2025); name years (e.g. 'from 2023 through 2025') to compare across annual reports.");
+    it('change intent with one period bucket says so (named period, and the change default)', () => {
+      const named = analyzer.analyze('How have Apple and Tesla risk factors evolved in FY2025?');
+      expect(named.changeIntent).toBe(true);
+      expect(named.notes).toContain("AAPL, TSLA: only one period is in scope (FY2025); name years (e.g. 'from 2023 through 2025') to compare across annual reports.");
+      // Decision 1: no period named → last 3 annual reports; the synthetic catalog has one each.
+      // Phase 4 L11: the gap says it once, without "requested" (the user requested no period), and no duplicate note.
+      const unnamed = analyzer.analyze('How have Apple and Tesla risk factors changed?');
+      expect(unnamed.gaps).toContain('AAPL: only 1 annual report in the corpus (FY2025), so change over time cannot be shown.');
+      expect(unnamed.gaps.join(' ')).not.toMatch(/requested/);
+      expect(unnamed.notes.join(' ')).not.toMatch(/only one/);
+    });
+  });
+
+  describe('decision 1 (2026-10-02): a change question naming no period reads the last 3 annual reports (SPEC §26.3)', () => {
+    it.each(['How has Visa changed?', "What changed in Apple's risk factors?", 'How has Tesla evolved?', "What are the trends in Nike's margins?", 'How has Microsoft shifted its strategy?'])(
+      '%s → last 3 annual reports, stated',
+      (question) => {
+        const a = analyzer.analyze(question);
+        expect(a.period).toMatchObject({ kind: 'last_n', n: 3, changeDefault: true });
+        expect(a.notes.join(' ')).toMatch(/change question with no period named .* last 3 annual reports/);
+        expect(a.notes.join(' ')).not.toMatch(/current view/);
+      },
+    );
+
+    it.each([
+      ["What does Apple's developer ecosystem look like?", 'current'],
+      ['How has Apple changed since 2022?', 'since'],
+      ['How did Apple change from 2023 through 2025?', 'years'],
+      ['How has Apple changed over the last two years?', 'last_n'],
+      ['What risks does Apple face?', 'current'],
+    ])('%s → %s (a named period or no change wording keeps its own rule)', (question, kind) => {
+      const a = analyzer.analyze(question);
+      expect(a.period.kind).toBe(kind);
+      expect(a.period.kind === 'last_n' && a.period.changeDefault).toBeFalsy();
+    });
+
+    it('a fiscal-year filter overrides the change default', () => {
+      const a = analyzer.analyze('How has Visa changed?', { fiscalYearFrom: 2024, fiscalYearTo: 2025 });
+      expect(a.period.kind).toBe('range');
+    });
+
+    it('an unscoped change question uses the default too (all companies, global lane)', () => {
+      expect(analyzer.analyze('How have risk factors changed across big pharma?').period).toMatchObject({ kind: 'last_n', n: 3 });
+    });
+  });
+
+  describe('Phase 4 H4: the change default needs wording that asks how the subject changed', () => {
+    it.each([
+      'What does Exxon say about climate change?',
+      'What change of control provisions does Visa disclose?',
+      'What change-in-control payments does Visa describe?',
+      'How does Starbucks staff its shift supervisors?',
+      'How does Starbucks schedule night shifts?',
+      'What changes in accounting principles did Apple adopt?',
+      'How do changes in tax law affect Apple?',
+      'What tax law changes does Apple mention?',
+      'What is the history of litigation at Johnson & Johnson?',
+      'Which exchange lists Visa stock?',
+      'How do changes in interest rates affect JPMorgan?',
+      'What has Visa said about the change in interchange fees?',
+      'What does Apple say about the evolving regulatory landscape?',
+      'How does Tesla shift production between factories?',
+    ])('%s → current view', (question) => {
+      const a = analyzer.analyze(question);
+      expect(a.period.kind).toBe('current');
+      expect(a.gaps.join(' ')).not.toMatch(/annual report/);
+    });
+
+    it.each([
+      'How has Visa changed?',
+      'Has Visa’s strategy changed?',
+      "What's changed at Apple?",
+      'What has changed in Nike’s risk factors?',
+      'Did Apple’s margins change?',
+      'How did Microsoft shift its strategy?',
+      'How are Nike’s margins changing?',
+      'How has Exxon’s view of climate change evolved?',
+      'How have Visa’s change of control provisions changed?',
+      'Describe Apple’s gross margin over time.',
+      'What is the trend in Tesla’s deliveries?',
+      'Describe the evolution of Pfizer’s pipeline.',
+      'How do Apple’s risk factors differ across filings?',
+      'How have changes in tax law affected Apple over time?',
+    ])('%s → last 3 annual reports (change default)', (question) => {
+      expect(analyzer.analyze(question).period).toMatchObject({ kind: 'last_n', n: 3, changeDefault: true });
+    });
+
+    it('climate change and shift as nouns do not set change intent either', () => {
+      expect(analyzer.analyze('What does Exxon say about climate change?').changeIntent).toBe(false);
+      expect(analyzer.analyze('How does Starbucks staff its shift supervisors?').changeIntent).toBe(false);
+      expect(analyzer.analyze('What change of control provisions does Visa disclose?').changeIntent).toBe(false);
+    });
+
+    it.each([
+      'How has Visa changed in its latest quarterly report?',
+      'What changed in the most recent quarter for Apple?',
+      'How has Apple changed in its 10-Q filings?',
+      'What changed for Apple this quarter?',
+    ])('%s → quarterly scope keeps the current view', (question) => {
+      const a = analyzer.analyze(question);
+      expect(a.period.kind).toBe('current');
+      expect(a.notes.join(' ')).not.toMatch(/last 3 annual reports/);
+    });
+
+    it('a 10-Q-only filter keeps the quarterly current view and states the true gap', () => {
+      const a = analyzer.analyze('How has Visa changed?', { filingTypes: ['10-Q'] });
+      expect(a.period.kind).toBe('current');
+      expect(a.gaps).toEqual(['V: no quarterly reports in the corpus.']);
+    });
+
+    it('a 10-K-only filter still gets the change default', () => {
+      expect(analyzer.analyze('How has Visa changed?', { filingTypes: ['10-K'] }).period).toMatchObject({ kind: 'last_n', changeDefault: true });
+    });
+  });
+
+  describe('Phase 4 L11: last-N gap grammar', () => {
+    const co = buildCatalog([
+      { documentId: 'K24', ticker: 'AAA', company: 'A', sector: 'X', filingType: '10-K', filingDate: '2025-02-01', periodEnd: '2024-12-31', fiscalYear: 2024, fiscalQuarter: null, fiscalLabel: 'FY2024' },
+      { documentId: 'K25', ticker: 'AAA', company: 'A', sector: 'X', filingType: '10-K', filingDate: '2026-02-01', periodEnd: '2025-12-31', fiscalYear: 2025, fiscalQuarter: null, fiscalLabel: 'FY2025' },
+    ]).byTicker.get('AAA')!;
+    it('a requested period: "has" for one, "have" for more, with the labels', () => {
+      expect(resolvePeriod(co, { kind: 'last_n', n: 3, phrase: '' }).gaps).toEqual(['AAA: only 2 of the 3 requested fiscal years have an annual report in the corpus (FY2024, FY2025).']);
+      const one = buildCatalog([{ documentId: 'K25', ticker: 'BBB', company: 'B', sector: 'X', filingType: '10-K', filingDate: '2026-02-01', periodEnd: '2025-12-31', fiscalYear: 2025, fiscalQuarter: null, fiscalLabel: 'FY2025' }]).byTicker.get('BBB')!;
+      expect(resolvePeriod(one, { kind: 'last_n', n: 2, phrase: '' }).gaps).toEqual(['BBB: only 1 of the 2 requested fiscal years has an annual report in the corpus (FY2025).']);
+    });
+    it('the change default never says "requested"', () => {
+      expect(resolvePeriod(co, { kind: 'last_n', n: 3, phrase: '', changeDefault: true }).gaps).toEqual(['AAA: only 2 annual reports in the corpus (FY2024, FY2025), not 3.']);
     });
   });
 

@@ -89,7 +89,7 @@ packages/corpus/       Header parsing, period/fiscal labels, section detection, 
 packages/rag/          query/ retrieval/ context/ generation/ validation/ signals/ (change detection, DD-18)
                        profile/ (profile context + validation, DD-16) compare/ pipeline.ts
 services/api/          Lambda handlers (api, worker, dlq-handler), DynamoDB repositories, session, observability, local dev server
-infrastructure/cdk/    CoreStack, ApiStack, WebStack (+ CDK assertion tests)
+infrastructure/cdk/    CoreStack, ApiStack, WebStack, WorkerStack (Phase 4: analysis queue, DLQ, worker, dlq-handler) (+ CDK assertion tests)
 scripts/ingestion/     probe-corpus.mjs (exists), corpus → processed filings + chunks
 scripts/indexing/      Chunks → embeddings (cached, resumable) → index artifacts (incl. adjacency, §6.4) → S3; index summary/validation
 scripts/intelligence/  build-profiles.mjs: offline, admin-run Company Intelligence build (DD-16); never deployed
@@ -143,7 +143,7 @@ So every dashboard has a performance view, a cited risk section, drivers, and re
 
 ## 4. Request flows
 
-### 4.1 Run an analysis *(planned: Phases 3–5)*
+### 4.1 Run an analysis *(worker built in Phase 4; the api routes, sessions and caps in Phase 5)*
 
 ```text
 Browser                         api Lambda                         SQS        worker Lambda                     Bedrock
@@ -154,17 +154,24 @@ Browser                         api Lambda                         SQS        wo
   │                              send message ─────────────────────▶ │
   │ ◀── 202 {analysisId}         (send fails → mark FAILED ENQUEUE_FAILED, 503 + requestId)
   │                                                                 └──▶ claim (QUEUED→RUNNING + claimToken, conditional)
-  │ GET /api/analyses/:id (poll ~1.5 s)                                  stage=analyzing   query analysis
+  │ GET /api/analyses/:id (poll ~1.5 s)                                  stage=analyzing   query analysis + lane plan
   │ ◀── {status, stage}  (past deadlineAt → lazily mark FAILED)          stage=retrieving  embed query ───────▶ embed (retrieval)
-  │                                                                      stage=balancing   lanes + RRF
-  │                                                                      stage=context     context builder
+  │                                                                                        + hybrid search per lane (RRF)
+  │                                                                      stage=balancing   context builder: lane quotas, caps, dedupe, budget
+  │                                                                      stage=context     lane report + scope + user message
   │                                                                      stage=generating  persist generationStartedAt,
   │                                                                                        ONE request ───────▶ Claude (generation)
   │                                                                      stage=validating  schema/citations/numbers
   │ ◀── {status: COMPLETE, brief, interpretation, coverage, telemetry}   persist (conditional on claimToken)
 ```
 
-The stages shown in the UI are the stages the worker actually writes. There is no fake progress. Cold-start index loading happens inside the async job and shows as the first stage; its duration is measured in Phase 2. A user-triggered prewarm is a documented future option, not part of v1.
+The stages shown in the UI are the stages the worker actually writes (Phase 4): `claimed`, `loading_index` (cold start only), `analyzing`, `retrieving`, `balancing`, `context`, `generating`, `validating`, then `complete` or `failed`. There is no fake progress. Each stage is written when its work starts (`packages/rag/src/retrieval/retrieve.ts`; SPEC §38.1):
+- `analyzing` ("Interpreting the question…"): deterministic query analysis and the company × period lane plan. The plan is part of reading the question: it decides which filings each lane may search, so it must precede the search.
+- `retrieving` ("Searching SEC filings…"): the one query embedding (10 s timeout, BM25 fallback) and the filtered hybrid search of every lane.
+- `balancing` ("Balancing evidence across companies and periods…"): the context builder fills each lane's quota (companies before periods), applies per-company caps, removes near-duplicates and keeps the token budget.
+- `context` ("Preparing source context…"): the lane report and snapshot, then the scope description and user message with the `<filing_excerpts>` block.
+
+The deterministic steps take milliseconds; the embedding and the generation dominate, so `retrieving` and `generating` are the stages a user actually sees for long. Cold-start index loading happens inside the async job and shows as the first stage; its duration is measured in Phase 2. A user-triggered prewarm is a documented future option, not part of v1.
 
 ### 4.2 Everything else at runtime is deterministic and LLM-free
 
@@ -180,7 +187,7 @@ All of the following run as plain api-Lambda reads and writes against DynamoDB a
 - the Sources explorer;
 - reset.
 
-### 4.3 Job lifecycle and stuck-job handling *(planned: Phase 4)*
+### 4.3 Job lifecycle and stuck-job handling *(built in Phase 4: `services/api/src/analyses/store.ts`, `worker.ts`, `dlq-handler.ts`)*
 
 `QUEUED → RUNNING → COMPLETE | FAILED`. Every transition is a DynamoDB conditional write, so concurrent writers (worker, poll, DLQ handler) cannot overwrite each other.
 
@@ -192,8 +199,15 @@ All of the following run as plain api-Lambda reads and writes against DynamoDB a
 | Worker dies mid-job (crash, timeout) | Next poll after `deadlineAt` | `RUNNING` → `FAILED`: `GENERATION_TIMEOUT` if `generationStartedAt` is set, otherwise `PIPELINE_TIMEOUT`. |
 | Message redelivered (visibility timeout expired, duplicate delivery) | Worker | Claim fails because the analysis is not QUEUED, or is past `deadlineAt` (the 1080 s visibility timeout always exceeds the 240 s deadline) → acknowledge, no work. Redelivery is never a recovery path; see DD-04. |
 | Invoke throttled before the claim (account concurrency limit 10, shared) | Next poll after `deadlineAt` | `QUEUED` → `FAILED` (`QUEUE_TIMEOUT`). No silent retry. The user re-runs, which creates a new analysis. |
-| Worker fails before claiming, 3 times | SQS → DLQ → dlq-handler Lambda | Analysis marked `FAILED` (`WORKER_FAILED`) if still QUEUED/RUNNING. Event-driven, not scheduled. |
+| Worker fails before claiming, 3 times | SQS → DLQ → dlq-handler Lambda | Analysis marked `FAILED` (`WORKER_FAILED`) if still QUEUED/RUNNING. Event-driven, not scheduled. In practice the poll got there first (see below). |
+| Kill switch unreadable in the worker (SSM error) | Worker | The QUEUED job is failed at once as `WORKER_FAILED` ("The analysis could not be started. Run it again."), with no claim and no spend. It is not reported as "paused" (`ANALYSES_DISABLED` is only for an explicit "off"), and it is not thrown for a redelivery, which would arrive after the deadline and surface only as `QUEUE_TIMEOUT`. The api keeps failing closed on a read error. |
+| Generation-start write fails (not a lost claim) | Worker | The model is **not** called. A `ClaimLostError` means the claim was lost: nothing is written. Any other error (a throttled or failed DynamoDB write) fails the job `WORKER_FAILED`, with the detail "the model was not called". If that write actually landed and only its response was lost, the record keeps `generationStartedAt` and `generationCallCount = 1` (persisted before the call, so an upper bound), while `telemetry.generationCallCount` is 0: the gateway never handed the request to the client. |
+| Context snapshot write fails after `complete` | Worker | The analysis stays `COMPLETE`. The snapshot is written only after the conditional `complete` succeeds (so a lost claim leaves no orphan snapshot), retried once, then logged (`context_snapshot_missing`; the summary carries `contextStored: false`). A missing `CONTEXT#` item means "snapshot unavailable"; the cited passages are still in `citations[]`. |
 | Worker finishes after the record was marked FAILED | Worker | Final write is conditional on `status = RUNNING AND claimToken = mine`, so it is rejected; the outcome is logged. |
+
+**Phase 4 implementation.** Every transition above is a conditional write in `DynamoAnalysisStore` (a `MemoryAnalysisStore` with the same conditions backs the tests). The worker claims before any fallible work; only a failure of the claim write itself throws (SQS redelivers, at most 3 times, then the DLQ handler). Before generation it checks that the time left (the earlier of `deadlineAt` and the Lambda's remaining time, less 5 s) covers the 120 s generation budget plus a 10 s finish margin; the request is aborted at 120 s (`GENERATION_TIMEOUT`). A failing query embedding falls back to BM25-only retrieval, stated in the Interpretation panel (assumptions A1). `expireIfPastDeadline` is the poll path's lazy expiry; Phase 5 wires it into `GET /api/analyses/:id`.
+
+**Redelivery and the DLQ in practice.** With a 1080 s visibility timeout, every SQS redelivery arrives after the 240 s `deadlineAt`, so a redelivered message can never be claimed. A worker that throws before its claim is therefore not "retried" in any useful sense: the next poll after `deadlineAt` marks the job `QUEUE_TIMEOUT` (or, once claimed, `PIPELINE_TIMEOUT` / `GENERATION_TIMEOUT`). The DLQ handler only records poison messages whose claim write itself failed three times, and usually finds the analysis already FAILED. **The poll's lazy expiry is the real recovery path.**
 
 `generationStartedAt` and `generationCallCount = 1` are persisted **immediately before** the Bedrock call. If the worker crashes after that write, the record honestly shows that a generation was attempted. `generationCallCount` is 0 for jobs that failed before generation and never exceeds 1.
 
@@ -225,7 +239,7 @@ At runtime the api Lambda reads the active set named by the SSM parameter `/dili
 
 ---
 
-## 5. Single-call guarantee (defense in depth) *(planned: Phase 4)*
+## 5. Single-call guarantee (defense in depth) *(built in Phase 4)*
 
 Assessment rule: the final answer comes from **exactly one generative LLM API request** per analysis. Query embedding (and, if ever enabled, reranking) is retrieval, not generation. Both are non-generative model calls and are documented and counted separately.
 
@@ -241,11 +255,17 @@ Assessment rule: the final answer comes from **exactly one generative LLM API re
 
 A failed generation becomes a clear error state with a request ID. Re-running is an explicit user action that creates a **new** analysis.
 
+**Phase 4 implementation.** `GenerationGateway` (`packages/rag/src/generation/gateway.ts`) takes its one call from the budget before `beforeCall` runs, so two concurrent calls can never both reach the client; `beforeCall` persists the start and, if it fails (claim lost), the model is never called. `BedrockGenerationClient` sends one `ConverseStream` request on a runtime built with `maxAttempts: 1`. The worker logs one `analysis_summary` event per analysis; a CloudWatch metric filter counts events with `generationCallCount > 1` and an alarm fires on any (its notification target arrives with the Phase 8 alerts). Tests: `packages/rag/src/generation/generation.test.ts` (gateway, client, pipeline paths) and `services/api/src/analyses/worker.test.ts` (success, Bedrock error, malformed output, concurrent duplicate delivery, redelivery after a claim and after a crash mid-generation, late delivery, kill switch, index failure, no evidence, lost claim; a constructor spy sees only `purpose: 'analysis'`); `infrastructure/cdk/test/stacks.test.ts` checks the queue settings, the IAM scope and that no bundle carries the profile builder.
+
+**Abort and the "write nothing" rule.** The request is aborted at the 120 s budget. `BedrockGenerationClient` stops reading the stream on the abort and throws `AbortError`; and if any client returns after the abort (a stream that ends cleanly instead of throwing), the pipeline still treats it as `GENERATION_TIMEOUT` and discards the output, so a cut-off brief is never validated as `MALFORMED_OUTPUT`. Only a lost claim (`ClaimLostError`, matched with `instanceof` by the worker) makes the pipeline return `CLAIM_LOST`; any other `beforeCall` failure is a `WORKER_FAILED` job with no model call (§4.3).
+
+**Idle cost of the worker plane.** Nothing runs on a schedule, but the two SQS event source mappings (the work queue and the DLQ) long-poll continuously. Those are billed SQS requests, at most a few cents a month (often inside the SQS free tier), and with the ~$0.10/month CloudWatch alarm on `generationCallCount > 1` they are the worker plane's whole idle cost (§13.1).
+
 **Scope.** This guarantee covers every live analysis. The offline profile build (§4.4) is a separate, admin-run plane with its own one-call-per-profile rule. It uses the same `GenerationGateway` class with `purpose: 'profile'`, `maxAttempts: 1`, and per-profile call counts in the build manifest. The worker only ever constructs a gateway with `purpose: 'analysis'` (a unit test spies on the gateway constructor across the worker handler's paths), and a bundle test asserts that no deployed bundle includes `scripts/intelligence`, `packages/rag/profile`'s prompt builder, or `prompts/company-intelligence-prompt.md`.
 
 ---
 
-## 6. RAG design *(§6.1–6.4 built in Phase 2; §6.5–6.7 built in Phase 3; §6.8–6.9 planned: Phase 4)*
+## 6. RAG design *(§6.1–6.4 built in Phase 2; §6.5–6.7 built in Phase 3; §6.8–6.9 built in Phase 4)*
 
 ### 6.1 Ingestion (offline, admin-run)
 1. **Parse the header block.** Apply the metadata override table for known anomalies (e.g. `GE_10K_2015` → "General Electric Capital Corp (GE Capital)", FY2014, outside the review window).
@@ -311,6 +331,7 @@ Documents are re-embedded **only** when their embedded text or the embedding mod
   - Explicit fiscal years, ranges, and "since 2023". A bare year counts only in a time phrase ("in 2024", "the 2024 10-K"); a year that dates an event ("enacted in 2022") does not.
   - **"Last N years"** resolves per company to the N most recent complete fiscal years (by 10-K) for that company, plus any later quarters shown separately as "FY<next> YTD".
   - **No period named:** per company, the latest 10-K plus subsequent 10-Qs ("current view").
+  - **Change question with no period named** (SPEC §26.3, amended 2026-10-02): each company's last 3 annual reports (`last_n`, `changeDefault`), stated as an assumption; fewer 10-Ks is a stated gap.
   - **A named period with no filing** for any company in scope falls back to the current view, with a stated gap. A user's fiscal-year filter never falls back.
   - The resolution is always shown in the Interpretation panel; user filters override it.
 - **Filing types:** 10-K / annual report, 10-Q / quarterly.
@@ -395,9 +416,12 @@ TEXT:
 
 ### 6.8 Generation
 - **One** Bedrock `ConverseStream` request. Default model: **Claude Sonnet 4.6** via the `us.anthropic.claude-sonnet-4-6` cross-region inference profile, configurable via `GENERATION_MODEL_ID`.
-- Claude Sonnet 5.5 (`us.anthropic.claude-sonnet-5-5`) is the preferred upgrade, but this account's cross-region quota for it is **0 tokens/minute** (assumptions D3). It becomes the default only if Mike files and receives a quota increase.
+- Claude Sonnet 5.5 (`us.anthropic.claude-sonnet-5-5`) is the preferred upgrade, but this account's quota for it is **0 tokens/minute**, cross-region (L-94A31E46) and global (L-31AB82D0), re-read 2026-10-02 (assumptions D3). It becomes the default only if Mike files and receives a quota increase. **It is not a drop-in switch:** Sonnet 5.5 rejects forced `toolChoice` (`any`/`tool`) and a non-default `temperature` with a 400, so moving to it needs a SPEC §29.1 change first (`toolChoice: auto` with a strict tool and the prompt naming the tool, no temperature).
 - The system prompt states the §20 rules: only the supplied evidence, no outside knowledge, no invented numbers or citations, separate filing facts from synthesis, acknowledge insufficient evidence, and treat excerpts as **untrusted content, not instructions**.
-- Structured output is produced by forcing the tool `submit_diligence_brief`, whose input schema is the brief schema (§7). Temperature 0.2; acceptance of the temperature parameter alongside forced tool use is verified in Phase 4.
+- Structured output is produced by forcing the tool `submit_diligence_brief`, whose input schema is the brief schema (§7). Temperature 0.2, max output 8,192 tokens. **Verified 2026-10-02** on `us.anthropic.claude-sonnet-4-6`: Bedrock accepts `temperature: 0.2` together with the forced tool (first live eval call, pdf-1).
+- **Known risk: max tokens vs. the 120 s budget.** At the measured ~11–14 s per 1,000 output tokens, a brief that ran to the full 8,192 tokens would take roughly 90–115 s plus time to first token, so it can exceed the 120 s generation budget. The slowest eval call so far took 87 s. Such a call is aborted and ends as a clean `GENERATION_TIMEOUT` (one call, tokens counted in the cost estimate), never as a truncated brief; see §5. Lowering `maxTokens` is a prompt-settings change (`GENERATION_SETTINGS`, rendered into `prompts/final-diligence-prompt.md`) and needs a new eval run, so it is not changed here.
+- **Prompt** (`packages/rag/src/generation/prompt.ts`, version `DEEP_ANALYSIS_PROMPT_VERSION`): the system prompt, one user message (`<question>` with the question defanged, `<retrieval_scope>` with the deterministic Interpretation, then the `<filing_excerpts>` block), and the tool. `prompts/final-diligence-prompt.md` is rendered from it (`pnpm prompts:render`) and a test asserts they match.
+- **Pipeline** (`packages/rag/src/generation/pipeline.ts`, `runDeepAnalysis`): retrieval with real stage callbacks → no context means `NO_RELEVANT_EVIDENCE` with no call → the time check → the one gateway call → repair and validation → interpretation, coverage, server-built `citations[]` and telemetry with an estimated cost from a pricing table.
 - **The offline profile prompt** (`prompts/company-intelligence-prompt.md`, tool `submit_company_profile`, §7.1) uses the same model, the same rules and the same untrusted-content framing. It adds three rules:
   - explain only the supplied signals;
   - state no currency or percentage figure that is not in the supplied FACTS block;
@@ -410,6 +434,18 @@ TEXT:
 - **Citation validation:** every ID must be in the context set. Invalid IDs are removed and flagged, and the failure is logged and counted.
 - **Uncited claims:** findings without valid citations are flagged.
 - **Numeric grounding:** every currency or percentage figure must appear in at least one of its cited chunks. Otherwise it gets an "unverified figure" badge.
+- **Phase 4 implementation** (`packages/rag/src/generation/validate.ts`):
+  - **Repair** handles a stringified tool input or field, a comma-separated ID list, a missing array, a null comparison and enum case slips. When every comparison row has exactly one value fewer than there are columns (the model put the row-label header into `columns`), repair drops that leading column. Each repair is recorded. Truncated JSON is never guessed.
+  - **Comparison alignment:** after repair, rows whose value count differs from the column count are listed in `validation.comparisonMisaligned`, with a notice. The table is kept.
+  - **Figure rules:** a figure is a currency amount or a percentage in model-written text. Passage numbers are read with what is printed around them: a "$" before (also the flattened cell "$ | 47,405" and a negative "(69,691)"), a scale word after, "%" (also in the next cell, "215 | %"), and whether they sit in a "|" table cell. A year ("Fiscal 2024"), a day after a month ("December 31") and a reference number ("Item 5", "Note 7") are never candidates. A passage's unit is "in billions / millions / thousands" anywhere in it.
+    - *Percentage:* the same value printed as a percentage (`exact`).
+    - *Currency with no scale word* ("$6.11"): the same value after a "$", or in a table cell of a passage that prints a "$", with no scale word (`exact`). It is refused at 1,000 or more when the passage states a unit, because the unit was dropped.
+    - *Currency with a scale word* ("$25.0 billion"): the same value with the same scale word (`exact`). Or the exactly equal amount under another scale word, "$72,220 million" for "$72.22 billion" (`scaled`). Or, in a passage that states its unit, a "$" amount or table cell equal to the figure in that unit, or rounding to it at the figure's own precision when the figure is in a coarser unit and has at least 3 significant digits as printed: "$416.2 billion" for 416,161 in millions, never "$1 billion" for 1,234 (`scaled`). Precision is read from the printed text: "5.0" is not "5". Rounding under the same scale word ("$295B" for "$295.49 billion") is not accepted.
+    - *Comparison cells* take the unit their row label or column header states ("Total Revenue ($M)"): "$134,902" in that row is checked as $134,902 million.
+    - *Near match* (`unit_unstated`): a scaled figure whose printed digits equal a table cell in a passage that states no unit, typically a table whose "(in millions)" header is in another chunk. It is reported, counted separately, and **not verified**.
+  - **Scope:** an item's figures are checked against that item's own valid citations. The title, summary and evidence gaps are checked against every passage some item cites, because they summarize the items. Follow-up questions are not checked.
+  - **What it does not prove:** a verified figure means a number with these digits and this unit is printed in a cited passage, not that it means what the sentence says. A computed "about 2%" can still verify against an unrelated "2%" in the same passage, and a figure can verify against the wrong row of a table. This is a deterministic check against invented, converted and rescaled numbers, not semantic grounding.
+  - **Validation block:** removed citations, uncited items, misaligned comparison rows, every figure with its rule and chunk, and plain-language notices for the brief.
 
 ---
 

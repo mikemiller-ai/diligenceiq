@@ -11,6 +11,20 @@ export interface KillSwitch {
 }
 
 /**
+ * What a read of the switch found. `enabled` is the fail-closed answer the api uses; `source`
+ * lets the worker tell an explicit "off" from a read that failed (DD-14).
+ */
+export interface KillSwitchState {
+  enabled: boolean;
+  /** 'parameter': the value was read; 'unconfigured': no parameter name; 'read_failed': SSM errored. */
+  source: 'parameter' | 'unconfigured' | 'read_failed';
+}
+
+export interface KillSwitchReader extends KillSwitch {
+  read(requestId: string): Promise<KillSwitchState>;
+}
+
+/**
  * Reads `/diligenceiq/analyses-enabled` (architecture §11). Only the exact string "true"
  * enables analyses; anything else, a missing parameter name, or an SSM error reads as off.
  * Successful reads are cached per warm container. Failures are not cached, so the switch
@@ -21,30 +35,35 @@ export function createKillSwitch(opts: {
   parameterName: string | undefined;
   now?: () => number;
   ttlMs?: number;
-}): KillSwitch {
+}): KillSwitchReader {
   const now = opts.now ?? Date.now;
   const ttlMs = opts.ttlMs ?? KILL_SWITCH_CACHE_MS;
   let cached: { value: boolean; expiresAt: number } | undefined;
 
+  const read = async (requestId: string): Promise<KillSwitchState> => {
+    if (cached && now() < cached.expiresAt) return { enabled: cached.value, source: 'parameter' };
+    if (!opts.parameterName) {
+      log('warn', 'kill switch parameter name not configured; failing closed', { requestId });
+      return { enabled: false, source: 'unconfigured' };
+    }
+    try {
+      const out = await opts.ssm.send(new GetParameterCommand({ Name: opts.parameterName }));
+      const value = out.Parameter?.Value?.trim() === 'true';
+      cached = { value, expiresAt: now() + ttlMs };
+      return { enabled: value, source: 'parameter' };
+    } catch (err) {
+      log('warn', 'kill switch read failed; failing closed', {
+        requestId,
+        errorName: err instanceof Error ? err.name : 'Unknown',
+      });
+      return { enabled: false, source: 'read_failed' };
+    }
+  };
+
   return {
+    read,
     async analysesEnabled(requestId) {
-      if (cached && now() < cached.expiresAt) return cached.value;
-      if (!opts.parameterName) {
-        log('warn', 'kill switch parameter name not configured; failing closed', { requestId });
-        return false;
-      }
-      try {
-        const out = await opts.ssm.send(new GetParameterCommand({ Name: opts.parameterName }));
-        const value = out.Parameter?.Value?.trim() === 'true';
-        cached = { value, expiresAt: now() + ttlMs };
-        return value;
-      } catch (err) {
-        log('warn', 'kill switch read failed; failing closed', {
-          requestId,
-          errorName: err instanceof Error ? err.name : 'Unknown',
-        });
-        return false;
-      }
+      return (await read(requestId)).enabled;
     },
   };
 }

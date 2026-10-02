@@ -72,6 +72,8 @@ const required = {
   ],
   'STATE.md': [],
   'README.md': ['[SPEC.md](SPEC.md) (v2) is the sole canonical implementation specification', '(SPEC §35.7)', 'docs/archive/'],
+  // Phase 4: the prompt log (SPEC §42) with both prompt sections.
+  'docs/prompt-iterations.md': ['## Deep Analysis prompt (`promptVersion`)', '### da-v1 (2026-10-02)', '## Company Intelligence profile prompt (`profilePromptVersion`)'],
   'docs/architecture.md': [
     '## 13. Cost and Scaling Strategy',
     '## 5. Single-call guarantee',

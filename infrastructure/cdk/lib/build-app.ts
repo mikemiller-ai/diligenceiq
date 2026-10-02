@@ -3,6 +3,7 @@ import { ApiStack } from './api-stack';
 import { CONFIG, TAGS } from './config';
 import { CoreStack } from './core-stack';
 import { WebStack } from './web-stack';
+import { WorkerStack } from './worker-stack';
 
 /** Adds every stack to `app`. Shared by bin/app.ts and the assertion tests. */
 export function buildApp(app: App) {
@@ -22,5 +23,12 @@ export function buildApp(app: App) {
     stackName: CONFIG.stackNames.web,
     apiEndpoint: api.apiEndpoint,
   });
-  return { core, api, web };
+  const worker = new WorkerStack(app, CONFIG.stackNames.worker, {
+    ...common,
+    stackName: CONFIG.stackNames.worker,
+    table: core.table,
+    dataBucket: core.dataBucket,
+    killSwitch: core.killSwitch,
+  });
+  return { core, api, web, worker };
 }

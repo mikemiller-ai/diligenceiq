@@ -3,37 +3,65 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `ba161bb` (Phase 3). Previous: `13b6ee9` (Phase 2).
+`main` (no remote yet). Last code commit: `ba161bb` (Phase 3). Phase 4 is **staged for commit, awaiting Mike's go-ahead** (see `git log` for the hash once committed).
 
 ## Current phase
-**Phase 3 is complete, gated and committed (`ba161bb`): query analysis, hybrid retrieval, context builder, retrieval debug endpoint, retrieval evals, signal go/no-go.** Nothing new is deployed. Handoff: `docs/handoffs/phase-03.md`. Eval write-up: `docs/evaluation.md`.
-- The live site https://diligenceiq.mikemiller.ai still serves the Phase 1 build.
-- Index `iv-9cf51c066743` is in S3 (verified 2026-10-01, read-only) and locally in `.index/build/` (gitignored); details in `docs/handoffs/phase-02.md`.
-- **Retrieval** (20 questions, `pnpm eval:retrieval`): hybrid passes 19/20, evidence hit rate 0.99, gold recall@context 0.62 (40/74), search ~26 ms p50 plus one Titan query embedding. BM25 alone passes 16/20.
-- **Decisions:** chunker c2 kept (cost and context diversity, not a measured win); Titan v2 kept (Cohere not evaluated); rerank off.
-- **Signal go/no-go** (`DETECTOR_STATUS`, `packages/rag/src/signals/status.ts`): PERSISTENT (0.90 / 0.89) and TREND CHANGE (1.00 / 1.00) enabled; NEW, heading REDUCED, emphasis EXPANDED/REDUCED and OUTLOOK CHANGE suppressed.
-- Spend this phase: 20 Titan query embeddings, about $0.000007.
+**Phase 4 is complete and gated (`pnpm gate` exit 0, 2026-10-02): the one-call generation pipeline, deterministic validation, the SQS worker plane, and generation evals.** Handoff: `docs/handoffs/phase-04.md`. Evals: `docs/evaluation.md` §4–5. Prompt log: `docs/prompt-iterations.md`.
+- **Decision 1 settled:** a change question that names no period reads each company's last 3 annual reports (SPEC §26.3, Appendix A.4).
+- **Shipped prompt `da-v3`**, on Sonnet 4.6. Temperature 0.2 with the forced tool is verified.
+  - 20 eval questions: 14/20 pass every check; 1 generation call per question.
+  - Citation validity 1.00; numeric grounding 0.922 (498/540, strict validator) plus 35 unverified "unit_unstated" near matches.
+  - Abstention 1/2, follow-ups answerable 0/2 (the da-v4 candidate), injection 1/1, coverage 17/17.
+- **In-region:** cold index load 2.75 s; generation 41–59 s (first token ~1.1 s); enqueue → COMPLETE 42–64 s; ~$0.12–0.13 per analysis.
+- **Deployed:**
+  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm). It was last deployed with da-v3 **before** the adversary, fixer and code-review fixes, so redeploy before relying on it.
+  - The live site still serves Phase 1. The api still answers `ANALYSES_DISABLED`. The kill switch is `false` (verified).
+- **Spend this phase (approved):** Bedrock ≈ $7.06 estimated: generation evals $6.69, plus 3 in-region analyses ≈ $0.37.
 
 ## Gate
 `pnpm gate` run on 2026-10-02 against the working tree: **exit 0**.
-- check-docs OK (13 files); lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 30, cdk 35, api 26, corpus 102, rag 217, web 91 (501).
+- check-docs OK (14 files); lint and typecheck clean.
+- Unit tests with `REQUIRE_CORPUS=1`: core 30, cdk 42, corpus 102, web 91, rag 335, api 56 (656).
 - `cdk:synth` and `build` succeeded; **e2e 31 passed**.
 
-Gate record for the phase: adversary (1 blocker, 6 high, 6 medium, 5 low) → three fresh fixers (all fixed except the SPEC-level part of H3, which is pending decision 1 below) → `/code-review` medium (2 findings, fixed) → `pnpm gate` green.
+Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fixers (all fixed except M2, which needs a paid prompt run) → `/code-review` medium (2 lows, fixed) → `pnpm gate` green.
 
 ## In flight
-- Nothing running.
-- Next is **Phase 4**: Deep Analysis prompt, `GenerationGateway`, validation, SQS worker using `Retriever`, generation evals.
+- Nothing running. Phase 4 commit awaits Mike's go-ahead.
+- Next: Phase 4b (offline profiles; ask Eliza about F4 first) or Phase 5 (sessions, caps, `POST /api/analyses` enqueue, poll with `expireIfPastDeadline`, Deep Analysis UI).
 
 ## Decisions pending with Mike
-- **Change questions with no period named** (SPEC §26.3 current view, versus the last 2–3 annual reports). Recommended: amend the SPEC at the start of Phase 4.
-- **PERSISTENT go on its stated basis:** 22/77 links unlabeled; fully labeled chains 5/7; recall over all persistent headings 0.36. Recommended: keep it.
-- **Ask Eliza** about the offline profile generation (F4), before Phase 4b. The rerank question (F1) is reopened; ask only if the Phase 4 evals show a need.
+- **da-v4 prompt run (~$2.25):**
+  - Follow-ups must not target out-of-corpus companies or missing periods, nor use outside knowledge (Ford "Model e").
+  - The Apple 2015 brief must not claim things about a filing it never saw.
+  - Optional: a validator look-up of a table's unit header in the adjacent chunk, which would verify the 35 near matches.
+- **Redeploy `DiligenceIQ-Worker`** with the post-review code.
+- **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
+- **Ask Eliza** about F4 (before Phase 4b). F1 (rerank): the Phase 4 evals show no need.
 - **Lambda concurrency quota increase:** recommended before the demo (the account limit is 10, shared).
-- **Sonnet 5.5 quota increase:** optional (L-94A31E46). The app ships on Sonnet 4.6 otherwise.
+- **Sonnet 5.5:** still 0 quota (L-94A31E46, L-31AB82D0). Switching needs a SPEC §29.1 change first.
 
 ## Known traps
+- **Sonnet 5.5 is not a drop-in model switch.** It rejects forced `toolChoice` (`any`/`tool`) and a non-default `temperature` with a 400. Moving to it needs a SPEC §29.1 change (`toolChoice: auto` with a strict tool), a prompt version bump and a paid eval run.
+- **The AWS CLI default region on this machine is us-east-2.** Pass `--region us-east-1` to `aws` commands. The scripts default `AWS_REGION` to us-east-1 themselves.
+- **Generation eval spend:**
+  - `pnpm eval:retrieval --generate` replays the recordings in `.index/cache/generations/<promptVersion>/` (keyed by the exact request; gitignored) for free.
+  - `--live` calls Bedrock for unrecorded requests: about $0.11 each, about $2.25 per 20 questions. Ask first.
+  - A failed live call is recorded too, so replay never spends again.
+  - Any prompt or context change is a new key.
+- **`--generate` writes only the generation results.** Only the full default three-mode `pnpm eval:retrieval` run may rewrite `evals/results/retrieval-<iv>.*`; a Phase 4 run once overwrote it. `pnpm eval:generation:rescore` re-validates stored briefs after a validator change (free).
+- **Numeric grounding is strict on purpose** (architecture §6.9).
+  - A scaled figure needs the same scale word, an exactly equal amount, or a passage that states its unit.
+  - Digits in a table cell whose unit header sits in another chunk are a `unit_unstated` near match: reported, never verified.
+  - Do not loosen a rule to raise the eval score. Phase 4's first, looser rules overstated grounding (0.985 → 0.922).
+- **Prompt changes:**
+  - Edit `packages/rag/src/generation/prompt.ts`, bump `DEEP_ANALYSIS_PROMPT_VERSION`, and copy the old `prompts/final-diligence-prompt.md` to `prompts/versions/<old>.md` first.
+  - Run `pnpm prompts:render` (a test fails until the file matches).
+  - Log a real entry in `docs/prompt-iterations.md`.
+- **The worker's kill switch:** `false` fails QUEUED jobs as `ANALYSES_DISABLED`; an unreadable SSM value fails them as `WORKER_FAILED`. To measure in-region, set `/diligenceiq/analyses-enabled` to `true`, run `pnpm analysis:run`, then set it back to `false`. Ask first: it is an AWS write plus Bedrock spend.
+- **Redelivery is never recovery.** The 1080 s visibility timeout outlasts the 240 s deadline, so the poll's `expireIfPastDeadline` is the real recovery path. The DLQ only records messages whose claim write itself failed three times.
+- **`MemoryAnalysisStore` mirrors `DynamoAnalysisStore`'s condition expressions** and backs the worker tests. Change both together.
+- **The worker bundles its pinned AWS SDK** (`externalModules: []`), not the Lambda runtime's.
 - **Bare years are not periods** (Phase 3). A year counts only in a time phrase ("in 2024", "FY2024", "2024 10-K", "from … through …", "for 2023-2025"). "Apple risks 2024" stays in the current view, with a "Not read as a period" note. A requested period missing for every company falls back to the current view, with gaps. A UI fiscal-year filter never falls back.
 - **Query embeddings are cached** in `.index/cache/query-embeddings-*.jsonl`. `pnpm eval:retrieval` and `pnpm retrieval:debug` are cache-only unless `--embed` (Titan spend: ask first). A new or reworded eval question shows as "not embedded" until embedded.
 - **Signal detectors are suppressed by default.** `detectCompanySignals` filters on `DETECTOR_STATUS`; only `pnpm eval:signals` passes `includeSuppressed`. A corpus-backed gate test fails if an enabled detector drops below the bar, or a suppressed one starts passing (then revisit the decision).

@@ -82,3 +82,24 @@ describe('kill switch', () => {
     expect(send).not.toHaveBeenCalled();
   });
 });
+
+describe('kill switch read state (the worker tells "off" from "unreadable")', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('reports where the answer came from', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const on = createKillSwitch({ ssm: stubSsm(async () => ({ Parameter: { Value: 'true' } })).ssm, parameterName: PARAM });
+    expect(await on.read('r')).toEqual({ enabled: true, source: 'parameter' });
+
+    const off = createKillSwitch({ ssm: stubSsm(async () => ({ Parameter: { Value: 'false' } })).ssm, parameterName: PARAM });
+    expect(await off.read('r')).toEqual({ enabled: false, source: 'parameter' });
+
+    const broken = createKillSwitch({ ssm: stubSsm(async () => Promise.reject(new Error('timeout'))).ssm, parameterName: PARAM });
+    expect(await broken.read('r')).toEqual({ enabled: false, source: 'read_failed' });
+    // The api's fail-closed answer is unchanged.
+    expect(await broken.analysesEnabled('r')).toBe(false);
+
+    const unset = createKillSwitch({ ssm: stubSsm(async () => ({ Parameter: { Value: 'true' } })).ssm, parameterName: undefined });
+    expect(await unset.read('r')).toEqual({ enabled: false, source: 'unconfigured' });
+  });
+});

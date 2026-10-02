@@ -249,14 +249,72 @@ export const RetrievalDebugRequestSchema = z
   );
 export type RetrievalDebugRequest = z.infer<typeof RetrievalDebugRequestSchema>;
 
-/** Resolved scope shown above a brief (server-computed; architecture §7). */
+/** Resolved scope shown above a brief (server-computed; architecture §7; the Interpretation panel). */
 export interface AnalysisInterpretation {
   companies: string[];
   periods: string[];
   filingTypes: FilingType[];
   coverageWarnings: string[];
+  /** Phase 4 worker additions: how each company's period was resolved, sectors, notes and the plan strategy. */
+  scopes?: Array<{ ticker: string; company: string; via: string; periods: string[]; description: string }>;
+  sectors?: Array<{ phrase: string; tickers: string[] }>;
+  periodRule?: { kind: string; phrase?: string; assumption?: string };
+  notes?: string[];
+  strategy?: string;
+  /** Set when query embedding failed and retrieval fell back to BM25 only (assumptions A1). */
+  retrievalMode?: 'hybrid' | 'bm25';
 }
 
+/** Deterministic validation of one brief (SPEC §31; architecture §6.9). Never a second model call. */
+export const BriefValidationSchema = z.object({
+  /** Deterministic repairs applied before the schema parse (empty when none were needed). */
+  repairs: z.array(z.string()),
+  citations: z.object({
+    /** Citation IDs the model returned (with duplicates inside one item removed). */
+    returned: z.number().int().nonnegative(),
+    valid: z.number().int().nonnegative(),
+    /** Removed: not among the chunks supplied in the context. */
+    removed: z.array(z.object({ location: z.string(), id: z.string() })),
+    /** valid / returned before removal (1 when nothing was cited). */
+    preValidationRate: z.number(),
+  }),
+  /** Items left with no valid citation (findings, comparison rows, considerations). */
+  uncited: z.array(z.string()),
+  numeric: z.object({
+    figures: z.array(
+      z.object({
+        location: z.string(),
+        figure: z.string(),
+        verified: z.boolean(),
+        /**
+         * How it matched a cited passage (packages/rag validate.ts matchFigure): `exact` (same value and
+         * unit printed), `scaled` (an equal amount under another scale word, or a table that states its
+         * unit), or `unit_unstated`: the digits are a table cell in a passage that states no unit. A
+         * `unit_unstated` figure is NOT verified.
+         */
+        rule: z.enum(['exact', 'scaled', 'unit_unstated']).nullable(),
+        chunkId: z.string().nullable(),
+      }),
+    ),
+    total: z.number().int().nonnegative(),
+    verified: z.number().int().nonnegative(),
+    /** Unverified figures whose digits match a table cell in a passage that states no unit (reported separately). */
+    unitUnstated: z.number().int().nonnegative().default(0),
+  }),
+  /** Comparison rows whose number of values differs from the number of columns (after repair). */
+  comparisonMisaligned: z.array(z.string()).default([]),
+  /** Plain-language notices for the brief ("1 citation removed: not in the supplied evidence"). */
+  notices: z.array(z.string()),
+});
+export type BriefValidation = z.infer<typeof BriefValidationSchema>;
+
+/** Company × period coverage matrix (SPEC §15.2): every resolved cell, with context and cited chunk counts. */
+export const BriefCoverageSchema = z.object({
+  cells: z.array(z.object({ ticker: z.string(), period: z.string(), contextChunks: z.number().int().nonnegative(), citedChunks: z.number().int().nonnegative() })),
+});
+export type BriefCoverage = z.infer<typeof BriefCoverageSchema>;
+
+/** One telemetry summary per analysis (SPEC §30.1). The question is logged; prompts and chunk text never are. */
 export interface AnalysisTelemetry {
   retrievalDurationMs: number;
   generationDurationMs: number;
@@ -274,4 +332,17 @@ export interface AnalysisTelemetry {
   promptVersion: string;
   indexVersion: string;
   estimatedCostUsd: number;
+  /** Phase 4 worker additions (SPEC §30.1). */
+  requestId?: string;
+  analysisId?: string;
+  query?: string;
+  retrievalRequests?: number;
+  indexLoadMs?: number;
+  coldStart?: boolean;
+  embeddingDurationMs?: number;
+  generationFirstTokenMs?: number | null;
+  stopReason?: string;
+  contextTokenEstimate?: number;
+  /** The generation was sent but returned no usage (timeout or error): inputTokens is estimated from the prompt and output is unknown, so estimatedCostUsd is a lower bound. */
+  costIncomplete?: boolean;
 }

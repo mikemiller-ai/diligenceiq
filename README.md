@@ -2,7 +2,7 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 3 (deterministic query analysis, balanced hybrid BM25 + cosine retrieval, the ~24K-token context builder, a development-only retrieval debug endpoint, retrieval evals and the signal go/no-go) is complete in the repository; results are in [docs/evaluation.md](docs/evaluation.md). The Phase 2 index (`iv-9cf51c066743`) is uploaded to S3. Nothing new is deployed: the live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build, Company Intelligence on preview profiles for AAPL, MSFT and NVDA (cited risk headings plus labeled placeholders, no figures). Deep Analysis accepts any question, but generation arrives in Phase 4, so the API answers `ANALYSES_DISABLED` for now. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 4 (the one-call Deep Analysis generation pipeline, deterministic validation, the async SQS worker plane and the generation evals) is complete in the repository. Results are in [docs/evaluation.md](docs/evaluation.md) §4–5, and the prompt history is in [docs/prompt-iterations.md](docs/prompt-iterations.md). The worker stack (`DiligenceIQ-Worker`) is deployed in us-east-1, but nothing sends it work yet. The live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build: Company Intelligence on preview profiles for AAPL, MSFT and NVDA, with cited risk headings, labeled placeholders and no figures. The public API still answers `ANALYSES_DISABLED`, because sessions, caps and the enqueue route arrive in Phase 5. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## Develop
 Node ≥ 22 and pnpm 9.
@@ -43,6 +43,12 @@ Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-c
 - `pnpm eval:chunk-size`: a BM25-only chunk-size experiment. No AWS.
 - `pnpm eval:signals`: the signal go/no-go against the hand labels. No AWS.
 - `pnpm retrieval:debug`: serves `POST /api/retrieval/debug` locally on 127.0.0.1. It is never deployed.
+
+**Generation (Phase 4, admin-run):**
+- `pnpm eval:retrieval --generate`: one generation call per eval question through the real pipeline, scored deterministically. It replays recorded responses for free; `--live` calls Bedrock for unrecorded requests (Sonnet 4.6, about $0.11 each); `--only <ids>` limits the run.
+- `pnpm eval:generation:rescore`: re-validates the stored briefs after a validator change. No AWS.
+- `pnpm prompts:render`: rewrites `prompts/final-diligence-prompt.md` from the runtime prompt. A test checks that they match.
+- `pnpm analysis:run --question "…"`: one analysis through the deployed worker, in-region. AWS writes and about $0.13 of Bedrock spend; it needs the kill switch on.
 
 ## Requirements
 - The Eliza assessment PDF is the outer constraint.
