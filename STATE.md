@@ -6,7 +6,7 @@ _Last updated: 2026-10-02 (local)_
 `main` (no remote yet). Last code commit: `dfff25e` (Phase 4b). Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
 
 ## Current phase
-**Phase 4b (offline Company Intelligence profiles) is built, gated (`pnpm gate` exit 0, 2026-10-02) and committed (`dfff25e`). Both sets are uploaded; production serves det-v2; llm-v3 waits for the api deploy.** Handoff: `docs/handoffs/phase-04b.md`.
+**Phase 4b (offline Company Intelligence profiles) is built, gated (`pnpm gate` exit 0, 2026-10-02) and committed (`dfff25e`). Both sets are uploaded and **llm-v3 is live** (2026-10-02).** Handoff: `docs/handoffs/phase-04b.md`.
 - Sets built locally in `.index/intelligence/iv-9cf51c066743/`: **det-v2** (53 profiles, zero calls, every bar met) and **llm-v3** (42 model-written, 11 deterministic fallbacks; deep-tier fallback 3/12 = 25%: the provisional 10% bar was missed, and Mike revised it to ≤ 25% (SPEC A.4)). 53 = every corpus company but GE Capital (G2).
 - Spend (each approved by Mike): 59 profile calls, about $6.0 (v1 trial 3, v2 trial 3, v3 53). Ledger: `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/ledger/iv-9cf51c066743/{1,2,3}/`.
 - Mike's decisions 2026-10-02: F4 settled (build both sets); cited-passage figure rule (SPEC A.4); active set will be **llm-v3** with det-v2 uploaded as the instant fallback.
@@ -24,12 +24,7 @@ Gate record: adversary (1 blocker: the deep-tier bar; 5 high: citations to passa
 ## In flight
 - **Done 2026-10-02 (Mike approved):** `det-v2` and `llm-v3` uploaded to `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/iv-9cf51c066743/` (54 objects each, manifest last).
 - **Incident, 2026-10-02:** the pointer was switched to `llm-v3` before the api was redeployed. The deployed api still runs the pre-4b strict `CompanyIntelligenceProfileSchema`, which has no `headline`, so the 42 model-written profiles read as `PROFILE_MISSING` and Compare 404'd. It lasted a few minutes. The pointer was switched to `det-v2`: production smoke then showed 53/53 profiles 200, Compare 200 and `POST /api/analyses` → `ANALYSES_DISABLED`.
-- **Production now:** `/diligenceiq/active-profile-set` = `iv-9cf51c066743/det-v2` (parameter version 4); kill switch `false`. The deployed web is still the `950a021` landing ("Preview today: Apple, Microsoft and NVIDIA"), which now understates det-v2.
-- **To finish (each step needs Mike's go-ahead, in this order):**
-  1. `pnpm deploy:infra`, so the api gets the core schema with the optional `headline` field.
-  2. `aws ssm put-parameter --region us-east-1 --name /diligenceiq/active-profile-set --value iv-9cf51c066743/llm-v3 --type String --overwrite`.
-  3. Smoke: every company 200, Compare 200, a profile with `headline` and `managementOutlook`.
-  4. `pnpm deploy:web`.
+- **Finished 2026-10-02 (Mike approved):** `pnpm deploy:infra` (Worker and Api updated; Core and Web unchanged) → pointer `iv-9cf51c066743/llm-v3` (parameter version 5) → production smoke (53/53 profiles 200, Compare 200, MSFT llm with headline and outlook, `POST /api/analyses` 503 `ANALYSES_DISABLED`) → `pnpm deploy:web` (landing "Every company in the review window has a profile (53 companies)…"; NVDA dashboard shows the model-written summary, Management outlook and footer "Generation: llm · 1 model call to build · profile set llm-v3"). Kill switch `false`. Instant fallback: set the pointer to `iv-9cf51c066743/det-v2`.
 - Next phase: Phase 6.
 
 ## Decisions pending with Mike
