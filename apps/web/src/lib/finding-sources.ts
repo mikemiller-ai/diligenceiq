@@ -102,7 +102,7 @@ function resolveCompareRow(
   const theme = r.attentionRanking.find((t) => compareRowRef.theme(t.category) === source.ref);
   if (theme) {
     // Common, distinctive and shared areas depend on each company's complete risk list, which a
-    // fixture profile does not hold (it holds a selection), so they are not saved as findings.
+    // preview profile cannot vouch for (its extracted list can miss headings), so they are not saved as findings.
     if (r.companies.some((c) => { const p = profiles.get(c.ticker); return !p || isFixtureProfile(p); })) return null;
     const holders = theme.tickers.map(name);
     const common = theme.tickers.length === r.companies.length;
@@ -169,8 +169,12 @@ function resolveProfileSource(
       if (!r) return null;
       const signals = profile.signals.filter((s) => r.signalIds.includes(s.signalId));
       // The theme follows what the recommendation rests on: its first signal, else the current
-      // risk it cites.
-      const risk = profile.currentRisks.find((x) => x.citationIds.some((id) => r.citationIds.includes(id)));
+      // risk it cites. Neighbouring headings can share a chunk, so only a classified risk citing
+      // exactly the same chunks counts, and the one whose area the question names wins.
+      const same = (ids: readonly string[]) => ids.length === r.citationIds.length && ids.every((id) => r.citationIds.includes(id));
+      const candidates = profile.currentRisks.filter((x) => x.category !== null && same(x.citationIds));
+      const question = r.question.toLowerCase();
+      const risk = candidates.find((x) => question.includes(x.plainLabel.toLowerCase())) ?? candidates[0];
       const category = signals[0]?.category ?? risk?.category;
       return {
         ...base,

@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Offline, admin-run CLIs (run from the repo root with pnpm). Not a workspace package; ESM so top-level await works."
+}

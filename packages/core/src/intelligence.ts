@@ -78,9 +78,13 @@ const CATEGORY_THEME: Record<SignalCategory, ThemeId> = {
   management_outlook: 'growth-outlook',
 };
 
-export function themeForCategory(category: SignalCategory): ThemeId {
-  return CATEGORY_THEME[category];
+/** A current risk the deterministic classifier could not place is saved under Risk factors. */
+export function themeForCategory(category: SignalCategory | null): ThemeId {
+  return category ? CATEGORY_THEME[category] : 'risk-factors';
 }
+
+/** Label for current risks with no category (the classifier never forces one). */
+export const OTHER_RISKS_LABEL = 'Other risks';
 
 export const COVERAGE_TIERS = ['deep', 'partial', 'limited_history'] as const;
 export const CoverageTierSchema = z.enum(COVERAGE_TIERS);
@@ -98,8 +102,8 @@ export function coverageTier(tenK: number, tenQ: number): CoverageTier {
 
 /**
  * Deterministic risk-heading classifier: an ordered keyword rule list, first match wins.
- * Phase 2 replaces it with the extractor's classifier; until then it is what assigns
- * fixture risk headings to a category, so no category is chosen by hand. The rules are
+ * The Phase 2 heading extractor (`packages/corpus`) uses it for every extracted heading, so
+ * no category is chosen by hand. The rules are
  * deliberately narrow: a heading that only mentions international operations, or a
  * component in passing, says nothing about concentration or supply, so it stays
  * unclassified (null) rather than being forced into the nearest category.
@@ -131,9 +135,11 @@ export function isPlaceholder(text: string): boolean {
 }
 
 /**
- * Phase 1 fixture profiles hold a hand-picked selection of risk headings, not the full list,
- * so nothing that depends on completeness (common or distinctive areas, attention ranking,
- * risk position) may be presented as a conclusion when one is involved.
+ * Fixture (preview) profiles: since Phase 2 they hold the latest 10-K's complete EXTRACTED
+ * heading list, but the extractor is a deterministic heuristic with measured, imperfect
+ * recall, and the profiles have no figures or signals yet. So nothing that depends on a
+ * complete list (common or distinctive areas, attention ranking, risk position) is presented
+ * as a conclusion while one is involved (SPEC §8.6), until the Phase 4b profile build.
  */
 export function isFixtureProfile(p: Pick<CompanyIntelligenceProfile, 'version'>): boolean {
   return p.version.profileSetId.startsWith('fixture-');
@@ -230,13 +236,17 @@ export const CompanyIntelligenceProfileSchema = z
     currentRisks: z.array(
       z
         .object({
-          category: SignalCategorySchema,
+          /**
+           * Null when the deterministic classifier finds no category: the heading is shown
+           * under "Other risks" rather than forced into the nearest area (Phase 2).
+           */
+          category: SignalCategorySchema.nullable(),
           /** The latest 10-K risk heading, verbatim. */
           heading: z.string().min(1),
           plainLabel: z.string().min(1),
           /**
-           * Order of the heading in the latest 10-K's risk section. Only meaningful when the
-           * profile holds the full heading list; a fixture profile holds a selection.
+           * Order of the heading in the latest 10-K's risk section, as extracted. A preview
+           * (fixture) profile never presents it as a position (SPEC §8.6).
            */
           rank: z.number().int().positive(),
           citationIds: ids.min(1),

@@ -2,7 +2,7 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 1 (application shell on the SPEC v2 navigation) is live at <https://diligenceiq.mikemiller.ai>. Company Intelligence runs on preview profiles for AAPL, MSFT and NVDA: verbatim, cited risk headings plus labeled placeholders, and no figures. Deep Analysis accepts any question, but the RAG pipeline arrives in Phases 2–4, so the API answers `ANALYSES_DISABLED` for now. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 2 (corpus ingestion, chunking, embeddings, a validated local index, and deterministic extraction) is complete in the repository; the index is built locally but not yet uploaded to S3, and nothing new is deployed. The live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build: Company Intelligence on preview profiles for AAPL, MSFT and NVDA (cited risk headings plus labeled placeholders, no figures). Deep Analysis accepts any question, but retrieval and generation arrive in Phases 3–4, so the API answers `ANALYSES_DISABLED` for now. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## Develop
 Node ≥ 22 and pnpm 9.
@@ -29,6 +29,14 @@ Company Intelligence profiles are built **offline** by an admin-run script (one 
 - [Implementation plan](docs/implementation-plan.md)
 
 Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-corpus.mjs` (reads `CORPUS_PATH`, default `./edgar_corpus`; Node ≥ 22).
+
+**Offline pipeline (Phase 2, admin-run; outputs in `.index/`, gitignored):**
+- `pnpm ingest`: corpus (directory or zip at `CORPUS_PATH`) → processed filings, section offsets and chunks. No AWS.
+- `pnpm extract`: deterministic financial facts, trends, drivers and risk headings per company. No AWS.
+- `pnpm index:embed --dry-run`, then `pnpm index:embed`: Titan v2 embeddings, cached by content hash and resumable (Bedrock spend, about $0.44 for the full corpus).
+- `pnpm index:build`: vectors, BM25, adjacency, `summary.json` and `manifest.json`, validated before the build is kept.
+- `pnpm index:upload --bucket <name> [--yes]`: immutable S3 upload (a dry run without `--yes`).
+- `pnpm index:measure-load`: cold-load timing.
 
 ## Requirements
 - The Eliza assessment PDF is the outer constraint.

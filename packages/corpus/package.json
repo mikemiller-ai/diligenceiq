@@ -1,0 +1,22 @@
+{
+  "name": "@diligenceiq/corpus",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Corpus ingestion: filing headers, periods and fiscal labels, preamble stripping, section detection, boilerplate, chunking, citation IDs, deterministic financial extraction, risk headings, drivers and coverage",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@diligenceiq/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

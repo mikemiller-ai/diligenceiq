@@ -1,6 +1,7 @@
-import type { FindingSource } from '@diligenceiq/core';
+import { SIGNAL_CATEGORY_LABELS, profileRef, themeForCategory, type FindingSource, type SignalCategory } from '@diligenceiq/core';
 import { describe, expect, it } from 'vitest';
 import { FIXTURE_PROFILES } from '@/fixtures/profiles';
+import { resolveSource } from './finding-sources';
 import { builtProfiles } from '@/test/profiles';
 import { SAMPLE_ANALYSES } from '@/test/sample-analyses';
 import { buildFinding, emptyState, reducer, sourceKey, type WorkspaceState } from './workspace-store';
@@ -65,7 +66,11 @@ describe('buildFinding copies stored content, never form content', () => {
     const common = save('theme-regulatory');
     expect(common.origin.kind).toBe('compare');
     expect(common.tickers).toEqual(['AAPL', 'MSFT', 'NVDA']);
-    expect(common.citations.length).toBe(3);
+    // The row's evidence is every company's regulatory headings, deduplicated, in company order.
+    const regulatoryIds = [...new Set(['AAPL', 'MSFT', 'NVDA'].flatMap((t) => profiles.get(t)!.currentRisks.filter((r) => r.category === 'regulatory').flatMap((r) => r.citationIds)))];
+    expect(regulatoryIds.length).toBeGreaterThanOrEqual(3);
+    expect(common.citations.map((c) => c.chunkId)).toEqual(regulatoryIds);
+    for (const t of ['AAPL', 'MSFT', 'NVDA']) expect(common.citations.some((c) => c.ticker === t), t).toBe(true);
     expect(common.title).toBe('Regulatory: common attention area');
     // Regression (adversary finding 7): a distinctive row used to be titled "shared attention area".
     const distinctive = save('theme-supply_chain', ['AAPL', 'MSFT']);
@@ -98,8 +103,9 @@ describe('buildFinding copies stored content, never form content', () => {
     ).toThrow();
   });
 
-  it('refuses Compare theme rows built from fixture profiles (a selection, not the full risk list)', () => {
-    // Regression (adversary finding 1): saving "common/distinctive" conclusions from a hand-picked subset.
+  it('refuses Compare theme rows built from preview profiles (an extracted list that can miss headings)', () => {
+    // Regression (adversary finding 1): saving "common/distinctive" conclusions from a list that may be incomplete
+    // (Phase 1: a hand-picked subset; Phase 2: a rule-extracted list with imperfect recall).
     expect(() =>
       buildFinding(emptyState(), FIXTURE_PROFILES, { source: { kind: 'compareRow', tickers: ['AAPL', 'MSFT', 'NVDA'], ref: 'theme-regulatory' }, theme: 'regulatory-compliance', title: '', status: 'ACTIVE' }, NOW),
     ).toThrow();
@@ -107,11 +113,28 @@ describe('buildFinding copies stored content, never form content', () => {
 
   it('from a recommendation: cites the current risk it rests on and takes that risk’s theme', () => {
     // Regression (adversary finding 7): recommendations were saved with zero citations and theme risk-factors.
+    // A preview profile has one recommendation per classified risk area, citing that area's first
+    // heading; chunks are shared between neighboring headings, so the theme must follow the area
+    // the recommendation was built for, not whichever heading happens to share its first chunk.
     const msft = FIXTURE_PROFILES.get('MSFT')!;
-    const i = msft.recommendedDiligence.findIndex((r) => r.citationIds.some((id) => msft.currentRisks.find((x) => x.category === 'regulatory')?.citationIds.includes(id)));
+    const i = msft.recommendedDiligence.findIndex((r) => / regulatory risk/.test(r.question));
+    expect(i).toBeGreaterThanOrEqual(0);
+    const firstRegulatory = msft.currentRisks.find((x) => x.category === 'regulatory')!;
     const f = buildFinding(emptyState(), FIXTURE_PROFILES, { source: { kind: 'recommendation', ticker: 'MSFT', ref: `rec-${i + 1}` }, theme: 'risk-factors', title: '', status: 'ACTIVE' }, NOW);
     expect(f.citations.length).toBeGreaterThan(0);
     expect(f.citations.map((c) => c.chunkId)).toEqual(msft.recommendedDiligence[i]!.citationIds);
+    expect(f.citations.map((c) => c.chunkId)).toEqual(firstRegulatory.citationIds);
+
+    const areaOf = (question: string) =>
+      (Object.entries(SIGNAL_CATEGORY_LABELS) as Array<[SignalCategory, string]>).find(([, label]) => question.includes(` ${label.toLowerCase()} risk`))?.[0];
+    for (const p of FIXTURE_PROFILES.values()) {
+      p.recommendedDiligence.forEach((r, idx) => {
+        const area = areaOf(r.question);
+        expect(area, r.question).toBeDefined();
+        const resolved = resolveSource({ kind: 'recommendation', ticker: p.ticker, ref: profileRef.recommendation(idx) }, { analyses: [], profiles: FIXTURE_PROFILES });
+        expect(resolved?.defaultTheme, `${p.ticker} ${r.question}`).toBe(themeForCategory(area!));
+      });
+    }
   });
 
   it('rejects items that do not exist', () => {

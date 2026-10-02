@@ -390,6 +390,7 @@ Every dashboard has a performance view, a cited risk section, drivers, and recom
 - The dashboard reads a **persisted, versioned profile** from the active profile set (§32). It never generates.
 - Provenance is labeled: model-written text is shown as company analysis; curated text is labeled "General context"; placeholders (Phase 1 only) are labeled "Placeholder, not filing data".
 - Phase 1 fixture profiles hold a **selection** of verbatim risk headings, not the latest 10-K's complete list (the heading extractor is Phase 2). They are labeled as a preview, and nothing that depends on a complete list (common or distinctive areas, attention ranking, "major attention area", the comparative questions derived from them, or a heading's position) is presented as a conclusion while a fixture profile is involved; those slots are labeled placeholders.
+- Since Phase 2 the preview (fixture) profiles hold every heading the deterministic extractor finds in the latest 10-K, each cited to its index chunk. The extractor's precision and recall are measured on hand-labeled AAPL, MSFT and NVDA lists (assumptions G3a) and are imperfect: it can miss some headings and can include a sentence that is not a heading. So the same rule still applies to them until the Phase 4b profile build: they stay labeled a preview and draw no completeness conclusion. A heading the classifier cannot place has no category and is shown under "Other risks"; it is never forced into the nearest area.
 
 **Business value.** This page answers: *What is happening with this company, and what should I look at first?*
 
@@ -973,7 +974,7 @@ Stored in S3 under `index/<indexVersion>/`:
 - chunk metadata and text;
 - the adjacency file (for each chunk, the most similar passages of the same section in the previous and next comparable filing);
 - `summary.json`, the **index summary**: documents, chunks, companies, fiscal years, filing types, and detected sections per filing (also printed by the CLI and recorded in the Phase 2 handoff);
-- `manifest.json`: index version (corpus hash + chunker version + embedding model), counts, embedding calls and tokens consumed.
+- `manifest.json`: index version (a content hash of the chunks as produced, plus tokenizer version, embedding model and dimensions, so chunk IDs and text are immutable within it; §25.2), counts, embedded texts and tokens, and the logged embed-run spend.
 
 Processed filing text and section offsets are also written to S3 for the readable source view.
 

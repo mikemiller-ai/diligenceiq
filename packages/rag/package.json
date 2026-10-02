@@ -1,0 +1,22 @@
+{
+  "name": "@diligenceiq/rag",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "RAG runtime: index format and loader (Phase 2); query analysis, retrieval, context, generation, validation, signals and profiles from Phase 3",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@diligenceiq/corpus": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "6.0.3",
+    "vitest": "5.0.3"
+  }
+}

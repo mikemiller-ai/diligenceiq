@@ -1,14 +1,15 @@
 import { coverageTier, type Citation, type CoverageTier, type FilingType } from '@diligenceiq/core';
 import filingsJson from './generated/filings.json';
-import passagesJson from './generated/passages.json';
+import riskHeadingsJson from './generated/risk-headings.json';
 import type { FilingRecord } from './types';
 
 /*
- * Phase 1 fixtures. Filing rows come from the real corpus headers, and every passage is an
- * exact slice of a real filing (scripts/fixtures/build-web-fixtures.mjs). There are no
- * hand-written analyses or findings here: the workspace starts empty and the fixture
- * profiles (./profiles) hold only verbatim filing text, deterministic templates, and
- * labeled placeholders. Phase 2+ replaces all of it with the real index and profiles.
+ * Fixtures. Filing rows come from the real corpus headers (scripts/fixtures/build-web-fixtures.mjs).
+ * The passages are real index chunks, verbatim slices of the processed filing text, cited by
+ * the preview profiles' extracted risk headings (scripts/fixtures/build-risk-fixtures.ts).
+ * There are no hand-written analyses or findings here: the workspace starts empty and the
+ * preview profiles (./profiles) hold only verbatim filing text, deterministic templates, and
+ * labeled placeholders. Phase 5 replaces them with the real profiles read from S3.
  */
 
 /**
@@ -23,7 +24,7 @@ export const FILINGS: FilingRecord[] = (filingsJson as FilingRecord[]).map((f) =
   const company = COMPANY_OVERRIDES[f.documentId];
   return company ? { ...f, company } : f;
 });
-export const PASSAGES = passagesJson as Citation[];
+export const PASSAGES = (riskHeadingsJson as { passages: Citation[] }).passages;
 
 export function passage(chunkId: string): Citation {
   const p = PASSAGES.find((x) => x.chunkId === chunkId);

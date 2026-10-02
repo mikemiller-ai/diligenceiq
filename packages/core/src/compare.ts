@@ -92,7 +92,7 @@ const UP: ReadonlySet<Trajectory> = new Set(['accelerating', 'growing', 'improvi
 const DOWN: ReadonlySet<Trajectory> = new Set(['declining']);
 
 function categoriesOf(p: CompanyIntelligenceProfile): SignalCategory[] {
-  const set = new Set<SignalCategory>([...p.currentRisks.map((r) => r.category), ...p.signals.map((s) => s.category)]);
+  const set = new Set<SignalCategory>([...p.currentRisks.flatMap((r) => (r.category ? [r.category] : [])), ...p.signals.map((s) => s.category)]);
   return SIGNAL_CATEGORIES.filter((c) => set.has(c));
 }
 

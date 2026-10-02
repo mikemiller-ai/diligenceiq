@@ -245,7 +245,7 @@ A failed generation becomes a clear error state with a request ID. Re-running is
 
 ---
 
-## 6. RAG design *(planned: Phases 2–4)*
+## 6. RAG design *(§6.1–6.4 built in Phase 2; §6.5–6.9 planned: Phases 3–4)*
 
 ### 6.1 Ingestion (offline, admin-run)
 1. **Parse the header block.** Apply the metadata override table for known anomalies (e.g. `GE_10K_2015` → "General Electric Capital Corp (GE Capital)", FY2014, outside the review window).
@@ -261,11 +261,23 @@ A failed generation becomes a clear error state with a request ID. Re-running is
 7. Best-effort subsection breadcrumbs (e.g. "Liquidity and Capital Resources").
 8. Write processed filing text + section offsets to S3 for the Sources viewer. The ingestion summary reports detection results per filing.
 
+**As built (Phase 2, `packages/corpus`, `scripts/ingestion/ingest.ts`):**
+- Input is `CORPUS_PATH`, a directory or the zip (a dependency-free ZIP reader). The manifest completeness check fails the run on a missing or extra file.
+- Headings are classified by **title**, not item number, because the numbers differ between a 10-K and a 10-Q. A running page header ("PART I Item 1A") never ends a section, because only an explicit list of standard item titles counts as a boundary.
+- **TOC entries are skipped:** a `|` row ending in a page number, or followed by another `|` row; a title that wraps onto the next lines before its page number (GS: `Item 7 |` / `Management’s Discussion…` / `and Results of Operations | 62`); and an `Item` match inside a dense TOC cluster (at least four within ~3,000 characters, at least half TOC-shaped, TOC rows on both sides).
+- **Cross-references are skipped:** a reference word, an opening quote, a comma, colon or semicolon, or a lowercase word right before the `Item` (JNJ "…operating results under: Item 7."; ORCL "…as well as our discussion in Item 7"); or, after the full title, "of this Report", "in this Annual Report", "and Note 13…", "both included elsewhere" (JNJ, ORCL).
+- **One heading per kind, in canonical order.** The `Item` headings chosen are the longest sequence that follows the standard item order (10-K: Business, 1A, 1C, 2, 3, 7, 7A, 8, 9A; 10-Q: Part I items in any order, then Part II Legal Proceedings, then Risk Factors), earliest first among equals. A cross-reference to Item 7 inside Item 1 cannot claim MD&A, because the real Risk Factors heading follows it.
+- **Stubs fall back to bare headings.** An `Item 7` (or 10-K `Item 1A`) under 1,500 characters ("Reference is made to…", the integrated-report 10-Ks of XOM, CVX, DE, BAC, INTC, MCD, MS; JPM's 10-K) falls back to the bare title heading (Title Case or UPPER CASE, at a line start or glued to its first sentence; JPM's sentence-case running title "Management’s discussion and analysis" only at a line start). An `Item 8` under 1,500 characters, or none (DIS, BLK, NVDA, ORCL, PEP, the integrated reports), falls back to the bare heading that opens the statements after MD&A ("Financial Statements and Supplementary Data", "Index to Financial Statements", "Report of Independent Registered Public Accounting Firm" unless it is the internal-control or schedule report, "CONSOLIDATED STATEMENTS OF INCOME/OPERATIONS/EARNINGS", "STATEMENTS OF CONSOLIDATED INCOME"), at a line start or after page furniture; the candidate that opens the longest section wins. There is no bare-title fallback for Legal Proceedings: it relabeled financial-statement notes (AMZN, BA, CSCO, ADBE, NFLX, TSLA) as Legal Proceedings.
+- **Gaps are reported.** `sectionGaps()` lists expected sections (MD&A for every filing; Risk Factors and the statements for a 10-K) that are missing or under 1,500 characters, so a filing whose MD&A is incorporated by reference is visible rather than silently thin.
+- Detection over all 246 files (chunker `c2`): every filing has MD&A (246/246) and financial statements (246/246); every 10-K has Risk Factors (89/89); 10-K Business 86/89 (INTC, MCD and MS have no Business item heading). The only reported gap is IBM's 10-K: its MD&A (210 characters) and statements (357 characters) are incorporated by reference to IBM's Annual Report to Stockholders, which is not in the corpus. In every 10-K the `Item` headings follow the canonical order; INTC and MCD use an integrated layout whose bare-title MD&A precedes Risk Factors. The 24 JNJ and XOM 10-Qs get no Risk Factors section (133/157 10-Qs have one).
+- **Chunk offsets index into the processed text** (the body from the cover heading on, whitespace-normalized), which is what is written to S3 for the readable source view.
+
 ### 6.2 Chunking
 - Target **~900 tokens (~3,600 characters)** with **~120-token overlap**, split on paragraph, then sentence, boundaries. Pipe-delimited tables are kept intact when they fit, otherwise split on row boundaries.
 - Lines are not paragraphs: a single line can be 287,855 characters, so the splitter works on sentence and table-row boundaries inside lines and enforces a hard character cap.
 - A contextual header (`Apple Inc · 10-K FY2022 · Item 1A Risk Factors › Supply chain`) is prepended to the text used for embedding and BM25. The citation text shown to users is the raw passage.
 - Rationale: a risk factor or MD&A argument, together with its supporting numbers, usually fits in one citable unit. At this size ~25–30 chunks fit in a ~24K-token context, which leaves room for multi-company and multi-year balance. Final values are confirmed against retrieval evals in Phase 3 and recorded here.
+- **As built (chunker `c2`):** target 3,600 characters, overlap 480 characters (unit-aligned, so a chunk is always a verbatim slice), hard cap 6,000 characters, a final chunk under 900 characters folded into the previous one. Units are sentences inside paragraphs; paragraphs split at line breaks and at glued breaks (`…stock price.The Company…`); a table is one unit when it fits under the cap. A line is a table row only when its pipes are dense, so a prose line that carries a page footer ("Apple Inc. | 2025 Form 10-K | 5") is still split into sentences. `c2` (from `c1`) changes only the section boundaries (§6.1), which renumbers chunk IDs. Result: 25,404 chunks over 246 filings (median 3,451 characters, max 5,972); 28 boilerplate chunks. A section with more than 999 chunks fails the run (the ID has three digits).
 
 ### 6.3 Chunk / citation IDs
 - Human-readable and built from **fiscal** labels: `AAPL-FY2025-10K-1A-004`, `NVDA-FY2026Q3-10Q-MDA-012`. The citation ID shown to the model **is** the chunk ID.
@@ -274,15 +286,18 @@ A failed generation becomes a clear error state with a request ID. Re-running is
 
 ### 6.4 Index artifacts (S3 `index/<version>/`)
 - `vectors.bin`: Float32 matrix, **Amazon Titan Text Embeddings v2** (`amazon.titan-embed-text-v2:0`), 1024 dimensions, normalized. Dimension and quantization are confirmed in Phase 2 against load time. Cohere Embed v4 is evaluated as an alternative in Phase 3 (DD-08).
-- `bm25.json`: precomputed inverted index (postings, document lengths, IDF).
+- `bm25.json` + `bm25-postings.bin`: precomputed inverted index. The JSON holds the vocabulary, document frequencies, posting offsets, document lengths and parameters (k1 1.2, b 0.75); the binary file holds the postings (Uint32 chunk indexes, then Uint16 term frequencies), because ~8M postings as a JSON array would be several times larger and slower to parse on a cold start. The tokenizer (`packages/rag`, version `t2`: decimals such as `1.2` stay one token, dotted abbreviations fold (`U.S.` → `us`), and the negations `no`, `not`, `nor` are kept) is shared by the indexer and the query path.
 - `chunks.jsonl`: chunk metadata + text.
-- `adjacency/<TICKER>.json`: for each chunk, the top 3 chunks of the **same section** in the previous and the next comparable filing of the same company (10-K ↔ 10-K, 10-Q ↔ 10-Q), ranked by cosine similarity of the stored embeddings. Computed offline at index build, no model call. It backs `GET /api/evidence/adjacent` (§9) for adjacent-period comparison of brief citations.
-- `summary.json`: the index summary (SPEC §24.4): documents, chunks, companies, fiscal years, filing types, and detected sections per filing.
-- `manifest.json`: index version hash (corpus hash + chunker version + embedding model), counts, and embedding calls/tokens consumed.
+- `adjacency/<TICKER>.json`: for each chunk, the top 3 chunks of the **same section** in the previous and the next comparable filing of the same company, ranked by cosine similarity of the stored embeddings. "Comparable" means the adjacent filing **of the same form** by period end: 10-K ↔ 10-K (prior/next fiscal year) and 10-Q ↔ 10-Q (prior/next quarter, so a Q1 10-Q's `previous` is the prior year's Q3 10-Q; there is no Q4 10-Q). For 10-Qs a third side, `sameQuarterPriorYear`, gives the year-over-year comparison (same fiscal quarter, one fiscal year earlier; null for 10-Ks or when that filing is not in the corpus). Computed offline at index build, no model call. It backs `GET /api/evidence/adjacent` (§9) for adjacent-period comparison of brief citations.
+- `summary.json`: the index summary (SPEC §24.4): documents, chunks, companies, fiscal years, filing types, and detected sections per filing, plus any filing missing an expected section.
+- Index version: `iv-` + the first 12 hex characters of sha256(chunks hash, tokenizer version, embedding model, dimensions), where the chunks hash is a sha256 over `chunks.jsonl` as produced plus every chunk's embedded text (contextual header + passage). Because it is derived from the chunks themselves, any change to section detection, segmentation, headers, fiscal labels or IDs yields a new version, so chunk IDs and text are immutable within a version (SPEC §25.2). `pnpm ingest` records it in the ingest report; `pnpm index:build` re-derives it from `chunks.jsonl` and the current `EMBEDDING_MODEL_ID` and refuses to build on any mismatch.
+- The CLIs are `pnpm ingest`, `pnpm index:embed`, `pnpm index:build`, `pnpm index:upload`. The build writes to a temporary directory, validates the artifacts it wrote (counts, unique IDs, unit-norm finite vectors, hard cap, adjacency references), and only then writes a `VALIDATED` marker and moves the directory to `.index/build/<version>/`; a failed build leaves nothing there. `index:upload` (dry run unless `--yes`) refuses a build without the marker or whose files differ from the manifest, stores each object's sha256 as S3 metadata, skips an existing key with the same sha256, refuses (before writing anything) if any existing key has a different sha256, writes with `If-None-Match: *`, and uploads `manifest.json` last. The cold load (`loadIndex`) verifies each artifact's byte length and sha256 against the manifest before parsing.
+- `manifest.json`: index version and the chunks hash it derives from, corpus hash, chunker and tokenizer versions, counts, per-artifact bytes and sha256, and embedding figures named for what they are: `embeddedTexts` (unique texts, one vector each) and `inputTokens` (the tokens the model reported for those texts, from the cache), plus `embedRuns`, the sum of the per-run log `.index/cache/embed-runs.jsonl` (attempts including retries and failures, successful calls, billed tokens). The run log only covers runs since it was introduced and spans the whole cache for the model, so it can include other versions' texts.
 
 **Indexing is resumable and cached.**
 - Embeddings are cached by `sha256(embedded text + model id)`, so re-chunking only embeds chunks whose text changed.
-- The indexer checkpoints progress and rate-limits itself to the model's quota (Titan v2: 300,000 tokens/minute, so a full ~20M-token build takes over an hour). An interrupted run resumes from the checkpoint.
+- The indexer checkpoints progress and rate-limits itself to the model's quota (Titan v2: 300,000 tokens/minute, so a full ~20M-token build takes over an hour); every attempt, retries included, acquires the limiter, and `--max-calls` is a hard cap on attempts. An interrupted run resumes from the checkpoint.
+- One writer at a time: a live `index:embed` holds an exclusive lock file next to the cache (pid, host, start time), released on exit, SIGINT/SIGTERM and error; a second run fails fast. A stale lock from a dead process is reported with instructions, not removed automatically. `--dry-run` and `index:build` open the cache read-only and never write to it.
 
 Documents are re-embedded **only** when their embedded text or the embedding model changes. Never on deploy, never per request.
 
@@ -405,8 +420,9 @@ type CompanyIntelligenceProfile = {
   trends: Array<{ metric: string; trajectory: Trajectory; basis: string; periods: string[]; chunkIds: string[] }>; // deterministic
   drivers: Array<{ label: string; metric: string; periods: string[]; changeBasis: string;   // deterministic, from MD&A rows
                    explanation: string; citationIds: string[] }>;       // explanation generated or templated
-  currentRisks: Array<{ category: SignalCategory; heading: string;      // latest 10-K risk heading, verbatim
+  currentRisks: Array<{ category: SignalCategory | null; heading: string; // latest 10-K risk heading, verbatim
                         plainLabel: string; rank: number;               // plainLabel generated or templated
+                                                                        // category is null when the classifier finds none ("Other risks")
                         citationIds: string[] }>;
   signals: Array<{ signalId: string; type: SignalType; category: SignalCategory; periods: string[];
                    measurement: string;                                   // deterministic, DD-18
@@ -433,6 +449,8 @@ Labels are descriptive only. Scores, ratings and recommendations are not part of
 **Every figure has a source row.** A number is rendered only from `facts` (or a value derived in code from two facts). The UI shows the fact's `rawRow` and chunk on hover and in the evidence drawer. A number in model-written text must match a fact (numeric validation).
 
 **Phase 1 fixture profiles** (before extraction exists) follow the same rule. Their current risks are a hand-picked **selection** of verbatim latest-10-K headings, not the complete list, so the UI labels them a preview and shows nothing derived from completeness (common, distinctive, ranking, `rank` as a position) while one is involved (SPEC §8.6). They carry **no figures and no narrative presented as fact**: every slot is either clearly labeled placeholder structure ("Revenue trend: placeholder, not filing data") or a value copied verbatim from a filing row with its `chunkId` and `rawRow`. A test fails if a fixture profile renders a numeric figure without a source row (testing-strategy §3).
+
+**Since Phase 2** the fixture (preview) profiles (`profileSetId: fixture-v2`) hold the latest 10-K's complete **extracted** heading list (`packages/corpus` `risks.ts`, written to the web app by `scripts/fixtures/build-risk-fixtures.ts`), each heading cited to the real index chunk(s) that contain it. The extractor is a heuristic whose precision and recall are measured on hand-labeled AAPL, MSFT and NVDA lists (assumptions G3a): it can miss some headings and can include a sentence that is not a heading, so the preview rules above still apply until the Phase 4b profile build.
 
 ---
 

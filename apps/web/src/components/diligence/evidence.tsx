@@ -126,7 +126,8 @@ function EvidencePanel({ target }: { target: EvidenceTarget }) {
           {PROVENANCE_LABEL[target.provenance]}
         </p>
       </div>
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      {/* Index passages are long, so this region scrolls; it is focusable so keyboard users can scroll it (WCAG 2.1.1). */}
+      <div tabIndex={0} role="region" aria-label="Source passage and details" className="flex-1 overflow-y-auto px-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
         <MicroLabel>Source passage</MicroLabel>
         <blockquote className="mt-2 rounded-lg border border-border bg-secondary/60 p-4 text-[15px] leading-7 text-foreground">
           {c.text}
@@ -172,7 +173,7 @@ function PeriodsPanel({ title, periods }: { title: string; periods: Array<{ peri
           The passages behind each period compared.
         </SheetDescription>
       </div>
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-5">
+      <div tabIndex={0} role="region" aria-label="Passages by period" className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
         {periods.map((p) => (
           <section key={p.period} aria-label={p.period}>
             <MicroLabel>{p.period}</MicroLabel>

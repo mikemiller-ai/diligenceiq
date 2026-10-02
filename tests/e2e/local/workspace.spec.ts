@@ -19,7 +19,7 @@ const A11Y_PAGES = [
   '/analysis/new/?q=What%20changed%3F&tickers=AAPL&origin=recommendation:AAPL:rec-1',
   '/analysis/?id=an-unknown',
   '/findings/',
-  '/sources/filing/?id=AAPL_10K_2025-10-31#chunk-AAPL-FY2025-10K-1A-R01',
+  '/sources/filing/?id=AAPL_10K_2025-10-31#chunk-AAPL-FY2025-10K-1A-001',
 ];
 
 for (const path of A11Y_PAGES) {
@@ -39,7 +39,8 @@ test.describe('keyboard', () => {
     await page.keyboard.press('Enter');
     await expect(page.locator('#main')).toBeFocused();
 
-    const chip = page.getByRole('region', { name: 'Cybersecurity' }).getByRole('button', { name: /^View evidence/ });
+    // A risk area holds every extracted heading, each with its chips; use the first.
+    const chip = page.getByRole('region', { name: 'Cybersecurity' }).getByRole('button', { name: /^View evidence/ }).first();
     await chip.focus();
     await page.keyboard.press('Enter');
     const drawer = page.getByRole('dialog');
@@ -128,11 +129,12 @@ test('Compare: AAPL, MSFT, NVDA launches comparative diligence without running i
 test('Findings: save from Company Intelligence, filter, group, clear, and Reset', async ({ page }) => {
   await page.goto('/intelligence/?ticker=MSFT');
   for (const area of ['Cybersecurity', 'Regulatory']) {
-    await page.getByRole('region', { name: area }).getByRole('button', { name: 'Save Finding' }).click();
+    // Each area lists all its extracted headings; save the first.
+    await page.getByRole('region', { name: area }).getByRole('button', { name: 'Save Finding' }).first().click();
     const dialog = page.getByRole('dialog');
     if (area === 'Regulatory') await dialog.getByLabel('Status').selectOption('NEEDS_FOLLOW_UP');
     await dialog.getByRole('button', { name: 'Save finding' }).click();
-    await expect(page.getByRole('region', { name: area }).getByRole('link', { name: 'Saved' })).toBeVisible();
+    await expect(page.getByRole('region', { name: area }).getByRole('link', { name: 'Saved' })).toHaveCount(1);
   }
 
   // Client-side navigation keeps the in-memory workspace (Phase 1 has no API).

@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-// Builds the Phase 1 web fixtures from the real corpus (read-only, no dependencies):
+// Builds the web fixtures from the real corpus (read-only, no dependencies):
 //   apps/web/src/fixtures/generated/filings.json   one row per filing, from the file headers
-//   apps/web/src/fixtures/generated/passages.json  exact filing slices the app cites (spec `passages`)
 //   apps/web/src/test/generated/passages.json      exact filing slices for the test-only sample brief
 //                                                  (spec `testPassages`; application code never imports src/test)
+// The app's own passages are real index chunks cited by the preview profiles' extracted risk
+// headings; they come from scripts/fixtures/build-risk-fixtures.ts (Phase 2), which replaced
+// the Phase 1 hand-picked `passages`.
 // The outputs are committed because the corpus is gitignored and the Amplify build never sees it.
 //   node scripts/fixtures/build-web-fixtures.mjs     # reads $CORPUS_PATH or ./edgar_corpus
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -100,16 +102,14 @@ const slice = (p) => {
     text: text.slice(start, end),
   };
 };
-const passages = spec.passages.map(slice);
 const testPassages = spec.testPassages.map(slice);
-const ids = [...passages, ...testPassages].map((p) => p.chunkId);
+const ids = testPassages.map((p) => p.chunkId);
 if (new Set(ids).size !== ids.length) throw new Error('duplicate chunkId in passages.spec.json');
 
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, 'filings.json'), `${JSON.stringify(filings, null, 1)}\n`);
-writeFileSync(join(outDir, 'passages.json'), `${JSON.stringify(passages, null, 1)}\n`);
 mkdirSync(testOutDir, { recursive: true });
 writeFileSync(join(testOutDir, 'passages.json'), `${JSON.stringify(testPassages, null, 1)}\n`);
 console.log(
-  `build-web-fixtures: ${filings.length} filings, ${passages.length} app passages → ${outDir}, ${testPassages.length} test passages → ${testOutDir}`,
+  `build-web-fixtures: ${filings.length} filings → ${outDir}, ${testPassages.length} test passages → ${testOutDir}`,
 );

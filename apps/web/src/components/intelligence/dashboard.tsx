@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  OTHER_RISKS_LABEL,
   SIGNAL_CATEGORY_LABELS,
   isFixtureProfile,
   isPlaceholder,
@@ -86,8 +87,9 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
         </div>
         {fixture && (
           <p className="relative border-t border-white/10 bg-white/[0.03] px-6 py-2.5 text-[13px] text-white/75">
-            Preview profile. It shows a selection of risk headings copied from the latest annual report, each cited, not the
-            complete list; sections marked “Placeholder, not filing data” fill in once extraction and change detection run.
+            Preview profile. It lists the risk headings extracted from the latest annual report by a deterministic rule, each
+            cited; the rule can miss some headings and can include a sentence that is not a heading. Sections marked
+            “Placeholder, not filing data” fill in once the full profile is built.
           </p>
         )}
       </header>
@@ -146,7 +148,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
         title="Current risks"
         lede={
           fixture
-            ? 'Selected risk headings from the latest annual report, grouped by area. A preview, not the complete list.'
+            ? 'Risk headings extracted from the latest annual report, grouped by area. A preview: the extraction rule can miss some headings and can include a sentence that is not a heading.'
             : 'Risk headings from the latest annual report, grouped by area.'
         }
       >
@@ -328,17 +330,24 @@ function formatFact(value: number, unit: string, scale: number): string {
 }
 
 function CurrentRisks({ profile, citations }: { profile: CompanyIntelligenceProfile; citations: Map<string, Citation> }) {
-  const groups = new Map<SignalCategory, CompanyIntelligenceProfile['currentRisks']>();
-  for (const r of [...profile.currentRisks].sort((a, b) => a.rank - b.rank)) groups.set(r.category, [...(groups.get(r.category) ?? []), r]);
+  // Classified areas first, in filing order; headings the classifier could not place go last
+  // under "Other risks" rather than being forced into the nearest area.
+  const groups = new Map<SignalCategory | null, CompanyIntelligenceProfile['currentRisks']>();
+  const ordered = [...profile.currentRisks].sort((a, b) => Number(a.category === null) - Number(b.category === null) || a.rank - b.rank);
+  for (const r of ordered) groups.set(r.category, [...(groups.get(r.category) ?? []), r]);
   if (groups.size === 0) {
     return <PlaceholderSlot title="Current risks">The latest annual report’s risk headings, grouped by area and cited.</PlaceholderSlot>;
   }
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {[...groups.entries()].map(([category, risks]) => (
-        <section key={category} aria-label={SIGNAL_CATEGORY_LABELS[category]} className="rounded-card border border-border bg-card px-5 py-4 shadow-sm">
+        <section
+          key={category ?? 'other'}
+          aria-label={category ? SIGNAL_CATEGORY_LABELS[category] : OTHER_RISKS_LABEL}
+          className="rounded-card border border-border bg-card px-5 py-4 shadow-sm"
+        >
           <div className="flex items-center gap-2">
-            <Badge tone="accent">{SIGNAL_CATEGORY_LABELS[category]}</Badge>
+            <Badge tone="accent">{category ? SIGNAL_CATEGORY_LABELS[category] : OTHER_RISKS_LABEL}</Badge>
             <FilingTextBadge />
           </div>
           <ul className="mt-3 flex flex-col gap-4">
@@ -351,7 +360,9 @@ function CurrentRisks({ profile, citations }: { profile: CompanyIntelligenceProf
                   <Button asChild size="sm" variant="secondary">
                     <Link
                       href={newAnalysisHref({
-                        question: `What does ${profile.company} disclose about ${r.plainLabel.toLowerCase()} risk in its latest annual report?`,
+                        question: r.category
+                          ? `What does ${profile.company} disclose about ${r.plainLabel.toLowerCase()} risk in its latest annual report?`
+                          : `What does ${profile.company} disclose about this risk in its latest annual report: “${r.heading}”`,
                         tickers: [profile.ticker],
                         origin: { kind: 'currentRisk', ticker: profile.ticker, ref: profileRef.currentRisk(r) },
                       })}

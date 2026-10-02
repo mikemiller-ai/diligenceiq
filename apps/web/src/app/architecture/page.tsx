@@ -63,7 +63,7 @@ const SYSTEM: { icon: typeof Cloud; title: string; status: BuildStatus; lines: s
 /** What this build does, plainly (Phase 1). */
 const TODAY: { item: string; status: BuildStatus }[] = [
   {
-    item: 'Company Intelligence preview profiles for Apple, Microsoft and NVIDIA: a selection of cited risk headings, everything else a labeled placeholder',
+    item: 'Company Intelligence preview profiles for Apple, Microsoft and NVIDIA: every risk heading the extraction rule found in the latest annual report, each cited to the index; everything else a labeled placeholder',
     status: 'Built',
   },
   { item: 'Compare, Save Finding and the Findings Board, composed in the browser without a model call; findings last for the browser session', status: 'Built' },

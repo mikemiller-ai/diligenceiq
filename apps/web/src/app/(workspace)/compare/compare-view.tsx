@@ -38,7 +38,7 @@ const KNOWN = new Set(OPTIONS.map((c) => c.ticker));
 const STARTER = ['AAPL', 'MSFT', 'NVDA'];
 
 const PREVIEW_COPY =
-  'Computed from each company’s full set of risk headings once extraction runs. These preview profiles hold a selection of headings, so no comparison is drawn from them.';
+  'Computed from each company’s full profile once it is built. These preview profiles list the headings an extraction rule found; the rule can miss some headings and can include a sentence that is not a heading, so no comparison is drawn from them.';
 
 const RANK_RULE =
   'Ranked by a fixed rule: how many selected companies share the area, then the number of change signals, then its position in the latest risk headings, then a fixed category order.';
@@ -104,8 +104,8 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
     const p = profiles.get(t);
     return !p || isFixtureProfile(p);
   };
-  // Phase 1 fixture profiles hold a selection of risk headings, so anything that depends on a
-  // company's complete list (common and distinctive areas, attention ranking, the questions
+  // Preview (fixture) profiles hold an extracted heading list of imperfect recall, so anything
+  // that depends on a company's complete list (common and distinctive areas, attention ranking, the questions
   // derived from them) is a labeled placeholder whenever one is compared (SPEC §8.6, §13.2).
   const preview = tickers.some(isPreview);
   const majorArea = (ticker: string) => result.attentionRanking.find((r) => r.tickers.includes(ticker))?.label ?? '—';

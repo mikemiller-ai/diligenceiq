@@ -1,5 +1,5 @@
 import type * as React from 'react';
-import type { CompanyIntelligenceProfile } from '@diligenceiq/core';
+import { OTHER_RISKS_LABEL, SIGNAL_CATEGORY_LABELS, type CompanyIntelligenceProfile } from '@diligenceiq/core';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -17,6 +17,8 @@ import { IntelligenceView } from './intelligence/intelligence-view';
 
 const withSamples = { initial: { analyses: SAMPLE_ANALYSES, findings: [], nextId: 1 } };
 const hrefParams = (el: HTMLElement) => new URLSearchParams((el.getAttribute('href') ?? '').split('?')[1] ?? '');
+/** The first (lowest-rank) current risk of a preview profile in a category. */
+const firstRisk = (ticker: string, category: string) => FIXTURE_PROFILES.get(ticker)!.currentRisks.find((r) => r.category === category)!;
 
 let fetchSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
@@ -69,21 +71,46 @@ describe('Company Intelligence', () => {
     ]);
     expect(screen.getAllByText('Placeholder, not filing data').length).toBeGreaterThan(3);
     const supply = screen.getByRole('region', { name: 'Supply chain' });
-    expect(supply).toHaveTextContent('The Company depends on component and product manufacturing');
-    expect(within(supply).getByRole('button', { name: 'View evidence AAPL-FY2025-10K-1A-R02' })).toBeInTheDocument();
+    const supplyRisk = firstRisk('AAPL', 'supply_chain');
+    expect(supplyRisk.heading).toMatch(/^The Company depends on component and product manufacturing/);
+    expect(supply).toHaveTextContent(supplyRisk.heading);
+    expect(supplyRisk.citationIds[0]).toMatch(/^AAPL-FY2025-10K-1A-\d{3}$/);
+    for (const id of supplyRisk.citationIds) expect(within(supply).getAllByRole('button', { name: `View evidence ${id}` }).length).toBeGreaterThan(0);
+    // Every extracted heading renders once, in a group: classified areas in order of their first
+    // heading, then the unclassified headings under "Other risks", last.
+    const aapl = FIXTURE_PROFILES.get('AAPL')!;
+    const risks = screen.getByRole('heading', { name: 'Current risks' }).closest('section')!;
+    const groups = within(risks).getAllByRole('region').map((r) => r.getAttribute('aria-label'));
+    const classified = [...new Set(aapl.currentRisks.flatMap((r) => (r.category ? [SIGNAL_CATEGORY_LABELS[r.category]] : [])))];
+    expect(aapl.currentRisks.some((r) => r.category === null)).toBe(true);
+    expect(groups).toEqual([...classified, OTHER_RISKS_LABEL]);
+    expect(within(risks).getAllByRole('link', { name: /Investigate/ })).toHaveLength(aapl.currentRisks.length);
+    const other = within(risks).getByRole('region', { name: OTHER_RISKS_LABEL });
+    const unclassified = aapl.currentRisks.filter((r) => r.category === null);
+    expect(within(other).getAllByRole('listitem')).toHaveLength(unclassified.length);
+    for (const r of unclassified) expect(other).toHaveTextContent(r.heading);
+    // An unclassified heading's Investigate question quotes the heading instead of naming an area.
+    expect(hrefParams(within(other).getAllByRole('link', { name: /Investigate/ })[0]!).get('q')).toBe(
+      `What does Apple Inc disclose about this risk in its latest annual report: “${unclassified[0]!.heading}”`,
+    );
     expect(screen.getByText(/Generation: deterministic · 0 model calls/)).toBeInTheDocument();
   });
 
-  it('labels fixture risk headings as a selection and never implies completeness', () => {
+  it('labels preview risk headings as rule-extracted and never implies completeness', () => {
     // Regression (adversary finding 1): the lede read "Risk headings from the latest annual report, grouped by area."
+    // Phase 2: the preview holds the complete rule-extracted list, and still says the rule can miss some.
+    // Phase 2 fix (adversary H2): it also says the rule can include a sentence that is not a heading.
     setRoute('/intelligence/', 'ticker=AAPL');
     const { container } = renderInWorkspace(<IntelligenceView />);
     const risks = screen.getByRole('heading', { name: 'Current risks' }).closest('section')!;
-    expect(risks).toHaveTextContent('Selected risk headings from the latest annual report');
-    expect(risks).toHaveTextContent('not the complete list');
+    expect(risks).toHaveTextContent(
+      'Risk headings extracted from the latest annual report, grouped by area. A preview: the extraction rule can miss some headings and can include a sentence that is not a heading.',
+    );
+    expect(container).toHaveTextContent('Preview profile. It lists the risk headings extracted from the latest annual report by a deterministic rule');
+    expect(container).toHaveTextContent('the rule can miss some headings and can include a sentence that is not a heading.');
     const text = container.textContent ?? '';
     expect(text).not.toMatch(/Risk headings from the latest annual report, grouped by area\./);
-    expect(text).not.toMatch(/position in the latest risk headings|all (?:of )?(?:its|the) risk/i);
+    expect(text).not.toMatch(/position in the latest risk headings|all (?:of )?(?:its|the) risk|complete list of|every risk/i);
   });
 
   it('shows Placeholder, not "Not extracted", in the performance table of a preview profile', () => {
@@ -99,7 +126,7 @@ describe('Company Intelligence', () => {
     // Regression (adversary finding 4): profile citations said "Validated — supplied to the model".
     setRoute('/intelligence/', 'ticker=MSFT');
     renderInWorkspace(<IntelligenceView />);
-    await userEvent.click(within(screen.getByRole('region', { name: 'Cybersecurity' })).getByRole('button', { name: /^View evidence/ }));
+    await userEvent.click(within(screen.getByRole('region', { name: 'Cybersecurity' })).getAllByRole('button', { name: /^View evidence/ })[0]!);
     const drawer = await screen.findByRole('dialog');
     expect(within(drawer).getByTestId('evidence-provenance')).toHaveTextContent('Filing text cited by the company profile');
     expect(drawer).not.toHaveTextContent('supplied to the model');
@@ -111,7 +138,10 @@ describe('Company Intelligence', () => {
     renderInWorkspace(<IntelligenceView />);
     const list = screen.getByRole('heading', { name: 'Recommended diligence' }).closest('section')!;
     expect(list).not.toHaveTextContent(/Templated|heading/);
-    expect(within(list).getAllByRole('button', { name: /^View evidence/ }).length).toBe(FIXTURE_PROFILES.get('AAPL')!.recommendedDiligence.length);
+    // One evidence chip per cited chunk; every recommendation cites at least one.
+    const recs = FIXTURE_PROFILES.get('AAPL')!.recommendedDiligence;
+    expect(recs.every((r) => r.citationIds.length > 0)).toBe(true);
+    expect(within(list).getAllByRole('button', { name: /^View evidence/ }).length).toBe(recs.reduce((n, r) => n + r.citationIds.length, 0));
     const riskQuestions = within(screen.getByRole('heading', { name: 'Current risks' }).closest('section')!)
       .getAllByRole('link', { name: /Investigate/ })
       .map((l) => hrefParams(l).get('q'));
@@ -253,14 +283,16 @@ describe('Company Intelligence', () => {
       </>,
     );
     const cyber = screen.getByRole('region', { name: 'Cybersecurity' });
-    await userEvent.click(within(cyber).getByRole('button', { name: 'Save Finding' }));
+    const risk = firstRisk('MSFT', 'cybersecurity');
+    await userEvent.click(within(cyber).getAllByRole('button', { name: 'Save Finding' })[0]!);
     const dialog = await screen.findByRole('dialog');
     await userEvent.selectOptions(within(dialog).getByLabelText('Status'), 'NEEDS_FOLLOW_UP');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
 
     const board = screen.getByRole('heading', { name: 'Risk Factors · 1' }).closest('section')!;
     expect(board).toHaveTextContent('Cybersecurity risk');
-    expect(board).toHaveTextContent('Cyberattacks and security vulnerabilities could lead to reduced revenue');
+    expect(risk.heading).toMatch(/^Cyberattacks and security vulnerabilities could lead to reduced revenue/);
+    expect(board).toHaveTextContent(risk.heading);
     expect(board).toHaveTextContent('Company Intelligence');
     expect(within(board).getByRole('link', { name: 'MSFT · current risk' }).getAttribute('href')).toMatch(/ticker=MSFT/);
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -268,9 +300,10 @@ describe('Company Intelligence', () => {
 });
 
 describe('Compare', () => {
-  it('with preview profiles, states no comparative conclusion drawn from a selection of headings', async () => {
+  it('with preview profiles, states no comparative conclusion drawn from a possibly incomplete heading list', async () => {
     // Regression (adversary finding 1): common/distinctive areas, "Major attention area", the
     // ranking and the questions derived from them were presented as facts about each company.
+    // Phase 2: the preview lists are complete rule output but can still miss headings.
     setRoute('/compare/', 'tickers=AAPL,MSFT,NVDA');
     renderInWorkspace(
       <div data-testid="compare">
@@ -283,13 +316,15 @@ describe('Compare', () => {
     expect(screen.queryByRole('heading', { name: 'Distinctive attention areas' })).not.toBeInTheDocument();
     expect(text).not.toMatch(/appears among the risk areas|among the latest risk headings of|position in the latest risk headings/);
     expect(screen.queryByRole('button', { name: 'How the ranking works' })).not.toBeInTheDocument();
-    for (const label of ['Regulatory', 'Cybersecurity', 'Competition', 'Supply chain', 'Geographic concentration']) {
+    for (const label of ['Regulatory', 'Cybersecurity', 'Competition', 'Supply chain', 'Geographic concentration', 'Customer concentration', 'Litigation', OTHER_RISKS_LABEL]) {
       expect(within(container).queryByText(label)).not.toBeInTheDocument();
     }
     const majorRow = screen.getByRole('rowheader', { name: 'Major attention area' }).closest('tr')!;
     expect(within(majorRow).getAllByText('Placeholder, not filing data')).toHaveLength(3);
     for (const id of ['attention-areas', 'ranking', 'comparative-diligence']) {
-      expect(container.querySelector(`[aria-labelledby="${id}"]`)).toHaveTextContent('Computed from each company’s full set of risk headings');
+      expect(container.querySelector(`[aria-labelledby="${id}"]`)).toHaveTextContent(
+        'Computed from each company’s full profile once it is built. These preview profiles list the headings an extraction rule found; the rule can miss some headings and can include a sentence that is not a heading, so no comparison is drawn from them.',
+      );
     }
     // No Save on any row: nothing here is a citable comparative fact yet.
     expect(screen.queryByRole('button', { name: /^Save/ })).not.toBeInTheDocument();

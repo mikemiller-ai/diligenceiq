@@ -416,7 +416,7 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 - SPEC §32.2: the LLM must not recreate easily determinable numbers.
 
 **Decision**
-- `packages/corpus/financials` scans the MD&A and financial-statement sections. It recognizes period header rows, a unit hint ("in millions"), and row labels matched against a **metric alias map**. Metrics:
+- `packages/corpus/financials` scans the MD&A and financial-statement sections (and nothing else). Integrated-report 10-Ks whose statements sit inside their bare-title MD&A are therefore covered too. It recognizes period header rows, a unit hint ("in millions", also in a row under the dates), and row labels matched against a **metric alias map**. Metrics:
   - revenue (e.g. "Total net sales", "Total revenues", "Revenue");
   - gross margin;
   - operating income;
@@ -425,15 +425,18 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
   - total debt;
   - capital expenditures;
   - operating cash flow.
-- **Each value records:** metric, period (fiscal label from the column header and the filing's period table), value, unit, scale, the source `chunkId`, the raw row text, and a cross-check flag. All of these are kept in the profile's `facts` (architecture §7.1), so a figure on screen can always show its source row.
-- **Derived values:** growth rates and margins are computed in code only when both inputs exist for comparable periods (same duration, same company).
-- **Trajectory labels** (Accelerating, Growing, Stable, Slowing, Declining; Improving, Stable, Declining for margins) come from fixed thresholds on the derived values. The thresholds are recorded with each label.
+- **One table per metric.** For each filing, metric and duration, one source row is chosen and every period of that metric comes from it. A row from the primary statement wins, identified by its caption ("CONSOLIDATED STATEMENTS OF OPERATIONS / INCOME / EARNINGS", "…BALANCE SHEETS", "…CASH FLOWS", "Condensed Consolidated…" in 10-Qs, MSFT's "INCOME STATEMENTS"; a caption inside a sentence or a TOC row does not count). Another table (a note, an MD&A table) is used only when no statement row has the metric, and its facts say `source: 'other_table'`. When the filing's income or cash-flow statement was found but does not show a metric of that statement, the metric is not extracted: a segment table's "Operating Income" (DIS) or a note's "Gross profit" (PFE) is never the company's figure. Balance-sheet metrics may fall back, because total debt is usually reported in a note.
+- **Plausibility checks** against the same filing's revenue for the same period: |operating income| ≤ revenue, gross profit ≤ revenue, net margin strictly inside (−200%, 100%), revenue > 0. A failing fact is kept with `suspect` set to the reason, shown as unverified, and never used in a trend.
+- **Each value records:** metric, period (fiscal label from the column header and the filing's period table), value, unit, scale, the source `chunkId`, the raw row text, its row and table offsets, `source`, `suspect`, and a cross-check flag. All of these are kept in the profile's `facts` (architecture §7.1), so a figure on screen can always show its source row.
+- **Derived values:** growth rates and margins are computed in code only when both inputs exist for comparable periods (same duration, same company) **and come from one place**: a growth rate from one table row of one filing; a margin from one table (numerator and revenue) of one filing. Each trend records its inputs.
+- **Trajectory labels** (Accelerating, Growing, Stable, Slowing, Declining; Improving, Stable, Declining for margins) come from fixed thresholds on the derived values. The thresholds are recorded with each label: Stable within ±2.0% growth; Accelerating or Slowing at least 5.0 pp faster or slower than the year before, except that growth after a decline is labeled Growing ("recovering from a decline the year before"), not Accelerating; margins Improving or Declining at a change of at least 1.0 pp.
+- **Drivers** come from one MD&A table whose revenue total equals the filing's own extracted consolidated revenue for the same year (within 0.5%) and whose rows add up to that total (within 1%); a deduction schedule (returns, rebates, chargebacks, allowances, discounts) never qualifies.
 - **Cross-check.** When a 10-K reports the same metric for several years, values from overlapping filings are compared. A mismatch above 0.5% (for example a restatement) sets `crossCheck: 'mismatch'` on both values. It is a **flag, never a blocker**: the build continues, both values keep their own source rows, and the UI shows "Values differ across filings" with both rows. Values are never averaged.
 - **Gaps are honest.** A metric that is not found shows as "Not extracted" and is never filled in. Single-10-K companies get trends from the multi-year columns inside that one 10-K. 10-Qs are extracted too: their comparative columns (quarter and year-to-date vs the same period a year earlier) give BAC and JPM current-year trends after their only 10-K.
 
 **Consequences**
 - Long-tail labels (banks, insurers, conglomerates) will extract fewer metrics. The coverage note on the dashboard (and the P1 coverage matrix, DD-19) shows this as partial evidence.
-- Golden tests cover AAPL, NVDA, MSFT, JNJ, and XOM (testing-strategy §3).
+- Golden tests cover AAPL, NVDA, MSFT, JNJ, and XOM (testing-strategy §3), plus CMCSA (statement over segment table). A property test over all 54 companies keeps every margin inside (−200%, 100%) and every trend inside one table. Measured coverage: assumptions G3.
 
 ---
 

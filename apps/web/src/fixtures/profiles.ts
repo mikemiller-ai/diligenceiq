@@ -1,24 +1,44 @@
 import {
+  OTHER_RISKS_LABEL,
   PLACEHOLDER_TEXT,
   SIGNAL_CATEGORY_LABELS,
-  classifyRiskHeading,
+  type Citation,
   type CompanyIntelligenceProfile,
   type CoverageTier,
+  type SignalCategory,
 } from '@diligenceiq/core';
-import { FILINGS, companyByTicker, passage } from './index';
+import riskHeadingsJson from './generated/risk-headings.json';
+import { FILINGS, companyByTicker } from './index';
 
 /*
- * Phase 1 fixture profiles for AAPL, MSFT and NVDA (implementation plan, Phase 1). They
- * carry no figures and no narrative presented as fact. Every slot is one of:
- *   - verbatim filing text: each current-risk heading is copied from the latest 10-K and
- *     cited to a passage that starts with it. The headings are a hand-picked SELECTION, not
- *     the 10-K's complete list (the heading extractor is Phase 2), so the UI labels them as
- *     a preview and never draws completeness conclusions from them (isFixtureProfile);
- *   - a deterministic template over that text or over the filing rows (category from
- *     classifyRiskHeading, plain label, coverage tier, a recommended question);
+ * Preview (fixture) profiles for AAPL, MSFT and NVDA. They carry no figures and no narrative
+ * presented as fact. Every slot is one of:
+ *   - verbatim filing text: since Phase 2, the latest 10-K's COMPLETE extracted list of risk
+ *     headings (scripts/fixtures/build-risk-fixtures.ts, packages/corpus risks.ts), each cited
+ *     to the real index chunk(s) that contain it. The extractor is a deterministic heuristic
+ *     with imperfect recall, so the UI still labels these profiles a preview and never draws
+ *     completeness conclusions from them (isFixtureProfile, SPEC §8.6);
+ *   - a deterministic template over that text or over the filing rows (category from the
+ *     extractor's classifier, plain label, coverage tier, recommended questions);
  *   - a labeled placeholder (PLACEHOLDER_TEXT), shown in the UI as "Placeholder, not filing data".
  * fixtures.test.ts and the rendered-figure test enforce this.
  */
+
+interface RiskHeadingsFile {
+  indexVersion: string;
+  companies: Array<{
+    ticker: string;
+    documentId: string;
+    fiscalLabel: string;
+    headings: Array<{ heading: string; group: string | null; category: SignalCategory | null; rank: number; chunkIds: string[] }>;
+  }>;
+  passages: Citation[];
+}
+
+const RISK_HEADINGS = riskHeadingsJson as RiskHeadingsFile;
+
+/** The index passages the preview profiles cite. */
+export const RISK_PASSAGES: readonly Citation[] = RISK_HEADINGS.passages;
 
 /** Plain-language coverage summary per tier (templated; no figures). */
 export const TIER_COPY: Record<CoverageTier, { label: string; summary: string }> = {
@@ -42,26 +62,37 @@ const EXECUTIVE_DIMENSIONS = ['Performance', 'Growth', 'Margins', 'Outlook', 'Ri
 interface FixtureInput {
   ticker: string;
   sector: string;
-  /** Latest-10-K passages that each start with a verbatim risk heading, and that heading. */
-  risks: Array<{ chunkId: string; heading: string }>;
 }
 
-function buildFixtureProfile({ ticker, sector, risks }: FixtureInput): CompanyIntelligenceProfile {
+/** The first (lowest-rank) classified heading of each area, in rank order. */
+function firstPerCategory<T extends { category: SignalCategory | null }>(risks: readonly T[]): T[] {
+  const seen = new Set<SignalCategory>();
+  return risks.filter((r) => r.category !== null && !seen.has(r.category) && seen.add(r.category));
+}
+
+function buildFixtureProfile({ ticker, sector }: FixtureInput): CompanyIntelligenceProfile {
   const company = companyByTicker(ticker);
-  if (!company) throw new Error(`fixture profile: unknown ticker ${ticker}`);
-  const citations = risks.map((r) => passage(r.chunkId));
+  const extracted = RISK_HEADINGS.companies.find((c) => c.ticker === ticker);
+  if (!company || !extracted) throw new Error(`fixture profile: unknown ticker ${ticker}`);
+  const byId = new Map(RISK_HEADINGS.passages.map((p) => [p.chunkId, p]));
   const annualPeriods = FILINGS.filter((f) => f.ticker === ticker && f.filingType === '10-K')
     .map((f) => f.periodEnd)
     .sort();
 
-  // Rank is the order of the selected headings in the filing, kept only to satisfy the schema;
-  // it is not a position in the complete risk list and the UI never presents it as one.
-  const ordered = [...risks].sort((a, b) => passage(a.chunkId).charStart - passage(b.chunkId).charStart);
-  const currentRisks = ordered.map((r, i) => {
-    const category = classifyRiskHeading(r.heading);
-    // The category enum is fixed (SPEC §11.1), so a fixture heading must classify.
-    if (!category) throw new Error(`fixture profile: unclassified heading for ${ticker}: ${r.heading}`);
-    return { category, heading: r.heading, plainLabel: SIGNAL_CATEGORY_LABELS[category], rank: i + 1, citationIds: [r.chunkId] };
+  // Rank is the heading's order in the extracted list; the UI never presents it as a
+  // position while the profile is a preview.
+  const currentRisks = extracted.headings.map((h) => ({
+    category: h.category,
+    heading: h.heading,
+    plainLabel: h.category ? SIGNAL_CATEGORY_LABELS[h.category] : OTHER_RISKS_LABEL,
+    rank: h.rank,
+    citationIds: h.chunkIds,
+  }));
+  const citationIds = [...new Set(currentRisks.flatMap((r) => r.citationIds))];
+  const citations = citationIds.map((id) => {
+    const p = byId.get(id);
+    if (!p) throw new Error(`fixture profile: passage missing: ${id}`);
+    return p;
   });
 
   const tier = TIER_COPY[company.tier];
@@ -70,9 +101,9 @@ function buildFixtureProfile({ ticker, sector, risks }: FixtureInput): CompanyIn
     company: company.company,
     sector,
     version: {
-      indexVersion: 'fixture-phase1',
-      profileSetId: 'fixture-v1',
-      templateVersion: 'fixture-1',
+      indexVersion: RISK_HEADINGS.indexVersion,
+      profileSetId: 'fixture-v2',
+      templateVersion: 'fixture-2',
       builtAt: '2026-10-01',
       periodsCovered: annualPeriods,
     },
@@ -88,10 +119,11 @@ function buildFixtureProfile({ ticker, sector, risks }: FixtureInput): CompanyIn
       { dimension: 'Evidence coverage', label: tier.label, summary: tier.summary, citationIds: [] },
     ],
     managementOutlook: null,
-    // Templated from each selected current risk and cited to it. It asks what the dashboard
-    // cannot show yet (how the disclosure moved across annual reports and what management is
-    // doing about it), so it does not repeat the risk's own Investigate question.
-    recommendedDiligence: currentRisks.map((r) => {
+    // Templated, one per risk area the latest annual report discusses, cited to that area's
+    // first heading. It asks what the dashboard cannot show yet (how the disclosure moved
+    // across annual reports and what management is doing about it), so it does not repeat a
+    // risk's own Investigate question. Unclassified headings get no templated question.
+    recommendedDiligence: firstPerCategory(currentRisks).map((r) => {
       const area = r.plainLabel.toLowerCase();
       const history = company.tenK > 1;
       return {
@@ -107,8 +139,8 @@ function buildFixtureProfile({ ticker, sector, risks }: FixtureInput): CompanyIn
       };
     }),
     gaps: [
-      'The risk headings shown are a selection from the latest annual report, not its complete list.',
-      'Financial figures and trends are not extracted yet.',
+      'Risk headings are extracted by a deterministic rule from the latest annual report and can miss some headings and include a sentence that is not a heading; comparisons between companies wait for the full profile build.',
+      'Financial figures and trends are extracted but not shown in this preview yet.',
       'Filing-to-filing change detection has not run yet.',
       'Management outlook is not extracted yet.',
     ],
@@ -124,78 +156,9 @@ function buildFixtureProfile({ ticker, sector, risks }: FixtureInput): CompanyIn
 export const FIXTURE_PROFILES: ReadonlyMap<string, CompanyIntelligenceProfile> = new Map(
   (
     [
-      {
-        ticker: 'AAPL',
-        sector: 'Information Technology',
-        risks: [
-          {
-            chunkId: 'AAPL-FY2025-10K-1A-R01',
-            heading:
-              'Global markets for the Company’s products and services are highly competitive and subject to rapid technological change, and the Company may be unable to compete effectively in these markets.',
-          },
-          {
-            chunkId: 'AAPL-FY2025-10K-1A-R02',
-            heading:
-              'The Company depends on component and product manufacturing and logistical services provided by outsourcing partners, many of which are located outside of the U.S.',
-          },
-          {
-            chunkId: 'AAPL-FY2025-10K-1A-R04',
-            heading:
-              'Losses or unauthorized access to or releases of confidential information, including personal information, could subject the Company to significant reputational, financial, legal and operational consequences.',
-          },
-          {
-            chunkId: 'AAPL-FY2025-10K-1A-R03',
-            heading:
-              'The Company is subject to complex and changing laws and regulations worldwide, which exposes the Company to potential liabilities, increased costs and other adverse effects on the Company’s business.',
-          },
-        ],
-      },
-      {
-        ticker: 'MSFT',
-        sector: 'Information Technology',
-        risks: [
-          {
-            chunkId: 'MSFT-FY2025-10K-1A-R01',
-            heading:
-              'We face intense competition across all markets for our products and services, which could adversely affect our results of operations.',
-          },
-          {
-            chunkId: 'MSFT-FY2025-10K-1A-R02',
-            heading:
-              'Cyberattacks and security vulnerabilities could lead to reduced revenue, increased costs, liability claims, or harm to our reputation or competitive position.',
-          },
-          {
-            chunkId: 'MSFT-FY2025-10K-1A-R03',
-            heading:
-              'We are subject to a variety of new, existing, and evolving legal and regulatory requirements that could adversely affect our results of operations.',
-          },
-        ],
-      },
-      {
-        ticker: 'NVDA',
-        sector: 'Information Technology',
-        risks: [
-          {
-            chunkId: 'NVDA-FY2025-10K-1A-R01',
-            heading:
-              'Dependency on third-party suppliers and their technology to manufacture, assemble, test, or package our products reduces our control over product quantity and quality, manufacturing yields, and product delivery schedules and could harm our business.',
-          },
-          {
-            chunkId: 'NVDA-FY2025-10K-1A-R03',
-            heading: 'Competition could adversely impact our market share and financial results.',
-          },
-          {
-            chunkId: 'NVDA-FY2025-10K-1A-R04',
-            heading:
-              'Product, system security, and data protection incidents or breaches, as well as cyber-attacks, could disrupt our operations, reduce our expected revenue, increase our expenses, and significantly harm our business and reputation.',
-          },
-          {
-            chunkId: 'NVDA-FY2025-10K-1A-R02',
-            heading:
-              'We are subject to complex laws, rules, regulations, and political and other actions, including restrictions on the export of our products, which may adversely impact our business.',
-          },
-        ],
-      },
+      { ticker: 'AAPL', sector: 'Information Technology' },
+      { ticker: 'MSFT', sector: 'Information Technology' },
+      { ticker: 'NVDA', sector: 'Information Technology' },
     ] satisfies FixtureInput[]
   ).map((input) => [input.ticker, buildFixtureProfile(input)]),
 );

@@ -3,36 +3,31 @@
 _Last updated: 2026-10-01 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `716181a` Phase 1 (application shell on the SPEC v2 IA).
+`main` (no remote yet). Last commit: `fdee7d8` (STATE after Phase 1 `716181a`). **Phase 2 is uncommitted in the working tree.**
 
 ## Current phase
-**Phase 1 (rework to the SPEC v2 IA) is complete, deployed, and committed (`716181a`).** Handoff: `docs/handoffs/phase-01.md`.
-- Live at https://diligenceiq.mikemiller.ai (Amplify job 1, app `d1jxmy4ao911ax`; the api Lambda was updated by `pnpm deploy:infra` on 2026-10-01).
-- **D9 verified:** the Amplify `/api/<*>` rewrite forwards `Set-Cookie` and the returning `Cookie` header (curl with a cookie jar, and a real browser).
-- Navigation: Company Intelligence | Compare | Deep Analysis | Findings, plus "Ask a question". Routes: `/`, `/intelligence`, `/compare`, `/analysis/new`, `/analysis`, `/findings`, `/architecture`, `/sources/filing`.
-- Content is fixture-only: preview profiles for AAPL, MSFT and NVDA hold a **selection** of verbatim, cited latest-10-K risk headings plus labeled placeholders, and no figures. Compare shows placeholders for anything that needs the complete heading list.
-- The workspace starts empty. The hand-written sample brief is test-only (`apps/web/src/test/`), and a test forbids app imports from there.
-- The API answers `POST /api/analyses` with `ANALYSES_DISABLED`; there is no pipeline yet.
+**Phase 2 (ingestion, chunking, embeddings, index, extraction) is complete locally and gated, not committed, not uploaded, not deployed.** Handoff: `docs/handoffs/phase-02.md`.
+- Live site https://diligenceiq.mikemiller.ai still serves the Phase 1 build.
+- Bedrock invoke entitlement verified (Titan v2, `us.anthropic.claude-sonnet-4-6`).
+- Index `iv-9cf51c066743` built and validated in `.index/build/` (gitignored): 246 documents, 25,404 chunks (chunker c2, tokenizer t2), 54 companies; vectors 104 MB, chunks 93 MB, BM25 28 MB; local cold load ~420 ms, ~900 MB resident.
+- Embedding spend this phase: 22.1M Titan v2 tokens ≈ $0.44.
+- Web preview profiles (AAPL 28, MSFT 24, NVDA 25 headings) cite real index chunks.
 
 ## Gate
-`pnpm gate` was run on 2026-10-01 against the working tree (exit 0):
-- `check-docs: OK (13 files verified)`;
-- lint and typecheck (including `tests/e2e`) clean;
-- unit tests: core 30, cdk 35, api 23, web 89 (177 in total; the corpus exact-slice test ran);
-- `cdk:synth` and `build` succeeded;
-- **e2e: 31 passed** (Playwright 1.63.0, including axe scans and the prefill-never-auto-submits network test).
+`pnpm gate` run on 2026-10-01 against the working tree: **exit 0**.
+- check-docs OK (13 files); lint and typecheck (incl. `tests/e2e`, `scripts/`) clean.
+- Unit tests with `REQUIRE_CORPUS=1`: core 30, cdk 35, api 23, corpus 102, rag 38, web 91 (319).
+- `cdk:synth` and `build` succeeded; **e2e 31 passed**.
 
-Gate record for the phase:
-- the adversary found 1 blocker, 3 high and the rest medium or low;
-- a fresh fixer fixed all of them, with regression tests;
-- `/code-review` at medium returned 0 findings;
-- `pnpm gate` passed.
+Gate record for the phase: adversary (2 blockers, 4 high, 7 medium, lows) → two fresh fixers (all fixed or partly fixed with measured numbers) → `/code-review` medium (2 low findings, fixed) → e2e axe regression fixed → `pnpm gate` green.
 
 ## In flight
-- Nothing uncommitted.
-- Next is **Phase 2**, ingestion and indexing. Verify Bedrock invoke entitlement first.
+- Nothing running. Awaiting Mike: S3 upload and commit.
+- Next is **Phase 3** (query analysis, lanes, hybrid retrieval, context builder, retrieval evals, change detection and signal go/no-go).
 
 ## Decisions pending with Mike
+- **Upload index `iv-9cf51c066743` to S3?** `pnpm index:upload --bucket diligenceiq-core-databuckete3889a50-cto74g4tj9kn --yes` (296 index objects + 246 processed filings, ~293 MB; dry run verified). Needed before Phase 3's worker can load it.
+- **Commit Phase 2** (waiting for go-ahead).
 - **Ask Eliza** about the offline profile generation (F4), before Phase 4b.
 - **Lambda concurrency quota increase:** recommended before the demo (the account limit is 10, shared).
 - **Sonnet 5.5 quota increase:** optional (L-94A31E46). The app ships on Sonnet 4.6 otherwise.
@@ -45,7 +40,7 @@ Gate record for the phase:
 - **Lambda account concurrency is 10 (shared).** No reserved concurrency; worker `maximumConcurrency: 2`.
 - **Claude Sonnet 5.5 has 0 tokens/minute quota here.** The default is `us.anthropic.claude-sonnet-4-6`. IAM needs the us-east-1, us-east-2 and us-west-2 foundation-model ARNs.
 - **Cohere Embed v4 is capped at 16.2M tokens/day,** below the ~20M-token corpus. Titan v2 is the default. The indexer must checkpoint and cache.
-- **Bedrock invoke entitlement is unverified.** Verify at the start of Phase 2.
+- **Bedrock invoke entitlement verified 2026-10-01** (Titan v2 and Sonnet 4.6, us-east-1). Re-check with `pnpm check:bedrock` (tiny spend; ask first).
 - **No Docker.** Lambda zip bundles only.
 - **Corpus coverage tiers:**
   - Deep: 12 companies, 3–5 10-Ks each.
@@ -60,9 +55,16 @@ Gate record for the phase:
   - `pnpm e2e` serves `apps/web/out` with `python3 -m http.server` on port 4174, with **one worker**: parallel workers stall the Python server and pages hang on "Loading…".
   - It needs a prior `pnpm build`; the gate order handles that.
   - `@playwright/test` is pinned to 1.63.0 to match the cached Chromium 1243. Bumping it triggers a browser download.
-- **Fixture profiles hold a selection of headings.** While any `profileSetId` is `fixture-*` (`isFixtureProfile`), nothing that depends on the complete heading list may be stated as a conclusion: common or distinctive areas, ranking, "major attention area", or a heading's rank. SPEC §8.6.
-- **Fixture passages are regenerated, never hand-edited:**
-  - Run `node scripts/fixtures/build-web-fixtures.mjs`; it needs `./edgar_corpus`.
-  - App passages and test-only passages (`apps/web/src/test/generated/`) are separate files.
+- **Preview profiles (`fixture-v2`) hold the full EXTRACTED heading list, not a vetted one.** Measured precision 0.92 / recall 0.96 on hand-labeled AAPL, MSFT, NVDA (NVDA precision 0.84). While any `profileSetId` is `fixture-*` (`isFixtureProfile`), nothing that depends on a complete list may be stated as a conclusion (common or distinctive areas, ranking, "major attention area", rank). SPEC §8.6.
+- **Fixture files are regenerated, never hand-edited:**
+  - `pnpm fixtures:risks` → `apps/web/src/fixtures/generated/risk-headings.json` (real index chunk IDs; its `indexVersion` must equal the ingest report's).
+  - `node scripts/fixtures/build-web-fixtures.mjs` → `filings.json` and the test-only passages (`apps/web/src/test/generated/`). Both need `./edgar_corpus`.
+- **Index version = content hash of the chunks as produced** (`packages/rag` `version.ts`). Any change to section detection, segmentation, headers or fiscal labels changes it, and therefore chunk IDs, the web fixture's `indexVersion`, and which cached embeddings apply. After such a change: `pnpm ingest`, `pnpm fixtures:risks`, `pnpm index:embed --dry-run` (ask before the real run), `pnpm index:build`.
+- **Embedding cache** `.index/cache/embeddings-amazon.titan-embed-text-v2_0-1024.jsonl` (28,202 vectors, gitignored, ~$0.44 to rebuild). A live embed run holds `<cache>.lock`; a stale lock is reported, never auto-removed. Never run two embed runs at once. Spend log: `.index/cache/embed-runs.jsonl` (covers only runs since it was introduced).
+- **Chunk offsets index the PROCESSED text** (body from the cover heading on, whitespace-normalized), not the raw file. Test-only passages are still raw-file slices.
+- **Section-detection gaps that remain:** IBM 10-K (MD&A and statements are 210/357-char stubs, incorporated by reference); integrated-report 10-Ks (XOM, CVX, DE, BAC, INTC, MCD, PEP, MS) label statements as MD&A. See assumptions Known corpus anomalies.
+- **Extraction is time-boxed:** drivers for 9/54 companies; total debt 11/54; gross profit 16/54. Facts carry `source` (`statement`/`other_table`) and `suspect`; Phase 4b must map them into core's strict `ProfileFactSchema`.
+- **`pnpm gate` requires the corpus** (`REQUIRE_CORPUS=1`); without `edgar_corpus/` it fails by design.
+- **Evidence drawer regions scroll and are focusable** (axe `scrollable-region-focusable`); long passages broke the Phase 1 e2e axe scan.
 - **Corpus company names have no trailing period** ("Apple Inc", "Tesla Inc"). GE's display name is overridden to "General Electric Capital Corp (GE Capital)" (G2).
 - **`cdk diff` is not side-effect free.** It publishes template and Lambda assets to the CDK bootstrap bucket.

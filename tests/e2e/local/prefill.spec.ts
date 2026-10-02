@@ -67,7 +67,7 @@ test('Investigate on Company Intelligence prefills Deep Analysis without running
   const requests = recordRequests(page);
   await page.goto('/intelligence/?ticker=AAPL');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Apple Inc');
-  await page.getByRole('region', { name: 'Supply chain' }).getByRole('link', { name: /Investigate/ }).click();
+  await page.getByRole('region', { name: 'Supply chain' }).getByRole('link', { name: /Investigate/ }).first().click();
   await expect(page).toHaveURL(/\/analysis\/new\/\?.*origin=currentRisk%3AAAPL%3Arisk-/);
   await expect(page.getByRole('textbox', { name: 'Question', exact: true })).toHaveValue(/supply chain risk/);
   await settle(page);

@@ -2,7 +2,7 @@
   "name": "diligenceiq",
   "private": true,
   "version": "0.0.0",
-  "description": "DiligenceIQ — investment intelligence over SEC filings: Company Intelligence, Compare, and one-call Deep Analysis (RAG)",
+  "description": "DiligenceIQ \u2014 investment intelligence over SEC filings: Company Intelligence, Compare, and one-call Deep Analysis (RAG)",
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=22"
@@ -10,7 +10,7 @@
   "scripts": {
     "check:docs": "node scripts/check-docs.mjs",
     "lint": "eslint .",
-    "typecheck": "pnpm -r --if-present typecheck && tsc -p tests/e2e/tsconfig.json",
+    "typecheck": "pnpm -r --if-present typecheck && tsc -p tests/e2e/tsconfig.json && tsc -p scripts/tsconfig.json",
     "test": "pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
     "cdk:synth": "pnpm --filter @diligenceiq/cdk cdk:synth",
@@ -18,11 +18,24 @@
     "fixtures:web": "node scripts/fixtures/build-web-fixtures.mjs",
     "deploy:infra": "pnpm --filter @diligenceiq/cdk run deploy",
     "deploy:web": "bash scripts/deploy-web.sh",
-    "gate": "pnpm check:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm cdk:synth && pnpm build && pnpm e2e",
-    "e2e": "playwright test"
+    "gate": "pnpm check:docs && pnpm lint && pnpm typecheck && REQUIRE_CORPUS=1 pnpm test && pnpm cdk:synth && pnpm build && pnpm e2e",
+    "e2e": "playwright test",
+    "ingest": "tsx scripts/ingestion/ingest.ts",
+    "index:embed": "tsx scripts/indexing/embed.ts",
+    "index:build": "tsx scripts/indexing/build-index.ts",
+    "extract": "tsx scripts/ingestion/extract.ts",
+    "fixtures:risks": "tsx scripts/fixtures/build-risk-fixtures.ts",
+    "index:upload": "tsx scripts/indexing/upload-index.ts",
+    "index:measure-load": "tsx scripts/indexing/measure-load.ts",
+    "check:bedrock": "tsx scripts/check-bedrock-entitlement.ts"
   },
   "devDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "3.1144.0",
+    "@aws-sdk/client-s3": "3.1144.0",
     "@axe-core/playwright": "4.13.0",
+    "@diligenceiq/core": "workspace:*",
+    "@diligenceiq/corpus": "workspace:*",
+    "@diligenceiq/rag": "workspace:*",
     "@eslint/js": "10.0.1",
     "@next/eslint-plugin-next": "16.3.8",
     "@playwright/test": "1.63.0",
@@ -30,6 +43,7 @@
     "eslint": "10.11.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.13.0",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0"
   }
