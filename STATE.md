@@ -3,10 +3,10 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last commit: `ae6057b` (STATE after da-v4). Phase 5 is **uncommitted in the working tree**, pending Mike's go-ahead. Phase 4: `9699b3b`, da-v4 follow-up `ab5de38`.
+`main` (no remote yet). Last code commit: `fb54e18` (Phase 5). Phase 4: `9699b3b`, da-v4 follow-up `ab5de38`.
 
 ## Current phase
-**Phase 5 is built and gated (`pnpm gate` exit 0, 2026-10-02) but not committed and not deployed.** Handoff: `docs/handoffs/phase-05.md`. Mike chose Phase 5 before Phase 4b on 2026-10-02; SPEC v2 Appendix A.4 records it, **pending his confirmation**.
+**Phase 5 is built, gated (`pnpm gate` exit 0, 2026-10-02) and committed (`fb54e18`), but not deployed.** Handoff: `docs/handoffs/phase-05.md`. Mike chose Phase 5 before Phase 4b on 2026-10-02; SPEC v2 Appendix A.4 records it (confirmed by Mike, 2026-10-02).
 - **api** (`services/api`):
   - HMAC sessions (cookie `__Host-diq_ws`, secret = SSM SecureString `/diligenceiq/session-secret`, admin-created).
   - Demo workspace seeded from `seed/demo-workspace.json` (3 real pre-run briefs, 4 findings); reset.
@@ -27,7 +27,6 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all fixed, regression tests) → `/code-review` medium (2 findings: concurrent 401s minted several workspaces; profile finding IDs collided across profile sets; both fixed with tests) → `pnpm gate` green.
 
 ## In flight
-- Phase 5 commit: waiting for Mike's go-ahead.
 - Deploy (each needs Mike's OK; none done):
   1. Create the SecureString `/diligenceiq/session-secret` (≥ 32 bytes) in us-east-1.
   2. Upload the preview set: `pnpm profiles:upload-set --bucket <data bucket> --set iv-9cf51c066743/fixture-v2 --yes`.
@@ -38,7 +37,6 @@ Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all
 - Next phase: Phase 4b (offline profiles; must write the manifest format in `ProfileSetManifestSchema`), then Phase 6.
 
 ## Decisions pending with Mike
-- **Confirm SPEC A.4:** Phase 5 before 4b, preview set through the real profile path.
 - **D12 (per-client creation cap keyed on `sourceIp`):** behind the Amplify rewrite, `sourceIp` may be a shared proxy address, so many visitors would share 20 workspaces a day. Before deploy, choose: raise the cap, key on the last untrusted `X-Forwarded-For` hop, or verify in Phase 8.
 - **Validator:** whether to also read a same-chunk "(MILLIONS)" caption (would address the 42 Pfizer near matches; free re-score). Do not loosen anything else.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.

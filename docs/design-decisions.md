@@ -512,7 +512,7 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 **Status:** Accepted (Phase 5, 2026-10-02).
 
 **Context**
-- Phase 5 wires the real api (sessions, workspace, profiles, Compare, analyses, findings) before the Phase 4b profile build exists. Running Phase 5 before Phase 4b is Mike's choice of 2026-10-02, recorded as a SPEC v2 Appendix A.4 amendment to §49 (pending his confirmation at the Phase 5 handoff).
+- Phase 5 wires the real api (sessions, workspace, profiles, Compare, analyses, findings) before the Phase 4b profile build exists. Running Phase 5 before Phase 4b is Mike's choice of 2026-10-02, recorded as a SPEC v2 Appendix A.4 amendment to §49 (confirmed by Mike at the Phase 5 handoff).
 - The demo needs a seeded workspace, spend caps that hold, and an E2E suite that exercises the real api without spending money.
 
 **Decision**

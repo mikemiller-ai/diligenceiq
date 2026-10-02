@@ -10,7 +10,7 @@ Phase 5 connects the product to the Phase 4 worker. Phase 1 kept all workspace s
 - Findings are stored server-side, with their text copied from stored content.
 
 ## Decisions settled first
-- **Order:** Mike chose Phase 5 before Phase 4b (2026-10-02). SPEC v2 Appendix A.4 records it, with the preview set `fixture-v2` served through the real runtime profile path (SSM pointer + S3) until 4b. **It is pending Mike's confirmation.**
+- **Order:** Mike chose Phase 5 before Phase 4b (2026-10-02). SPEC v2 Appendix A.4 records it, with the preview set `fixture-v2` served through the real runtime profile path (SSM pointer + S3) until 4b. Mike confirmed it at the handoff.
 - **Validator improvement (approved by Mike this session):** the `preceding_unit` rule.
   - A table cell whose unit caption ("(In millions)") sits in the immediately preceding chunk of the same filing and section, at most 2 chunks back and contiguous, verifies only when the amount is exactly equal.
   - da-v4 numeric grounding went from 0.901 (484/537, 47 near matches) to **0.911 (489/537, 42 near matches)** on a free re-score. The earlier prediction that it would verify "most of the 47" was wrong and is recorded in `docs/prompt-iterations.md`.
@@ -92,7 +92,6 @@ None. The seed build and the re-score are replay-only. Nothing was deployed.
 6. One in-region `pnpm analysis:run` (about $0.13, kill switch on then off) to verify api → SQS → worker. **It has never run end to end.**
 
 ## Decisions pending with Mike
-- Confirm SPEC A.4: Phase 5 before 4b, preview set through the real path.
 - D12: the per-client creation cap keys on `sourceIp`, which may be a shared proxy address behind the Amplify rewrite. Raise the cap, key on `X-Forwarded-For`, or verify in Phase 8.
 - Whether the validator should also read a same-chunk "(MILLIONS)" caption (free re-score).
 - Approval for each deployment step above.
