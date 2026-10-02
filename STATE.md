@@ -3,7 +3,7 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `9699b3b` (Phase 4). Previous: `ba161bb` (Phase 3).
+`main` (no remote yet). Last code commit: `ab5de38` (Phase 4 follow-up: da-v4). Phase 4: `9699b3b`. Phase 3: `ba161bb`.
 
 ## Current phase
 **Phase 4 is complete and gated (`pnpm gate` exit 0, 2026-10-02): the one-call generation pipeline, deterministic validation, the SQS worker plane, and generation evals.** Handoff: `docs/handoffs/phase-04.md`. Evals: `docs/evaluation.md` §4–5. Prompt log: `docs/prompt-iterations.md`.
@@ -14,7 +14,7 @@ _Last updated: 2026-10-02 (local)_
   - Abstention 2/2, follow-ups answerable 2/2, injection 1/1, coverage 17/17.
 - **In-region:** cold index load 2.75 s; generation 41–59 s (first token ~1.1 s); enqueue → COMPLETE 42–64 s; ~$0.12–0.13 per analysis.
 - **Deployed:**
-  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm), redeployed from `9699b3b` on 2026-10-02 (15:58 UTC). It runs da-v3; redeploying with da-v4 awaits Mike's go-ahead.
+  - `DiligenceIQ-Worker` (queue, DLQ, worker, dlq-handler, alarm), redeployed from `ab5de38` on 2026-10-02 (16:19 UTC). It runs da-v4 and matches the committed code.
   - The live site still serves Phase 1. The api still answers `ANALYSES_DISABLED`. The kill switch is `false` (verified).
 - **Spend this phase (approved):** Bedrock ≈ $9.30 estimated: four generation eval runs $8.93 (da-v1–v4), plus 3 in-region analyses ≈ $0.37.
 
@@ -31,7 +31,6 @@ Gate record: adversary (0 blocker, 5 high, 6 medium, 11 low) → three fresh fix
 - Next: Phase 4b (offline profiles; F4 settled 2026-10-02: Mike confirmed the offline build is fine) or Phase 5 (sessions, caps, `POST /api/analyses` enqueue, poll with `expireIfPastDeadline`, Deep Analysis UI).
 
 ## Decisions pending with Mike
-- **Redeploy `DiligenceIQ-Worker` with da-v4** (an AWS write; the deployed worker runs da-v3).
 - **Optional validator improvement:** read a table's "(in millions)" unit header from the adjacent chunk of the same filing. It would verify most of the 47 near matches; a re-score is free.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.

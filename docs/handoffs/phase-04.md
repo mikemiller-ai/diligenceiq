@@ -175,7 +175,7 @@ After the gate and commit `9699b3b`, Mike approved three follow-ups:
 - **F4 settled:** Mike confirmed the offline profile build is fine, so Phase 4b proceeds. Both profile sets and the SSM pointer stay as designed (DD-16).
 - **Lambda concurrency:** raised from 10 to 1,000 (quota L-B99A9384, verified 2026-10-02). The no-reserved-concurrency rule and `maximumConcurrency: 2` are unchanged.
 - **Spend:** total Phase 4 Bedrock generation is now $8.93 (four eval runs) plus about $0.37 in-region.
-- **Deployment:** the deployed worker still runs da-v3 from `9699b3b`. Redeploying it with da-v4 needs Mike's go-ahead.
+- **Deployment:** committed as `ab5de38` and redeployed (2026-10-02, 16:19 UTC). The worker runs da-v4.
 
 ## Next-phase objective (Phase 4b or 5, per Mike and the Eliza answer on F4)
 - **Phase 4b:** the offline Company Intelligence build (SPEC §32), after asking Eliza. It uses the same `GenerationGateway` with `purpose: 'profile'`.
