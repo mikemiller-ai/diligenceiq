@@ -1,0 +1,1518 @@
+{
+ "indexVersion": "iv-9cf51c066743",
+ "ranAt": "2026-10-02T01:16:04.008Z",
+ "minDecided": 5,
+ "scores": [
+  {
+   "detector": "risk_new",
+   "emitted": 9,
+   "judged": 3,
+   "correct": 1,
+   "precision": 0.3333333333333333,
+   "labeledPositives": 1,
+   "found": 1,
+   "recall": 1,
+   "pass": false,
+   "verdict": "only 3 decided candidate(s) (minimum 5); precision 0.33 < 0.8"
+  },
+  {
+   "detector": "risk_removed",
+   "emitted": 13,
+   "judged": 8,
+   "correct": 3,
+   "precision": 0.375,
+   "labeledPositives": 3,
+   "found": 3,
+   "recall": 1,
+   "pass": false,
+   "verdict": "precision 0.38 < 0.8"
+  },
+  {
+   "detector": "risk_persistent",
+   "emitted": 29,
+   "judged": 29,
+   "correct": 26,
+   "precision": 0.896551724137931,
+   "labeledPositives": 27,
+   "found": 24,
+   "recall": 0.8888888888888888,
+   "pass": true,
+   "verdict": "meets the bar",
+   "recallAll": {
+    "found": 27,
+    "labeledPositives": 74,
+    "recall": 0.36486486486486486
+   },
+   "links": {
+    "total": 77,
+    "labeled": 55,
+    "held": 51,
+    "precision": 0.9272727272727272
+   },
+   "fullyVerified": {
+    "judged": 7,
+    "correct": 5,
+    "precision": 0.7142857142857143
+   }
+  },
+  {
+   "detector": "emphasis_up",
+   "emitted": 3,
+   "judged": 2,
+   "correct": 2,
+   "precision": 1,
+   "labeledPositives": 13,
+   "found": 2,
+   "recall": 0.15384615384615385,
+   "pass": false,
+   "verdict": "only 2 decided candidate(s) (minimum 5); recall 0.15 < 0.5"
+  },
+  {
+   "detector": "emphasis_down",
+   "emitted": 0,
+   "judged": 0,
+   "correct": 0,
+   "precision": null,
+   "labeledPositives": 1,
+   "found": 0,
+   "recall": 0,
+   "pass": false,
+   "verdict": "only 0 decided candidate(s) (minimum 5); recall 0.00 < 0.5"
+  },
+  {
+   "detector": "outlook",
+   "emitted": 3,
+   "judged": 1,
+   "correct": 0,
+   "precision": 0,
+   "labeledPositives": 5,
+   "found": 0,
+   "recall": 0,
+   "pass": false,
+   "verdict": "only 1 decided candidate(s) (minimum 5); precision 0.00 < 0.8; recall 0.00 < 0.5"
+  },
+  {
+   "detector": "trend",
+   "emitted": 15,
+   "judged": 15,
+   "correct": 15,
+   "precision": 1,
+   "labeledPositives": 15,
+   "found": 15,
+   "recall": 1,
+   "pass": true,
+   "verdict": "meets the bar"
+  }
+ ],
+ "status": {
+  "risk_new": {
+   "enabled": false,
+   "reason": "Suppressed: precision 0.33 (1/3 judged, below the 5-decided minimum), recall 1/1. Real new risk factors are rare (1 in 6 pairs); extractor false-positive headings and reworded headings dominate."
+  },
+  "risk_removed": {
+   "enabled": false,
+   "reason": "Suppressed: precision 0.38 (3/8), recall 3/3. Merged risk factors (MSFT FY2025) and non-heading sentences read as removals."
+  },
+  "risk_persistent": {
+   "enabled": true,
+   "reason": "Go (AAPL, MSFT, NVDA only): precision 0.90 (26/29) judged on hand-labeled links only; link precision 0.93 (51/55); recall 0.89 (24/27) over labeled persistent headings the classifier categorizes. 22 of 77 chain links (FY2022→FY2023) are unlabeled and unverified, so the headline states the matched span (\"matched in each annual report FY2022–FY2025\"), not a verified history. Diagnostics: fully labeled chains 5/7; recall over all labeled persistent headings 27/74 (uncategorized headings are shown as current risks, not PERSISTENT)."
+  },
+  "emphasis_up": {
+   "enabled": false,
+   "reason": "Suppressed: precision 1.00 (2/2, below the 5-decided minimum) but recall 0.15 (2/13); lexicon density misses content-level expansion."
+  },
+  "emphasis_down": {
+   "enabled": false,
+   "reason": "Suppressed: no candidates; recall 0/1."
+  },
+  "outlook": {
+   "enabled": false,
+   "reason": "Suppressed: precision 0.00 (0/1 judged), recall 0/5."
+  },
+  "trend": {
+   "enabled": true,
+   "reason": "Go (AAPL, MSFT, NVDA only): precision 1.00 (15/15), recall 1.00 (15/15) against 24 direction labels derived from hand-read income-statement rows (testing/trend-labels.ts), as of FY2024 and FY2025; no candidate on the 9 labeled no-change cases."
+  }
+ },
+ "trendLabels": [
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2024",
+   "metric": "revenue_growth",
+   "direction": "none",
+   "basis": "hand-read revenue growth -2.8% (FY2023) → 2.0% (FY2024)"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2024",
+   "metric": "gross_margin",
+   "direction": "improving",
+   "basis": "hand-read gross margin 44.1% (FY2023) → 46.2% (FY2024), 2.08 pp"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2024",
+   "metric": "operating_margin",
+   "direction": "improving",
+   "basis": "hand-read operating margin 29.8% (FY2023) → 31.5% (FY2024), 1.69 pp"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2024",
+   "metric": "net_margin",
+   "direction": "declining",
+   "basis": "hand-read net margin 25.3% (FY2023) → 24.0% (FY2024), -1.33 pp"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2025",
+   "metric": "revenue_growth",
+   "direction": "none",
+   "basis": "hand-read revenue growth 2.0% (FY2024) → 6.4% (FY2025)"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2025",
+   "metric": "gross_margin",
+   "direction": "none",
+   "basis": "hand-read gross margin 46.2% (FY2024) → 46.9% (FY2025), 0.70 pp"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2025",
+   "metric": "operating_margin",
+   "direction": "none",
+   "basis": "hand-read operating margin 31.5% (FY2024) → 32.0% (FY2025), 0.46 pp"
+  },
+  {
+   "ticker": "AAPL",
+   "asOf": "FY2025",
+   "metric": "net_margin",
+   "direction": "improving",
+   "basis": "hand-read net margin 24.0% (FY2024) → 26.9% (FY2025), 2.94 pp"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2024",
+   "metric": "revenue_growth",
+   "direction": "accelerating",
+   "basis": "hand-read revenue growth 6.9% (FY2023) → 15.7% (FY2024)"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2024",
+   "metric": "gross_margin",
+   "direction": "none",
+   "basis": "hand-read gross margin 68.9% (FY2023) → 69.8% (FY2024), 0.84 pp"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2024",
+   "metric": "operating_margin",
+   "direction": "improving",
+   "basis": "hand-read operating margin 41.8% (FY2023) → 44.6% (FY2024), 2.87 pp"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2024",
+   "metric": "net_margin",
+   "direction": "improving",
+   "basis": "hand-read net margin 34.1% (FY2023) → 36.0% (FY2024), 1.81 pp"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2025",
+   "metric": "revenue_growth",
+   "direction": "none",
+   "basis": "hand-read revenue growth 15.7% (FY2024) → 14.9% (FY2025)"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2025",
+   "metric": "gross_margin",
+   "direction": "none",
+   "basis": "hand-read gross margin 69.8% (FY2024) → 68.8% (FY2025), -0.94 pp"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2025",
+   "metric": "operating_margin",
+   "direction": "none",
+   "basis": "hand-read operating margin 44.6% (FY2024) → 45.6% (FY2025), 0.98 pp"
+  },
+  {
+   "ticker": "MSFT",
+   "asOf": "FY2025",
+   "metric": "net_margin",
+   "direction": "none",
+   "basis": "hand-read net margin 36.0% (FY2024) → 36.1% (FY2025), 0.19 pp"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2024",
+   "metric": "revenue_growth",
+   "direction": "accelerating",
+   "basis": "hand-read revenue growth 0.2% (FY2023) → 125.9% (FY2024)"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2024",
+   "metric": "gross_margin",
+   "direction": "improving",
+   "basis": "hand-read gross margin 56.9% (FY2023) → 72.7% (FY2024), 15.79 pp"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2024",
+   "metric": "operating_margin",
+   "direction": "improving",
+   "basis": "hand-read operating margin 15.7% (FY2023) → 54.1% (FY2024), 38.46 pp"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2024",
+   "metric": "net_margin",
+   "direction": "improving",
+   "basis": "hand-read net margin 16.2% (FY2023) → 48.8% (FY2024), 32.66 pp"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2025",
+   "metric": "revenue_growth",
+   "direction": "slowing",
+   "basis": "hand-read revenue growth 125.9% (FY2024) → 114.2% (FY2025)"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2025",
+   "metric": "gross_margin",
+   "direction": "improving",
+   "basis": "hand-read gross margin 72.7% (FY2024) → 75.0% (FY2025), 2.27 pp"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2025",
+   "metric": "operating_margin",
+   "direction": "improving",
+   "basis": "hand-read operating margin 54.1% (FY2024) → 62.4% (FY2025), 8.30 pp"
+  },
+  {
+   "ticker": "NVDA",
+   "asOf": "FY2025",
+   "metric": "net_margin",
+   "direction": "improving",
+   "basis": "hand-read net margin 48.8% (FY2024) → 55.8% (FY2025), 7.00 pp"
+  }
+ ],
+ "sensitivity": [
+  {
+   "relative": 0.1,
+   "absolute": 0.25,
+   "up": "P 0.63 (5/8), R 5/13",
+   "down": "P 0.25 (1/4), R 1/1"
+  },
+  {
+   "relative": 0.1,
+   "absolute": 0.5,
+   "up": "P 0.63 (5/8), R 5/13",
+   "down": "P 0.33 (1/3), R 1/1"
+  },
+  {
+   "relative": 0.1,
+   "absolute": 1,
+   "up": "P 1.00 (4/4), R 4/13",
+   "down": "P 0.00 (0/1), R 0/1"
+  },
+  {
+   "relative": 0.2,
+   "absolute": 0.25,
+   "up": "P 0.60 (3/5), R 3/13",
+   "down": "P 0.50 (1/2), R 1/1"
+  },
+  {
+   "relative": 0.2,
+   "absolute": 0.5,
+   "up": "P 0.60 (3/5), R 3/13",
+   "down": "P 0.50 (1/2), R 1/1"
+  },
+  {
+   "relative": 0.2,
+   "absolute": 1,
+   "up": "P 1.00 (3/3), R 3/13",
+   "down": "P n/a (0/0), R 0/1"
+  },
+  {
+   "relative": 0.3,
+   "absolute": 0.25,
+   "up": "P 0.50 (2/4), R 2/13",
+   "down": "P 1.00 (1/1), R 1/1"
+  },
+  {
+   "relative": 0.3,
+   "absolute": 0.5,
+   "up": "P 0.50 (2/4), R 2/13",
+   "down": "P 1.00 (1/1), R 1/1"
+  },
+  {
+   "relative": 0.3,
+   "absolute": 1,
+   "up": "P 1.00 (2/2), R 2/13",
+   "down": "P n/a (0/0), R 0/1"
+  }
+ ],
+ "viability": [
+  {
+   "ticker": "AAPL",
+   "pairs": 3,
+   "headingsLatest": 28,
+   "newPerPair": 0.3,
+   "removedPerPair": 1
+  },
+  {
+   "ticker": "AMZN",
+   "pairs": 3,
+   "headingsLatest": 6,
+   "newPerPair": 0,
+   "removedPerPair": 0
+  },
+  {
+   "ticker": "DIS",
+   "pairs": 3,
+   "headingsLatest": 17,
+   "newPerPair": 2.3,
+   "removedPerPair": 3
+  },
+  {
+   "ticker": "GOOG",
+   "pairs": 3,
+   "headingsLatest": 8,
+   "newPerPair": 0.3,
+   "removedPerPair": 0
+  },
+  {
+   "ticker": "JNJ",
+   "pairs": 4,
+   "headingsLatest": 16,
+   "newPerPair": 0.8,
+   "removedPerPair": 0.8
+  },
+  {
+   "ticker": "KO",
+   "pairs": 2,
+   "headingsLatest": 9,
+   "newPerPair": 2,
+   "removedPerPair": 2
+  },
+  {
+   "ticker": "META",
+   "pairs": 1,
+   "headingsLatest": 34,
+   "newPerPair": 0,
+   "removedPerPair": 0
+  },
+  {
+   "ticker": "MSFT",
+   "pairs": 3,
+   "headingsLatest": 24,
+   "newPerPair": 1.3,
+   "removedPerPair": 1.7
+  },
+  {
+   "ticker": "NVDA",
+   "pairs": 3,
+   "headingsLatest": 25,
+   "newPerPair": 1.3,
+   "removedPerPair": 1.7
+  },
+  {
+   "ticker": "PFE",
+   "pairs": 2,
+   "headingsLatest": 10,
+   "newPerPair": 0,
+   "removedPerPair": 0
+  },
+  {
+   "ticker": "TSLA",
+   "pairs": 3,
+   "headingsLatest": 18,
+   "newPerPair": 0.3,
+   "removedPerPair": 1
+  },
+  {
+   "ticker": "UNH",
+   "pairs": 2,
+   "headingsLatest": 14,
+   "newPerPair": 1,
+   "removedPerPair": 1
+  },
+  {
+   "ticker": "XOM",
+   "pairs": 3,
+   "headingsLatest": 3,
+   "newPerPair": 0.3,
+   "removedPerPair": 0
+  }
+ ],
+ "judged": [
+  {
+   "signalId": "AAPL-REDUCED-risk-FY2023-1",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "The Company’s business, results of operations, financial condition and stock price have been adversely affected and could in the future be materially adversely affected by the COVID-19 pandemic.",
+   "measurement": "Risk factor in the FY2022 annual report with no counterpart in FY2023: best heading match 0.17 and best sentence match 0.33, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "AAPL-OUTLOOK-mda_headwinds-FY2023-2",
+   "detector": "outlook",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "mda_headwinds",
+   "measurement": "Management discussion of headwinds: 3.23 → 4.88 terms per 10,000 characters of MD&A (6 → 8; 51%); thresholds ±30% and ±1.0, at least 5 matches.",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "AAPL-REDUCED-risk-FY2024-1",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "Political uncertainty surrounding trade and other international disputes could also have a negative effect on consumer confidence and spending, which could adversely affect the Company’s business.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2024: best heading match 0.30 and best sentence match 0.28, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "not labeled removed (still present, merged, or not a heading)"
+  },
+  {
+   "signalId": "AAPL-NEW-risk-FY2025-1",
+   "detector": "risk_new",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company’s net sales and gross margins are subject to volatility and downward pressure due to a variety of factors.",
+   "measurement": "Risk factor in the FY2025 annual report with no counterpart in FY2024: best heading match 0.31 and best sentence match 0.31, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "labeled as the same risk as “The Company expects its quarterly net sales and results of o…”"
+  },
+  {
+   "signalId": "AAPL-REDUCED-risk-FY2025-2",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company’s retail stores are subject to numerous risks and uncertainties.",
+   "measurement": "Risk factor in the FY2024 annual report with no counterpart in FY2025: best heading match 0.25 and best sentence match 0.33, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": true,
+   "why": "labeled removed"
+  },
+  {
+   "signalId": "AAPL-EXPANDED-geographic_concentration-FY2025-3",
+   "detector": "emphasis_up",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "geographic_concentration",
+   "measurement": "geographic concentration terms in Item 1A: 1.75 → 3.09 per 10,000 characters (12 → 21 matches; 77%); thresholds ±30% and ±1.0 per 10,000 characters, at least 5 matches.",
+   "correct": true,
+   "why": "labeled expanded"
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-geographic_concentration-FY2025-1",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company’s business can be impacted by political events, trade and other international disputes, geopolitical tensions, conflict, terrorism, natural disasters, public health issues, industrial accidents and other business interruptions.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-competition-FY2025-2",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Global markets for the Company’s products and services are highly competitive and subject to rapid technological change, and the Company may be unable to compete effectively in these markets.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-competition-FY2025-3",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "To remain competitive and stimulate customer demand, the Company must successfully manage frequent introductions and transitions of products and services.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-supply_chain-FY2025-4",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company’s products and services may be affected from time to time by design and manufacturing defects that could materially adversely affect the Company’s business and result in harm to the Company’s reputation.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-cybersecurity-FY2025-5",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Losses or unauthorized access to or releases of confidential information, including personal information, could subject the Company to significant reputational, financial, legal and operational consequences.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-litigation-FY2025-6",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company’s business, results of operations and financial condition could be adversely impacted by unfavorable results of legal proceedings or government investigations.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-regulatory-FY2025-7",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company is subject to complex and changing laws and regulations worldwide, which exposes the Company to potential liabilities, increased costs and other adverse effects on the Company’s business.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-regulatory-FY2025-8",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The technology industry, including, in some instances, the Company, is subject to intense media, political and regulatory scrutiny, which exposes the Company to increasing regulation, government investigations, legal actions and penalties.",
+   "measurement": "The same risk-factor heading was matched in each of 3 consecutive annual reports in the corpus (FY2023–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 0 of 2 link(s) unlabeled",
+   "links": {
+    "total": 2,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-PERSISTENT-regulatory-FY2025-9",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The Company’s business is subject to a variety of U.S. and international laws, rules, policies and other obligations regarding the collection, use, protection and transfer of personal data.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "AAPL-TREND-net_margin-FY2025-1",
+   "detector": "trend",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "net_margin",
+   "measurement": "26.9% in FY2025 vs 24.0% in FY2024, a change of 2.9 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read net margin 24.0% (FY2024) → 26.9% (FY2025), 2.94 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "AAPL-TREND-gross_margin-FY2024-1",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "gross_margin",
+   "measurement": "46.2% in FY2024 vs 44.1% in FY2023, a change of 2.1 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read gross margin 44.1% (FY2023) → 46.2% (FY2024), 2.08 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "AAPL-TREND-operating_margin-FY2024-2",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "operating_margin",
+   "measurement": "31.5% in FY2024 vs 29.8% in FY2023, a change of 1.7 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read operating margin 29.8% (FY2023) → 31.5% (FY2024), 1.69 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "AAPL-TREND-net_margin-FY2024-3",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "net_margin",
+   "measurement": "24.0% in FY2024 vs 25.3% in FY2023, a change of -1.3 pp (declining: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read net margin 25.3% (FY2023) → 24.0% (FY2024), -1.33 pp: labeled declining, claimed declining"
+  },
+  {
+   "signalId": "MSFT-NEW-regulatory-FY2023-1",
+   "detector": "risk_new",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "Laws and regulations relating to anti-corruption and trade could result in increased costs, fines, criminal penalties, or reputational damage.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2022: best heading match 0.21 and best sentence match 0.55, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "MSFT-NEW-regulatory-FY2023-2",
+   "detector": "risk_new",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "Existing and increasing legal and regulatory requirements could adversely affect our results of operations.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2022: best heading match 0.15 and best sentence match 0.46, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "MSFT-NEW-risk-FY2023-3",
+   "detector": "risk_new",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "We face risks related to the protection and utilization of our intellectual property that may result in our business and operating results may be harmed.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2022: best heading match 0.38 and best sentence match 0.38, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "MSFT-REDUCED-risk-FY2023-4",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "We may not be able to protect our source code from copying if there is an unauthorized disclosure.",
+   "measurement": "Risk factor in the FY2022 annual report with no counterpart in FY2023: best heading match 0.38 and best sentence match 0.44, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "MSFT-REDUCED-risk-FY2023-5",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "Reductions in the legal protection for software intellectual property rights could adversely affect revenue.",
+   "measurement": "Risk factor in the FY2022 annual report with no counterpart in FY2023: best heading match 0.38 and best sentence match 0.46, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "MSFT-NEW-regulatory-FY2024-1",
+   "detector": "risk_new",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "We are subject to evolving sustainability regulatory requirements and expectations, which exposes us to increased costs and legal and reputational risks.",
+   "measurement": "Risk factor in the FY2024 annual report with no counterpart in FY2023: best heading match 0.35 and best sentence match 0.38, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": true,
+   "why": "labeled new"
+  },
+  {
+   "signalId": "MSFT-REDUCED-risk-FY2024-2",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "We may incur increased costs to effectively manage these aspects of our business.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2024: best heading match 0.22 and best sentence match 0.29, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "not labeled removed (still present, merged, or not a heading)"
+  },
+  {
+   "signalId": "MSFT-REDUCED-regulatory-FY2025-1",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Government enforcement under competition laws and new market regulation may limit how we design and market our products.",
+   "measurement": "Risk factor in the FY2024 annual report with no counterpart in FY2025: best heading match 0.35 and best sentence match 0.55, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "not labeled removed (still present, merged, or not a heading)"
+  },
+  {
+   "signalId": "MSFT-REDUCED-regulatory-FY2025-2",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Laws and regulations relating to anti-corruption and trade could result in increased costs, fines, criminal penalties, or reputational damage.",
+   "measurement": "Risk factor in the FY2024 annual report with no counterpart in FY2025: best heading match 0.16 and best sentence match 0.40, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "not labeled removed (still present, merged, or not a heading)"
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-competition-FY2025-1",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "We face intense competition across all markets for our products and services, which could adversely affect our results of operations.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-competition-FY2025-2",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Our focus on cloud-based and AI services presents execution and competitive risks.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-cybersecurity-FY2025-3",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Cyberattacks and security vulnerabilities could lead to reduced revenue, increased costs, liability claims, or harm to our reputation or competitive position.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-cybersecurity-FY2025-4",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Cyberattacks could adversely impact our customers even if our production services are not directly compromised.",
+   "measurement": "The same risk-factor heading was matched in each of 3 consecutive annual reports in the corpus (FY2023–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": false,
+   "why": "FY2024 heading is not a labeled heading (0/2 labeled link(s) hold; 0 of 2 link(s) unlabeled)",
+   "links": {
+    "total": 2,
+    "labeled": 2,
+    "held": 0
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-competition-FY2025-5",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Issues in the development, deployment, and use of AI may result in reputational or competitive harm or liability.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-regulatory-FY2025-6",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "We are subject to a variety of new, existing, and evolving legal and regulatory requirements that could adversely affect our results of operations.",
+   "measurement": "The same risk-factor heading was matched in each of 3 consecutive annual reports in the corpus (FY2023–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 0 of 2 link(s) unlabeled",
+   "links": {
+    "total": 2,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-litigation-FY2025-7",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "We have claims and lawsuits against us that may result in adverse outcomes.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-regulatory-FY2025-8",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Our business with government customers may present additional uncertainties.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-PERSISTENT-geographic_concentration-FY2025-9",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Catastrophic events or geopolitical conditions could disrupt our business.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "MSFT-TREND-revenue_growth-FY2024-1",
+   "detector": "trend",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "revenue_growth",
+   "measurement": "Growth of 15.7% in FY2024, after 6.9% in FY2023 (accelerating: at least 5.0 pp faster than the year before).",
+   "correct": true,
+   "why": "hand-read revenue growth 6.9% (FY2023) → 15.7% (FY2024): labeled accelerating, claimed accelerating"
+  },
+  {
+   "signalId": "MSFT-TREND-operating_margin-FY2024-2",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "operating_margin",
+   "measurement": "44.6% in FY2024 vs 41.8% in FY2023, a change of 2.9 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read operating margin 41.8% (FY2023) → 44.6% (FY2024), 2.87 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "MSFT-TREND-net_margin-FY2024-3",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "net_margin",
+   "measurement": "36.0% in FY2024 vs 34.1% in FY2023, a change of 1.8 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read net margin 34.1% (FY2023) → 36.0% (FY2024), 1.81 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "NVDA-NEW-risk-FY2023-1",
+   "detector": "risk_new",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "Failure to estimate customer demand properly has led and could lead to mismatches between supply and demand.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2022: best heading match 0.13 and best sentence match 0.53, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-NEW-risk-FY2023-2",
+   "detector": "risk_new",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "Adverse economic conditions may harm our business.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2022: best heading match 0.00 and best sentence match 0.29, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-NEW-risk-FY2023-3",
+   "detector": "risk_new",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "International operations are a significant part of our business, which exposes us to us to risks that could harm our business.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2022: best heading match 0.11 and best sentence match 0.33, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-REDUCED-risk-FY2023-4",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "If we fail to meet the evolving needs of our markets, or to identify new products, services or technologies, our revenue and financial results may be adversely impacted.",
+   "measurement": "Risk factor in the FY2022 annual report with no counterpart in FY2023: best heading match 0.21 and best sentence match 0.40, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-REDUCED-risk-FY2023-5",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "Volatility in the financial markets could impact overall technology spending, adversely affecting demand for our products, our business and the value of our common stock.",
+   "measurement": "Risk factor in the FY2022 annual report with no counterpart in FY2023: best heading match 0.20 and best sentence match 0.50, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-EXPANDED-geographic_concentration-FY2023-6",
+   "detector": "emphasis_up",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "geographic_concentration",
+   "measurement": "geographic concentration terms in Item 1A: 1.67 → 4.00 per 10,000 characters (12 → 35 matches; 140%); thresholds ±30% and ±1.0 per 10,000 characters, at least 5 matches.",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-OUTLOOK-mda_demand-FY2023-7",
+   "detector": "outlook",
+   "periods": [
+    "FY2022",
+    "FY2023"
+   ],
+   "subject": "mda_demand",
+   "measurement": "Management discussion of demand: 9.29 → 5.08 terms per 10,000 characters of MD&A (39 → 20; -45%); thresholds ±30% and ±1.0, at least 5 matches.",
+   "correct": null,
+   "why": "pair not labeled"
+  },
+  {
+   "signalId": "NVDA-REDUCED-risk-FY2024-1",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "The COVID-19 pandemic has affected and could continue to have a material adverse impact on our financial condition and results of operations.",
+   "measurement": "Risk factor in the FY2023 annual report with no counterpart in FY2024: best heading match 0.00 and best sentence match 0.33, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": true,
+   "why": "labeled removed"
+  },
+  {
+   "signalId": "NVDA-EXPANDED-geographic_concentration-FY2024-2",
+   "detector": "emphasis_up",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "geographic_concentration",
+   "measurement": "geographic concentration terms in Item 1A: 4.00 → 5.25 per 10,000 characters (35 → 56 matches; 31%); thresholds ±30% and ±1.0 per 10,000 characters, at least 5 matches.",
+   "correct": true,
+   "why": "labeled expanded"
+  },
+  {
+   "signalId": "NVDA-OUTLOOK-mda_headwinds-FY2024-3",
+   "detector": "outlook",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "mda_headwinds",
+   "measurement": "Management discussion of headwinds: 1.78 → 3.15 terms per 10,000 characters of MD&A (7 → 13; 77%); thresholds ±30% and ±1.0, at least 5 matches.",
+   "correct": false,
+   "why": "labeled similar"
+  },
+  {
+   "signalId": "NVDA-NEW-risk-FY2025-1",
+   "detector": "risk_new",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The AI Diffusion IFR’s licensing requirement could impact our ability to complete development of products in a timely manner, support existing customers using covered products, or supply customers with covered products outside the impacted regions, and may require us to transition certain operations out of one or more of the identified countries.",
+   "measurement": "Risk factor in the FY2025 annual report with no counterpart in FY2024: best heading match 0.11 and best sentence match 0.34, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "not a labeled heading (extractor false positive)"
+  },
+  {
+   "signalId": "NVDA-REDUCED-debt-FY2025-2",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Our indebtedness could adversely affect our financial position and cash flows from operations, and prevent us from implementing our strategy or fulfilling our contractual obligations.",
+   "measurement": "Risk factor in the FY2024 annual report with no counterpart in FY2025: best heading match 0.10 and best sentence match 0.21, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": true,
+   "why": "labeled removed"
+  },
+  {
+   "signalId": "NVDA-REDUCED-competition-FY2025-3",
+   "detector": "risk_removed",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Maintenance of our current and future indebtedness and contractual restrictions could cause us to dedicate a substantial portion of our cash flows from operations towards debt service obligations and principal repayments; increase our vulnerability to adverse changes in general economic, industry and competitive conditions; limit our flexibility regarding changes in our business and our industry; impair our ability to obtain future financing; and restrict our ability to grant liens on property, enter into certain mergers, dispose of our assets, or materially change our business.",
+   "measurement": "Risk factor in the FY2024 annual report with no counterpart in FY2025: best heading match 0.10 and best sentence match 0.18, both below the thresholds (0.5 heading, 0.6 sentence; topic-word Dice).",
+   "correct": false,
+   "why": "not labeled removed (still present, merged, or not a heading)"
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-competition-FY2025-1",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Competition could adversely impact our market share and financial results.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-supply_chain-FY2025-2",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Long manufacturing lead times and uncertain supply and component availability, combined with a failure to estimate customer demand accurately, has led and could lead to mismatches between supply and demand.",
+   "measurement": "The same risk-factor heading was matched in each of 3 consecutive annual reports in the corpus (FY2023–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 0 of 2 link(s) unlabeled",
+   "links": {
+    "total": 2,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-cybersecurity-FY2025-3",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Product, system security, and data protection incidents or breaches, as well as cyber-attacks, could disrupt our operations, reduce our expected revenue, increase our expenses, and significantly harm our business and reputation.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-customer_concentration-FY2025-4",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "We receive a significant amount of our revenue from a limited number of partners and distributors and we have a concentration of sales to customers who purchase directly or indirectly from us, and our revenue could be adversely affected if we lose or are prevented from selling to any of these customers.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-regulatory-FY2025-5",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "We are subject to complex laws, rules, regulations, and political and other actions, including restrictions on the export of our products, which may adversely impact our business.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-regulatory-FY2025-6",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "The increasing focus on the risks and strategic importance of AI technologies has resulted in regulatory restrictions that target products and services capable of enabling or facilitating AI and may in the future result in additional restrictions impacting some or all of our product and service offerings.",
+   "measurement": "The same risk-factor heading was matched in each of 2 consecutive annual reports in the corpus (FY2024–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": false,
+   "why": "FY2025 heading is not a labeled heading (0/1 labeled link(s) hold; 0 of 1 link(s) unlabeled)",
+   "links": {
+    "total": 1,
+    "labeled": 1,
+    "held": 0
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-supply_chain-FY2025-7",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Increased scrutiny from shareholders, regulators and others regarding our corporate sustainability practices could result in additional costs or risks and adversely impact our reputation and willingness of customers and suppliers to do business with us.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-competition-FY2025-8",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Actions to adequately protect our IP rights could result in substantial costs to us and our ability to compete could be harmed if we are unsuccessful or if we are prohibited from making or selling our products.",
+   "measurement": "The same risk-factor heading was matched in each of 2 consecutive annual reports in the corpus (FY2024–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "1/1 labeled link(s) hold; 0 of 1 link(s) unlabeled",
+   "links": {
+    "total": 1,
+    "labeled": 1,
+    "held": 1
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-regulatory-FY2025-9",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "We may have exposure to additional tax liabilities and our operating results may be adversely impacted by changes in tax laws, higher than expected tax rates and other tax-related factors.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": false,
+   "why": "FY2024 heading is labeled as the same risk as a different FY2023 heading (1/2 labeled link(s) hold; 1 of 3 link(s) unlabeled)",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 1
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-litigation-FY2025-10",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Our business is exposed to the burden and risks associated with litigation, investigations and regulatory proceedings.",
+   "measurement": "The same risk-factor heading was matched in each of 2 consecutive annual reports in the corpus (FY2024–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "1/1 labeled link(s) hold; 0 of 1 link(s) unlabeled",
+   "links": {
+    "total": 1,
+    "labeled": 1,
+    "held": 1
+   }
+  },
+  {
+   "signalId": "NVDA-PERSISTENT-regulatory-FY2025-11",
+   "detector": "risk_persistent",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "Delaware law and our certificate of incorporation, bylaws and agreement with Microsoft could delay or prevent a change in control.",
+   "measurement": "The same risk-factor heading was matched in each of 4 consecutive annual reports in the corpus (FY2022–FY2025); each heading matches the next at topic-word Dice ≥ 0.5.",
+   "correct": true,
+   "why": "2/2 labeled link(s) hold; 1 of 3 link(s) unlabeled",
+   "links": {
+    "total": 3,
+    "labeled": 2,
+    "held": 2
+   }
+  },
+  {
+   "signalId": "NVDA-TREND-revenue_growth-FY2025-1",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "revenue_growth",
+   "measurement": "Growth of 114.2% in FY2025, after 125.9% in FY2024 (slowing: at least 5.0 pp slower than the year before).",
+   "correct": true,
+   "why": "hand-read revenue growth 125.9% (FY2024) → 114.2% (FY2025): labeled slowing, claimed slowing"
+  },
+  {
+   "signalId": "NVDA-TREND-gross_margin-FY2025-2",
+   "detector": "trend",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "gross_margin",
+   "measurement": "75.0% in FY2025 vs 72.7% in FY2024, a change of 2.3 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read gross margin 72.7% (FY2024) → 75.0% (FY2025), 2.27 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "NVDA-TREND-operating_margin-FY2025-3",
+   "detector": "trend",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "operating_margin",
+   "measurement": "62.4% in FY2025 vs 54.1% in FY2024, a change of 8.3 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read operating margin 54.1% (FY2024) → 62.4% (FY2025), 8.30 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "NVDA-TREND-net_margin-FY2025-4",
+   "detector": "trend",
+   "periods": [
+    "FY2024",
+    "FY2025"
+   ],
+   "subject": "net_margin",
+   "measurement": "55.8% in FY2025 vs 48.8% in FY2024, a change of 7.0 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read net margin 48.8% (FY2024) → 55.8% (FY2025), 7.00 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "NVDA-TREND-revenue_growth-FY2024-1",
+   "detector": "trend",
+   "periods": [
+    "FY2022",
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "revenue_growth",
+   "measurement": "Growth of 125.9% in FY2024, after 0.2% in FY2023 (accelerating: at least 5.0 pp faster than the year before).",
+   "correct": true,
+   "why": "hand-read revenue growth 0.2% (FY2023) → 125.9% (FY2024): labeled accelerating, claimed accelerating"
+  },
+  {
+   "signalId": "NVDA-TREND-gross_margin-FY2024-2",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "gross_margin",
+   "measurement": "72.7% in FY2024 vs 56.9% in FY2023, a change of 15.8 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read gross margin 56.9% (FY2023) → 72.7% (FY2024), 15.79 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "NVDA-TREND-operating_margin-FY2024-3",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "operating_margin",
+   "measurement": "54.1% in FY2024 vs 15.7% in FY2023, a change of 38.5 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read operating margin 15.7% (FY2023) → 54.1% (FY2024), 38.46 pp: labeled improving, claimed improving"
+  },
+  {
+   "signalId": "NVDA-TREND-net_margin-FY2024-4",
+   "detector": "trend",
+   "periods": [
+    "FY2023",
+    "FY2024"
+   ],
+   "subject": "net_margin",
+   "measurement": "48.8% in FY2024 vs 16.2% in FY2023, a change of 32.7 pp (improving: threshold 1.0 pp).",
+   "correct": true,
+   "why": "hand-read net margin 16.2% (FY2023) → 48.8% (FY2024), 32.66 pp: labeled improving, claimed improving"
+  }
+ ]
+}

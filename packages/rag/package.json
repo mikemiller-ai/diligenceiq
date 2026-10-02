@@ -12,7 +12,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@diligenceiq/corpus": "workspace:*"
+    "@diligenceiq/core": "workspace:*",
+    "@diligenceiq/corpus": "workspace:*",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@types/node": "22.20.4",

@@ -1,0 +1,8417 @@
+{
+ "indexVersion": "iv-9cf51c066743",
+ "ranAt": "2026-10-02T04:03:03.983Z",
+ "source": "/Users/mikemiller/Developer/DilligenceIQ/.index/build/iv-9cf51c066743",
+ "modes": [
+  "bm25",
+  "cosine",
+  "hybrid"
+ ],
+ "summaries": [
+  {
+   "mode": "bm25",
+   "questions": 20,
+   "passed": 16,
+   "companyCoverage": 1,
+   "periodCoverage": 1,
+   "evidenceHitRate": 0.848,
+   "sectionPrecision": 0.858,
+   "relevantShare": 0.55,
+   "goldRecall": 0.481,
+   "goldHits": 29,
+   "goldTotal": 74,
+   "checksPassed": 107,
+   "checksTotal": 111
+  },
+  {
+   "mode": "cosine",
+   "questions": 20,
+   "passed": 19,
+   "companyCoverage": 1,
+   "periodCoverage": 1,
+   "evidenceHitRate": 0.976,
+   "sectionPrecision": 0.986,
+   "relevantShare": 0.601,
+   "goldRecall": 0.624,
+   "goldHits": 40,
+   "goldTotal": 74,
+   "checksPassed": 110,
+   "checksTotal": 111
+  },
+  {
+   "mode": "hybrid",
+   "questions": 20,
+   "passed": 19,
+   "companyCoverage": 1,
+   "periodCoverage": 1,
+   "evidenceHitRate": 0.988,
+   "sectionPrecision": 0.966,
+   "relevantShare": 0.637,
+   "goldRecall": 0.62,
+   "goldHits": 40,
+   "goldTotal": 74,
+   "checksPassed": 110,
+   "checksTotal": 111
+  }
+ ],
+ "notEmbedded": [],
+ "latencyMs": {
+  "bm25": {
+   "p50": 25,
+   "max": 39
+  },
+  "cosine": {
+   "p50": 27,
+   "max": 49
+  },
+  "hybrid": {
+   "p50": 25,
+   "max": 32
+  }
+ },
+ "rows": [
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "pdf-1",
+    "pass": false,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": false,
+      "detail": "2/3; missed JPM[risk_factors] /credit risk|liquidity risk|capital requirements/"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23897/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 0.6666666666666666,
+    "sectionPrecision": 0.731,
+    "relevantShare": null,
+    "gold": {
+     "hits": 6,
+     "total": 18,
+     "recall": 0.333,
+     "perCompany": {
+      "AAPL": {
+       "hits": 3,
+       "total": 6
+      },
+      "TSLA": {
+       "hits": 2,
+       "total": 6
+      },
+      "JPM": {
+       "hits": 1,
+       "total": 6
+      }
+     },
+     "missing": [
+      "AAPL-FY2025-10K-1A-002",
+      "AAPL-FY2025-10K-1A-006",
+      "AAPL-FY2025-10K-1A-015",
+      "TSLA-FY2025-10K-1A-002",
+      "TSLA-FY2025-10K-1A-005",
+      "TSLA-FY2025-10K-1A-006",
+      "TSLA-FY2025-10K-1A-007",
+      "JPM-FY2025-10K-1A-001",
+      "JPM-FY2025-10K-1A-002",
+      "JPM-FY2025-10K-1A-003",
+      "JPM-FY2025-10K-1A-012",
+      "JPM-FY2025-10K-1A-016"
+     ]
+    },
+    "contextChunks": 26,
+    "tokenEstimate": 23897,
+    "companies": {
+     "AAPL": 9,
+     "TSLA": 10,
+     "JPM": 7
+    },
+    "sectionShare": {
+     "risk_factors": 0.731,
+     "market_risk": 0.038,
+     "mda": 0.077,
+     "financial_statements": 0.154
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 35,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 3,
+    "filingsRepresented": 4,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "AAPL(7)",
+     "TSLA(7)",
+     "JPM(7)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2026Q1-10Q-MKT-001",
+    "TSLA-FY2025-10K-1A-001",
+    "TSLA-FY2025-10K-1A-010",
+    "TSLA-FY2025-10K-1A-011",
+    "TSLA-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-013",
+    "TSLA-FY2025-10K-1A-015",
+    "TSLA-FY2025-10K-1A-016",
+    "TSLA-FY2025-10K-1A-023",
+    "TSLA-FY2025-10K-1A-026",
+    "TSLA-FY2025-10K-1A-027",
+    "JPM-FY2025-10K-1A-023",
+    "JPM-FY2025-10K-MDA-051",
+    "JPM-FY2025-10K-MDA-098",
+    "JPM-FY2025-10K-FS-071",
+    "JPM-FY2025-10K-FS-136",
+    "JPM-FY2025-10K-FS-170",
+    "JPM-FY2025-10K-FS-171"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 10
+    },
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 7
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "AAPL",
+    "TSLA",
+    "JPM"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "pdf-2",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23805/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.783,
+    "relevantShare": 0.435,
+    "gold": {
+     "hits": 4,
+     "total": 8,
+     "recall": 0.5,
+     "perCompany": {
+      "NVDA": {
+       "hits": 4,
+       "total": 8
+      }
+     },
+     "missing": [
+      "NVDA-FY2025-10K-MDA-004",
+      "NVDA-FY2025-10K-MDA-005",
+      "NVDA-FY2026Q1-10Q-MDA-004",
+      "NVDA-FY2026Q3-10Q-MDA-004"
+     ]
+    },
+    "contextChunks": 23,
+    "tokenEstimate": 23805,
+    "companies": {
+     "NVDA": 23
+    },
+    "sectionShare": {
+     "business": 0.217,
+     "mda": 0.609,
+     "financial_statements": 0.174
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 28,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 5,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "NVDA:FY2024(7)",
+     "NVDA:FY2025(7)",
+     "NVDA:FY2026 YTD(7)"
+    ]
+   },
+   "chunkIds": [
+    "NVDA-FY2024-10K-BUS-002",
+    "NVDA-FY2024-10K-BUS-016",
+    "NVDA-FY2024-10K-BUS-017",
+    "NVDA-FY2024-10K-MDA-004",
+    "NVDA-FY2024-10K-MDA-005",
+    "NVDA-FY2024-10K-MDA-010",
+    "NVDA-FY2024-10K-FS-008",
+    "NVDA-FY2024-10K-FS-034",
+    "NVDA-FY2025-10K-BUS-013",
+    "NVDA-FY2025-10K-BUS-017",
+    "NVDA-FY2025-10K-MDA-001",
+    "NVDA-FY2025-10K-MDA-003",
+    "NVDA-FY2025-10K-MDA-008",
+    "NVDA-FY2025-10K-MDA-009",
+    "NVDA-FY2025-10K-FS-008",
+    "NVDA-FY2025-10K-FS-014",
+    "NVDA-FY2026Q1-10Q-MDA-002",
+    "NVDA-FY2026Q1-10Q-MDA-006",
+    "NVDA-FY2026Q2-10Q-MDA-004",
+    "NVDA-FY2026Q2-10Q-MDA-006",
+    "NVDA-FY2026Q2-10Q-MDA-007",
+    "NVDA-FY2026Q3-10Q-MDA-002",
+    "NVDA-FY2026Q3-10Q-MDA-006"
+   ],
+   "coverage": [
+    {
+     "ticker": "NVDA",
+     "period": "FY2024",
+     "chunks": 8
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026 YTD",
+     "chunks": 7
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "NVDA"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "pdf-3",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "5/5 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "5/5"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [ABBV, JNJ, LLY, MRK, PFE], expected [ABBV, JNJ, LLY, MRK, PFE]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23952/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.522,
+    "gold": {
+     "hits": 5,
+     "total": 18,
+     "recall": 0.278,
+     "perCompany": {
+      "JNJ": {
+       "hits": 1,
+       "total": 2
+      },
+      "PFE": {
+       "hits": 1,
+       "total": 4
+      },
+      "MRK": {
+       "hits": 0,
+       "total": 4
+      },
+      "LLY": {
+       "hits": 1,
+       "total": 4
+      },
+      "ABBV": {
+       "hits": 2,
+       "total": 4
+      }
+     },
+     "missing": [
+      "JNJ-FY2025-10K-1A-004",
+      "PFE-FY2024-10K-1A-006",
+      "PFE-FY2024-10K-1A-011",
+      "PFE-FY2024-10K-1A-013",
+      "MRK-FY2024-10K-1A-007",
+      "MRK-FY2024-10K-1A-008",
+      "MRK-FY2024-10K-1A-017",
+      "MRK-FY2024-10K-1A-018",
+      "LLY-FY2025-10K-1A-007",
+      "LLY-FY2025-10K-1A-024",
+      "LLY-FY2025-10K-1A-025",
+      "ABBV-FY2024-10K-1A-007",
+      "ABBV-FY2024-10K-1A-011"
+     ]
+    },
+    "contextChunks": 23,
+    "tokenEstimate": 23952,
+    "companies": {
+     "JNJ": 5,
+     "PFE": 4,
+     "MRK": 4,
+     "LLY": 5,
+     "ABBV": 5
+    },
+    "sectionShare": {
+     "risk_factors": 0.696,
+     "business": 0.304
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 35,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 5,
+    "chunksRetrieved": 120,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 5,
+    "filingsRepresented": 5,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "sector",
+    "lanes": [
+     "JNJ(4)",
+     "PFE(4)",
+     "MRK(4)",
+     "LLY(4)",
+     "ABBV(4)"
+    ]
+   },
+   "chunkIds": [
+    "JNJ-FY2025-10K-1A-002",
+    "JNJ-FY2025-10K-1A-006",
+    "JNJ-FY2025-10K-1A-007",
+    "JNJ-FY2025-10K-1A-008",
+    "JNJ-FY2025-10K-1A-009",
+    "PFE-FY2024-10K-BUS-012",
+    "PFE-FY2024-10K-1A-002",
+    "PFE-FY2024-10K-1A-004",
+    "PFE-FY2024-10K-1A-010",
+    "MRK-FY2024-10K-BUS-010",
+    "MRK-FY2024-10K-BUS-019",
+    "MRK-FY2024-10K-1A-001",
+    "MRK-FY2024-10K-1A-002",
+    "LLY-FY2025-10K-BUS-005",
+    "LLY-FY2025-10K-BUS-006",
+    "LLY-FY2025-10K-BUS-007",
+    "LLY-FY2025-10K-1A-003",
+    "LLY-FY2025-10K-1A-011",
+    "ABBV-FY2024-10K-BUS-008",
+    "ABBV-FY2024-10K-1A-001",
+    "ABBV-FY2024-10K-1A-002",
+    "ABBV-FY2024-10K-1A-005",
+    "ABBV-FY2024-10K-1A-006"
+   ],
+   "coverage": [
+    {
+     "ticker": "JNJ",
+     "period": "FY2025",
+     "chunks": 5
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 4
+    },
+    {
+     "ticker": "MRK",
+     "period": "FY2024",
+     "chunks": 4
+    },
+    {
+     "ticker": "LLY",
+     "period": "FY2025",
+     "chunks": 5
+    },
+    {
+     "ticker": "ABBV",
+     "period": "FY2024",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "JNJ",
+    "PFE",
+    "MRK",
+    "LLY",
+    "ABBV"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "expert-1",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23938/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.296,
+    "gold": {
+     "hits": 6,
+     "total": 13,
+     "recall": 0.462,
+     "perCompany": {
+      "AAPL": {
+       "hits": 6,
+       "total": 13
+      }
+     },
+     "missing": [
+      "AAPL-FY2023-10K-1A-015",
+      "AAPL-FY2024-10K-1A-015",
+      "AAPL-FY2024-10K-LEGAL-001",
+      "AAPL-FY2024-10K-LEGAL-002",
+      "AAPL-FY2025-10K-1A-015",
+      "AAPL-FY2025-10K-1A-018",
+      "AAPL-FY2025-10K-LEGAL-001"
+     ]
+    },
+    "contextChunks": 27,
+    "tokenEstimate": 23938,
+    "companies": {
+     "AAPL": 27
+    },
+    "sectionShare": {
+     "risk_factors": 0.556,
+     "legal": 0.074,
+     "mda": 0.37
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 20,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 27,
+    "companiesRepresented": 1,
+    "filingsRepresented": 3,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "AAPL:FY2023(7)",
+     "AAPL:FY2024(7)",
+     "AAPL:FY2025(7)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2023-10K-1A-002",
+    "AAPL-FY2023-10K-1A-010",
+    "AAPL-FY2023-10K-1A-014",
+    "AAPL-FY2023-10K-1A-016",
+    "AAPL-FY2023-10K-1A-017",
+    "AAPL-FY2023-10K-LEGAL-001",
+    "AAPL-FY2023-10K-MDA-001",
+    "AAPL-FY2023-10K-MDA-006",
+    "AAPL-FY2024-10K-1A-002",
+    "AAPL-FY2024-10K-1A-010",
+    "AAPL-FY2024-10K-1A-014",
+    "AAPL-FY2024-10K-1A-016",
+    "AAPL-FY2024-10K-1A-017",
+    "AAPL-FY2024-10K-MDA-001",
+    "AAPL-FY2024-10K-MDA-003",
+    "AAPL-FY2024-10K-MDA-007",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-LEGAL-002",
+    "AAPL-FY2025-10K-MDA-001",
+    "AAPL-FY2025-10K-MDA-003",
+    "AAPL-FY2025-10K-MDA-004",
+    "AAPL-FY2025-10K-MDA-008",
+    "AAPL-FY2025-10K-MDA-009"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2023",
+     "chunks": 8
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2024",
+     "chunks": 8
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 11
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "rev-msft-fy2025",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23982/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.8,
+    "relevantShare": 0.4,
+    "gold": {
+     "hits": 3,
+     "total": 3,
+     "recall": 1,
+     "perCompany": {
+      "MSFT": {
+       "hits": 3,
+       "total": 3
+      }
+     },
+     "missing": []
+    },
+    "contextChunks": 25,
+    "tokenEstimate": 23982,
+    "companies": {
+     "MSFT": 25
+    },
+    "sectionShare": {
+     "other": 0.12,
+     "business": 0.08,
+     "mda": 0.44,
+     "financial_statements": 0.36
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 31,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 25,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "MSFT(22)"
+    ]
+   },
+   "chunkIds": [
+    "MSFT-FY2025-10K-OTH-001",
+    "MSFT-FY2025-10K-OTH-002",
+    "MSFT-FY2025-10K-BUS-003",
+    "MSFT-FY2025-10K-BUS-004",
+    "MSFT-FY2025-10K-OTH-005",
+    "MSFT-FY2025-10K-MDA-001",
+    "MSFT-FY2025-10K-MDA-002",
+    "MSFT-FY2025-10K-MDA-003",
+    "MSFT-FY2025-10K-MDA-004",
+    "MSFT-FY2025-10K-MDA-005",
+    "MSFT-FY2025-10K-MDA-006",
+    "MSFT-FY2025-10K-MDA-007",
+    "MSFT-FY2025-10K-MDA-008",
+    "MSFT-FY2025-10K-MDA-009",
+    "MSFT-FY2025-10K-MDA-011",
+    "MSFT-FY2025-10K-MDA-012",
+    "MSFT-FY2025-10K-FS-004",
+    "MSFT-FY2025-10K-FS-022",
+    "MSFT-FY2025-10K-FS-027",
+    "MSFT-FY2025-10K-FS-032",
+    "MSFT-FY2025-10K-FS-034",
+    "MSFT-FY2025-10K-FS-035",
+    "MSFT-FY2025-10K-FS-036",
+    "MSFT-FY2025-10K-FS-037",
+    "MSFT-FY2025-10K-FS-038"
+   ],
+   "coverage": [
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 25
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "MSFT"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "risk-tsla-demand",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23874/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.696,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23874,
+    "companies": {
+     "TSLA": 23
+    },
+    "sectionShare": {
+     "business": 0.261,
+     "risk_factors": 0.522,
+     "mda": 0.217
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 31,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "TSLA(22)"
+    ]
+   },
+   "chunkIds": [
+    "TSLA-FY2025-10K-BUS-005",
+    "TSLA-FY2025-10K-BUS-006",
+    "TSLA-FY2025-10K-BUS-007",
+    "TSLA-FY2025-10K-BUS-008",
+    "TSLA-FY2025-10K-BUS-010",
+    "TSLA-FY2025-10K-BUS-015",
+    "TSLA-FY2025-10K-1A-003",
+    "TSLA-FY2025-10K-1A-004",
+    "TSLA-FY2025-10K-1A-005",
+    "TSLA-FY2025-10K-1A-006",
+    "TSLA-FY2025-10K-1A-007",
+    "TSLA-FY2025-10K-1A-008",
+    "TSLA-FY2025-10K-1A-010",
+    "TSLA-FY2025-10K-1A-011",
+    "TSLA-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-020",
+    "TSLA-FY2025-10K-1A-021",
+    "TSLA-FY2025-10K-1A-022",
+    "TSLA-FY2025-10K-MDA-001",
+    "TSLA-FY2025-10K-MDA-003",
+    "TSLA-FY2025-10K-MDA-004",
+    "TSLA-FY2025-10K-MDA-007",
+    "TSLA-FY2025-10K-MDA-008"
+   ],
+   "coverage": [
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 23
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "TSLA"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "multi-cloud",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23623/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.75,
+    "gold": {
+     "hits": 1,
+     "total": 8,
+     "recall": 0.125,
+     "perCompany": {
+      "MSFT": {
+       "hits": 0,
+       "total": 2
+      },
+      "AMZN": {
+       "hits": 0,
+       "total": 3
+      },
+      "GOOG": {
+       "hits": 1,
+       "total": 3
+      }
+     },
+     "missing": [
+      "MSFT-FY2025-10K-BUS-005",
+      "MSFT-FY2025-10K-MDA-006",
+      "AMZN-FY2025-10K-BUS-001",
+      "AMZN-FY2025-10K-MDA-010",
+      "AMZN-FY2025-10K-MDA-013",
+      "GOOG-FY2025-10K-BUS-004",
+      "GOOG-FY2025-10K-MDA-008"
+     ]
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23623,
+    "companies": {
+     "MSFT": 7,
+     "AMZN": 9,
+     "GOOG": 8
+    },
+    "sectionShare": {
+     "business": 0.25,
+     "mda": 0.333,
+     "risk_factors": 0.167,
+     "cybersecurity": 0.042,
+     "financial_statements": 0.208
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 21,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 3,
+    "filingsRepresented": 5,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "MSFT(7)",
+     "AMZN(7)",
+     "GOOG(7)"
+    ]
+   },
+   "chunkIds": [
+    "MSFT-FY2025-10K-BUS-002",
+    "MSFT-FY2025-10K-BUS-003",
+    "MSFT-FY2025-10K-MDA-004",
+    "MSFT-FY2026Q1-10Q-MDA-002",
+    "MSFT-FY2026Q2-10Q-MDA-004",
+    "MSFT-FY2026Q2-10Q-MDA-005",
+    "MSFT-FY2026Q2-10Q-MDA-006",
+    "AMZN-FY2025-10K-BUS-003",
+    "AMZN-FY2025-10K-BUS-004",
+    "AMZN-FY2025-10K-1A-003",
+    "AMZN-FY2025-10K-1A-016",
+    "AMZN-FY2025-10K-1A-017",
+    "AMZN-FY2025-10K-1C-002",
+    "AMZN-FY2025-10K-MDA-016",
+    "AMZN-FY2025-10K-FS-032",
+    "AMZN-FY2025-10K-FS-033",
+    "GOOG-FY2025-10K-BUS-001",
+    "GOOG-FY2025-10K-BUS-005",
+    "GOOG-FY2025-10K-1A-002",
+    "GOOG-FY2025-10K-MDA-001",
+    "GOOG-FY2025-10K-MDA-010",
+    "GOOG-FY2025-10K-FS-009",
+    "GOOG-FY2025-10K-FS-047",
+    "GOOG-FY2025-10K-FS-048"
+   ],
+   "coverage": [
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "MSFT",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "MSFT",
+     "period": "FY2026Q2",
+     "chunks": 3
+    },
+    {
+     "ticker": "AMZN",
+     "period": "FY2025",
+     "chunks": 9
+    },
+    {
+     "ticker": "GOOG",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "MSFT",
+    "AMZN",
+    "GOOG"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "long-pfe-since-2022",
+    "pass": false,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "evidence",
+      "pass": false,
+      "detail": "0/2; missed PFE/FY2022 /Comirnaty|Paxlovid/; PFE/FY2024 /Comirnaty|Paxlovid/"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23964/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 0,
+    "sectionPrecision": 1,
+    "relevantShare": 0.4,
+    "gold": null,
+    "contextChunks": 25,
+    "tokenEstimate": 23964,
+    "companies": {
+     "PFE": 25
+    },
+    "sectionShare": {
+     "mda": 0.24,
+     "financial_statements": 0.76
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 20,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 25,
+    "companiesRepresented": 1,
+    "filingsRepresented": 6,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "PFE:FY2022(5)",
+     "PFE:FY2023(5)",
+     "PFE:FY2024(5)",
+     "PFE:FY2025 YTD(5)"
+    ]
+   },
+   "chunkIds": [
+    "PFE-FY2022-10K-MDA-001",
+    "PFE-FY2022-10K-MDA-017",
+    "PFE-FY2022-10K-FS-002",
+    "PFE-FY2022-10K-FS-004",
+    "PFE-FY2022-10K-FS-033",
+    "PFE-FY2022-10K-FS-109",
+    "PFE-FY2022-10K-FS-110",
+    "PFE-FY2023-10K-MDA-001",
+    "PFE-FY2023-10K-MDA-041",
+    "PFE-FY2023-10K-MDA-042",
+    "PFE-FY2023-10K-FS-005",
+    "PFE-FY2023-10K-FS-006",
+    "PFE-FY2023-10K-FS-036",
+    "PFE-FY2023-10K-FS-107",
+    "PFE-FY2024-10K-FS-005",
+    "PFE-FY2024-10K-FS-006",
+    "PFE-FY2024-10K-FS-018",
+    "PFE-FY2024-10K-FS-036",
+    "PFE-FY2024-10K-FS-100",
+    "PFE-FY2025Q1-10Q-FS-033",
+    "PFE-FY2025Q1-10Q-FS-035",
+    "PFE-FY2025Q1-10Q-MDA-016",
+    "PFE-FY2025Q2-10Q-FS-037",
+    "PFE-FY2025Q3-10Q-FS-039",
+    "PFE-FY2025Q3-10Q-FS-041"
+   ],
+   "coverage": [
+    {
+     "ticker": "PFE",
+     "period": "FY2022",
+     "chunks": 7
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2023",
+     "chunks": 7
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2025 YTD",
+     "chunks": 6
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "PFE"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "reg-nvda-export",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23886/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.917,
+    "gold": {
+     "hits": 4,
+     "total": 6,
+     "recall": 0.667,
+     "perCompany": {
+      "NVDA": {
+       "hits": 4,
+       "total": 6
+      }
+     },
+     "missing": [
+      "NVDA-FY2026Q3-10Q-1A-012",
+      "NVDA-FY2026Q3-10Q-MDA-003"
+     ]
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23886,
+    "companies": {
+     "NVDA": 24
+    },
+    "sectionShare": {
+     "business": 0.042,
+     "risk_factors": 0.917,
+     "mda": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 39,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 4,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "NVDA(22)"
+    ]
+   },
+   "chunkIds": [
+    "NVDA-FY2025-10K-BUS-013",
+    "NVDA-FY2025-10K-1A-023",
+    "NVDA-FY2025-10K-1A-024",
+    "NVDA-FY2025-10K-1A-026",
+    "NVDA-FY2025-10K-1A-027",
+    "NVDA-FY2025-10K-1A-028",
+    "NVDA-FY2025-10K-1A-036",
+    "NVDA-FY2025-10K-MDA-003",
+    "NVDA-FY2026Q1-10Q-1A-007",
+    "NVDA-FY2026Q1-10Q-1A-008",
+    "NVDA-FY2026Q1-10Q-1A-009",
+    "NVDA-FY2026Q1-10Q-1A-010",
+    "NVDA-FY2026Q1-10Q-1A-011",
+    "NVDA-FY2026Q1-10Q-1A-012",
+    "NVDA-FY2026Q2-10Q-1A-005",
+    "NVDA-FY2026Q2-10Q-1A-006",
+    "NVDA-FY2026Q2-10Q-1A-008",
+    "NVDA-FY2026Q2-10Q-1A-009",
+    "NVDA-FY2026Q2-10Q-1A-010",
+    "NVDA-FY2026Q3-10Q-1A-009",
+    "NVDA-FY2026Q3-10Q-1A-010",
+    "NVDA-FY2026Q3-10Q-1A-011",
+    "NVDA-FY2026Q3-10Q-1A-014",
+    "NVDA-FY2026Q3-10Q-1A-015"
+   ],
+   "coverage": [
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q1",
+     "chunks": 6
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q2",
+     "chunks": 5
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q3",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "NVDA"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "cross-wmt-jpm-rates",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "2/2 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23956/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 25,
+    "tokenEstimate": 23956,
+    "companies": {
+     "WMT": 12,
+     "JPM": 13
+    },
+    "sectionShare": {
+     "other": 0.04,
+     "business": 0.04,
+     "risk_factors": 0.2,
+     "mda": 0.28,
+     "market_risk": 0.04,
+     "financial_statements": 0.4
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 24,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 2,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 25,
+    "companiesRepresented": 2,
+    "filingsRepresented": 2,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "WMT(11)",
+     "JPM(11)"
+    ]
+   },
+   "chunkIds": [
+    "WMT-FY2025-10K-OTH-004",
+    "WMT-FY2025-10K-BUS-005",
+    "WMT-FY2025-10K-1A-021",
+    "WMT-FY2025-10K-1A-022",
+    "WMT-FY2025-10K-MDA-001",
+    "WMT-FY2025-10K-MDA-002",
+    "WMT-FY2025-10K-MDA-005",
+    "WMT-FY2025-10K-MDA-010",
+    "WMT-FY2025-10K-MDA-011",
+    "WMT-FY2025-10K-MKT-001",
+    "WMT-FY2025-10K-FS-010",
+    "WMT-FY2025-10K-FS-016",
+    "JPM-FY2025-10K-1A-001",
+    "JPM-FY2025-10K-1A-010",
+    "JPM-FY2025-10K-1A-011",
+    "JPM-FY2025-10K-MDA-019",
+    "JPM-FY2025-10K-MDA-148",
+    "JPM-FY2025-10K-FS-025",
+    "JPM-FY2025-10K-FS-055",
+    "JPM-FY2025-10K-FS-064",
+    "JPM-FY2025-10K-FS-131",
+    "JPM-FY2025-10K-FS-135",
+    "JPM-FY2025-10K-FS-180",
+    "JPM-FY2025-10K-FS-217",
+    "JPM-FY2025-10K-FS-237"
+   ],
+   "coverage": [
+    {
+     "ticker": "WMT",
+     "period": "FY2025",
+     "chunks": 12
+    },
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 13
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "WMT",
+    "JPM"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "cross-cyber",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 4"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23799/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.833,
+    "relevantShare": 0.833,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23799,
+    "companies": {
+     "V": 9,
+     "UNH": 7,
+     "BA": 8
+    },
+    "sectionShare": {
+     "risk_factors": 0.625,
+     "cybersecurity": 0.208,
+     "other": 0.042,
+     "financial_statements": 0.083,
+     "controls": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 23,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 3,
+    "filingsRepresented": 3,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "V(7)",
+     "UNH(7)",
+     "BA(7)"
+    ]
+   },
+   "chunkIds": [
+    "V-FY2025-10K-1A-004",
+    "V-FY2025-10K-1A-008",
+    "V-FY2025-10K-1A-009",
+    "V-FY2025-10K-1A-021",
+    "V-FY2025-10K-1A-022",
+    "V-FY2025-10K-1A-023",
+    "V-FY2025-10K-1A-024",
+    "V-FY2025-10K-1A-025",
+    "V-FY2025-10K-1C-003",
+    "UNH-FY2024-10K-1A-004",
+    "UNH-FY2024-10K-1A-005",
+    "UNH-FY2024-10K-1C-001",
+    "UNH-FY2024-10K-1C-002",
+    "UNH-FY2024-10K-OTH-003",
+    "UNH-FY2024-10K-FS-021",
+    "UNH-FY2024-10K-CTRL-001",
+    "BA-FY2025-10K-1A-005",
+    "BA-FY2025-10K-1A-010",
+    "BA-FY2025-10K-1A-013",
+    "BA-FY2025-10K-1A-014",
+    "BA-FY2025-10K-1A-018",
+    "BA-FY2025-10K-1C-001",
+    "BA-FY2025-10K-1C-003",
+    "BA-FY2025-10K-FS-004"
+   ],
+   "coverage": [
+    {
+     "ticker": "V",
+     "period": "FY2025",
+     "chunks": 9
+    },
+    {
+     "ticker": "UNH",
+     "period": "FY2024",
+     "chunks": 7
+    },
+    {
+     "ticker": "BA",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "V",
+    "UNH",
+    "BA"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "sector-banks-capital",
+    "pass": false,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "4/4 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 3"
+     },
+     {
+      "name": "evidence",
+      "pass": false,
+      "detail": "3/4; missed BAC /CET1|capital ratio|liquidity coverage ratio|\\bLCR\\b|\\bHQLA\\b/"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [BAC, GS, JPM, MS], expected [BAC, GS, JPM, MS]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23742/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 0.75,
+    "sectionPrecision": null,
+    "relevantShare": 0.478,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23742,
+    "companies": {
+     "JPM": 6,
+     "BAC": 5,
+     "GS": 5,
+     "MS": 7
+    },
+    "sectionShare": {
+     "mda": 0.913,
+     "financial_statements": 0.087
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 28,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 4,
+    "filingsRepresented": 6,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "sector",
+    "lanes": [
+     "JPM(5)",
+     "BAC(5)",
+     "GS(5)",
+     "MS(5)"
+    ]
+   },
+   "chunkIds": [
+    "JPM-FY2025-10K-MDA-013",
+    "JPM-FY2025-10K-MDA-049",
+    "JPM-FY2025-10K-MDA-065",
+    "JPM-FY2025-10K-MDA-066",
+    "JPM-FY2025-10K-MDA-113",
+    "JPM-FY2025-10K-FS-194",
+    "BAC-FY2024-10K-MDA-044",
+    "BAC-FY2024-10K-MDA-050",
+    "BAC-FY2024-10K-MDA-065",
+    "BAC-FY2025Q1-10Q-MDA-037",
+    "BAC-FY2025Q2-10Q-MDA-050",
+    "GS-FY2024-10K-MDA-003",
+    "GS-FY2024-10K-MDA-064",
+    "GS-FY2024-10K-MDA-067",
+    "GS-FY2024-10K-MDA-069",
+    "GS-FY2024-10K-MDA-070",
+    "MS-FY2025-10K-MDA-005",
+    "MS-FY2025-10K-MDA-021",
+    "MS-FY2025-10K-MDA-031",
+    "MS-FY2025-10K-MDA-035",
+    "MS-FY2025-10K-MDA-039",
+    "MS-FY2025-10K-MDA-063",
+    "MS-FY2025-10K-FS-074"
+   ],
+   "coverage": [
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 6
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2024",
+     "chunks": 3
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q2",
+     "chunks": 1
+    },
+    {
+     "ticker": "GS",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "MS",
+     "period": "FY2025",
+     "chunks": 7
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "JPM",
+    "BAC",
+    "GS",
+    "MS"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "ambiguous-meta",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [META], expected [META]"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23897/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 28,
+    "tokenEstimate": 23897,
+    "companies": {
+     "META": 28
+    },
+    "sectionShare": {
+     "other": 0.179,
+     "business": 0.214,
+     "risk_factors": 0.071,
+     "properties": 0.036,
+     "legal": 0.107,
+     "financial_statements": 0.393
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 30,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 28,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "META(22)"
+    ]
+   },
+   "chunkIds": [
+    "META-FY2025-10K-OTH-001",
+    "META-FY2025-10K-OTH-003",
+    "META-FY2025-10K-BUS-001",
+    "META-FY2025-10K-BUS-002",
+    "META-FY2025-10K-BUS-005",
+    "META-FY2025-10K-BUS-006",
+    "META-FY2025-10K-BUS-007",
+    "META-FY2025-10K-BUS-008",
+    "META-FY2025-10K-1A-031",
+    "META-FY2025-10K-1A-043",
+    "META-FY2025-10K-PROP-001",
+    "META-FY2025-10K-LEGAL-005",
+    "META-FY2025-10K-LEGAL-006",
+    "META-FY2025-10K-LEGAL-013",
+    "META-FY2025-10K-OTH-007",
+    "META-FY2025-10K-FS-001",
+    "META-FY2025-10K-FS-004",
+    "META-FY2025-10K-FS-010",
+    "META-FY2025-10K-FS-011",
+    "META-FY2025-10K-FS-038",
+    "META-FY2025-10K-FS-039",
+    "META-FY2025-10K-FS-040",
+    "META-FY2025-10K-FS-041",
+    "META-FY2025-10K-FS-043",
+    "META-FY2025-10K-FS-044",
+    "META-FY2025-10K-FS-054",
+    "META-FY2025-10K-OTH-009",
+    "META-FY2025-10K-OTH-010"
+   ],
+   "coverage": [
+    {
+     "ticker": "META",
+     "period": "FY2025",
+     "chunks": 28
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "META"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "ambiguous-no-company",
+    "pass": true,
+    "checks": [
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanyShare",
+      "pass": true,
+      "detail": "max share 0.17 (limit 0.2)"
+     },
+     {
+      "name": "minCompanies",
+      "pass": true,
+      "detail": "16 companies (min 6)"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [], expected []"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports). | No corpus company named: all companies are searched, with a cap per company. | Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23874/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": null,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.917,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23874,
+    "companies": {
+     "MRK": 1,
+     "PFE": 2,
+     "HD": 1,
+     "NKE": 2,
+     "PG": 1,
+     "AAPL": 2,
+     "DE": 2,
+     "AMD": 1,
+     "JNJ": 1,
+     "AXP": 2,
+     "BA": 1,
+     "CMCSA": 1,
+     "LLY": 4,
+     "LMT": 1,
+     "TSLA": 1,
+     "VZ": 1
+    },
+    "sectionShare": {
+     "risk_factors": 0.833,
+     "mda": 0.083,
+     "business": 0.083
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 21,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 176,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 16,
+    "filingsRepresented": 16,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "global",
+    "lanes": [
+     "global(22)"
+    ]
+   },
+   "chunkIds": [
+    "MRK-FY2024-10K-1A-009",
+    "PFE-FY2024-10K-1A-006",
+    "PFE-FY2024-10K-1A-025",
+    "HD-FY2024-10K-1A-022",
+    "NKE-FY2025-10K-1A-024",
+    "NKE-FY2025-10K-1A-025",
+    "PG-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "DE-FY2025-10K-1A-002",
+    "DE-FY2025-10K-1A-003",
+    "AMD-FY2025-10K-1A-025",
+    "JNJ-FY2025-10K-1A-011",
+    "AXP-FY2025-10K-1A-001",
+    "AXP-FY2025-10K-MDA-038",
+    "BA-FY2025-10K-1A-007",
+    "CMCSA-FY2025-10K-BUS-026",
+    "LLY-FY2025-10K-BUS-023",
+    "LLY-FY2025-10K-1A-018",
+    "LLY-FY2025-10K-1A-020",
+    "LLY-FY2025-10K-1A-021",
+    "LMT-FY2025-10K-MDA-003",
+    "TSLA-FY2025-10K-1A-008",
+    "VZ-FY2025-10K-1A-003"
+   ],
+   "coverage": [
+    {
+     "ticker": "MRK",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 2
+    },
+    {
+     "ticker": "HD",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "NKE",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "PG",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "DE",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "AMD",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "JNJ",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "AXP",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "BA",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "CMCSA",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "LLY",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "LMT",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "VZ",
+     "period": "FY2025",
+     "chunks": 1
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports).",
+    "No corpus company named: all companies are searched, with a cap per company.",
+    "Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+   ],
+   "detected": []
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "ambiguous-ko-few-years",
+    "pass": false,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": false,
+      "detail": "0/1; missed KO /pricing initiatives|pricing actions|price, product and geographic mix/"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "\"last few years\" is vague; read as the last 3 fiscal years. | Years are read as each company’s own fiscal years."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23359/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 0,
+    "sectionPrecision": null,
+    "relevantShare": 0,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23359,
+    "companies": {
+     "KO": 24
+    },
+    "sectionShare": {
+     "other": 0.167,
+     "business": 0.125,
+     "legal": 0.167,
+     "financial_statements": 0.5,
+     "mda": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 22,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 6,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "KO:FY2022(5)",
+     "KO:FY2023(5)",
+     "KO:FY2024(5)",
+     "KO:FY2025 YTD(5)"
+    ]
+   },
+   "chunkIds": [
+    "KO-FY2022-10K-OTH-002",
+    "KO-FY2022-10K-BUS-007",
+    "KO-FY2022-10K-LEGAL-003",
+    "KO-FY2022-10K-FS-004",
+    "KO-FY2022-10K-FS-084",
+    "KO-FY2022-10K-FS-087",
+    "KO-FY2023-10K-OTH-002",
+    "KO-FY2023-10K-BUS-007",
+    "KO-FY2023-10K-LEGAL-003",
+    "KO-FY2023-10K-FS-038",
+    "KO-FY2023-10K-FS-083",
+    "KO-FY2023-10K-FS-086",
+    "KO-FY2024-10K-OTH-002",
+    "KO-FY2024-10K-BUS-008",
+    "KO-FY2024-10K-LEGAL-003",
+    "KO-FY2024-10K-FS-004",
+    "KO-FY2024-10K-FS-079",
+    "KO-FY2024-10K-FS-083",
+    "KO-FY2025Q1-10Q-FS-004",
+    "KO-FY2025Q1-10Q-MDA-006",
+    "KO-FY2025Q1-10Q-LEGAL-001",
+    "KO-FY2025Q1-10Q-OTH-007",
+    "KO-FY2025Q2-10Q-FS-016",
+    "KO-FY2025Q3-10Q-FS-017"
+   ],
+   "coverage": [
+    {
+     "ticker": "KO",
+     "period": "FY2022",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2023",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2024",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2025 YTD",
+     "chunks": 6
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "\"last few years\" is vague; read as the last 3 fiscal years.",
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "KO"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "unsupported-period",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [AAPL], expected [AAPL]"
+     },
+     {
+      "name": "gaps",
+      "pass": true,
+      "detail": "AAPL: no FY2015 filing in the corpus; showing the current view instead."
+     },
+     {
+      "name": "periodKind",
+      "pass": true,
+      "detail": "period current (expected current)"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "Years are read as each company’s own fiscal years. | The requested period (FY2015 filing) is not in the corpus for the named companies; each company is read in its current view instead."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23973/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 27,
+    "tokenEstimate": 23973,
+    "companies": {
+     "AAPL": 27
+    },
+    "sectionShare": {
+     "other": 0.074,
+     "business": 0.037,
+     "risk_factors": 0.704,
+     "cybersecurity": 0.037,
+     "mda": 0.037,
+     "financial_statements": 0.074,
+     "market_risk": 0.037
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 25,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 27,
+    "companiesRepresented": 1,
+    "filingsRepresented": 2,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "AAPL(22)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-OTH-003",
+    "AAPL-FY2025-10K-BUS-001",
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-007",
+    "AAPL-FY2025-10K-1A-008",
+    "AAPL-FY2025-10K-1A-009",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-012",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2025-10K-1C-001",
+    "AAPL-FY2025-10K-MDA-002",
+    "AAPL-FY2025-10K-FS-002",
+    "AAPL-FY2025-10K-FS-005",
+    "AAPL-FY2025-10K-OTH-006",
+    "AAPL-FY2026Q1-10Q-MKT-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 26
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    }
+   ],
+   "gaps": [
+    "AAPL: no FY2015 filing in the corpus; showing the current view instead."
+   ],
+   "notes": [
+    "Years are read as each company’s own fiscal years.",
+    "The requested period (FY2015 filing) is not in the corpus for the named companies; each company is read in its current view instead."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "unsupported-company",
+    "pass": true,
+    "checks": [
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [], expected []"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports). | No corpus company named (Ford is not in the corpus): all companies are searched, with a cap per company. | Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23951/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": null,
+    "periodCoverage": null,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23951,
+    "companies": {
+     "BLK": 2,
+     "BRK": 4,
+     "CVX": 2,
+     "NVDA": 3,
+     "SBUX": 1,
+     "CAT": 4,
+     "T": 1,
+     "TSLA": 4,
+     "UPS": 1,
+     "XOM": 2
+    },
+    "sectionShare": {
+     "mda": 0.292,
+     "other": 0.083,
+     "business": 0.5,
+     "financial_statements": 0.042,
+     "properties": 0.042,
+     "risk_factors": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 12,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 176,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 10,
+    "filingsRepresented": 10,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "global",
+    "lanes": [
+     "global(22)"
+    ]
+   },
+   "chunkIds": [
+    "BLK-FY2023-10K-MDA-009",
+    "BLK-FY2023-10K-OTH-014",
+    "BRK-FY2024-10K-BUS-012",
+    "BRK-FY2024-10K-BUS-015",
+    "BRK-FY2024-10K-BUS-033",
+    "BRK-FY2024-10K-BUS-037",
+    "CVX-FY2024-10K-MDA-003",
+    "CVX-FY2024-10K-MDA-027",
+    "NVDA-FY2025-10K-BUS-003",
+    "NVDA-FY2025-10K-BUS-006",
+    "NVDA-FY2025-10K-BUS-008",
+    "SBUX-FY2025-10K-OTH-015",
+    "CAT-FY2025-10K-BUS-001",
+    "CAT-FY2025-10K-BUS-003",
+    "CAT-FY2025-10K-MDA-015",
+    "CAT-FY2025-10K-FS-080",
+    "T-FY2025-10K-PROP-001",
+    "TSLA-FY2025-10K-BUS-001",
+    "TSLA-FY2025-10K-BUS-012",
+    "TSLA-FY2025-10K-BUS-014",
+    "TSLA-FY2025-10K-MDA-003",
+    "UPS-FY2025-10K-MDA-022",
+    "XOM-FY2025-10K-1A-006",
+    "XOM-FY2025-10K-MDA-005"
+   ],
+   "coverage": [
+    {
+     "ticker": "BLK",
+     "period": "FY2023",
+     "chunks": 2
+    },
+    {
+     "ticker": "BRK",
+     "period": "FY2024",
+     "chunks": 4
+    },
+    {
+     "ticker": "CVX",
+     "period": "FY2024",
+     "chunks": 2
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "SBUX",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "CAT",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "T",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "UPS",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "XOM",
+     "period": "FY2025",
+     "chunks": 2
+    }
+   ],
+   "gaps": [
+    "Ford is not in the corpus (54 companies)."
+   ],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports).",
+    "No corpus company named (Ford is not in the corpus): all companies are searched, with a cap per company.",
+    "Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+   ],
+   "detected": []
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "injection-instructions",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanies",
+      "pass": true,
+      "detail": "1 companies (max 1): AAPL"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [AAPL], expected [AAPL]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23982/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.5,
+    "gold": null,
+    "contextChunks": 28,
+    "tokenEstimate": 23982,
+    "companies": {
+     "AAPL": 28
+    },
+    "sectionShare": {
+     "other": 0.036,
+     "business": 0.036,
+     "risk_factors": 0.571,
+     "mda": 0.107,
+     "financial_statements": 0.179,
+     "controls": 0.036,
+     "market_risk": 0.036
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 23,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 28,
+    "companiesRepresented": 1,
+    "filingsRepresented": 2,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "AAPL(22)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-OTH-003",
+    "AAPL-FY2025-10K-BUS-001",
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-007",
+    "AAPL-FY2025-10K-1A-009",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-012",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-015",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2025-10K-MDA-001",
+    "AAPL-FY2025-10K-MDA-004",
+    "AAPL-FY2025-10K-FS-002",
+    "AAPL-FY2025-10K-FS-005",
+    "AAPL-FY2025-10K-FS-011",
+    "AAPL-FY2025-10K-FS-022",
+    "AAPL-FY2025-10K-FS-026",
+    "AAPL-FY2025-10K-CTRL-001",
+    "AAPL-FY2026Q1-10Q-MDA-002",
+    "AAPL-FY2026Q1-10Q-MKT-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 26
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 2
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "injection-scope",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanies",
+      "pass": true,
+      "detail": "1 companies (max 1): NFLX"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [NFLX], expected [NFLX]"
+     },
+     {
+      "name": "forbidGaps",
+      "pass": true,
+      "detail": "none matching"
+     },
+     {
+      "name": "periodKind",
+      "pass": true,
+      "detail": "period current (expected current)"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "Not read as a period (no time phrase such as \"in 2024\" or \"FY2024\"): \"2010\". | No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23960/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 26,
+    "tokenEstimate": 23960,
+    "companies": {
+     "NFLX": 26
+    },
+    "sectionShare": {
+     "other": 0.154,
+     "risk_factors": 0.5,
+     "cybersecurity": 0.038,
+     "mda": 0.038,
+     "controls": 0.077,
+     "financial_statements": 0.192
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 31,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "NFLX(22)"
+    ]
+   },
+   "chunkIds": [
+    "NFLX-FY2025-10K-OTH-001",
+    "NFLX-FY2025-10K-1A-002",
+    "NFLX-FY2025-10K-1A-003",
+    "NFLX-FY2025-10K-1A-004",
+    "NFLX-FY2025-10K-1A-005",
+    "NFLX-FY2025-10K-1A-006",
+    "NFLX-FY2025-10K-1A-007",
+    "NFLX-FY2025-10K-1A-012",
+    "NFLX-FY2025-10K-1A-013",
+    "NFLX-FY2025-10K-1A-014",
+    "NFLX-FY2025-10K-1A-016",
+    "NFLX-FY2025-10K-1A-019",
+    "NFLX-FY2025-10K-1A-020",
+    "NFLX-FY2025-10K-1A-024",
+    "NFLX-FY2025-10K-1C-002",
+    "NFLX-FY2025-10K-OTH-005",
+    "NFLX-FY2025-10K-OTH-006",
+    "NFLX-FY2025-10K-MDA-013",
+    "NFLX-FY2025-10K-CTRL-001",
+    "NFLX-FY2025-10K-CTRL-002",
+    "NFLX-FY2025-10K-OTH-008",
+    "NFLX-FY2025-10K-FS-001",
+    "NFLX-FY2025-10K-FS-007",
+    "NFLX-FY2025-10K-FS-037",
+    "NFLX-FY2025-10K-FS-040",
+    "NFLX-FY2025-10K-FS-042"
+   ],
+   "coverage": [
+    {
+     "ticker": "NFLX",
+     "period": "FY2025",
+     "chunks": 26
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Not read as a period (no time phrase such as \"in 2024\" or \"FY2024\"): \"2010\".",
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "NFLX"
+   ]
+  },
+  {
+   "mode": "bm25",
+   "score": {
+    "id": "quarter-goog",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23946/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 0, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23946,
+    "companies": {
+     "GOOG": 24
+    },
+    "sectionShare": {
+     "other": 0.083,
+     "financial_statements": 0.458,
+     "mda": 0.458
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 19,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 0,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 60,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "bm25",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "GOOG(22)"
+    ]
+   },
+   "chunkIds": [
+    "GOOG-FY2025Q2-10Q-OTH-002",
+    "GOOG-FY2025Q2-10Q-OTH-003",
+    "GOOG-FY2025Q2-10Q-FS-001",
+    "GOOG-FY2025Q2-10Q-FS-002",
+    "GOOG-FY2025Q2-10Q-FS-005",
+    "GOOG-FY2025Q2-10Q-FS-006",
+    "GOOG-FY2025Q2-10Q-FS-007",
+    "GOOG-FY2025Q2-10Q-FS-023",
+    "GOOG-FY2025Q2-10Q-FS-024",
+    "GOOG-FY2025Q2-10Q-FS-025",
+    "GOOG-FY2025Q2-10Q-FS-026",
+    "GOOG-FY2025Q2-10Q-FS-031",
+    "GOOG-FY2025Q2-10Q-FS-032",
+    "GOOG-FY2025Q2-10Q-MDA-001",
+    "GOOG-FY2025Q2-10Q-MDA-002",
+    "GOOG-FY2025Q2-10Q-MDA-004",
+    "GOOG-FY2025Q2-10Q-MDA-005",
+    "GOOG-FY2025Q2-10Q-MDA-006",
+    "GOOG-FY2025Q2-10Q-MDA-007",
+    "GOOG-FY2025Q2-10Q-MDA-011",
+    "GOOG-FY2025Q2-10Q-MDA-012",
+    "GOOG-FY2025Q2-10Q-MDA-014",
+    "GOOG-FY2025Q2-10Q-MDA-016",
+    "GOOG-FY2025Q2-10Q-MDA-018"
+   ],
+   "coverage": [
+    {
+     "ticker": "GOOG",
+     "period": "FY2025Q2",
+     "chunks": 24
+    }
+   ],
+   "gaps": [],
+   "notes": [],
+   "detected": [
+    "GOOG"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "pdf-1",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23839/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.958,
+    "relevantShare": null,
+    "gold": {
+     "hits": 9,
+     "total": 18,
+     "recall": 0.5,
+     "perCompany": {
+      "AAPL": {
+       "hits": 2,
+       "total": 6
+      },
+      "TSLA": {
+       "hits": 5,
+       "total": 6
+      },
+      "JPM": {
+       "hits": 2,
+       "total": 6
+      }
+     },
+     "missing": [
+      "AAPL-FY2025-10K-1A-002",
+      "AAPL-FY2025-10K-1A-003",
+      "AAPL-FY2025-10K-1A-004",
+      "AAPL-FY2025-10K-1A-015",
+      "TSLA-FY2025-10K-1A-013",
+      "JPM-FY2025-10K-1A-003",
+      "JPM-FY2025-10K-1A-012",
+      "JPM-FY2025-10K-1A-016",
+      "JPM-FY2025-10K-1A-023"
+     ]
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23839,
+    "companies": {
+     "AAPL": 8,
+     "TSLA": 8,
+     "JPM": 8
+    },
+    "sectionShare": {
+     "risk_factors": 0.958,
+     "market_risk": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 25,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 3,
+    "filingsRepresented": 4,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "AAPL(7)",
+     "TSLA(7)",
+     "JPM(7)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-008",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2026Q1-10Q-MKT-001",
+    "TSLA-FY2025-10K-1A-001",
+    "TSLA-FY2025-10K-1A-002",
+    "TSLA-FY2025-10K-1A-005",
+    "TSLA-FY2025-10K-1A-006",
+    "TSLA-FY2025-10K-1A-007",
+    "TSLA-FY2025-10K-1A-008",
+    "TSLA-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-026",
+    "JPM-FY2025-10K-1A-001",
+    "JPM-FY2025-10K-1A-002",
+    "JPM-FY2025-10K-1A-004",
+    "JPM-FY2025-10K-1A-017",
+    "JPM-FY2025-10K-1A-030",
+    "JPM-FY2025-10K-1A-031",
+    "JPM-FY2025-10K-1A-032",
+    "JPM-FY2025-10K-1A-033"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 7
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "AAPL",
+    "TSLA",
+    "JPM"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "pdf-2",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23765/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.625,
+    "gold": {
+     "hits": 8,
+     "total": 8,
+     "recall": 1,
+     "perCompany": {
+      "NVDA": {
+       "hits": 8,
+       "total": 8
+      }
+     },
+     "missing": []
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23765,
+    "companies": {
+     "NVDA": 24
+    },
+    "sectionShare": {
+     "mda": 0.667,
+     "financial_statements": 0.333
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 21,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 5,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "NVDA:FY2024(7)",
+     "NVDA:FY2025(7)",
+     "NVDA:FY2026 YTD(7)"
+    ]
+   },
+   "chunkIds": [
+    "NVDA-FY2024-10K-MDA-004",
+    "NVDA-FY2024-10K-MDA-005",
+    "NVDA-FY2024-10K-MDA-008",
+    "NVDA-FY2024-10K-MDA-009",
+    "NVDA-FY2024-10K-MDA-010",
+    "NVDA-FY2024-10K-MDA-014",
+    "NVDA-FY2024-10K-FS-004",
+    "NVDA-FY2024-10K-FS-008",
+    "NVDA-FY2024-10K-FS-035",
+    "NVDA-FY2025-10K-MDA-001",
+    "NVDA-FY2025-10K-MDA-004",
+    "NVDA-FY2025-10K-MDA-005",
+    "NVDA-FY2025-10K-MDA-009",
+    "NVDA-FY2025-10K-MDA-010",
+    "NVDA-FY2025-10K-FS-004",
+    "NVDA-FY2025-10K-FS-006",
+    "NVDA-FY2025-10K-FS-035",
+    "NVDA-FY2026Q1-10Q-MDA-004",
+    "NVDA-FY2026Q1-10Q-MDA-005",
+    "NVDA-FY2026Q1-10Q-MDA-006",
+    "NVDA-FY2026Q2-10Q-FS-001",
+    "NVDA-FY2026Q2-10Q-MDA-004",
+    "NVDA-FY2026Q3-10Q-FS-001",
+    "NVDA-FY2026Q3-10Q-MDA-004"
+   ],
+   "coverage": [
+    {
+     "ticker": "NVDA",
+     "period": "FY2024",
+     "chunks": 9
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026 YTD",
+     "chunks": 7
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "NVDA"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "pdf-3",
+    "pass": false,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "5/5 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 3"
+     },
+     {
+      "name": "evidence",
+      "pass": false,
+      "detail": "3/5; missed JNJ /Inflation Reduction Act|\\bIRA\\b|Medicare|\\bFDA\\b/; ABBV /Inflation Reduction Act|\\bIRA\\b|Medicare|\\bFDA\\b/"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [ABBV, JNJ, LLY, MRK, PFE], expected [ABBV, JNJ, LLY, MRK, PFE]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23978/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 0.6,
+    "sectionPrecision": 1,
+    "relevantShare": 0.522,
+    "gold": {
+     "hits": 6,
+     "total": 18,
+     "recall": 0.333,
+     "perCompany": {
+      "JNJ": {
+       "hits": 1,
+       "total": 2
+      },
+      "PFE": {
+       "hits": 0,
+       "total": 4
+      },
+      "MRK": {
+       "hits": 1,
+       "total": 4
+      },
+      "LLY": {
+       "hits": 2,
+       "total": 4
+      },
+      "ABBV": {
+       "hits": 2,
+       "total": 4
+      }
+     },
+     "missing": [
+      "JNJ-FY2025-10K-1A-004",
+      "PFE-FY2024-10K-1A-006",
+      "PFE-FY2024-10K-1A-010",
+      "PFE-FY2024-10K-1A-011",
+      "PFE-FY2024-10K-1A-013",
+      "MRK-FY2024-10K-1A-007",
+      "MRK-FY2024-10K-1A-008",
+      "MRK-FY2024-10K-1A-018",
+      "LLY-FY2025-10K-1A-011",
+      "LLY-FY2025-10K-1A-025",
+      "ABBV-FY2024-10K-1A-005",
+      "ABBV-FY2024-10K-1A-011"
+     ]
+    },
+    "contextChunks": 23,
+    "tokenEstimate": 23978,
+    "companies": {
+     "JNJ": 4,
+     "PFE": 4,
+     "MRK": 5,
+     "LLY": 5,
+     "ABBV": 5
+    },
+    "sectionShare": {
+     "risk_factors": 0.957,
+     "business": 0.043
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 32,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 5,
+    "chunksRetrieved": 120,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 5,
+    "filingsRepresented": 5,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "sector",
+    "lanes": [
+     "JNJ(4)",
+     "PFE(4)",
+     "MRK(4)",
+     "LLY(4)",
+     "ABBV(4)"
+    ]
+   },
+   "chunkIds": [
+    "JNJ-FY2025-10K-1A-003",
+    "JNJ-FY2025-10K-1A-006",
+    "JNJ-FY2025-10K-1A-009",
+    "JNJ-FY2025-10K-1A-010",
+    "PFE-FY2024-10K-1A-001",
+    "PFE-FY2024-10K-1A-005",
+    "PFE-FY2024-10K-1A-007",
+    "PFE-FY2024-10K-1A-012",
+    "MRK-FY2024-10K-1A-005",
+    "MRK-FY2024-10K-1A-011",
+    "MRK-FY2024-10K-1A-016",
+    "MRK-FY2024-10K-1A-017",
+    "MRK-FY2024-10K-1A-024",
+    "LLY-FY2025-10K-BUS-014",
+    "LLY-FY2025-10K-1A-001",
+    "LLY-FY2025-10K-1A-007",
+    "LLY-FY2025-10K-1A-008",
+    "LLY-FY2025-10K-1A-024",
+    "ABBV-FY2024-10K-1A-001",
+    "ABBV-FY2024-10K-1A-004",
+    "ABBV-FY2024-10K-1A-006",
+    "ABBV-FY2024-10K-1A-007",
+    "ABBV-FY2024-10K-1A-008"
+   ],
+   "coverage": [
+    {
+     "ticker": "JNJ",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 4
+    },
+    {
+     "ticker": "MRK",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "LLY",
+     "period": "FY2025",
+     "chunks": 5
+    },
+    {
+     "ticker": "ABBV",
+     "period": "FY2024",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "JNJ",
+    "PFE",
+    "MRK",
+    "LLY",
+    "ABBV"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "expert-1",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23910/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.36,
+    "gold": {
+     "hits": 8,
+     "total": 13,
+     "recall": 0.615,
+     "perCompany": {
+      "AAPL": {
+       "hits": 8,
+       "total": 13
+      }
+     },
+     "missing": [
+      "AAPL-FY2023-10K-LEGAL-001",
+      "AAPL-FY2024-10K-1A-015",
+      "AAPL-FY2024-10K-LEGAL-001",
+      "AAPL-FY2025-10K-LEGAL-001",
+      "AAPL-FY2025-10K-LEGAL-002"
+     ]
+    },
+    "contextChunks": 25,
+    "tokenEstimate": 23910,
+    "companies": {
+     "AAPL": 25
+    },
+    "sectionShare": {
+     "risk_factors": 0.68,
+     "mda": 0.28,
+     "legal": 0.04
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 19,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 25,
+    "companiesRepresented": 1,
+    "filingsRepresented": 3,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "AAPL:FY2023(7)",
+     "AAPL:FY2024(7)",
+     "AAPL:FY2025(7)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2023-10K-1A-010",
+    "AAPL-FY2023-10K-1A-015",
+    "AAPL-FY2023-10K-1A-016",
+    "AAPL-FY2023-10K-1A-017",
+    "AAPL-FY2023-10K-1A-018",
+    "AAPL-FY2023-10K-1A-019",
+    "AAPL-FY2023-10K-1A-022",
+    "AAPL-FY2023-10K-MDA-001",
+    "AAPL-FY2024-10K-1A-010",
+    "AAPL-FY2024-10K-1A-014",
+    "AAPL-FY2024-10K-1A-016",
+    "AAPL-FY2024-10K-1A-017",
+    "AAPL-FY2024-10K-1A-018",
+    "AAPL-FY2024-10K-LEGAL-002",
+    "AAPL-FY2024-10K-MDA-001",
+    "AAPL-FY2024-10K-MDA-007",
+    "AAPL-FY2024-10K-MDA-008",
+    "AAPL-FY2025-10K-1A-015",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-MDA-001",
+    "AAPL-FY2025-10K-MDA-008",
+    "AAPL-FY2025-10K-MDA-009"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2023",
+     "chunks": 8
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2024",
+     "chunks": 9
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "rev-msft-fy2025",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23796/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.958,
+    "relevantShare": 0.5,
+    "gold": {
+     "hits": 3,
+     "total": 3,
+     "recall": 1,
+     "perCompany": {
+      "MSFT": {
+       "hits": 3,
+       "total": 3
+      }
+     },
+     "missing": []
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23796,
+    "companies": {
+     "MSFT": 24
+    },
+    "sectionShare": {
+     "other": 0.042,
+     "mda": 0.542,
+     "financial_statements": 0.417
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 29,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "MSFT(22)"
+    ]
+   },
+   "chunkIds": [
+    "MSFT-FY2025-10K-OTH-005",
+    "MSFT-FY2025-10K-MDA-001",
+    "MSFT-FY2025-10K-MDA-002",
+    "MSFT-FY2025-10K-MDA-003",
+    "MSFT-FY2025-10K-MDA-004",
+    "MSFT-FY2025-10K-MDA-005",
+    "MSFT-FY2025-10K-MDA-006",
+    "MSFT-FY2025-10K-MDA-007",
+    "MSFT-FY2025-10K-MDA-008",
+    "MSFT-FY2025-10K-MDA-009",
+    "MSFT-FY2025-10K-MDA-010",
+    "MSFT-FY2025-10K-MDA-011",
+    "MSFT-FY2025-10K-MDA-012",
+    "MSFT-FY2025-10K-MDA-015",
+    "MSFT-FY2025-10K-FS-001",
+    "MSFT-FY2025-10K-FS-005",
+    "MSFT-FY2025-10K-FS-008",
+    "MSFT-FY2025-10K-FS-009",
+    "MSFT-FY2025-10K-FS-028",
+    "MSFT-FY2025-10K-FS-029",
+    "MSFT-FY2025-10K-FS-035",
+    "MSFT-FY2025-10K-FS-036",
+    "MSFT-FY2025-10K-FS-037",
+    "MSFT-FY2025-10K-FS-038"
+   ],
+   "coverage": [
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 24
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "MSFT"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "risk-tsla-demand",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23606/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.478,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23606,
+    "companies": {
+     "TSLA": 23
+    },
+    "sectionShare": {
+     "business": 0.043,
+     "risk_factors": 0.87,
+     "mda": 0.087
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 29,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "TSLA(22)"
+    ]
+   },
+   "chunkIds": [
+    "TSLA-FY2025-10K-BUS-013",
+    "TSLA-FY2025-10K-1A-001",
+    "TSLA-FY2025-10K-1A-002",
+    "TSLA-FY2025-10K-1A-003",
+    "TSLA-FY2025-10K-1A-004",
+    "TSLA-FY2025-10K-1A-005",
+    "TSLA-FY2025-10K-1A-006",
+    "TSLA-FY2025-10K-1A-007",
+    "TSLA-FY2025-10K-1A-008",
+    "TSLA-FY2025-10K-1A-009",
+    "TSLA-FY2025-10K-1A-010",
+    "TSLA-FY2025-10K-1A-011",
+    "TSLA-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-013",
+    "TSLA-FY2025-10K-1A-014",
+    "TSLA-FY2025-10K-1A-015",
+    "TSLA-FY2025-10K-1A-016",
+    "TSLA-FY2025-10K-1A-020",
+    "TSLA-FY2025-10K-1A-022",
+    "TSLA-FY2025-10K-1A-024",
+    "TSLA-FY2025-10K-1A-027",
+    "TSLA-FY2025-10K-MDA-003",
+    "TSLA-FY2025-10K-MDA-004"
+   ],
+   "coverage": [
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 23
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "TSLA"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "multi-cloud",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23932/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.654,
+    "gold": {
+     "hits": 2,
+     "total": 8,
+     "recall": 0.25,
+     "perCompany": {
+      "MSFT": {
+       "hits": 1,
+       "total": 2
+      },
+      "AMZN": {
+       "hits": 1,
+       "total": 3
+      },
+      "GOOG": {
+       "hits": 0,
+       "total": 3
+      }
+     },
+     "missing": [
+      "MSFT-FY2025-10K-MDA-006",
+      "AMZN-FY2025-10K-MDA-010",
+      "AMZN-FY2025-10K-MDA-013",
+      "GOOG-FY2025-10K-BUS-004",
+      "GOOG-FY2025-10K-MDA-008",
+      "GOOG-FY2025-10K-MDA-010"
+     ]
+    },
+    "contextChunks": 26,
+    "tokenEstimate": 23932,
+    "companies": {
+     "MSFT": 7,
+     "AMZN": 9,
+     "GOOG": 10
+    },
+    "sectionShare": {
+     "business": 0.423,
+     "financial_statements": 0.308,
+     "mda": 0.154,
+     "other": 0.077,
+     "properties": 0.038
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 20,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 3,
+    "filingsRepresented": 4,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "MSFT(7)",
+     "AMZN(7)",
+     "GOOG(7)"
+    ]
+   },
+   "chunkIds": [
+    "MSFT-FY2025-10K-BUS-001",
+    "MSFT-FY2025-10K-BUS-002",
+    "MSFT-FY2025-10K-BUS-005",
+    "MSFT-FY2025-10K-BUS-006",
+    "MSFT-FY2025-10K-FS-035",
+    "MSFT-FY2025-10K-FS-036",
+    "MSFT-FY2026Q1-10Q-FS-024",
+    "AMZN-FY2025-10K-BUS-001",
+    "AMZN-FY2025-10K-BUS-002",
+    "AMZN-FY2025-10K-BUS-003",
+    "AMZN-FY2025-10K-MDA-003",
+    "AMZN-FY2025-10K-FS-004",
+    "AMZN-FY2025-10K-FS-006",
+    "AMZN-FY2025-10K-FS-034",
+    "AMZN-FY2025-10K-FS-040",
+    "AMZN-FY2025-10K-OTH-007",
+    "GOOG-FY2025-10K-BUS-001",
+    "GOOG-FY2025-10K-BUS-002",
+    "GOOG-FY2025-10K-BUS-005",
+    "GOOG-FY2025-10K-BUS-006",
+    "GOOG-FY2025-10K-PROP-001",
+    "GOOG-FY2025-10K-MDA-001",
+    "GOOG-FY2025-10K-MDA-005",
+    "GOOG-FY2025-10K-MDA-007",
+    "GOOG-FY2025-10K-FS-048",
+    "GOOG-FY2025-10K-OTH-011"
+   ],
+   "coverage": [
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 6
+    },
+    {
+     "ticker": "MSFT",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "AMZN",
+     "period": "FY2025",
+     "chunks": 9
+    },
+    {
+     "ticker": "GOOG",
+     "period": "FY2025",
+     "chunks": 10
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "MSFT",
+    "AMZN",
+    "GOOG"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "long-pfe-since-2022",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23944/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.852,
+    "gold": null,
+    "contextChunks": 27,
+    "tokenEstimate": 23944,
+    "companies": {
+     "PFE": 27
+    },
+    "sectionShare": {
+     "mda": 0.704,
+     "financial_statements": 0.296
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 19,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 27,
+    "companiesRepresented": 1,
+    "filingsRepresented": 6,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "PFE:FY2022(5)",
+     "PFE:FY2023(5)",
+     "PFE:FY2024(5)",
+     "PFE:FY2025 YTD(5)"
+    ]
+   },
+   "chunkIds": [
+    "PFE-FY2022-10K-MDA-001",
+    "PFE-FY2022-10K-MDA-003",
+    "PFE-FY2022-10K-MDA-004",
+    "PFE-FY2022-10K-MDA-015",
+    "PFE-FY2022-10K-MDA-035",
+    "PFE-FY2022-10K-FS-120",
+    "PFE-FY2022-10K-FS-123",
+    "PFE-FY2023-10K-MDA-001",
+    "PFE-FY2023-10K-MDA-003",
+    "PFE-FY2023-10K-MDA-004",
+    "PFE-FY2023-10K-MDA-016",
+    "PFE-FY2023-10K-MDA-021",
+    "PFE-FY2023-10K-FS-118",
+    "PFE-FY2023-10K-FS-122",
+    "PFE-FY2024-10K-MDA-001",
+    "PFE-FY2024-10K-MDA-003",
+    "PFE-FY2024-10K-MDA-004",
+    "PFE-FY2024-10K-MDA-019",
+    "PFE-FY2024-10K-FS-006",
+    "PFE-FY2024-10K-FS-007",
+    "PFE-FY2024-10K-FS-118",
+    "PFE-FY2024-10K-FS-119",
+    "PFE-FY2025Q1-10Q-MDA-002",
+    "PFE-FY2025Q2-10Q-MDA-003",
+    "PFE-FY2025Q2-10Q-MDA-014",
+    "PFE-FY2025Q3-10Q-MDA-003",
+    "PFE-FY2025Q3-10Q-MDA-016"
+   ],
+   "coverage": [
+    {
+     "ticker": "PFE",
+     "period": "FY2022",
+     "chunks": 7
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2023",
+     "chunks": 7
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 8
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2025 YTD",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "PFE"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "reg-nvda-export",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23427/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.957,
+    "gold": {
+     "hits": 4,
+     "total": 6,
+     "recall": 0.667,
+     "perCompany": {
+      "NVDA": {
+       "hits": 4,
+       "total": 6
+      }
+     },
+     "missing": [
+      "NVDA-FY2025-10K-1A-026",
+      "NVDA-FY2026Q3-10Q-MDA-003"
+     ]
+    },
+    "contextChunks": 23,
+    "tokenEstimate": 23427,
+    "companies": {
+     "NVDA": 23
+    },
+    "sectionShare": {
+     "business": 0.043,
+     "risk_factors": 0.913,
+     "mda": 0.043
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 30,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 4,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "NVDA(22)"
+    ]
+   },
+   "chunkIds": [
+    "NVDA-FY2025-10K-BUS-013",
+    "NVDA-FY2025-10K-1A-022",
+    "NVDA-FY2025-10K-1A-023",
+    "NVDA-FY2025-10K-1A-024",
+    "NVDA-FY2025-10K-1A-027",
+    "NVDA-FY2025-10K-1A-028",
+    "NVDA-FY2025-10K-MDA-003",
+    "NVDA-FY2026Q1-10Q-1A-007",
+    "NVDA-FY2026Q1-10Q-1A-008",
+    "NVDA-FY2026Q1-10Q-1A-009",
+    "NVDA-FY2026Q1-10Q-1A-010",
+    "NVDA-FY2026Q1-10Q-1A-011",
+    "NVDA-FY2026Q1-10Q-1A-012",
+    "NVDA-FY2026Q2-10Q-1A-005",
+    "NVDA-FY2026Q2-10Q-1A-006",
+    "NVDA-FY2026Q2-10Q-1A-007",
+    "NVDA-FY2026Q2-10Q-1A-009",
+    "NVDA-FY2026Q2-10Q-1A-010",
+    "NVDA-FY2026Q3-10Q-1A-010",
+    "NVDA-FY2026Q3-10Q-1A-011",
+    "NVDA-FY2026Q3-10Q-1A-012",
+    "NVDA-FY2026Q3-10Q-1A-014",
+    "NVDA-FY2026Q3-10Q-1A-015"
+   ],
+   "coverage": [
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 7
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q1",
+     "chunks": 6
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q2",
+     "chunks": 5
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q3",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "NVDA"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "cross-wmt-jpm-rates",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "2/2 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23968/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23968,
+    "companies": {
+     "WMT": 12,
+     "JPM": 12
+    },
+    "sectionShare": {
+     "risk_factors": 0.625,
+     "mda": 0.25,
+     "market_risk": 0.083,
+     "financial_statements": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 27,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 2,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 2,
+    "filingsRepresented": 2,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "WMT(11)",
+     "JPM(11)"
+    ]
+   },
+   "chunkIds": [
+    "WMT-FY2025-10K-1A-002",
+    "WMT-FY2025-10K-1A-003",
+    "WMT-FY2025-10K-1A-004",
+    "WMT-FY2025-10K-1A-005",
+    "WMT-FY2025-10K-1A-017",
+    "WMT-FY2025-10K-1A-020",
+    "WMT-FY2025-10K-1A-021",
+    "WMT-FY2025-10K-MDA-002",
+    "WMT-FY2025-10K-MDA-003",
+    "WMT-FY2025-10K-MDA-010",
+    "WMT-FY2025-10K-MKT-001",
+    "WMT-FY2025-10K-MKT-002",
+    "JPM-FY2025-10K-1A-001",
+    "JPM-FY2025-10K-1A-011",
+    "JPM-FY2025-10K-1A-012",
+    "JPM-FY2025-10K-1A-013",
+    "JPM-FY2025-10K-1A-017",
+    "JPM-FY2025-10K-1A-030",
+    "JPM-FY2025-10K-1A-031",
+    "JPM-FY2025-10K-1A-037",
+    "JPM-FY2025-10K-MDA-095",
+    "JPM-FY2025-10K-MDA-119",
+    "JPM-FY2025-10K-MDA-120",
+    "JPM-FY2025-10K-FS-241"
+   ],
+   "coverage": [
+    {
+     "ticker": "WMT",
+     "period": "FY2025",
+     "chunks": 12
+    },
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 12
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "WMT",
+    "JPM"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "cross-cyber",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 4"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23982/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.391,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23982,
+    "companies": {
+     "V": 7,
+     "UNH": 9,
+     "BA": 7
+    },
+    "sectionShare": {
+     "risk_factors": 1
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 23,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 3,
+    "filingsRepresented": 3,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "V(7)",
+     "UNH(7)",
+     "BA(7)"
+    ]
+   },
+   "chunkIds": [
+    "V-FY2025-10K-1A-011",
+    "V-FY2025-10K-1A-012",
+    "V-FY2025-10K-1A-013",
+    "V-FY2025-10K-1A-021",
+    "V-FY2025-10K-1A-022",
+    "V-FY2025-10K-1A-023",
+    "V-FY2025-10K-1A-024",
+    "UNH-FY2024-10K-1A-003",
+    "UNH-FY2024-10K-1A-004",
+    "UNH-FY2024-10K-1A-005",
+    "UNH-FY2024-10K-1A-006",
+    "UNH-FY2024-10K-1A-008",
+    "UNH-FY2024-10K-1A-010",
+    "UNH-FY2024-10K-1A-011",
+    "UNH-FY2024-10K-1A-014",
+    "UNH-FY2024-10K-1A-021",
+    "BA-FY2025-10K-1A-001",
+    "BA-FY2025-10K-1A-005",
+    "BA-FY2025-10K-1A-007",
+    "BA-FY2025-10K-1A-008",
+    "BA-FY2025-10K-1A-013",
+    "BA-FY2025-10K-1A-014",
+    "BA-FY2025-10K-1A-015"
+   ],
+   "coverage": [
+    {
+     "ticker": "V",
+     "period": "FY2025",
+     "chunks": 7
+    },
+    {
+     "ticker": "UNH",
+     "period": "FY2024",
+     "chunks": 9
+    },
+    {
+     "ticker": "BA",
+     "period": "FY2025",
+     "chunks": 7
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "V",
+    "UNH",
+    "BA"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "sector-banks-capital",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "4/4 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [BAC, GS, JPM, MS], expected [BAC, GS, JPM, MS]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23956/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.609,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23956,
+    "companies": {
+     "JPM": 7,
+     "BAC": 6,
+     "GS": 5,
+     "MS": 5
+    },
+    "sectionShare": {
+     "mda": 0.826,
+     "financial_statements": 0.174
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 49,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 4,
+    "filingsRepresented": 7,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "sector",
+    "lanes": [
+     "JPM(5)",
+     "BAC(5)",
+     "GS(5)",
+     "MS(5)"
+    ]
+   },
+   "chunkIds": [
+    "JPM-FY2025-10K-MDA-049",
+    "JPM-FY2025-10K-MDA-066",
+    "JPM-FY2025-10K-MDA-068",
+    "JPM-FY2025-10K-MDA-113",
+    "JPM-FY2025-10K-FS-047",
+    "JPM-FY2025-10K-FS-072",
+    "JPM-FY2025-10K-FS-238",
+    "BAC-FY2024-10K-MDA-058",
+    "BAC-FY2024-10K-MDA-060",
+    "BAC-FY2024-10K-MDA-061",
+    "BAC-FY2025Q1-10Q-MDA-039",
+    "BAC-FY2025Q2-10Q-MDA-052",
+    "BAC-FY2025Q3-10Q-MDA-053",
+    "GS-FY2024-10K-MDA-039",
+    "GS-FY2024-10K-MDA-062",
+    "GS-FY2024-10K-MDA-066",
+    "GS-FY2024-10K-MDA-068",
+    "GS-FY2024-10K-FS-132",
+    "MS-FY2025-10K-MDA-032",
+    "MS-FY2025-10K-MDA-033",
+    "MS-FY2025-10K-MDA-034",
+    "MS-FY2025-10K-MDA-035",
+    "MS-FY2025-10K-MDA-036"
+   ],
+   "coverage": [
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 7
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2024",
+     "chunks": 3
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q2",
+     "chunks": 1
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q3",
+     "chunks": 1
+    },
+    {
+     "ticker": "GS",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "MS",
+     "period": "FY2025",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "JPM",
+    "BAC",
+    "GS",
+    "MS"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "ambiguous-meta",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [META], expected [META]"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23940/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23940,
+    "companies": {
+     "META": 24
+    },
+    "sectionShare": {
+     "other": 0.042,
+     "business": 0.125,
+     "risk_factors": 0.208,
+     "mda": 0.292,
+     "financial_statements": 0.333
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 30,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "META(22)"
+    ]
+   },
+   "chunkIds": [
+    "META-FY2025-10K-OTH-005",
+    "META-FY2025-10K-BUS-004",
+    "META-FY2025-10K-BUS-005",
+    "META-FY2025-10K-BUS-006",
+    "META-FY2025-10K-1A-001",
+    "META-FY2025-10K-1A-002",
+    "META-FY2025-10K-1A-020",
+    "META-FY2025-10K-1A-023",
+    "META-FY2025-10K-1A-024",
+    "META-FY2025-10K-MDA-001",
+    "META-FY2025-10K-MDA-005",
+    "META-FY2025-10K-MDA-010",
+    "META-FY2025-10K-MDA-012",
+    "META-FY2025-10K-MDA-013",
+    "META-FY2025-10K-MDA-017",
+    "META-FY2025-10K-MDA-020",
+    "META-FY2025-10K-FS-006",
+    "META-FY2025-10K-FS-007",
+    "META-FY2025-10K-FS-008",
+    "META-FY2025-10K-FS-012",
+    "META-FY2025-10K-FS-014",
+    "META-FY2025-10K-FS-025",
+    "META-FY2025-10K-FS-045",
+    "META-FY2025-10K-FS-053"
+   ],
+   "coverage": [
+    {
+     "ticker": "META",
+     "period": "FY2025",
+     "chunks": 24
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "META"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "ambiguous-no-company",
+    "pass": true,
+    "checks": [
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanyShare",
+      "pass": true,
+      "detail": "max share 0.13 (limit 0.2)"
+     },
+     {
+      "name": "minCompanies",
+      "pass": true,
+      "detail": "14 companies (min 6)"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [], expected []"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports). | No corpus company named: all companies are searched, with a cap per company. | Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23700/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": null,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.913,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23700,
+    "companies": {
+     "WMT": 3,
+     "TGT": 2,
+     "NKE": 2,
+     "COST": 1,
+     "AAPL": 1,
+     "SBUX": 3,
+     "DE": 2,
+     "JNJ": 1,
+     "AMZN": 1,
+     "BA": 1,
+     "CAT": 1,
+     "LLY": 3,
+     "LMT": 1,
+     "TSLA": 1
+    },
+    "sectionShare": {
+     "risk_factors": 1
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 35,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 176,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 14,
+    "filingsRepresented": 14,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "global",
+    "lanes": [
+     "global(22)"
+    ]
+   },
+   "chunkIds": [
+    "WMT-FY2025-10K-1A-008",
+    "WMT-FY2025-10K-1A-022",
+    "WMT-FY2025-10K-1A-023",
+    "TGT-FY2024-10K-1A-009",
+    "TGT-FY2024-10K-1A-010",
+    "NKE-FY2025-10K-1A-024",
+    "NKE-FY2025-10K-1A-025",
+    "COST-FY2025-10K-1A-009",
+    "AAPL-FY2025-10K-1A-002",
+    "SBUX-FY2025-10K-1A-007",
+    "SBUX-FY2025-10K-1A-008",
+    "SBUX-FY2025-10K-1A-009",
+    "DE-FY2025-10K-1A-002",
+    "DE-FY2025-10K-1A-003",
+    "JNJ-FY2025-10K-1A-011",
+    "AMZN-FY2025-10K-1A-012",
+    "BA-FY2025-10K-1A-008",
+    "CAT-FY2025-10K-1A-015",
+    "LLY-FY2025-10K-1A-018",
+    "LLY-FY2025-10K-1A-020",
+    "LLY-FY2025-10K-1A-021",
+    "LMT-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-008"
+   ],
+   "coverage": [
+    {
+     "ticker": "WMT",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "TGT",
+     "period": "FY2024",
+     "chunks": 2
+    },
+    {
+     "ticker": "NKE",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "COST",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "SBUX",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "DE",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "JNJ",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "AMZN",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "BA",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "CAT",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "LLY",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "LMT",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 1
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports).",
+    "No corpus company named: all companies are searched, with a cap per company.",
+    "Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+   ],
+   "detected": []
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "ambiguous-ko-few-years",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "\"last few years\" is vague; read as the last 3 fiscal years. | Years are read as each company’s own fiscal years."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23760/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.458,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23760,
+    "companies": {
+     "KO": 24
+    },
+    "sectionShare": {
+     "business": 0.083,
+     "risk_factors": 0.208,
+     "mda": 0.542,
+     "financial_statements": 0.083,
+     "market_risk": 0.083
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 23,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 6,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "KO:FY2022(5)",
+     "KO:FY2023(5)",
+     "KO:FY2024(5)",
+     "KO:FY2025 YTD(5)"
+    ]
+   },
+   "chunkIds": [
+    "KO-FY2022-10K-BUS-009",
+    "KO-FY2022-10K-1A-006",
+    "KO-FY2022-10K-MDA-004",
+    "KO-FY2022-10K-MDA-014",
+    "KO-FY2022-10K-MDA-022",
+    "KO-FY2022-10K-MDA-024",
+    "KO-FY2023-10K-BUS-009",
+    "KO-FY2023-10K-1A-006",
+    "KO-FY2023-10K-1A-020",
+    "KO-FY2023-10K-MDA-018",
+    "KO-FY2023-10K-MDA-019",
+    "KO-FY2023-10K-FS-053",
+    "KO-FY2024-10K-1A-002",
+    "KO-FY2024-10K-1A-006",
+    "KO-FY2024-10K-MDA-018",
+    "KO-FY2024-10K-MDA-020",
+    "KO-FY2024-10K-MKT-002",
+    "KO-FY2024-10K-FS-052",
+    "KO-FY2025Q1-10Q-MDA-008",
+    "KO-FY2025Q1-10Q-MKT-001",
+    "KO-FY2025Q2-10Q-MDA-008",
+    "KO-FY2025Q3-10Q-MDA-002",
+    "KO-FY2025Q3-10Q-MDA-010",
+    "KO-FY2025Q3-10Q-MDA-011"
+   ],
+   "coverage": [
+    {
+     "ticker": "KO",
+     "period": "FY2022",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2023",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2024",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2025 YTD",
+     "chunks": 6
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "\"last few years\" is vague; read as the last 3 fiscal years.",
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "KO"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "unsupported-period",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [AAPL], expected [AAPL]"
+     },
+     {
+      "name": "gaps",
+      "pass": true,
+      "detail": "AAPL: no FY2015 filing in the corpus; showing the current view instead."
+     },
+     {
+      "name": "periodKind",
+      "pass": true,
+      "detail": "period current (expected current)"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "Years are read as each company’s own fiscal years. | The requested period (FY2015 filing) is not in the corpus for the named companies; each company is read in its current view instead."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23904/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 26,
+    "tokenEstimate": 23904,
+    "companies": {
+     "AAPL": 26
+    },
+    "sectionShare": {
+     "risk_factors": 0.808,
+     "mda": 0.038,
+     "market_risk": 0.077,
+     "financial_statements": 0.077
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 26,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 1,
+    "filingsRepresented": 2,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "AAPL(22)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-007",
+    "AAPL-FY2025-10K-1A-008",
+    "AAPL-FY2025-10K-1A-010",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-012",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-015",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2025-10K-MDA-001",
+    "AAPL-FY2025-10K-MKT-001",
+    "AAPL-FY2025-10K-FS-005",
+    "AAPL-FY2025-10K-FS-024",
+    "AAPL-FY2026Q1-10Q-MKT-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 25
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    }
+   ],
+   "gaps": [
+    "AAPL: no FY2015 filing in the corpus; showing the current view instead."
+   ],
+   "notes": [
+    "Years are read as each company’s own fiscal years.",
+    "The requested period (FY2015 filing) is not in the corpus for the named companies; each company is read in its current view instead."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "unsupported-company",
+    "pass": true,
+    "checks": [
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [], expected []"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports). | No corpus company named (Ford is not in the corpus): all companies are searched, with a cap per company. | Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23954/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": null,
+    "periodCoverage": null,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23954,
+    "companies": {
+     "BLK": 1,
+     "CVX": 3,
+     "GS": 1,
+     "KO": 1,
+     "NVDA": 4,
+     "CRM": 1,
+     "MSFT": 2,
+     "PG": 1,
+     "INTC": 1,
+     "TSLA": 4,
+     "XOM": 4
+    },
+    "sectionShare": {
+     "mda": 0.435,
+     "business": 0.435,
+     "cybersecurity": 0.043,
+     "other": 0.043,
+     "risk_factors": 0.043
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 22,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 176,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 11,
+    "filingsRepresented": 12,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "global",
+    "lanes": [
+     "global(22)"
+    ]
+   },
+   "chunkIds": [
+    "BLK-FY2023-10K-MDA-010",
+    "CVX-FY2024-10K-BUS-002",
+    "CVX-FY2024-10K-MDA-003",
+    "CVX-FY2024-10K-MDA-004",
+    "GS-FY2024-10K-BUS-012",
+    "KO-FY2024-10K-MDA-003",
+    "NVDA-FY2025-10K-BUS-006",
+    "NVDA-FY2025-10K-BUS-007",
+    "NVDA-FY2025-10K-BUS-008",
+    "CRM-FY2025-10K-BUS-007",
+    "NVDA-FY2026Q1-10Q-MDA-003",
+    "MSFT-FY2025-10K-BUS-002",
+    "MSFT-FY2025-10K-1C-001",
+    "PG-FY2025-10K-MDA-008",
+    "INTC-FY2025-10K-OTH-007",
+    "TSLA-FY2025-10K-BUS-001",
+    "TSLA-FY2025-10K-BUS-002",
+    "TSLA-FY2025-10K-BUS-003",
+    "TSLA-FY2025-10K-MDA-003",
+    "XOM-FY2025-10K-1A-007",
+    "XOM-FY2025-10K-MDA-003",
+    "XOM-FY2025-10K-MDA-008",
+    "XOM-FY2025-10K-MDA-009"
+   ],
+   "coverage": [
+    {
+     "ticker": "BLK",
+     "period": "FY2023",
+     "chunks": 1
+    },
+    {
+     "ticker": "CVX",
+     "period": "FY2024",
+     "chunks": 3
+    },
+    {
+     "ticker": "GS",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "CRM",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "PG",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "INTC",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "XOM",
+     "period": "FY2025",
+     "chunks": 4
+    }
+   ],
+   "gaps": [
+    "Ford is not in the corpus (54 companies)."
+   ],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports).",
+    "No corpus company named (Ford is not in the corpus): all companies are searched, with a cap per company.",
+    "Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+   ],
+   "detected": []
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "injection-instructions",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanies",
+      "pass": true,
+      "detail": "1 companies (max 1): AAPL"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [AAPL], expected [AAPL]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23987/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.5,
+    "gold": null,
+    "contextChunks": 26,
+    "tokenEstimate": 23987,
+    "companies": {
+     "AAPL": 26
+    },
+    "sectionShare": {
+     "risk_factors": 0.846,
+     "cybersecurity": 0.038,
+     "mda": 0.038,
+     "financial_statements": 0.038,
+     "market_risk": 0.038
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 27,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 1,
+    "filingsRepresented": 2,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "AAPL(22)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-007",
+    "AAPL-FY2025-10K-1A-008",
+    "AAPL-FY2025-10K-1A-009",
+    "AAPL-FY2025-10K-1A-010",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-012",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-015",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2025-10K-1C-001",
+    "AAPL-FY2025-10K-MDA-002",
+    "AAPL-FY2025-10K-FS-005",
+    "AAPL-FY2026Q1-10Q-MKT-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 25
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "injection-scope",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanies",
+      "pass": true,
+      "detail": "1 companies (max 1): NFLX"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [NFLX], expected [NFLX]"
+     },
+     {
+      "name": "forbidGaps",
+      "pass": true,
+      "detail": "none matching"
+     },
+     {
+      "name": "periodKind",
+      "pass": true,
+      "detail": "period current (expected current)"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "Not read as a period (no time phrase such as \"in 2024\" or \"FY2024\"): \"2010\". | No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23952/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23952,
+    "companies": {
+     "NFLX": 23
+    },
+    "sectionShare": {
+     "risk_factors": 1
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 29,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "NFLX(22)"
+    ]
+   },
+   "chunkIds": [
+    "NFLX-FY2025-10K-1A-001",
+    "NFLX-FY2025-10K-1A-002",
+    "NFLX-FY2025-10K-1A-003",
+    "NFLX-FY2025-10K-1A-004",
+    "NFLX-FY2025-10K-1A-005",
+    "NFLX-FY2025-10K-1A-006",
+    "NFLX-FY2025-10K-1A-007",
+    "NFLX-FY2025-10K-1A-008",
+    "NFLX-FY2025-10K-1A-009",
+    "NFLX-FY2025-10K-1A-011",
+    "NFLX-FY2025-10K-1A-012",
+    "NFLX-FY2025-10K-1A-013",
+    "NFLX-FY2025-10K-1A-014",
+    "NFLX-FY2025-10K-1A-015",
+    "NFLX-FY2025-10K-1A-016",
+    "NFLX-FY2025-10K-1A-017",
+    "NFLX-FY2025-10K-1A-018",
+    "NFLX-FY2025-10K-1A-019",
+    "NFLX-FY2025-10K-1A-020",
+    "NFLX-FY2025-10K-1A-021",
+    "NFLX-FY2025-10K-1A-022",
+    "NFLX-FY2025-10K-1A-023",
+    "NFLX-FY2025-10K-1A-024"
+   ],
+   "coverage": [
+    {
+     "ticker": "NFLX",
+     "period": "FY2025",
+     "chunks": 23
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Not read as a period (no time phrase such as \"in 2024\" or \"FY2024\"): \"2010\".",
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "NFLX"
+   ]
+  },
+  {
+   "mode": "cosine",
+   "score": {
+    "id": "quarter-goog",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23909/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 26,
+    "tokenEstimate": 23909,
+    "companies": {
+     "GOOG": 26
+    },
+    "sectionShare": {
+     "other": 0.077,
+     "financial_statements": 0.423,
+     "mda": 0.423,
+     "market_risk": 0.038,
+     "legal": 0.038
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 18,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 60,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "cosine",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "GOOG(22)"
+    ]
+   },
+   "chunkIds": [
+    "GOOG-FY2025Q2-10Q-OTH-002",
+    "GOOG-FY2025Q2-10Q-FS-001",
+    "GOOG-FY2025Q2-10Q-FS-006",
+    "GOOG-FY2025Q2-10Q-FS-007",
+    "GOOG-FY2025Q2-10Q-FS-017",
+    "GOOG-FY2025Q2-10Q-FS-021",
+    "GOOG-FY2025Q2-10Q-FS-024",
+    "GOOG-FY2025Q2-10Q-FS-025",
+    "GOOG-FY2025Q2-10Q-FS-026",
+    "GOOG-FY2025Q2-10Q-FS-027",
+    "GOOG-FY2025Q2-10Q-FS-030",
+    "GOOG-FY2025Q2-10Q-FS-031",
+    "GOOG-FY2025Q2-10Q-MDA-001",
+    "GOOG-FY2025Q2-10Q-MDA-002",
+    "GOOG-FY2025Q2-10Q-MDA-003",
+    "GOOG-FY2025Q2-10Q-MDA-006",
+    "GOOG-FY2025Q2-10Q-MDA-007",
+    "GOOG-FY2025Q2-10Q-MDA-011",
+    "GOOG-FY2025Q2-10Q-MDA-012",
+    "GOOG-FY2025Q2-10Q-MDA-013",
+    "GOOG-FY2025Q2-10Q-MDA-016",
+    "GOOG-FY2025Q2-10Q-MDA-017",
+    "GOOG-FY2025Q2-10Q-MDA-018",
+    "GOOG-FY2025Q2-10Q-MKT-001",
+    "GOOG-FY2025Q2-10Q-LEGAL-001",
+    "GOOG-FY2025Q2-10Q-OTH-005"
+   ],
+   "coverage": [
+    {
+     "ticker": "GOOG",
+     "period": "FY2025Q2",
+     "chunks": 26
+    }
+   ],
+   "gaps": [],
+   "notes": [],
+   "detected": [
+    "GOOG"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "pdf-1",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23934/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.923,
+    "relevantShare": null,
+    "gold": {
+     "hits": 11,
+     "total": 18,
+     "recall": 0.611,
+     "perCompany": {
+      "AAPL": {
+       "hits": 3,
+       "total": 6
+      },
+      "TSLA": {
+       "hits": 5,
+       "total": 6
+      },
+      "JPM": {
+       "hits": 3,
+       "total": 6
+      }
+     },
+     "missing": [
+      "AAPL-FY2025-10K-1A-002",
+      "AAPL-FY2025-10K-1A-006",
+      "AAPL-FY2025-10K-1A-015",
+      "TSLA-FY2025-10K-1A-007",
+      "JPM-FY2025-10K-1A-003",
+      "JPM-FY2025-10K-1A-012",
+      "JPM-FY2025-10K-1A-016"
+     ]
+    },
+    "contextChunks": 26,
+    "tokenEstimate": 23934,
+    "companies": {
+     "AAPL": 9,
+     "TSLA": 9,
+     "JPM": 8
+    },
+    "sectionShare": {
+     "risk_factors": 0.923,
+     "market_risk": 0.038,
+     "financial_statements": 0.038
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 21,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 3,
+    "filingsRepresented": 4,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "AAPL(7)",
+     "TSLA(7)",
+     "JPM(7)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2026Q1-10Q-MKT-001",
+    "TSLA-FY2025-10K-1A-001",
+    "TSLA-FY2025-10K-1A-002",
+    "TSLA-FY2025-10K-1A-005",
+    "TSLA-FY2025-10K-1A-006",
+    "TSLA-FY2025-10K-1A-011",
+    "TSLA-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-013",
+    "TSLA-FY2025-10K-1A-026",
+    "TSLA-FY2025-10K-1A-027",
+    "JPM-FY2025-10K-1A-001",
+    "JPM-FY2025-10K-1A-002",
+    "JPM-FY2025-10K-1A-011",
+    "JPM-FY2025-10K-1A-017",
+    "JPM-FY2025-10K-1A-023",
+    "JPM-FY2025-10K-1A-032",
+    "JPM-FY2025-10K-1A-033",
+    "JPM-FY2025-10K-FS-071"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 9
+    },
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "AAPL",
+    "TSLA",
+    "JPM"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "pdf-2",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23986/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.609,
+    "gold": {
+     "hits": 7,
+     "total": 8,
+     "recall": 0.875,
+     "perCompany": {
+      "NVDA": {
+       "hits": 7,
+       "total": 8
+      }
+     },
+     "missing": [
+      "NVDA-FY2025-10K-MDA-004"
+     ]
+    },
+    "contextChunks": 23,
+    "tokenEstimate": 23986,
+    "companies": {
+     "NVDA": 23
+    },
+    "sectionShare": {
+     "mda": 0.783,
+     "financial_statements": 0.217
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 20,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 5,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "NVDA:FY2024(7)",
+     "NVDA:FY2025(7)",
+     "NVDA:FY2026 YTD(7)"
+    ]
+   },
+   "chunkIds": [
+    "NVDA-FY2024-10K-MDA-004",
+    "NVDA-FY2024-10K-MDA-005",
+    "NVDA-FY2024-10K-MDA-008",
+    "NVDA-FY2024-10K-MDA-009",
+    "NVDA-FY2024-10K-MDA-010",
+    "NVDA-FY2024-10K-MDA-012",
+    "NVDA-FY2024-10K-FS-004",
+    "NVDA-FY2024-10K-FS-008",
+    "NVDA-FY2025-10K-MDA-001",
+    "NVDA-FY2025-10K-MDA-005",
+    "NVDA-FY2025-10K-MDA-008",
+    "NVDA-FY2025-10K-MDA-009",
+    "NVDA-FY2025-10K-MDA-010",
+    "NVDA-FY2025-10K-FS-008",
+    "NVDA-FY2025-10K-FS-023",
+    "NVDA-FY2025-10K-FS-035",
+    "NVDA-FY2026Q1-10Q-MDA-004",
+    "NVDA-FY2026Q1-10Q-MDA-006",
+    "NVDA-FY2026Q2-10Q-MDA-004",
+    "NVDA-FY2026Q2-10Q-MDA-006",
+    "NVDA-FY2026Q2-10Q-MDA-007",
+    "NVDA-FY2026Q3-10Q-MDA-004",
+    "NVDA-FY2026Q3-10Q-MDA-006"
+   ],
+   "coverage": [
+    {
+     "ticker": "NVDA",
+     "period": "FY2024",
+     "chunks": 8
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026 YTD",
+     "chunks": 7
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "NVDA"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "pdf-3",
+    "pass": false,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "5/5 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 3"
+     },
+     {
+      "name": "evidence",
+      "pass": false,
+      "detail": "4/5; missed ABBV /Inflation Reduction Act|\\bIRA\\b|Medicare|\\bFDA\\b/"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [ABBV, JNJ, LLY, MRK, PFE], expected [ABBV, JNJ, LLY, MRK, PFE]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23902/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 0.8,
+    "sectionPrecision": 1,
+    "relevantShare": 0.522,
+    "gold": {
+     "hits": 7,
+     "total": 18,
+     "recall": 0.389,
+     "perCompany": {
+      "JNJ": {
+       "hits": 1,
+       "total": 2
+      },
+      "PFE": {
+       "hits": 1,
+       "total": 4
+      },
+      "MRK": {
+       "hits": 1,
+       "total": 4
+      },
+      "LLY": {
+       "hits": 2,
+       "total": 4
+      },
+      "ABBV": {
+       "hits": 2,
+       "total": 4
+      }
+     },
+     "missing": [
+      "JNJ-FY2025-10K-1A-004",
+      "PFE-FY2024-10K-1A-006",
+      "PFE-FY2024-10K-1A-010",
+      "PFE-FY2024-10K-1A-013",
+      "MRK-FY2024-10K-1A-007",
+      "MRK-FY2024-10K-1A-008",
+      "MRK-FY2024-10K-1A-018",
+      "LLY-FY2025-10K-1A-011",
+      "LLY-FY2025-10K-1A-025",
+      "ABBV-FY2024-10K-1A-005",
+      "ABBV-FY2024-10K-1A-011"
+     ]
+    },
+    "contextChunks": 23,
+    "tokenEstimate": 23902,
+    "companies": {
+     "JNJ": 5,
+     "PFE": 4,
+     "MRK": 5,
+     "LLY": 4,
+     "ABBV": 5
+    },
+    "sectionShare": {
+     "risk_factors": 0.957,
+     "business": 0.043
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 28,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 5,
+    "chunksRetrieved": 120,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 5,
+    "filingsRepresented": 5,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "sector",
+    "lanes": [
+     "JNJ(4)",
+     "PFE(4)",
+     "MRK(4)",
+     "LLY(4)",
+     "ABBV(4)"
+    ]
+   },
+   "chunkIds": [
+    "JNJ-FY2025-10K-1A-002",
+    "JNJ-FY2025-10K-1A-006",
+    "JNJ-FY2025-10K-1A-007",
+    "JNJ-FY2025-10K-1A-008",
+    "JNJ-FY2025-10K-1A-009",
+    "PFE-FY2024-10K-1A-002",
+    "PFE-FY2024-10K-1A-004",
+    "PFE-FY2024-10K-1A-007",
+    "PFE-FY2024-10K-1A-011",
+    "MRK-FY2024-10K-1A-001",
+    "MRK-FY2024-10K-1A-002",
+    "MRK-FY2024-10K-1A-005",
+    "MRK-FY2024-10K-1A-017",
+    "MRK-FY2024-10K-1A-024",
+    "LLY-FY2025-10K-BUS-014",
+    "LLY-FY2025-10K-1A-003",
+    "LLY-FY2025-10K-1A-007",
+    "LLY-FY2025-10K-1A-024",
+    "ABBV-FY2024-10K-1A-001",
+    "ABBV-FY2024-10K-1A-004",
+    "ABBV-FY2024-10K-1A-006",
+    "ABBV-FY2024-10K-1A-007",
+    "ABBV-FY2024-10K-1A-008"
+   ],
+   "coverage": [
+    {
+     "ticker": "JNJ",
+     "period": "FY2025",
+     "chunks": 5
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 4
+    },
+    {
+     "ticker": "MRK",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "LLY",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "ABBV",
+     "period": "FY2024",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "JNJ",
+    "PFE",
+    "MRK",
+    "LLY",
+    "ABBV"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "expert-1",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23951/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.24,
+    "gold": {
+     "hits": 5,
+     "total": 13,
+     "recall": 0.385,
+     "perCompany": {
+      "AAPL": {
+       "hits": 5,
+       "total": 13
+      }
+     },
+     "missing": [
+      "AAPL-FY2023-10K-1A-015",
+      "AAPL-FY2023-10K-LEGAL-001",
+      "AAPL-FY2024-10K-1A-015",
+      "AAPL-FY2024-10K-LEGAL-001",
+      "AAPL-FY2024-10K-LEGAL-002",
+      "AAPL-FY2025-10K-1A-015",
+      "AAPL-FY2025-10K-LEGAL-001",
+      "AAPL-FY2025-10K-LEGAL-002"
+     ]
+    },
+    "contextChunks": 25,
+    "tokenEstimate": 23951,
+    "companies": {
+     "AAPL": 25
+    },
+    "sectionShare": {
+     "risk_factors": 0.68,
+     "mda": 0.32
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 18,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 25,
+    "companiesRepresented": 1,
+    "filingsRepresented": 3,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "AAPL:FY2023(7)",
+     "AAPL:FY2024(7)",
+     "AAPL:FY2025(7)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2023-10K-1A-010",
+    "AAPL-FY2023-10K-1A-014",
+    "AAPL-FY2023-10K-1A-016",
+    "AAPL-FY2023-10K-1A-017",
+    "AAPL-FY2023-10K-1A-018",
+    "AAPL-FY2023-10K-1A-019",
+    "AAPL-FY2023-10K-1A-022",
+    "AAPL-FY2023-10K-MDA-001",
+    "AAPL-FY2023-10K-MDA-006",
+    "AAPL-FY2024-10K-1A-010",
+    "AAPL-FY2024-10K-1A-013",
+    "AAPL-FY2024-10K-1A-014",
+    "AAPL-FY2024-10K-1A-016",
+    "AAPL-FY2024-10K-1A-017",
+    "AAPL-FY2024-10K-MDA-001",
+    "AAPL-FY2024-10K-MDA-007",
+    "AAPL-FY2024-10K-MDA-008",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-MDA-001",
+    "AAPL-FY2025-10K-MDA-008",
+    "AAPL-FY2025-10K-MDA-009"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2023",
+     "chunks": 9
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2024",
+     "chunks": 8
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "rev-msft-fy2025",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23577/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 0.875,
+    "relevantShare": 0.458,
+    "gold": {
+     "hits": 3,
+     "total": 3,
+     "recall": 1,
+     "perCompany": {
+      "MSFT": {
+       "hits": 3,
+       "total": 3
+      }
+     },
+     "missing": []
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23577,
+    "companies": {
+     "MSFT": 24
+    },
+    "sectionShare": {
+     "business": 0.083,
+     "other": 0.042,
+     "mda": 0.5,
+     "financial_statements": 0.375
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 28,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "MSFT(22)"
+    ]
+   },
+   "chunkIds": [
+    "MSFT-FY2025-10K-BUS-004",
+    "MSFT-FY2025-10K-BUS-008",
+    "MSFT-FY2025-10K-OTH-005",
+    "MSFT-FY2025-10K-MDA-001",
+    "MSFT-FY2025-10K-MDA-002",
+    "MSFT-FY2025-10K-MDA-003",
+    "MSFT-FY2025-10K-MDA-004",
+    "MSFT-FY2025-10K-MDA-005",
+    "MSFT-FY2025-10K-MDA-006",
+    "MSFT-FY2025-10K-MDA-007",
+    "MSFT-FY2025-10K-MDA-008",
+    "MSFT-FY2025-10K-MDA-009",
+    "MSFT-FY2025-10K-MDA-010",
+    "MSFT-FY2025-10K-MDA-011",
+    "MSFT-FY2025-10K-MDA-012",
+    "MSFT-FY2025-10K-FS-009",
+    "MSFT-FY2025-10K-FS-022",
+    "MSFT-FY2025-10K-FS-028",
+    "MSFT-FY2025-10K-FS-029",
+    "MSFT-FY2025-10K-FS-032",
+    "MSFT-FY2025-10K-FS-035",
+    "MSFT-FY2025-10K-FS-036",
+    "MSFT-FY2025-10K-FS-037",
+    "MSFT-FY2025-10K-FS-038"
+   ],
+   "coverage": [
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 24
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "MSFT"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "risk-tsla-demand",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23558/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.652,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23558,
+    "companies": {
+     "TSLA": 23
+    },
+    "sectionShare": {
+     "business": 0.13,
+     "risk_factors": 0.696,
+     "mda": 0.174
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 29,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "TSLA(22)"
+    ]
+   },
+   "chunkIds": [
+    "TSLA-FY2025-10K-BUS-005",
+    "TSLA-FY2025-10K-BUS-007",
+    "TSLA-FY2025-10K-BUS-010",
+    "TSLA-FY2025-10K-1A-001",
+    "TSLA-FY2025-10K-1A-002",
+    "TSLA-FY2025-10K-1A-003",
+    "TSLA-FY2025-10K-1A-004",
+    "TSLA-FY2025-10K-1A-005",
+    "TSLA-FY2025-10K-1A-006",
+    "TSLA-FY2025-10K-1A-007",
+    "TSLA-FY2025-10K-1A-008",
+    "TSLA-FY2025-10K-1A-009",
+    "TSLA-FY2025-10K-1A-010",
+    "TSLA-FY2025-10K-1A-011",
+    "TSLA-FY2025-10K-1A-012",
+    "TSLA-FY2025-10K-1A-020",
+    "TSLA-FY2025-10K-1A-021",
+    "TSLA-FY2025-10K-1A-022",
+    "TSLA-FY2025-10K-1A-027",
+    "TSLA-FY2025-10K-MDA-001",
+    "TSLA-FY2025-10K-MDA-003",
+    "TSLA-FY2025-10K-MDA-004",
+    "TSLA-FY2025-10K-MDA-007"
+   ],
+   "coverage": [
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 23
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "TSLA"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "multi-cloud",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23790/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.75,
+    "gold": {
+     "hits": 2,
+     "total": 8,
+     "recall": 0.25,
+     "perCompany": {
+      "MSFT": {
+       "hits": 0,
+       "total": 2
+      },
+      "AMZN": {
+       "hits": 1,
+       "total": 3
+      },
+      "GOOG": {
+       "hits": 1,
+       "total": 3
+      }
+     },
+     "missing": [
+      "MSFT-FY2025-10K-BUS-005",
+      "MSFT-FY2025-10K-MDA-006",
+      "AMZN-FY2025-10K-MDA-010",
+      "AMZN-FY2025-10K-MDA-013",
+      "GOOG-FY2025-10K-BUS-004",
+      "GOOG-FY2025-10K-MDA-008"
+     ]
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23790,
+    "companies": {
+     "MSFT": 7,
+     "AMZN": 7,
+     "GOOG": 10
+    },
+    "sectionShare": {
+     "business": 0.417,
+     "mda": 0.292,
+     "financial_statements": 0.167,
+     "risk_factors": 0.083,
+     "other": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 20,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 3,
+    "filingsRepresented": 5,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "MSFT(7)",
+     "AMZN(7)",
+     "GOOG(7)"
+    ]
+   },
+   "chunkIds": [
+    "MSFT-FY2025-10K-BUS-001",
+    "MSFT-FY2025-10K-BUS-002",
+    "MSFT-FY2025-10K-BUS-003",
+    "MSFT-FY2025-10K-BUS-006",
+    "MSFT-FY2025-10K-MDA-004",
+    "MSFT-FY2026Q1-10Q-MDA-002",
+    "MSFT-FY2026Q2-10Q-MDA-004",
+    "AMZN-FY2025-10K-BUS-001",
+    "AMZN-FY2025-10K-BUS-002",
+    "AMZN-FY2025-10K-BUS-003",
+    "AMZN-FY2025-10K-BUS-004",
+    "AMZN-FY2025-10K-MDA-008",
+    "AMZN-FY2025-10K-FS-034",
+    "AMZN-FY2025-10K-FS-040",
+    "GOOG-FY2025-10K-BUS-001",
+    "GOOG-FY2025-10K-BUS-005",
+    "GOOG-FY2025-10K-1A-002",
+    "GOOG-FY2025-10K-1A-003",
+    "GOOG-FY2025-10K-MDA-001",
+    "GOOG-FY2025-10K-MDA-007",
+    "GOOG-FY2025-10K-MDA-010",
+    "GOOG-FY2025-10K-FS-047",
+    "GOOG-FY2025-10K-FS-048",
+    "GOOG-FY2025-10K-OTH-011"
+   ],
+   "coverage": [
+    {
+     "ticker": "MSFT",
+     "period": "FY2025",
+     "chunks": 5
+    },
+    {
+     "ticker": "MSFT",
+     "period": "FY2026Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "MSFT",
+     "period": "FY2026Q2",
+     "chunks": 1
+    },
+    {
+     "ticker": "AMZN",
+     "period": "FY2025",
+     "chunks": 7
+    },
+    {
+     "ticker": "GOOG",
+     "period": "FY2025",
+     "chunks": 10
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "MSFT",
+    "AMZN",
+    "GOOG"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "long-pfe-since-2022",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23734/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.871,
+    "gold": null,
+    "contextChunks": 31,
+    "tokenEstimate": 23734,
+    "companies": {
+     "PFE": 31
+    },
+    "sectionShare": {
+     "mda": 0.645,
+     "financial_statements": 0.355
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 18,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 31,
+    "companiesRepresented": 1,
+    "filingsRepresented": 6,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "PFE:FY2022(5)",
+     "PFE:FY2023(5)",
+     "PFE:FY2024(5)",
+     "PFE:FY2025 YTD(5)"
+    ]
+   },
+   "chunkIds": [
+    "PFE-FY2022-10K-MDA-001",
+    "PFE-FY2022-10K-MDA-004",
+    "PFE-FY2022-10K-MDA-015",
+    "PFE-FY2022-10K-MDA-017",
+    "PFE-FY2022-10K-FS-004",
+    "PFE-FY2022-10K-FS-123",
+    "PFE-FY2023-10K-MDA-001",
+    "PFE-FY2023-10K-MDA-003",
+    "PFE-FY2023-10K-MDA-016",
+    "PFE-FY2023-10K-MDA-042",
+    "PFE-FY2023-10K-FS-006",
+    "PFE-FY2023-10K-FS-118",
+    "PFE-FY2023-10K-FS-120",
+    "PFE-FY2023-10K-FS-126",
+    "PFE-FY2024-10K-MDA-001",
+    "PFE-FY2024-10K-MDA-015",
+    "PFE-FY2024-10K-MDA-016",
+    "PFE-FY2024-10K-MDA-019",
+    "PFE-FY2024-10K-MDA-020",
+    "PFE-FY2024-10K-MDA-021",
+    "PFE-FY2024-10K-FS-006",
+    "PFE-FY2024-10K-FS-118",
+    "PFE-FY2025Q1-10Q-FS-001",
+    "PFE-FY2025Q1-10Q-MDA-010",
+    "PFE-FY2025Q1-10Q-MDA-011",
+    "PFE-FY2025Q2-10Q-FS-001",
+    "PFE-FY2025Q2-10Q-MDA-010",
+    "PFE-FY2025Q3-10Q-FS-001",
+    "PFE-FY2025Q3-10Q-MDA-003",
+    "PFE-FY2025Q3-10Q-MDA-015",
+    "PFE-FY2025Q3-10Q-MDA-017"
+   ],
+   "coverage": [
+    {
+     "ticker": "PFE",
+     "period": "FY2022",
+     "chunks": 6
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2023",
+     "chunks": 8
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 8
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2025 YTD",
+     "chunks": 9
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "PFE"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "reg-nvda-export",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23902/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.917,
+    "gold": {
+     "hits": 5,
+     "total": 6,
+     "recall": 0.833,
+     "perCompany": {
+      "NVDA": {
+       "hits": 5,
+       "total": 6
+      }
+     },
+     "missing": [
+      "NVDA-FY2026Q3-10Q-MDA-003"
+     ]
+    },
+    "contextChunks": 24,
+    "tokenEstimate": 23902,
+    "companies": {
+     "NVDA": 24
+    },
+    "sectionShare": {
+     "business": 0.042,
+     "risk_factors": 0.917,
+     "mda": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 29,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 4,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "NVDA(22)"
+    ]
+   },
+   "chunkIds": [
+    "NVDA-FY2025-10K-BUS-013",
+    "NVDA-FY2025-10K-1A-022",
+    "NVDA-FY2025-10K-1A-023",
+    "NVDA-FY2025-10K-1A-024",
+    "NVDA-FY2025-10K-1A-026",
+    "NVDA-FY2025-10K-1A-027",
+    "NVDA-FY2025-10K-1A-028",
+    "NVDA-FY2025-10K-1A-036",
+    "NVDA-FY2025-10K-MDA-003",
+    "NVDA-FY2026Q1-10Q-1A-007",
+    "NVDA-FY2026Q1-10Q-1A-008",
+    "NVDA-FY2026Q1-10Q-1A-009",
+    "NVDA-FY2026Q1-10Q-1A-010",
+    "NVDA-FY2026Q1-10Q-1A-011",
+    "NVDA-FY2026Q1-10Q-1A-012",
+    "NVDA-FY2026Q2-10Q-1A-005",
+    "NVDA-FY2026Q2-10Q-1A-006",
+    "NVDA-FY2026Q2-10Q-1A-009",
+    "NVDA-FY2026Q2-10Q-1A-010",
+    "NVDA-FY2026Q3-10Q-1A-010",
+    "NVDA-FY2026Q3-10Q-1A-011",
+    "NVDA-FY2026Q3-10Q-1A-012",
+    "NVDA-FY2026Q3-10Q-1A-014",
+    "NVDA-FY2026Q3-10Q-1A-015"
+   ],
+   "coverage": [
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 9
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q1",
+     "chunks": 6
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q2",
+     "chunks": 4
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2026Q3",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "NVDA"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "cross-wmt-jpm-rates",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "2/2 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 5"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "2/2"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23774/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23774,
+    "companies": {
+     "WMT": 12,
+     "JPM": 11
+    },
+    "sectionShare": {
+     "business": 0.043,
+     "risk_factors": 0.478,
+     "mda": 0.304,
+     "market_risk": 0.087,
+     "financial_statements": 0.087
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 25,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 2,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 2,
+    "filingsRepresented": 2,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "WMT(11)",
+     "JPM(11)"
+    ]
+   },
+   "chunkIds": [
+    "WMT-FY2025-10K-BUS-001",
+    "WMT-FY2025-10K-1A-003",
+    "WMT-FY2025-10K-1A-004",
+    "WMT-FY2025-10K-1A-021",
+    "WMT-FY2025-10K-1A-022",
+    "WMT-FY2025-10K-MDA-001",
+    "WMT-FY2025-10K-MDA-002",
+    "WMT-FY2025-10K-MDA-005",
+    "WMT-FY2025-10K-MDA-010",
+    "WMT-FY2025-10K-MKT-001",
+    "WMT-FY2025-10K-MKT-002",
+    "WMT-FY2025-10K-FS-010",
+    "JPM-FY2025-10K-1A-001",
+    "JPM-FY2025-10K-1A-002",
+    "JPM-FY2025-10K-1A-010",
+    "JPM-FY2025-10K-1A-011",
+    "JPM-FY2025-10K-1A-012",
+    "JPM-FY2025-10K-1A-013",
+    "JPM-FY2025-10K-1A-017",
+    "JPM-FY2025-10K-MDA-019",
+    "JPM-FY2025-10K-MDA-119",
+    "JPM-FY2025-10K-MDA-121",
+    "JPM-FY2025-10K-FS-241"
+   ],
+   "coverage": [
+    {
+     "ticker": "WMT",
+     "period": "FY2025",
+     "chunks": 12
+    },
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 11
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "WMT",
+    "JPM"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "cross-cyber",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "3/3 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 4"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23768/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": 1,
+    "relevantShare": 0.826,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23768,
+    "companies": {
+     "V": 8,
+     "UNH": 7,
+     "BA": 8
+    },
+    "sectionShare": {
+     "risk_factors": 0.739,
+     "cybersecurity": 0.261
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 21,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 3,
+    "chunksRetrieved": 84,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 3,
+    "filingsRepresented": 3,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "multi_company",
+    "lanes": [
+     "V(7)",
+     "UNH(7)",
+     "BA(7)"
+    ]
+   },
+   "chunkIds": [
+    "V-FY2025-10K-1A-009",
+    "V-FY2025-10K-1A-016",
+    "V-FY2025-10K-1A-021",
+    "V-FY2025-10K-1A-022",
+    "V-FY2025-10K-1A-023",
+    "V-FY2025-10K-1A-024",
+    "V-FY2025-10K-1A-025",
+    "V-FY2025-10K-1C-001",
+    "UNH-FY2024-10K-1A-004",
+    "UNH-FY2024-10K-1A-005",
+    "UNH-FY2024-10K-1A-006",
+    "UNH-FY2024-10K-1A-011",
+    "UNH-FY2024-10K-1A-021",
+    "UNH-FY2024-10K-1C-001",
+    "UNH-FY2024-10K-1C-002",
+    "BA-FY2025-10K-1A-005",
+    "BA-FY2025-10K-1A-010",
+    "BA-FY2025-10K-1A-013",
+    "BA-FY2025-10K-1A-014",
+    "BA-FY2025-10K-1A-018",
+    "BA-FY2025-10K-1C-001",
+    "BA-FY2025-10K-1C-002",
+    "BA-FY2025-10K-1C-003"
+   ],
+   "coverage": [
+    {
+     "ticker": "V",
+     "period": "FY2025",
+     "chunks": 8
+    },
+    {
+     "ticker": "UNH",
+     "period": "FY2024",
+     "chunks": 7
+    },
+    {
+     "ticker": "BA",
+     "period": "FY2025",
+     "chunks": 8
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "V",
+    "UNH",
+    "BA"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "sector-banks-capital",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "4/4 present"
+     },
+     {
+      "name": "minPerCompany",
+      "pass": true,
+      "detail": "all ≥ 3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "4/4"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [BAC, GS, JPM, MS], expected [BAC, GS, JPM, MS]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23256/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.636,
+    "gold": null,
+    "contextChunks": 22,
+    "tokenEstimate": 23256,
+    "companies": {
+     "JPM": 6,
+     "BAC": 6,
+     "GS": 5,
+     "MS": 5
+    },
+    "sectionShare": {
+     "mda": 1
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 27,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 22,
+    "companiesRepresented": 4,
+    "filingsRepresented": 7,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "sector",
+    "lanes": [
+     "JPM(5)",
+     "BAC(5)",
+     "GS(5)",
+     "MS(5)"
+    ]
+   },
+   "chunkIds": [
+    "JPM-FY2025-10K-MDA-013",
+    "JPM-FY2025-10K-MDA-049",
+    "JPM-FY2025-10K-MDA-065",
+    "JPM-FY2025-10K-MDA-066",
+    "JPM-FY2025-10K-MDA-068",
+    "JPM-FY2025-10K-MDA-113",
+    "BAC-FY2024-10K-MDA-058",
+    "BAC-FY2024-10K-MDA-060",
+    "BAC-FY2025Q1-10Q-MDA-037",
+    "BAC-FY2025Q2-10Q-MDA-050",
+    "BAC-FY2025Q2-10Q-MDA-052",
+    "BAC-FY2025Q3-10Q-MDA-052",
+    "GS-FY2024-10K-MDA-064",
+    "GS-FY2024-10K-MDA-066",
+    "GS-FY2024-10K-MDA-067",
+    "GS-FY2024-10K-MDA-068",
+    "GS-FY2024-10K-MDA-069",
+    "MS-FY2025-10K-MDA-021",
+    "MS-FY2025-10K-MDA-032",
+    "MS-FY2025-10K-MDA-033",
+    "MS-FY2025-10K-MDA-034",
+    "MS-FY2025-10K-MDA-035"
+   ],
+   "coverage": [
+    {
+     "ticker": "JPM",
+     "period": "FY2025",
+     "chunks": 6
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2024",
+     "chunks": 2
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q1",
+     "chunks": 1
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q2",
+     "chunks": 2
+    },
+    {
+     "ticker": "BAC",
+     "period": "FY2025Q3",
+     "chunks": 1
+    },
+    {
+     "ticker": "GS",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "MS",
+     "period": "FY2025",
+     "chunks": 5
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "JPM",
+    "BAC",
+    "GS",
+    "MS"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "ambiguous-meta",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [META], expected [META]"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23694/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 26,
+    "tokenEstimate": 23694,
+    "companies": {
+     "META": 26
+    },
+    "sectionShare": {
+     "other": 0.115,
+     "business": 0.269,
+     "risk_factors": 0.154,
+     "mda": 0.154,
+     "financial_statements": 0.308
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 30,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "META(22)"
+    ]
+   },
+   "chunkIds": [
+    "META-FY2025-10K-OTH-003",
+    "META-FY2025-10K-BUS-001",
+    "META-FY2025-10K-BUS-002",
+    "META-FY2025-10K-BUS-004",
+    "META-FY2025-10K-BUS-005",
+    "META-FY2025-10K-BUS-006",
+    "META-FY2025-10K-BUS-007",
+    "META-FY2025-10K-BUS-008",
+    "META-FY2025-10K-1A-014",
+    "META-FY2025-10K-1A-020",
+    "META-FY2025-10K-1A-023",
+    "META-FY2025-10K-1A-031",
+    "META-FY2025-10K-OTH-007",
+    "META-FY2025-10K-MDA-005",
+    "META-FY2025-10K-MDA-010",
+    "META-FY2025-10K-MDA-013",
+    "META-FY2025-10K-MDA-017",
+    "META-FY2025-10K-FS-006",
+    "META-FY2025-10K-FS-007",
+    "META-FY2025-10K-FS-008",
+    "META-FY2025-10K-FS-009",
+    "META-FY2025-10K-FS-012",
+    "META-FY2025-10K-FS-038",
+    "META-FY2025-10K-FS-044",
+    "META-FY2025-10K-FS-054",
+    "META-FY2025-10K-OTH-010"
+   ],
+   "coverage": [
+    {
+     "ticker": "META",
+     "period": "FY2025",
+     "chunks": 26
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "META"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "ambiguous-no-company",
+    "pass": true,
+    "checks": [
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanyShare",
+      "pass": true,
+      "detail": "max share 0.13 (limit 0.2)"
+     },
+     {
+      "name": "minCompanies",
+      "pass": true,
+      "detail": "16 companies (min 6)"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [], expected []"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports). | No corpus company named: all companies are searched, with a cap per company. | Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23983/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": null,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.958,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23983,
+    "companies": {
+     "MRK": 1,
+     "PFE": 1,
+     "TGT": 1,
+     "HD": 1,
+     "NKE": 2,
+     "AAPL": 2,
+     "SBUX": 1,
+     "V": 1,
+     "DE": 2,
+     "JNJ": 1,
+     "AXP": 1,
+     "BA": 2,
+     "LLY": 3,
+     "LMT": 3,
+     "TSLA": 1,
+     "VZ": 1
+    },
+    "sectionShare": {
+     "risk_factors": 0.875,
+     "other": 0.042,
+     "mda": 0.083
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 32,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 176,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 16,
+    "filingsRepresented": 16,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "global",
+    "lanes": [
+     "global(22)"
+    ]
+   },
+   "chunkIds": [
+    "MRK-FY2024-10K-1A-009",
+    "PFE-FY2024-10K-1A-006",
+    "TGT-FY2024-10K-1A-009",
+    "HD-FY2024-10K-1A-022",
+    "NKE-FY2025-10K-1A-024",
+    "NKE-FY2025-10K-1A-025",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "SBUX-FY2025-10K-1A-008",
+    "V-FY2025-10K-OTH-004",
+    "DE-FY2025-10K-1A-002",
+    "DE-FY2025-10K-1A-003",
+    "JNJ-FY2025-10K-1A-011",
+    "AXP-FY2025-10K-1A-001",
+    "BA-FY2025-10K-1A-007",
+    "BA-FY2025-10K-1A-008",
+    "LLY-FY2025-10K-1A-018",
+    "LLY-FY2025-10K-1A-020",
+    "LLY-FY2025-10K-1A-021",
+    "LMT-FY2025-10K-1A-012",
+    "LMT-FY2025-10K-MDA-003",
+    "LMT-FY2025-10K-MDA-004",
+    "TSLA-FY2025-10K-1A-008",
+    "VZ-FY2025-10K-1A-003"
+   ],
+   "coverage": [
+    {
+     "ticker": "MRK",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "PFE",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "TGT",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "HD",
+     "period": "FY2024",
+     "chunks": 1
+    },
+    {
+     "ticker": "NKE",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "SBUX",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "V",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "DE",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "JNJ",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "AXP",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "BA",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "LLY",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "LMT",
+     "period": "FY2025",
+     "chunks": 3
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "VZ",
+     "period": "FY2025",
+     "chunks": 1
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports).",
+    "No corpus company named: all companies are searched, with a cap per company.",
+    "Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+   ],
+   "detected": []
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "ambiguous-ko-few-years",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "3/3"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "\"last few years\" is vague; read as the last 3 fiscal years. | Years are read as each company’s own fiscal years."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23981/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.375,
+    "gold": null,
+    "contextChunks": 24,
+    "tokenEstimate": 23981,
+    "companies": {
+     "KO": 24
+    },
+    "sectionShare": {
+     "business": 0.125,
+     "legal": 0.083,
+     "mda": 0.417,
+     "financial_statements": 0.25,
+     "risk_factors": 0.083,
+     "market_risk": 0.042
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 24,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 4,
+    "chunksRetrieved": 96,
+    "contextChunksUsed": 24,
+    "companiesRepresented": 1,
+    "filingsRepresented": 5,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "longitudinal",
+    "lanes": [
+     "KO:FY2022(5)",
+     "KO:FY2023(5)",
+     "KO:FY2024(5)",
+     "KO:FY2025 YTD(5)"
+    ]
+   },
+   "chunkIds": [
+    "KO-FY2022-10K-BUS-004",
+    "KO-FY2022-10K-LEGAL-003",
+    "KO-FY2022-10K-MDA-022",
+    "KO-FY2022-10K-MDA-024",
+    "KO-FY2022-10K-FS-020",
+    "KO-FY2022-10K-FS-034",
+    "KO-FY2022-10K-FS-039",
+    "KO-FY2023-10K-BUS-004",
+    "KO-FY2023-10K-BUS-008",
+    "KO-FY2023-10K-1A-013",
+    "KO-FY2023-10K-MDA-019",
+    "KO-FY2023-10K-FS-033",
+    "KO-FY2023-10K-FS-038",
+    "KO-FY2024-10K-1A-013",
+    "KO-FY2024-10K-LEGAL-003",
+    "KO-FY2024-10K-MDA-018",
+    "KO-FY2024-10K-MDA-019",
+    "KO-FY2024-10K-MDA-020",
+    "KO-FY2025Q1-10Q-FS-004",
+    "KO-FY2025Q1-10Q-MDA-006",
+    "KO-FY2025Q1-10Q-MDA-008",
+    "KO-FY2025Q1-10Q-MKT-001",
+    "KO-FY2025Q3-10Q-MDA-009",
+    "KO-FY2025Q3-10Q-MDA-010"
+   ],
+   "coverage": [
+    {
+     "ticker": "KO",
+     "period": "FY2022",
+     "chunks": 7
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2023",
+     "chunks": 6
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2024",
+     "chunks": 5
+    },
+    {
+     "ticker": "KO",
+     "period": "FY2025 YTD",
+     "chunks": 6
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "\"last few years\" is vague; read as the last 3 fiscal years.",
+    "Years are read as each company’s own fiscal years."
+   ],
+   "detected": [
+    "KO"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "unsupported-period",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [AAPL], expected [AAPL]"
+     },
+     {
+      "name": "gaps",
+      "pass": true,
+      "detail": "AAPL: no FY2015 filing in the corpus; showing the current view instead."
+     },
+     {
+      "name": "periodKind",
+      "pass": true,
+      "detail": "period current (expected current)"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "Years are read as each company’s own fiscal years. | The requested period (FY2015 filing) is not in the corpus for the named companies; each company is read in its current view instead."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23945/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 25,
+    "tokenEstimate": 23945,
+    "companies": {
+     "AAPL": 25
+    },
+    "sectionShare": {
+     "other": 0.04,
+     "risk_factors": 0.84,
+     "mda": 0.04,
+     "financial_statements": 0.04,
+     "market_risk": 0.04
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 24,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 25,
+    "companiesRepresented": 1,
+    "filingsRepresented": 2,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "AAPL(22)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-OTH-003",
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-007",
+    "AAPL-FY2025-10K-1A-008",
+    "AAPL-FY2025-10K-1A-010",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-012",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-015",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2025-10K-MDA-001",
+    "AAPL-FY2025-10K-FS-024",
+    "AAPL-FY2026Q1-10Q-MKT-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 24
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    }
+   ],
+   "gaps": [
+    "AAPL: no FY2015 filing in the corpus; showing the current view instead."
+   ],
+   "notes": [
+    "Years are read as each company’s own fiscal years.",
+    "The requested period (FY2015 filing) is not in the corpus for the named companies; each company is read in its current view instead."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "unsupported-company",
+    "pass": true,
+    "checks": [
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [], expected []"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "No period named: each company is read in its current view (latest annual report plus later quarterly reports). | No corpus company named (Ford is not in the corpus): all companies are searched, with a cap per company. | Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23586/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": null,
+    "periodCoverage": null,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 23,
+    "tokenEstimate": 23586,
+    "companies": {
+     "BLK": 2,
+     "BRK": 3,
+     "CVX": 3,
+     "NVDA": 4,
+     "CAT": 2,
+     "TSLA": 4,
+     "UPS": 1,
+     "XOM": 4
+    },
+    "sectionShare": {
+     "mda": 0.391,
+     "business": 0.522,
+     "financial_statements": 0.043,
+     "risk_factors": 0.043
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 28,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 176,
+    "contextChunksUsed": 23,
+    "companiesRepresented": 8,
+    "filingsRepresented": 8,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "global",
+    "lanes": [
+     "global(22)"
+    ]
+   },
+   "chunkIds": [
+    "BLK-FY2023-10K-MDA-009",
+    "BLK-FY2023-10K-MDA-010",
+    "BRK-FY2024-10K-BUS-012",
+    "BRK-FY2024-10K-BUS-033",
+    "BRK-FY2024-10K-BUS-037",
+    "CVX-FY2024-10K-BUS-002",
+    "CVX-FY2024-10K-MDA-003",
+    "CVX-FY2024-10K-MDA-027",
+    "NVDA-FY2025-10K-BUS-003",
+    "NVDA-FY2025-10K-BUS-006",
+    "NVDA-FY2025-10K-BUS-007",
+    "NVDA-FY2025-10K-BUS-008",
+    "CAT-FY2025-10K-MDA-015",
+    "CAT-FY2025-10K-FS-080",
+    "TSLA-FY2025-10K-BUS-001",
+    "TSLA-FY2025-10K-BUS-003",
+    "TSLA-FY2025-10K-BUS-012",
+    "TSLA-FY2025-10K-MDA-003",
+    "UPS-FY2025-10K-BUS-002",
+    "XOM-FY2025-10K-1A-006",
+    "XOM-FY2025-10K-MDA-003",
+    "XOM-FY2025-10K-MDA-005",
+    "XOM-FY2025-10K-MDA-009"
+   ],
+   "coverage": [
+    {
+     "ticker": "BLK",
+     "period": "FY2023",
+     "chunks": 2
+    },
+    {
+     "ticker": "BRK",
+     "period": "FY2024",
+     "chunks": 3
+    },
+    {
+     "ticker": "CVX",
+     "period": "FY2024",
+     "chunks": 3
+    },
+    {
+     "ticker": "NVDA",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "CAT",
+     "period": "FY2025",
+     "chunks": 2
+    },
+    {
+     "ticker": "TSLA",
+     "period": "FY2025",
+     "chunks": 4
+    },
+    {
+     "ticker": "UPS",
+     "period": "FY2025",
+     "chunks": 1
+    },
+    {
+     "ticker": "XOM",
+     "period": "FY2025",
+     "chunks": 4
+    }
+   ],
+   "gaps": [
+    "Ford is not in the corpus (54 companies)."
+   ],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports).",
+    "No corpus company named (Ford is not in the corpus): all companies are searched, with a cap per company.",
+    "Left out because every filing is outside the review window: GE (FY2014, period end 2014-12-31). Name the company to include it."
+   ],
+   "detected": []
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "injection-instructions",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanies",
+      "pass": true,
+      "detail": "1 companies (max 1): AAPL"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [AAPL], expected [AAPL]"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23957/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": null,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": 0.464,
+    "gold": null,
+    "contextChunks": 28,
+    "tokenEstimate": 23957,
+    "companies": {
+     "AAPL": 28
+    },
+    "sectionShare": {
+     "risk_factors": 0.75,
+     "cybersecurity": 0.036,
+     "mda": 0.036,
+     "financial_statements": 0.107,
+     "controls": 0.036,
+     "market_risk": 0.036
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 24,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 28,
+    "companiesRepresented": 1,
+    "filingsRepresented": 2,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "AAPL(22)"
+    ]
+   },
+   "chunkIds": [
+    "AAPL-FY2025-10K-1A-001",
+    "AAPL-FY2025-10K-1A-002",
+    "AAPL-FY2025-10K-1A-003",
+    "AAPL-FY2025-10K-1A-004",
+    "AAPL-FY2025-10K-1A-005",
+    "AAPL-FY2025-10K-1A-006",
+    "AAPL-FY2025-10K-1A-007",
+    "AAPL-FY2025-10K-1A-008",
+    "AAPL-FY2025-10K-1A-009",
+    "AAPL-FY2025-10K-1A-011",
+    "AAPL-FY2025-10K-1A-012",
+    "AAPL-FY2025-10K-1A-013",
+    "AAPL-FY2025-10K-1A-014",
+    "AAPL-FY2025-10K-1A-015",
+    "AAPL-FY2025-10K-1A-016",
+    "AAPL-FY2025-10K-1A-017",
+    "AAPL-FY2025-10K-1A-018",
+    "AAPL-FY2025-10K-1A-019",
+    "AAPL-FY2025-10K-1A-020",
+    "AAPL-FY2025-10K-1A-021",
+    "AAPL-FY2025-10K-1A-022",
+    "AAPL-FY2025-10K-1C-001",
+    "AAPL-FY2025-10K-MDA-004",
+    "AAPL-FY2025-10K-FS-002",
+    "AAPL-FY2025-10K-FS-005",
+    "AAPL-FY2025-10K-FS-024",
+    "AAPL-FY2025-10K-CTRL-001",
+    "AAPL-FY2026Q1-10Q-MKT-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "AAPL",
+     "period": "FY2025",
+     "chunks": 27
+    },
+    {
+     "ticker": "AAPL",
+     "period": "FY2026Q1",
+     "chunks": 1
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "AAPL"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "injection-scope",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "maxCompanies",
+      "pass": true,
+      "detail": "1 companies (max 1): NFLX"
+     },
+     {
+      "name": "analysisCompanies",
+      "pass": true,
+      "detail": "detected [NFLX], expected [NFLX]"
+     },
+     {
+      "name": "forbidGaps",
+      "pass": true,
+      "detail": "none matching"
+     },
+     {
+      "name": "periodKind",
+      "pass": true,
+      "detail": "period current (expected current)"
+     },
+     {
+      "name": "notes",
+      "pass": true,
+      "detail": "Not read as a period (no time phrase such as \"in 2024\" or \"FY2024\"): \"2010\". | No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23949/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": null,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 26,
+    "tokenEstimate": 23949,
+    "companies": {
+     "NFLX": 26
+    },
+    "sectionShare": {
+     "other": 0.115,
+     "risk_factors": 0.769,
+     "cybersecurity": 0.077,
+     "legal": 0.038
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 28,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 88,
+    "contextChunksUsed": 26,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "NFLX(22)"
+    ]
+   },
+   "chunkIds": [
+    "NFLX-FY2025-10K-OTH-001",
+    "NFLX-FY2025-10K-1A-001",
+    "NFLX-FY2025-10K-1A-002",
+    "NFLX-FY2025-10K-1A-003",
+    "NFLX-FY2025-10K-1A-004",
+    "NFLX-FY2025-10K-1A-005",
+    "NFLX-FY2025-10K-1A-006",
+    "NFLX-FY2025-10K-1A-007",
+    "NFLX-FY2025-10K-1A-009",
+    "NFLX-FY2025-10K-1A-012",
+    "NFLX-FY2025-10K-1A-013",
+    "NFLX-FY2025-10K-1A-014",
+    "NFLX-FY2025-10K-1A-015",
+    "NFLX-FY2025-10K-1A-016",
+    "NFLX-FY2025-10K-1A-017",
+    "NFLX-FY2025-10K-1A-019",
+    "NFLX-FY2025-10K-1A-020",
+    "NFLX-FY2025-10K-1A-021",
+    "NFLX-FY2025-10K-1A-022",
+    "NFLX-FY2025-10K-1A-023",
+    "NFLX-FY2025-10K-1A-024",
+    "NFLX-FY2025-10K-1C-001",
+    "NFLX-FY2025-10K-1C-002",
+    "NFLX-FY2025-10K-LEGAL-001",
+    "NFLX-FY2025-10K-OTH-006",
+    "NFLX-FY2025-10K-OTH-007"
+   ],
+   "coverage": [
+    {
+     "ticker": "NFLX",
+     "period": "FY2025",
+     "chunks": 26
+    }
+   ],
+   "gaps": [],
+   "notes": [
+    "Not read as a period (no time phrase such as \"in 2024\" or \"FY2024\"): \"2010\".",
+    "No period named: each company is read in its current view (latest annual report plus later quarterly reports)."
+   ],
+   "detected": [
+    "NFLX"
+   ]
+  },
+  {
+   "mode": "hybrid",
+   "score": {
+    "id": "quarter-goog",
+    "pass": true,
+    "checks": [
+     {
+      "name": "companies",
+      "pass": true,
+      "detail": "1/1 present"
+     },
+     {
+      "name": "periods",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "evidence",
+      "pass": true,
+      "detail": "1/1"
+     },
+     {
+      "name": "budget",
+      "pass": true,
+      "detail": "23920/24000 tokens"
+     },
+     {
+      "name": "oneEmbedding",
+      "pass": true,
+      "detail": "embeddings 1, rerank 0"
+     }
+    ],
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 1,
+    "sectionPrecision": null,
+    "relevantShare": null,
+    "gold": null,
+    "contextChunks": 27,
+    "tokenEstimate": 23920,
+    "companies": {
+     "GOOG": 27
+    },
+    "sectionShare": {
+     "other": 0.037,
+     "financial_statements": 0.407,
+     "mda": 0.444,
+     "market_risk": 0.037,
+     "legal": 0.037,
+     "risk_factors": 0.037
+    }
+   },
+   "telemetry": {
+    "retrievalDurationMs": 18,
+    "embeddingDurationMs": 0,
+    "embeddingCallCount": 1,
+    "rerankCallCount": 0,
+    "retrievalRequests": 1,
+    "chunksRetrieved": 60,
+    "contextChunksUsed": 27,
+    "companiesRepresented": 1,
+    "filingsRepresented": 1,
+    "mode": "hybrid",
+    "indexVersion": "iv-9cf51c066743"
+   },
+   "plan": {
+    "strategy": "single_company",
+    "lanes": [
+     "GOOG(22)"
+    ]
+   },
+   "chunkIds": [
+    "GOOG-FY2025Q2-10Q-OTH-002",
+    "GOOG-FY2025Q2-10Q-FS-001",
+    "GOOG-FY2025Q2-10Q-FS-005",
+    "GOOG-FY2025Q2-10Q-FS-006",
+    "GOOG-FY2025Q2-10Q-FS-007",
+    "GOOG-FY2025Q2-10Q-FS-023",
+    "GOOG-FY2025Q2-10Q-FS-024",
+    "GOOG-FY2025Q2-10Q-FS-025",
+    "GOOG-FY2025Q2-10Q-FS-026",
+    "GOOG-FY2025Q2-10Q-FS-027",
+    "GOOG-FY2025Q2-10Q-FS-030",
+    "GOOG-FY2025Q2-10Q-FS-031",
+    "GOOG-FY2025Q2-10Q-MDA-001",
+    "GOOG-FY2025Q2-10Q-MDA-002",
+    "GOOG-FY2025Q2-10Q-MDA-003",
+    "GOOG-FY2025Q2-10Q-MDA-004",
+    "GOOG-FY2025Q2-10Q-MDA-005",
+    "GOOG-FY2025Q2-10Q-MDA-006",
+    "GOOG-FY2025Q2-10Q-MDA-007",
+    "GOOG-FY2025Q2-10Q-MDA-011",
+    "GOOG-FY2025Q2-10Q-MDA-012",
+    "GOOG-FY2025Q2-10Q-MDA-016",
+    "GOOG-FY2025Q2-10Q-MDA-017",
+    "GOOG-FY2025Q2-10Q-MDA-018",
+    "GOOG-FY2025Q2-10Q-MKT-001",
+    "GOOG-FY2025Q2-10Q-LEGAL-001",
+    "GOOG-FY2025Q2-10Q-1A-001"
+   ],
+   "coverage": [
+    {
+     "ticker": "GOOG",
+     "period": "FY2025Q2",
+     "chunks": 27
+    }
+   ],
+   "gaps": [],
+   "notes": [],
+   "detected": [
+    "GOOG"
+   ]
+  }
+ ]
+}

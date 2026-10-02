@@ -27,7 +27,11 @@
     "fixtures:risks": "tsx scripts/fixtures/build-risk-fixtures.ts",
     "index:upload": "tsx scripts/indexing/upload-index.ts",
     "index:measure-load": "tsx scripts/indexing/measure-load.ts",
-    "check:bedrock": "tsx scripts/check-bedrock-entitlement.ts"
+    "check:bedrock": "tsx scripts/check-bedrock-entitlement.ts",
+    "eval:retrieval": "tsx scripts/evaluation/retrieval-eval.ts",
+    "eval:chunk-size": "tsx scripts/evaluation/chunk-size-experiment.ts",
+    "retrieval:debug": "tsx scripts/evaluation/retrieval-debug-server.ts",
+    "eval:signals": "tsx scripts/evaluation/signal-eval.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "3.1144.0",
@@ -45,6 +49,7 @@
     "globals": "17.13.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.71.0"
+    "typescript-eslint": "8.71.0",
+    "yaml": "2.9.1"
   }
 }

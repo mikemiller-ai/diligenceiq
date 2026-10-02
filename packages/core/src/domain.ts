@@ -227,6 +227,28 @@ export const CreateAnalysisRequestSchema = z
   );
 export type CreateAnalysisRequest = z.infer<typeof CreateAnalysisRequestSchema>;
 
+/**
+ * `POST /api/retrieval/debug` (SPEC §27.3): retrieval only, no generation. Development only:
+ * the deployed api never registers the route.
+ */
+export const RetrievalDebugRequestSchema = z
+  .object({
+    question: z.string().trim().min(1).max(1000),
+    filters: AnalysisFiltersSchema.optional(),
+    mode: z.enum(['hybrid', 'bm25', 'cosine']).optional(),
+    /** Include each context block's prompt text (never logged). */
+    includeText: z.boolean().optional(),
+  })
+  .strict()
+  .refine(
+    (r) =>
+      r.filters?.fiscalYearFrom === undefined ||
+      r.filters.fiscalYearTo === undefined ||
+      r.filters.fiscalYearFrom <= r.filters.fiscalYearTo,
+    { message: 'fiscalYearFrom must be ≤ fiscalYearTo', path: ['filters', 'fiscalYearFrom'] },
+  );
+export type RetrievalDebugRequest = z.infer<typeof RetrievalDebugRequestSchema>;
+
 /** Resolved scope shown above a brief (server-computed; architecture §7). */
 export interface AnalysisInterpretation {
   companies: string[];

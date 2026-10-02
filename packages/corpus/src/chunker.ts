@@ -54,7 +54,7 @@ export interface Chunk {
 }
 
 /** Table blocks are one unit when they fit; prose is split into sentences. */
-function units(text: string, section: Section): Span[] {
+function units(text: string, section: Section, hardCap = HARD_CAP_CHARS): Span[] {
   const out: Span[] = [];
   const lines = lineSpans(text, section.start, section.end);
   let i = 0;
@@ -64,37 +64,49 @@ function units(text: string, section: Section): Span[] {
       let j = i;
       while (j + 1 < lines.length && isTableRow(text.slice(lines[j + 1]!.start, lines[j + 1]!.end))) j++;
       const block = { start: line.start, end: lines[j]!.end };
-      if (block.end - block.start <= HARD_CAP_CHARS) out.push(block);
-      else for (const row of lines.slice(i, j + 1)) out.push(...capSpan(text, row, HARD_CAP_CHARS));
+      if (block.end - block.start <= hardCap) out.push(block);
+      else for (const row of lines.slice(i, j + 1)) out.push(...capSpan(text, row, hardCap));
       i = j + 1;
       continue;
     }
     for (const para of paragraphSpans(text, line.start, line.end)) {
-      for (const sentence of sentenceSpans(text, para)) out.push(...capSpan(text, sentence, HARD_CAP_CHARS));
+      for (const sentence of sentenceSpans(text, para)) out.push(...capSpan(text, sentence, hardCap));
     }
     i++;
   }
   return out;
 }
 
+/**
+ * Chunk sizing. The defaults are chunker `c2`; other values exist only for the offline Phase 3
+ * chunk-size experiment (`pnpm eval:chunk-size`, BM25 only), never for the index.
+ */
+export interface ChunkSizing {
+  targetChars: number;
+  overlapChars: number;
+  hardCapChars: number;
+}
+export const DEFAULT_SIZING: ChunkSizing = { targetChars: TARGET_CHARS, overlapChars: OVERLAP_CHARS, hardCapChars: HARD_CAP_CHARS };
+
 /** Greedy packing of consecutive units into [start, end) ranges with unit-aligned overlap. */
-export function packUnits(spans: readonly Span[]): Span[] {
+export function packUnits(spans: readonly Span[], sizing: ChunkSizing = DEFAULT_SIZING): Span[] {
+  const { targetChars, overlapChars, hardCapChars } = sizing;
   const chunks: Span[] = [];
   let first = 0;
   while (first < spans.length) {
     let last = first;
-    while (last + 1 < spans.length && spans[last + 1]!.end - spans[first]!.start <= TARGET_CHARS) last++;
+    while (last + 1 < spans.length && spans[last + 1]!.end - spans[first]!.start <= targetChars) last++;
     chunks.push({ start: spans[first]!.start, end: spans[last]!.end });
     if (last + 1 >= spans.length) break;
     // Next chunk starts with the trailing units that fit in the overlap budget, but always
     // advances by at least one unit.
     let next = last + 1;
-    while (next - 1 > first && spans[last]!.end - spans[next - 1]!.start <= OVERLAP_CHARS) next--;
+    while (next - 1 > first && spans[last]!.end - spans[next - 1]!.start <= overlapChars) next--;
     first = next;
   }
   const tail = chunks.at(-1);
   const prev = chunks.at(-2);
-  if (tail && prev && tail.end - tail.start < MIN_TAIL_CHARS && tail.end - prev.start <= HARD_CAP_CHARS) {
+  if (tail && prev && tail.end - tail.start < Math.min(MIN_TAIL_CHARS, targetChars / 4) && tail.end - prev.start <= hardCapChars) {
     chunks.splice(-2, 2, { start: prev.start, end: tail.end });
   }
   return chunks;
@@ -146,14 +158,14 @@ export function chunkId(meta: Pick<FilingMeta, 'ticker' | 'fiscalLabel' | 'filin
   return `${meta.ticker}-${meta.fiscalLabel}-${meta.filingType.replace('-', '')}-${sectionCode}-${String(n).padStart(3, '0')}`;
 }
 
-export function chunkFiling(meta: FilingMeta, text: string, sections: readonly Section[]): Chunk[] {
+export function chunkFiling(meta: FilingMeta, text: string, sections: readonly Section[], sizing: ChunkSizing = DEFAULT_SIZING): Chunk[] {
   const chunks: Chunk[] = [];
   const perCode = new Map<string, number>();
   for (const section of sections) {
     if (!text.slice(section.start, section.end).trim()) continue;
     const boilerplate = isBoilerplateSection(text, section, meta.filingType);
     const headings = sectionHeadings(text, section);
-    for (const span of packUnits(units(text, section))) {
+    for (const span of packUnits(units(text, section, sizing.hardCapChars), sizing)) {
       const slice = text.slice(span.start, span.end);
       if (!slice.trim()) continue;
       const n = (perCode.get(section.code) ?? 0) + 1;

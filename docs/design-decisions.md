@@ -124,7 +124,7 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 ---
 
 ## DD-05 · Deterministic query analysis + lane-based balanced retrieval
-**Status:** Accepted. Thresholds are Provisional until the Phase 3 evals.
+**Status:** Accepted. Built and measured in Phase 3: hybrid retrieval passes 19/20 eval questions (evidence hit rate 0.99, gold recall@context 0.62; full company and period coverage by construction of the lanes), and many-lane questions keep every company ([evaluation.md](evaluation.md) §1).
 
 **Context**
 - No runtime LLM may rewrite or plan the query (SPEC §26).
@@ -147,7 +147,7 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 ---
 
 ## DD-06 · Section-aware chunking with contextual headers and immutable readable IDs
-**Status:** Accepted. Chunk size and overlap are Provisional pending the Phase 3 evals.
+**Status:** Accepted. Chunk size and overlap are confirmed by the Phase 3 evals: chunker `c2` (3,600 characters, 480 overlap) is kept ([evaluation.md](evaluation.md) §2).
 
 **Context**
 - Filings are flattened HTML with inline Item headings.
@@ -186,14 +186,14 @@ An earlier draft used `maxReceiveCount = 1` plus reserved concurrency. Reserved 
 ---
 
 ## DD-08 · Model choices
-**Status:** Provisional until Phase 2 (invoke entitlement) and the Phase 3/4 evals.
+**Status:** Accepted for embeddings and rerank (Phase 3 evals: Titan v2 kept, rerank off, [evaluation.md](evaluation.md) §2). Generation stays Provisional until the Phase 4 temperature and forced-tool check.
 
 **Context:** Phase 0 read the account's Bedrock quotas (assumptions D3, D8). Claude Sonnet 5.5 has a cross-region quota of 0 tokens/minute; Sonnet 4.6 has 6,000,000. Cohere Embed v4 is capped at 8.1M tokens/day on-demand and 16.2M cross-region (non-adjustable), below the ~20M-token corpus.
 
 **Decision**
 - **Generation:** Claude Sonnet 4.6 via the `us.anthropic.claude-sonnet-4-6` inference profile, configurable via `GENERATION_MODEL_ID`. Claude Sonnet 5.5 (`us.anthropic.claude-sonnet-5-5`) is the preferred upgrade only if Mike files and receives a quota increase (quota code L-94A31E46, cross-region tokens/minute). Temperature acceptance with forced tool use is verified in Phase 4.
 - **Embeddings:** Amazon Titan Text Embeddings v2 (`amazon.titan-embed-text-v2:0`), 1024 dimensions, normalized; 6,000 requests/min with no daily token quota listed. The indexer is resumable, checkpointed, rate-limited to the 300,000 tokens/min quota, and caches embeddings by `sha256(embedded text + model id)`. Configurable via `EMBEDDING_MODEL_ID`.
-- **Cohere Embed v4** (asymmetric `search_document` / `search_query`) is evaluated in Phase 3 as an alternative. Its quota allows one full build per ~1.5 days.
+- **Cohere Embed v4** (asymmetric `search_document` / `search_query`) was the planned Phase 3 alternative. Its quota allows one full build per ~1.5 days. **Not evaluated in Phase 3** (quota and ~$2.40 cost); a stated limitation (evaluation.md §2).
 - **Rerank:** off by default. Cohere Rerank 3.5 is enabled only if the Phase 3 evals show a clear lift, and then flagged as a question to confirm with Eliza (assumptions A1, F1).
 
 **Consequences**
@@ -441,7 +441,14 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 ---
 
 ## DD-18 · Deterministic change detection and attention-signal candidates
-**Status:** Accepted. Thresholds and lexicons are Provisional until the Phase 3 hand-labeled evals.
+**Status:** Accepted. **Phase 3 go/no-go recorded 2026-10-01, re-measured after the adversary review** ([evaluation.md](evaluation.md) §3).
+- **Ships:**
+  - **TREND CHANGE:** precision 1.00 (15/15) and recall 1.00 (15/15), judged against 24 direction labels derived from hand-read income statements, as of FY2024 and FY2025.
+  - **PERSISTENT:** precision 0.90 (26/29), judged on hand-labeled links only. Link precision is 0.93 (51/55). Recall is 0.89 (24/27) over the categorized labeled headings it targets, and 0.36 (27/74) over all labeled persistent headings. 22 of the 77 chain links (FY2022→FY2023) are unlabeled and unverified. Fully labeled chains score 5/7, a diagnostic that would miss the bar if it gated.
+- **Suppressed:** NEW, heading-REDUCED, emphasis EXPANDED/REDUCED and OUTLOOK CHANGE (`DETECTOR_STATUS` in `packages/rag/src/signals/status.ts`). The dashboard therefore leads with current risks, trajectories and recommended diligence.
+- **The bar:** precision ≥ 0.8, recall ≥ 0.5, and at least 5 decided candidates. A recall that cannot be measured fails.
+- **Scope:** both Go decisions are measured on AAPL, MSFT and NVDA only. Low-yield heading extractions (XOM, GOOG, AMZN, CVX, KO, PFE) get no PERSISTENT, because of the heading floor.
+- **Thresholds:** detector thresholds were fixed before the evaluation and not tuned on it.
 
 **Decision.** Signals are computed in `packages/rag/signals`. Each one carries:
 - an ID;
@@ -455,18 +462,18 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 | Type | Detection |
 |---|---|
 | NEW / REDUCED (risk) | Diff of normalized risk-factor headings between consecutive 10-Ks, matched by token-set similarity. A heading with no match ≥ threshold in the prior 10-K is NEW. A heading that disappears is REDUCED. |
-| PERSISTENT | A heading matched in **each of at least two** consecutive 10-Ks, through the latest one. With a single 10-K nothing is PERSISTENT; its headings appear as current risks instead (architecture §7.1 `currentRisks`). |
-| EXPANDED / REDUCED (emphasis) | Per-topic lexicon density (matches per 10K characters) per section per filing, compared across like-for-like filings (10-K vs 10-K, or consecutive 10-Qs of the same fiscal quarter cadence). A change above both a relative and an absolute threshold triggers the signal. |
-| TREND CHANGE | From DD-17 trajectories, for example growth slowed while margin improved. Works **inside one filing** too: a single 10-K's multi-year columns, or a 10-Q's prior-year comparative columns, are enough. |
+| PERSISTENT | A categorized heading matched in **each of at least two** consecutive 10-Ks, through the latest one. With a single 10-K nothing is PERSISTENT; its headings appear as current risks instead (architecture §7.1 `currentRisks`). No year is skipped: a 10-K with fewer than `PERSISTENT_MIN_HEADINGS` (10) extracted headings breaks the chain, and a latest 10-K below the floor yields no PERSISTENT. The headline states the matched span ("matched in each annual report FY2022–FY2025"). |
+| EXPANDED / REDUCED (emphasis) | Per-topic lexicon density (matches per 10K characters) in Item 1A, compared 10-K vs 10-K only (the detector never compares 10-Qs). A change above both a relative and an absolute threshold triggers the signal. |
+| TREND CHANGE | From DD-17 trajectories, inside one filing's multi-year columns. Revenue growth emits on a change of direction: accelerating or slowing by ≥ 5 pp, or turning to a decline after growth. Margins emit on a year-over-year move of ≥ 1 pp, which is a material change in level, not necessarily a reversal. |
 | OUTLOOK CHANGE | MD&A outlook-lexicon deltas (demand, headwinds, investment, guidance). The candidate is deterministic; the profile call (DD-16) explains it from the cited passages. |
 
 - 10-Q "no material changes" boilerplate (assumptions B9) never produces a signal.
 - JNJ and XOM 10-Qs have no Item 1A (Known corpus anomalies), so their risk signals use 10-Ks only.
-- Companies with a single 10-K get no 10-K-vs-10-K signals (NEW, REDUCED, PERSISTENT, 10-K emphasis). They still get in-filing TREND CHANGE signals, current risks, and drivers (architecture §3 tiers), and the profile says "Limited history: one annual report in the corpus". This covers 41 companies: the 37 single-filing companies plus BAC, JPM, MCD and PEP, which have one 10-K each. BAC and JPM also get 10-Q-vs-10-Q emphasis and outlook signals within their 2025 quarters.
+- Companies with a single 10-K get no 10-K-vs-10-K signals (NEW, REDUCED, PERSISTENT, 10-K emphasis). They still get in-filing TREND CHANGE signals, current risks, and drivers (architecture §3 tiers), and the profile says "Limited history: one annual report in the corpus". This covers 41 companies: the 37 single-filing companies plus BAC, JPM, MCD and PEP, which have one 10-K each. No company gets 10-Q-vs-10-Q emphasis or outlook signals: the detectors compare 10-Ks only, and both detectors are suppressed in any case.
 
 **Consequences**
 - Signals are reproducible and explainable: the evidence drawer shows the measurement and the passages from both periods.
-- Precision is measured on a hand-labeled set for AAPL, NVDA, and MSFT before the thresholds are fixed.
+- Precision is measured on a hand-labeled set for AAPL, NVDA, and MSFT. The thresholds were fixed before it and not tuned on it. The Go applies to those three companies; every other company is unmeasured.
 - **Phase 3 go/no-go on signal quality** (provisional bar: precision ≥ 0.8 on the hand-labeled set, with a recall sanity check that at least half of the hand-labeled real changes are found). It runs before Phase 4b. If heading diffs or lexicon deltas miss the bar, the signal types that fail are suppressed, and the dashboard **leads with current risks, trajectories, and recommended diligence**. Change signals are shown only for types that clear the bar. This keeps the weakest assumption (G4) from emptying or polluting the dashboard.
 
 ---

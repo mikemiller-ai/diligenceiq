@@ -2,7 +2,7 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 2 (corpus ingestion, chunking, embeddings, a validated local index, and deterministic extraction) is complete in the repository; the index is built locally but not yet uploaded to S3, and nothing new is deployed. The live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build: Company Intelligence on preview profiles for AAPL, MSFT and NVDA (cited risk headings plus labeled placeholders, no figures). Deep Analysis accepts any question, but retrieval and generation arrive in Phases 3–4, so the API answers `ANALYSES_DISABLED` for now. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 3 (deterministic query analysis, balanced hybrid BM25 + cosine retrieval, the ~24K-token context builder, a development-only retrieval debug endpoint, retrieval evals and the signal go/no-go) is complete in the repository; results are in [docs/evaluation.md](docs/evaluation.md). The Phase 2 index (`iv-9cf51c066743`) is uploaded to S3. Nothing new is deployed: the live site <https://diligenceiq.mikemiller.ai> still serves the Phase 1 build, Company Intelligence on preview profiles for AAPL, MSFT and NVDA (cited risk headings plus labeled placeholders, no figures). Deep Analysis accepts any question, but generation arrives in Phase 4, so the API answers `ANALYSES_DISABLED` for now. This README grows as each phase lands. The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## Develop
 Node ≥ 22 and pnpm 9.
@@ -37,6 +37,12 @@ Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-c
 - `pnpm index:build`: vectors, BM25, adjacency, `summary.json` and `manifest.json`, validated before the build is kept.
 - `pnpm index:upload --bucket <name> [--yes]`: immutable S3 upload (a dry run without `--yes`).
 - `pnpm index:measure-load`: cold-load timing.
+
+**Evals and retrieval tools (Phase 3, admin-run; results in `evals/results/`, summarized in [docs/evaluation.md](docs/evaluation.md)):**
+- `pnpm eval:retrieval`: the 20 questions in `evals/questions.yaml`, in BM25, cosine and hybrid modes, with no generation. It uses cached query embeddings; `--embed` embeds new questions (Titan v2, about $0.000001 each).
+- `pnpm eval:chunk-size`: a BM25-only chunk-size experiment. No AWS.
+- `pnpm eval:signals`: the signal go/no-go against the hand labels. No AWS.
+- `pnpm retrieval:debug`: serves `POST /api/retrieval/debug` locally on 127.0.0.1. It is never deployed.
 
 ## Requirements
 - The Eliza assessment PDF is the outer constraint.

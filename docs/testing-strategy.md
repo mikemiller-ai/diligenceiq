@@ -73,8 +73,10 @@ Tests that need the full corpus (e.g. header parsing over all 246 files) read `C
 - Sector mapping ("major pharmaceutical companies" → JNJ, PFE, MRK, LLY, ABBV; not TMO/UNH).
 - Periods: explicit years, ranges, "since 2023"; **"last two years" for NVDA → FY2024 + FY2025 + FY2026 YTD (Q1–Q3)**; BAC → FY2024 complete + FY2025 YTD; default "current view" per company (JPM = FY2025 10-K only; MCD and PEP exclude their stray 2023 10-Qs).
 - RRF fusion (k = 60) ordering and ties; metadata filters as hard filters; topic boosts never filter; boilerplate down-weighting.
-- Planner lanes and **lane quotas**: every named company and period represented before score fill.
-- Context builder: shingle-Jaccard dedupe, adjacent merge, **~24K-token budget never exceeded**, untrusted-content block format, snapshot ≤ 350 KB guard.
+- Planner lanes and **lane quotas**: every named company and period represented before score fill. Sector lanes get quota ⌊22 / members⌋, smaller than a single company's.
+- **Many lanes (H2):** companies before periods (tier-ordered quota passes); endpoint reduction above 11 company × period lanes with a plan note; 5 companies × 5 years keep each company's first and last period; 14 companies under a short budget all keep their latest period; on the real corpus (BM25), "big tech since 2022" keeps every company's earliest and latest annual period and a 14-company change question represents every company.
+- Context builder: shingle-Jaccard dedupe, adjacent merge, **~24K-token budget never exceeded**, untrusted-content block format. `filing_excerpts` tags are defanged, including space, zero-width and soft-hyphen variants, and filing lines that pose as block headers are prefixed. Over the 350 KB snapshot cap the builder degrades: it drops the lowest-scoring fill blocks first and never throws.
+- Periods with no filing: a named period falls back to the current view with a stated gap; an empty fiscal-year filter builds no lanes and makes no embedding call.
 - Validation: citation validator (unknown IDs removed and flagged), uncited findings flagged, numeric grounding (currency/percent figures present in cited chunks or badged), deterministic JSON repair and `MALFORMED_OUTPUT`.
 - `GenerationGateway`: the second call in one analysis throws; the Bedrock client is built with `maxAttempts: 1`.
 - **Purpose guard:** a spy on the `GenerationGateway` constructor across every worker handler path (success, error, malformed output, duplicate delivery) sees only `purpose: 'analysis'`.
@@ -140,7 +142,7 @@ Synthesize all stacks and assert:
 - **Injection resistance:** planted instructions are not followed.
 - Generation calls per question (must be 1) and token/latency telemetry.
 
-A retrieval-only mode (no generation) supports the Phase 3 chunking, embedding (Titan v2 vs. Cohere Embed v4), and rerank decisions.
+A retrieval-only mode (no generation) supports the Phase 3 chunking, embedding, and rerank decisions: `pnpm eval:retrieval` (BM25 / cosine / hybrid over the 20 questions), `pnpm eval:chunk-size` (BM25-only chunk sizes) and `pnpm eval:signals` (signal go/no-go on the hand labels). Beyond coverage, which is 1.00 by construction, the retrieval eval reports **gold recall@context**: the share of hand-picked answering chunks (`gold` in `evals/questions.yaml`, 74 passages over 7 questions, chosen before any retrieval output was seen) present in the context, overall and per company. It is scored by character coverage, so it also compares chunk sizes. A question without a cached query embedding is reported as "not embedded" for cosine and hybrid, not as a crash. Results and decisions: [evaluation.md](evaluation.md). The gate re-checks the key outcomes on the real corpus without AWS: multi-company, sector and longitudinal balance in BM25-only retrieval, and the enabled signal detectors staying above the bar.
 
 **Profile evaluation** (`evals/profiles.yaml`, run after a profile build). Pass bars are **provisional** until the first real build and are revisited then:
 

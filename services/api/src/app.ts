@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { CreateAnalysisRequestSchema } from '@diligenceiq/core';
+import { CreateAnalysisRequestSchema, type RetrievalDebugRequest, RetrievalDebugRequestSchema } from '@diligenceiq/core';
 import { error, json, log, type HttpResponse } from './http';
 import type { KillSwitch } from './kill-switch';
 
@@ -9,8 +9,17 @@ const MAX_REPORTED_ISSUES = 10;
 export const PROBE_COOKIE = 'diq_probe=1';
 const PROBE_SET_COOKIE = `${PROBE_COOKIE}; Path=/api; Max-Age=300; HttpOnly; Secure; SameSite=Lax`;
 
+/**
+ * Retrieval-only inspection (SPEC §27.3). Development only: it needs the in-memory index and a
+ * query embedding, which the deployed api Lambda has neither of (no Bedrock permission, no
+ * index). The deployed handler never passes it, so the route does not exist in production;
+ * `pnpm retrieval:debug` serves it locally.
+ */
+export type RetrievalDebug = (request: RetrievalDebugRequest, requestId: string) => Promise<unknown>;
+
 export interface AppDeps {
   killSwitch: KillSwitch;
+  retrievalDebug?: RetrievalDebug;
 }
 
 interface RequestContext {
@@ -71,6 +80,21 @@ export function createApp(deps: AppDeps) {
       return error('ANALYSES_DISABLED', 'Analyses are not enabled in this build.', requestId);
     },
   };
+
+  const retrievalDebug = deps.retrievalDebug;
+  if (retrievalDebug) {
+    routes['POST /api/retrieval/debug'] = async ({ event, requestId }) => {
+      const parsed = readJsonBody(event, requestId);
+      if (!parsed.ok) return parsed.response;
+      const result = RetrievalDebugRequestSchema.safeParse(parsed.value);
+      if (!result.success) {
+        return error('VALIDATION_ERROR', 'Request body is invalid.', requestId, {
+          issues: summarizeIssues(result.error.issues),
+        });
+      }
+      return json(200, await retrievalDebug(result.data, requestId), requestId);
+    };
+  }
 
   return async function handle(event: APIGatewayProxyEventV2): Promise<HttpResponse> {
     const requestId = event.requestContext?.requestId ?? 'unknown';

@@ -1,0 +1,137 @@
+{
+ "ranAt": "2026-10-02T01:26:57.687Z",
+ "indexVersion": "iv-9cf51c066743",
+ "results": [
+  {
+   "name": "1,800 chars (~450 tokens)",
+   "sizing": {
+    "targetChars": 1800,
+    "overlapChars": 240,
+    "hardCapChars": 3000
+   },
+   "chunks": 50075,
+   "medianChars": 1679,
+   "targetChunks": 44,
+   "indexVersion": null,
+   "summary": {
+    "mode": "1,800 chars (~450 tokens)",
+    "questions": 20,
+    "passed": 17,
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 0.936,
+    "sectionPrecision": 0.844,
+    "relevantShare": 0.473,
+    "goldRecall": 0.431,
+    "goldHits": 24,
+    "goldTotal": 74,
+    "checksPassed": 108,
+    "checksTotal": 111
+   },
+   "failing": [
+    "pdf-1 (evidence)",
+    "long-pfe-since-2022 (evidence)",
+    "sector-banks-capital (evidence)"
+   ],
+   "seconds": 5
+  },
+  {
+   "name": "2,700 chars (~675 tokens)",
+   "sizing": {
+    "targetChars": 2700,
+    "overlapChars": 360,
+    "hardCapChars": 4500
+   },
+   "chunks": 33791,
+   "medianChars": 2564,
+   "targetChunks": 29,
+   "indexVersion": null,
+   "summary": {
+    "mode": "2,700 chars (~675 tokens)",
+    "questions": 20,
+    "passed": 19,
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 0.98,
+    "sectionPrecision": 0.851,
+    "relevantShare": 0.531,
+    "goldRecall": 0.417,
+    "goldHits": 25,
+    "goldTotal": 74,
+    "checksPassed": 110,
+    "checksTotal": 111
+   },
+   "failing": [
+    "pdf-1 (evidence)"
+   ],
+   "seconds": 4.8
+  },
+  {
+   "name": "3,600 chars (~900 tokens, c2)",
+   "sizing": {
+    "targetChars": 3600,
+    "overlapChars": 480,
+    "hardCapChars": 6000
+   },
+   "chunks": 25404,
+   "medianChars": 3451,
+   "targetChunks": 22,
+   "indexVersion": "iv-9cf51c066743",
+   "summary": {
+    "mode": "3,600 chars (~900 tokens, c2)",
+    "questions": 20,
+    "passed": 16,
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 0.848,
+    "sectionPrecision": 0.858,
+    "relevantShare": 0.55,
+    "goldRecall": 0.481,
+    "goldHits": 29,
+    "goldTotal": 74,
+    "checksPassed": 107,
+    "checksTotal": 111
+   },
+   "failing": [
+    "pdf-1 (evidence)",
+    "long-pfe-since-2022 (evidence)",
+    "sector-banks-capital (evidence)",
+    "ambiguous-ko-few-years (evidence)"
+   ],
+   "seconds": 4.8
+  },
+  {
+   "name": "5,400 chars (~1,350 tokens)",
+   "sizing": {
+    "targetChars": 5400,
+    "overlapChars": 720,
+    "hardCapChars": 9000
+   },
+   "chunks": 16705,
+   "medianChars": 5239,
+   "targetChunks": 15,
+   "indexVersion": null,
+   "summary": {
+    "mode": "5,400 chars (~1,350 tokens)",
+    "questions": 20,
+    "passed": 17,
+    "companyCoverage": 1,
+    "periodCoverage": 1,
+    "evidenceHitRate": 0.946,
+    "sectionPrecision": 0.871,
+    "relevantShare": 0.681,
+    "goldRecall": 0.414,
+    "goldHits": 23,
+    "goldTotal": 74,
+    "checksPassed": 108,
+    "checksTotal": 111
+   },
+   "failing": [
+    "pdf-1 (evidence)",
+    "pdf-2 (evidence)",
+    "sector-banks-capital (evidence)"
+   ],
+   "seconds": 4.7
+  }
+ ]
+}

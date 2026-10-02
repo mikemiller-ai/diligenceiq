@@ -245,7 +245,7 @@ A failed generation becomes a clear error state with a request ID. Re-running is
 
 ---
 
-## 6. RAG design *(§6.1–6.4 built in Phase 2; §6.5–6.9 planned: Phases 3–4)*
+## 6. RAG design *(§6.1–6.4 built in Phase 2; §6.5–6.7 built in Phase 3; §6.8–6.9 planned: Phase 4)*
 
 ### 6.1 Ingestion (offline, admin-run)
 1. **Parse the header block.** Apply the metadata override table for known anomalies (e.g. `GE_10K_2015` → "General Electric Capital Corp (GE Capital)", FY2014, outside the review window).
@@ -276,7 +276,8 @@ A failed generation becomes a clear error state with a request ID. Re-running is
 - Target **~900 tokens (~3,600 characters)** with **~120-token overlap**, split on paragraph, then sentence, boundaries. Pipe-delimited tables are kept intact when they fit, otherwise split on row boundaries.
 - Lines are not paragraphs: a single line can be 287,855 characters, so the splitter works on sentence and table-row boundaries inside lines and enforces a hard character cap.
 - A contextual header (`Apple Inc · 10-K FY2022 · Item 1A Risk Factors › Supply chain`) is prepended to the text used for embedding and BM25. The citation text shown to users is the raw passage.
-- Rationale: a risk factor or MD&A argument, together with its supporting numbers, usually fits in one citable unit. At this size ~25–30 chunks fit in a ~24K-token context, which leaves room for multi-company and multi-year balance. Final values are confirmed against retrieval evals in Phase 3 and recorded here.
+- Rationale: a risk factor or MD&A argument, together with its supporting numbers, usually fits in one citable unit. At this size ~25–30 chunks fit in a ~24K-token context, which leaves room for multi-company and multi-year balance.
+- **Phase 3 decision: keep `c2`, on cost, not on a measured win.** The BM25-only chunk-size experiment (`pnpm eval:chunk-size`; 1,800 / 2,700 / 3,600 / 5,400 characters at the same budget) slightly favors other sizes: `c2` passes the fewest questions (16/20) and has the lowest evidence hit rate, and 5,400 characters beats it on passing, evidence, section precision and on-topic share. `c2` has the highest gold recall (29 of 74 hand-picked passages against 23–25), a weak signal on a small set. The experiment is lexical only. `c2` stays because re-embedding another size costs ~$0.44 and an hour with no hybrid-mode evidence it would help, and because 5,400-character chunks cut the context from 22 blocks to 15, which squeezes sector and longitudinal questions. Details: [evaluation.md](evaluation.md) §2.
 - **As built (chunker `c2`):** target 3,600 characters, overlap 480 characters (unit-aligned, so a chunk is always a verbatim slice), hard cap 6,000 characters, a final chunk under 900 characters folded into the previous one. Units are sentences inside paragraphs; paragraphs split at line breaks and at glued breaks (`…stock price.The Company…`); a table is one unit when it fits under the cap. A line is a table row only when its pipes are dense, so a prose line that carries a page footer ("Apple Inc. | 2025 Form 10-K | 5") is still split into sentences. `c2` (from `c1`) changes only the section boundaries (§6.1), which renumbers chunk IDs. Result: 25,404 chunks over 246 filings (median 3,451 characters, max 5,972); 28 boilerplate chunks. A section with more than 999 chunks fails the run (the ID has three digits).
 
 ### 6.3 Chunk / citation IDs
@@ -285,7 +286,7 @@ A failed generation becomes a clear error state with a request ID. Re-running is
 - Metadata: `chunkId, documentId, company, ticker, cik, sector, filingType, filingDate, periodEnd, fiscalYear, fiscalQuarter, calendarQuarter, section, sectionCode, subsection, boilerplate, sourceFile, chunkIndex, charStart, charEnd, text`.
 
 ### 6.4 Index artifacts (S3 `index/<version>/`)
-- `vectors.bin`: Float32 matrix, **Amazon Titan Text Embeddings v2** (`amazon.titan-embed-text-v2:0`), 1024 dimensions, normalized. Dimension and quantization are confirmed in Phase 2 against load time. Cohere Embed v4 is evaluated as an alternative in Phase 3 (DD-08).
+- `vectors.bin`: Float32 matrix, **Amazon Titan Text Embeddings v2** (`amazon.titan-embed-text-v2:0`), 1024 dimensions, normalized. Dimension and quantization are confirmed in Phase 2 against load time. Cohere Embed v4 was not evaluated in Phase 3 (quota and cost; DD-08, evaluation.md §2).
 - `bm25.json` + `bm25-postings.bin`: precomputed inverted index. The JSON holds the vocabulary, document frequencies, posting offsets, document lengths and parameters (k1 1.2, b 0.75); the binary file holds the postings (Uint32 chunk indexes, then Uint16 term frequencies), because ~8M postings as a JSON array would be several times larger and slower to parse on a cold start. The tokenizer (`packages/rag`, version `t2`: decimals such as `1.2` stay one token, dotted abbreviations fold (`U.S.` → `us`), and the negations `no`, `not`, `nor` are kept) is shared by the indexer and the query path.
 - `chunks.jsonl`: chunk metadata + text.
 - `adjacency/<TICKER>.json`: for each chunk, the top 3 chunks of the **same section** in the previous and the next comparable filing of the same company, ranked by cosine similarity of the stored embeddings. "Comparable" means the adjacent filing **of the same form** by period end: 10-K ↔ 10-K (prior/next fiscal year) and 10-Q ↔ 10-Q (prior/next quarter, so a Q1 10-Q's `previous` is the prior year's Q3 10-Q; there is no Q4 10-Q). For 10-Qs a third side, `sameQuarterPriorYear`, gives the year-over-year comparison (same fiscal quarter, one fiscal year earlier; null for 10-Ks or when that filing is not in the corpus). Computed offline at index build, no model call. It backs `GET /api/evidence/adjacent` (§9) for adjacent-period comparison of brief citations.
@@ -307,9 +308,10 @@ Documents are re-embedded **only** when their embedded text or the embedding mod
   - Tickers that are short or English words (V, T, MA, GE, BA, TGT, MS, DE, HD, PG, CAT, KO…) match only as **uppercase standalone tokens**.
 - **Sectors:** static GICS-style map ("pharmaceutical/pharma/drugmakers", "banks", "big tech", "oil majors"…) → corpus companies.
 - **Periods** (assumptions C1, C5):
-  - Explicit fiscal years, ranges, and "since 2023".
+  - Explicit fiscal years, ranges, and "since 2023". A bare year counts only in a time phrase ("in 2024", "the 2024 10-K"); a year that dates an event ("enacted in 2022") does not.
   - **"Last N years"** resolves per company to the N most recent complete fiscal years (by 10-K) for that company, plus any later quarters shown separately as "FY<next> YTD".
   - **No period named:** per company, the latest 10-K plus subsequent 10-Qs ("current view").
+  - **A named period with no filing** for any company in scope falls back to the current view, with a stated gap. A user's fiscal-year filter never falls back.
   - The resolution is always shown in the Interpretation panel; user filters override it.
 - **Filing types:** 10-K / annual report, 10-Q / quarterly.
 - **Topics:** risk, regulatory, revenue/growth, liquidity, competition, outlook → **soft** section boosts only. They never filter, so arbitrary questions still get general semantic retrieval.
@@ -322,7 +324,7 @@ Documents are re-embedded **only** when their embedded text or the embedding mod
   - Otherwise → a global lane with a per-company cap.
 - **Per lane:** a metadata-filtered BM25 search and a metadata-filtered exact cosine search over the in-memory index, fused by **Reciprocal Rank Fusion (k = 60)**. User-selected filters (companies, filing types, period) are hard metadata filters.
 - Chunks flagged `boilerplate` are down-weighted so "no material changes" passages don't displace substantive evidence.
-- **Rerank: off by default.** Cohere Rerank 3.5 on Bedrock (non-generative) is enabled only if the Phase 3 evals show a clear lift, and then it is flagged as a question to confirm with Eliza (assumptions A1).
+- **Rerank: off by default.** Cohere Rerank 3.5 on Bedrock (non-generative) was not evaluated in Phase 3; it would be enabled only after a measured lift on the gold labels and Eliza's answer to F1 (assumptions A1, F1).
 
 ### 6.7 Context builder
 - Deduplicate adjacent or overlapping chunks (shingle Jaccard > 0.8).
@@ -340,6 +342,56 @@ TEXT:
 …
 </filing_excerpts>
 ```
+
+**As built (Phase 3, `packages/rag` query/, retrieval/):**
+- **Catalog** (`query/catalog.ts`): derived from the loaded index's own chunks, so the analyzer can never name a filing that retrieval cannot return.
+- **Companies** (`query/companies.ts`):
+  - aliases from header names (legal name, suffix-stripped name) and tickers, plus the curated list;
+  - common-word names (`COMMON_WORD_NAMES`) match case-sensitively and never before a hyphen;
+  - other names match case-insensitively; tickers match uppercase only and never next to a letter, digit, `-`, `&`, `.` or apostrophe;
+  - among overlapping matches the longest wins;
+  - known limitation: a common-word name that opens a sentence ("Target markets…") still matches; the Interpretation panel shows it.
+- **Sectors** (`query/sectors.ts`): 21 phrase rules, each mapping to explicit members or a whole catalog sector. A phrase needs a plural or a group noun ("pharmaceutical companies", "banks"), so "NVIDIA's semiconductor business" or "Apple's financial risks" pulls in no sector.
+- **Periods** (`query/periods.ts`):
+  - kinds: current, last N, explicit years and ranges, since Y, fiscal quarters (Q4 resolves to the 10-K), and a filter range;
+  - explicit years use the 10-K when present, else that year's 10-Qs as "FY<y> YTD", else a stated gap;
+  - only 1990–2039 count as years, so "2,000 stores" is not one;
+  - **time-phrase rule:** a bare year counts only after a temporal preposition ("in", "for", "during", "through", "as of", "ended"…), before a filing word ("2024 10-K", "2024 annual report", "2024 results"), or in a list joined to a counted year ("2022 and 2024"). FY / fiscal prefixes always count. A year after an event verb ("launched in 2020", "enacted in 2022", "acquired in 2019") never counts. Year-like tokens not read as periods get a note: "Not read as a period (no time phrase…)";
+  - two-digit years need the FY prefix ("FY23", "FY'23" → FY2023); a bare "23" is never a year;
+  - "last few years", "several years" and a plural with no count ("recent years") are read as 3 and flagged; "last couple of years" is 2;
+  - "year over year" or "compared with the prior year", with no year named, is read as the last 2 fiscal years and flagged.
+- **Fallback** (`query/analyze.ts`): when a named period (years, since, quarters) has no filing for any company in scope, the analysis records it as `requestedPeriod`, resolves every company to its current view instead, and states a gap per named company ("AAPL: no FY2015 filing in the corpus; showing the current view instead.") plus a note. A user's fiscal-year filter is a hard filter and never falls back: no filings means no lanes, no embedding call and a stated gap. When only some named companies lack it ("Compare Apple and Merck in 2022"), each of those keeps a lane in its current view, with the gap "MRK: no FY2022 filing in the corpus; showing its current view (FY2024) instead." and a note, so a comparison never silently loses a company. A dash-only range ("2025-2030") follows the time-phrase rule like a bare year; "from…", "between…" and "to/through/until" ranges always count.
+- **Interpretation:** the analysis carries `notes` (assumptions, filter overrides) and `gaps` (corpus gaps for named companies), both shown in the Interpretation panel. Other notes and gaps:
+  - **Out-of-corpus companies:** a likely company mention that is not in the corpus (a curated list such as Ford or Rivian, or a capitalized name before "Inc", "Corp", …) gets a gap: "Ford is not in the corpus (54 companies)".
+  - **Common words:** a lowercase common-word name next to named companies gets a note that it was read as a word. The common-word list is trimmed to genuine English words and given names; brand-only names such as Tesla, Google or Nike match case-insensitively.
+  - **Review window:** a company whose every filing ends more than 3 years before the corpus's newest period end is left out of questions that name no company, with a note. GE's only filing is its FY2014 10-K. When named, it is searched with a note.
+  - **One period in scope:** a change question where a named company has only one period gets a note on how to name years to compare.
+- **Planner** (`retrieval/plan.ts`):
+  - the context targets 22 blocks; each lane's quota is max(1, ⌊22 / lanes⌋), so 3 lanes get 7 each, 11 lanes 2 each, and 12 or more lanes 1 each;
+  - lanes are longitudinal when the question has change intent and a company resolves to two or more period buckets;
+  - **companies before periods (H2):** each lane has a `tier`. Company and sector lanes are tier 0. In company × period lanes, a company's latest annual period is tier 0, its earliest period tier 1, and the others tier 2. The context builder fills quotas pass by pass in tier order, so every company is represented before any company gets a second period;
+  - **endpoint reduction:** when company × period lanes would exceed 11 (⌊22 / 2⌋), each company with three or more periods keeps only its earliest period and its latest annual period. Middle years and later YTD quarters are dropped, and a plan note names them. "Big tech since 2022" goes from 25 lanes to 12. With more than 11 companies, even the endpoints exceed the target: each lane gets 1 block, latest periods first, and a note says some earliest periods may be missing;
+  - plan notes appear in the retrieval debug view and travel with the result;
+  - the global lane caps 4 blocks per company.
+- **Search** (`retrieval/search.ts`):
+  - BM25 and exact cosine over the lane's filings only, the top 200 of each fused by RRF (k = 60);
+  - topic section boost ×1.25; boilerplate weight ×0.2;
+  - each lane's lexical query drops the *other* named companies' names; the semantic query is the whole question, embedded once;
+  - modes: `hybrid` (default), `bm25` (no embedding; the A1 fallback) and `cosine` (evals).
+- **Context** (`retrieval/context.ts`):
+  - lane quotas are filled one block per lane per pass, visiting lanes by tier (companies before periods), then the rest fills by fused score;
+  - dedupe: >50% character overlap within a filing, or 5-word-shingle Jaccard > 0.8 within the lane (or the company, outside period lanes). Near-identical passages in different period lanes are kept, because they are evidence of persistence;
+  - the budget is 24,000 tokens at 3.5 characters a token, never exceeded;
+  - order: lane, then filing, then chunk;
+  - one `<filing_excerpts>` block. Inside a passage, any `filing_excerpts` tag is defanged, including variants with spaces, zero-width characters or soft hyphens. A line that starts like a block header (`SOURCE_ID:`, `COMPANY:`, `FILING:`, `SECTION:`, `TEXT:`) is prefixed with `[filing text]`;
+  - a snapshot (≤ 350 KB) for the evidence drawer, and a company × period coverage matrix. Over the cap, the builder drops the lowest-scoring fill blocks (then quota blocks, if needed) and records the count in `skipped.snapshotCap`; it never fails the analysis.
+- **Telemetry:** retrieval time, embedding time, `embeddingCallCount` (0 or 1), `rerankCallCount` (always 0), `retrievalRequests` (lanes), chunks retrieved, chunks used, companies and filings represented.
+- **Debug:** `POST /api/retrieval/debug` (§9) is registered only when a retrieval dependency is injected. The deployed handler never injects one; `pnpm retrieval:debug` serves it on 127.0.0.1 over the built index.
+- **Measured** (20 eval questions, [evaluation.md](evaluation.md) §1):
+  - hybrid passes 17 of the 18 questions that have a cached query embedding, with a 0.99 evidence hit rate. Two questions still need one `--embed` run;
+  - gold recall@context, on 74 hand-picked answering passages over 7 questions: hybrid 0.62, cosine 0.62, BM25 0.48;
+  - search takes 27 ms p50, excluding the one Titan query embedding;
+  - **rerank stays off**, on cost and the open F1 question, not for lack of a gap: gold recall is 0.62, and pdf-3 and multi-cloud are weak.
 
 ### 6.8 Generation
 - **One** Bedrock `ConverseStream` request. Default model: **Claude Sonnet 4.6** via the `us.anthropic.claude-sonnet-4-6` cross-region inference profile, configurable via `GENERATION_MODEL_ID`.
@@ -563,7 +615,7 @@ type AnalysisSummary = { analysisId: string; question: string; origin: AnalysisO
 | `GET /api/ic-brief` | — | `200 { sections: Array<{ id, title, items }>, supportingEvidence: Citation[], markdown }` (§8.2) |
 | `GET /api/sources` | — | `200 { indexVersion, companies, filings: Array<{ documentId, ticker, company, filingType, filingDate, periodEnd, fiscalLabel, flags }> }` |
 | `GET /api/sources/:documentId` | — | `200 { filing, sections: Array<{ code, title, charStart, charEnd }>, text }` |
-| `POST /api/retrieval/debug` | `{ question, filters? }` | Retrieval-only inspection. Feature-flagged, disabled in production. |
+| `POST /api/retrieval/debug` | `{ question, filters?, mode?, includeText? }` | Retrieval-only inspection (Phase 3): interpretation, plan (strategy, target, notes such as an endpoint reduction), per-lane candidates with tier, quota, and BM25 and cosine ranks, context and telemetry. The local server answers 500 JSON on an internal error. The route exists only when a retrieval dependency is injected (`pnpm retrieval:debug`, 127.0.0.1); the deployed handler never injects one, so production answers 404. |
 | `GET /api/health` | — | `200 { status: 'ok', indexVersion, profileSetId, profileIndexVersion, analysesEnabled }` |
 
 **Error codes → HTTP status** (request-level errors):
@@ -702,7 +754,7 @@ Expected idle cost is dominated by storage. Exact figures will be computed from 
 Per-analysis estimated cost is computed from a **configured pricing table** in code and stored with each analysis's telemetry. It is shown as an *estimate*, not as billing truth. Total runtime spend is bounded by the global daily cap and the kill switch (§11).
 
 ### 13.3 One-time offline cost
-Embedding the corpus (~20M tokens) happens **once** per index version, with Titan Text Embeddings v2 by default. Embeddings are cached by content hash, so a re-chunk embeds only changed chunks. The index manifest records embedding calls and tokens consumed. Cohere Embed v4 is capped at 16.2M tokens/day cross-region in this account (non-adjustable), so a full Cohere build takes about 1.5 days of quota; it is evaluated in Phase 3, not used by default.
+Embedding the corpus (~20M tokens) happens **once** per index version, with Titan Text Embeddings v2 by default. Embeddings are cached by content hash, so a re-chunk embeds only changed chunks. The index manifest records embedding calls and tokens consumed. Cohere Embed v4 is capped at 16.2M tokens/day cross-region in this account (non-adjustable), so a full Cohere build takes about 1.5 days of quota; it was not evaluated in Phase 3 and is not used.
 
 **Company Intelligence profiles** are also a one-time offline cost, under the dated override in DD-16: at most **one generation call per company per (`indexVersion`, `profilePromptVersion`)**, so 54 calls for a full LLM build, and zero for the deterministic set. The bound is enforced by the append-only build ledger (no `--force`; a rebuild needs a version bump). The build is budget-capped (`--max-calls`) and run manually; no page view or schedule triggers it. The ledger and manifest record calls, tokens, and model per profile. Profiles are a few tens of KB each in S3.
 
