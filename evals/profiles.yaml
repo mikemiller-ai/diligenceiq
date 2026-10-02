@@ -1,0 +1,13 @@
+# Company Intelligence profile evaluation (testing-strategy §7; SPEC §32.9; DD-16).
+# Provisional bars, revisited after the first real build. `pnpm eval:profiles` checks that the
+# code's PROVISIONAL_BARS (packages/rag/src/profile/evaluate.ts) match these values.
+# 53 profiles per set: every corpus company except GE Capital (outside the review window).
+bars:
+  citationValidity: 1        # profile citations are index chunks of that company, and model-written citations are inside the request recomputed from the deterministic profile
+  figureMatch: 1             # figures in narrative found in FACTS, or (model text) in a passage the same item cites whose text was in the excerpts; points only as points
+  bannedPhrases: 0           # canonical list, packages/core/src/vocabulary.ts (model text, including the headline)
+  deepTierFallbackRate: 0.25 # LLM set: deterministic fallbacks among the 12 deep-tier companies (revised from 0.1 after the first build, SPEC A.4)
+  tierCorrectness: 1         # coverage tier recomputed from the index's 10-K and 10-Q document counts per ticker
+  maxCallsPerProfile: 1      # from the profile's generationCallCount, which counts the ledger
+# Signal precision ≥ 0.8 and recall ≥ 0.5 on the hand-labeled AAPL, MSFT, NVDA set are measured
+# by `pnpm eval:signals`; the profiles use only the detectors that passed (DD-18).

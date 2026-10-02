@@ -105,7 +105,11 @@ const app = createApp({
       setTimeout(() => void stubWorker(workspaceId, analysisId), 50);
     },
   },
-  profiles: createProfileProvider({ pointer: async () => 'iv-9cf51c066743/fixture-v2', read: dirSetReader(PROFILE_SET_ROOT) }),
+  // E2E_PROFILE_SET / E2E_PROFILE_ROOT preview a locally built set (pnpm intelligence:build); the e2e suite uses the committed fixture set.
+  profiles: createProfileProvider({
+    pointer: async () => process.env.E2E_PROFILE_SET ?? 'iv-9cf51c066743/fixture-v2',
+    read: dirSetReader(process.env.E2E_PROFILE_ROOT ?? PROFILE_SET_ROOT),
+  }),
   seed: SEED,
   indexVersion: 'iv-9cf51c066743',
   indexAvailable: async () => true,

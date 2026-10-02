@@ -115,6 +115,13 @@ describe('CompanyIntelligenceProfileSchema and integrity', () => {
     expect(profileIntegrityIssues(p)).toEqual([]);
   });
 
+  it('takes an optional model-written headline (absent on deterministic and preview profiles), never an empty one', () => {
+    const p = profile('AAPL', [['competition', 'Markets are competitive.']]);
+    expect(CompanyIntelligenceProfileSchema.safeParse({ ...p, headline: 'What stands out.' }).success).toBe(true);
+    expect('headline' in p).toBe(false);
+    expect(CompanyIntelligenceProfileSchema.safeParse({ ...p, headline: '' }).success).toBe(false);
+  });
+
   it('rejects ratings or unknown fields and invalid set IDs', () => {
     const p = profile('AAPL', [['competition', 'Markets are competitive.']]);
     expect(CompanyIntelligenceProfileSchema.safeParse({ ...p, rating: 'Strong Buy' }).success).toBe(false);
@@ -217,13 +224,13 @@ describe('composeCompare', () => {
     expect(out.result.companies.map((c) => c.fiscalYearEnd)).toEqual(['2024-12-31', '2024-12-31']);
   });
 
-  it('carries management emphasis per company (architecture §9 contract), null until extracted', () => {
+  it('carries management emphasis per company (architecture §9 contract), model-written when present, null when not summarized', () => {
     const withOutlook = profile('AAPL', [['competition', 'A.']], { managementOutlook: { summary: 'Outlook text.', citationIds: ['AAPL-R1'] } });
     const out = composeCompare(['AAPL', 'NVDA'], new Map([['AAPL', withOutlook], ['NVDA', profiles.get('NVDA')!]]));
     if (!out.ok) throw new Error('expected ok');
     expect(out.result.managementEmphasis).toEqual([
-      { ticker: 'AAPL', summary: 'Outlook text.', citationIds: ['AAPL-R1'] },
-      { ticker: 'NVDA', summary: null, citationIds: [] },
+      { ticker: 'AAPL', summary: 'Outlook text.', source: 'model', citationIds: ['AAPL-R1'] },
+      { ticker: 'NVDA', summary: null, source: null, citationIds: [] },
     ]);
     expect(out.result.citations.some((c) => c.chunkId === 'AAPL-R1')).toBe(true);
   });

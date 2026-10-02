@@ -24,22 +24,6 @@ export function shortCompanyName(name: string): string {
   return name.replace(/,?\s+(?:Inc\.?|Incorporated|Corporation|Corp\.?|Co\.?|Ltd\.?|plc)$/i, '');
 }
 
-/**
- * The companies with a Company Intelligence profile today: the preview set holds a profile, with
- * extracted risk headings, for exactly the companies in the risk-headings fixture. A test keeps
- * this equal to the live preview profile set. Phase 4b's offline build covers every company.
- */
-export const PREVIEW_COMPANIES: ReadonlyArray<{ ticker: string; name: string }> = COMPANIES.map((c) => ({
-  ticker: c.ticker,
-  name: shortCompanyName(companyName(c.ticker)),
-}));
-
-/** "Apple, Microsoft and NVIDIA". */
-export function previewCompanyList(): string {
-  const names = PREVIEW_COMPANIES.map((c) => c.name);
-  return names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : (names[0] ?? '');
-}
-
 /** The first heading of each risk group in a company's latest 10-K, verbatim, with its citation IDs. */
 export function riskPreview(ticker = 'AAPL') {
   const company = COMPANIES.find((c) => c.ticker === ticker);

@@ -232,6 +232,59 @@ describe('Company Intelligence', () => {
     expect(unsourcedFigures(container, sourced)).toEqual([]);
   });
 
+  it('a built profile shows a trend basis in the value cell when there is no single reported figure', () => {
+    const base = FIXTURE_PROFILES.get('AAPL')!;
+    const chunk = base.citations[0]!.chunkId;
+    const built: CompanyIntelligenceProfile = {
+      ...base,
+      version: { ...base.version, profileSetId: 'det-v2' },
+      facts: [],
+      trends: [{ metric: 'Gross margin', trajectory: 'improving', basis: 'TEST basis: 46.9% vs 46.2%, a change of 0.7 pp.', periods: ['FY2024', 'FY2025'], chunkIds: [chunk] }],
+    };
+    const { container } = renderInWorkspace(<IntelligenceDashboard profile={built} />);
+    const row = screen.getByRole('rowheader', { name: 'Gross margin' }).closest('tr')!;
+    expect(row).toHaveTextContent('TEST basis: 46.9% vs 46.2%, a change of 0.7 pp.');
+    expect(within(screen.getByRole('rowheader', { name: 'Debt' }).closest('tr')!).getAllByText('Not extracted')).toHaveLength(2);
+    // The basis is the deterministic derivation, marked as an allowed figure.
+    expect(unsourcedFigures(container, built)).toEqual([]);
+  });
+
+  it('labels model-written text: the headline, the management outlook and "why this matters", and names a fallback in the footer', () => {
+    const base = profileWithSignal();
+    const chunk = base.signals[0]!.citationIds[0]!;
+    const llm: CompanyIntelligenceProfile = {
+      ...base,
+      version: { ...base.version, profileSetId: 'llm-v3', profilePromptVersion: '3' },
+      headline: 'TEST model headline.',
+      managementOutlook: { summary: 'TEST outlook summary.', citationIds: [chunk] },
+      signals: base.signals.map((s) => ({ ...s, whyThisMattersSource: 'model' as const })),
+      generation: { mode: 'llm', generationCallCount: 1, validation: { invalidCitations: 0, unsupportedFigures: 0, bannedPhrases: 0 } },
+    };
+    const { unmount } = renderInWorkspace(<IntelligenceDashboard profile={llm} />);
+    const headline = screen.getByTestId('profile-headline');
+    expect(headline).toHaveTextContent('Model-written summary');
+    expect(headline).toHaveTextContent('TEST model headline.');
+    const outlook = screen.getByRole('heading', { name: 'Management outlook' }).closest('section')!;
+    expect(within(outlook).getByText('Model-written')).toBeInTheDocument();
+    expect(outlook).toHaveTextContent('TEST outlook summary.');
+    expect(within(outlook).getAllByRole('button').length).toBeGreaterThan(0);
+    expect(screen.getByText('Model-written analysis')).toBeInTheDocument();
+    expect(screen.queryByText('Company analysis')).not.toBeInTheDocument();
+    expect(screen.getByText(/Generation: llm · 1 model call to build/)).toBeInTheDocument();
+    unmount();
+
+    // A deterministic profile inside an LLM set is a fallback; no headline, no outlook section.
+    const fallback: CompanyIntelligenceProfile = {
+      ...base,
+      version: { ...base.version, profileSetId: 'llm-v3' },
+      generation: { mode: 'deterministic', generationCallCount: 1, validation: { invalidCitations: 0, unsupportedFigures: 0, bannedPhrases: 0 } },
+    };
+    renderInWorkspace(<IntelligenceDashboard profile={fallback} />);
+    expect(screen.getByText(/Generation: deterministic fallback · 1 model call to build/)).toBeInTheDocument();
+    expect(screen.queryByTestId('profile-headline')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Management outlook' })).not.toBeInTheDocument();
+  });
+
   it('offers Deep Analysis when a company has no profile, and handles unknown tickers', () => {
     setRoute('/intelligence/', 'ticker=TSLA');
     const { unmount } = renderInWorkspace(<IntelligenceView />);
@@ -364,6 +417,19 @@ describe('Compare', () => {
     const ranking = screen.getByRole('heading', { name: 'Attention ranking' }).closest('section')!;
     expect(within(ranking).getAllByRole('link', { name: 'Saved' })).toHaveLength(1);
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('management emphasis: a model-written outlook is labeled, a missing one reads "Not summarized"', () => {
+    const profiles = builtProfiles();
+    const aapl = profiles.get('AAPL')!;
+    profiles.set('AAPL', { ...aapl, managementOutlook: { summary: 'TEST outlook.', citationIds: [aapl.citations[0]!.chunkId] } });
+    setRoute('/compare/', 'tickers=AAPL,MSFT');
+    renderInWorkspace(<CompareView />, { profiles });
+    const emphasis = screen.getByRole('heading', { name: 'Management emphasis' }).closest('section')!;
+    expect(emphasis).toHaveTextContent('TEST outlook.');
+    expect(within(emphasis).getByText('Model-written')).toBeInTheDocument();
+    expect(within(emphasis).getByText('Not summarized')).toBeInTheDocument();
+    expect(within(emphasis).queryByText('Not extracted')).not.toBeInTheDocument();
   });
 
   it('lists companies without a profile and fails clearly below two', () => {

@@ -1,0 +1,1096 @@
+{
+ "indexVersion": "iv-9cf51c066743",
+ "set": "det-v2",
+ "builtAt": "2026-10-02T22:11:01.780Z",
+ "runId": "2026-10-02T22-11-01-779Z-a7b3eb28",
+ "bars": {
+  "citationValidity": 1,
+  "figureMatch": 1,
+  "bannedPhrases": 0,
+  "deepTierFallbackRate": 0.25,
+  "tierCorrectness": 1,
+  "maxCallsPerProfile": 1
+ },
+ "summary": {
+  "profiles": 53,
+  "schemaValid": 53,
+  "integrityClean": 53,
+  "citationValidity": 1,
+  "figureMatch": 1,
+  "bannedPhrases": 0,
+  "tierCorrectness": 1,
+  "maxCallsPerProfile": 0,
+  "llm": 0,
+  "deepTierFallbackRate": null,
+  "passes": {
+   "citationValidity": true,
+   "figureMatch": true,
+   "bannedPhrases": true,
+   "deepTierFallbackRate": null,
+   "tierCorrectness": true,
+   "maxCallsPerProfile": true
+  }
+ },
+ "scores": [
+  {
+   "ticker": "AAPL",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 64,
+    "valid": 64,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "ABBV",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 17,
+    "valid": 17,
+    "invalid": []
+   },
+   "figures": {
+    "total": 3,
+    "matched": 3,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "ADBE",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 12,
+    "valid": 12,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "AMD",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 28,
+    "valid": 28,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "AMZN",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 27,
+    "valid": 27,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "AXP",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 32,
+    "valid": 32,
+    "invalid": []
+   },
+   "figures": {
+    "total": 6,
+    "matched": 6,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "BA",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 18,
+    "valid": 18,
+    "invalid": []
+   },
+   "figures": {
+    "total": 3,
+    "matched": 3,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "BAC",
+   "tier": "partial",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 23,
+    "valid": 23,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "BLK",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 32,
+    "valid": 32,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "BRK",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 8,
+    "valid": 8,
+    "invalid": []
+   },
+   "figures": {
+    "total": 6,
+    "matched": 6,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "CAT",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 13,
+    "valid": 13,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "CMCSA",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 15,
+    "valid": 15,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "COST",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 16,
+    "valid": 16,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "CRM",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 26,
+    "valid": 26,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "CSCO",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 27,
+    "valid": 27,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "CVX",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 5,
+    "valid": 5,
+    "invalid": []
+   },
+   "figures": {
+    "total": 6,
+    "matched": 6,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "DE",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 15,
+    "valid": 15,
+    "invalid": []
+   },
+   "figures": {
+    "total": 0,
+    "matched": 0,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "DIS",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 38,
+    "valid": 38,
+    "invalid": []
+   },
+   "figures": {
+    "total": 5,
+    "matched": 5,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "GOOG",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 34,
+    "valid": 34,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "GS",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 26,
+    "valid": 26,
+    "invalid": []
+   },
+   "figures": {
+    "total": 6,
+    "matched": 6,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "HD",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 18,
+    "valid": 18,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "IBM",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 4,
+    "valid": 4,
+    "invalid": []
+   },
+   "figures": {
+    "total": 0,
+    "matched": 0,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "INTC",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 16,
+    "valid": 16,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "JNJ",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 67,
+    "valid": 67,
+    "invalid": []
+   },
+   "figures": {
+    "total": 8,
+    "matched": 8,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "JPM",
+   "tier": "partial",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 30,
+    "valid": 30,
+    "invalid": []
+   },
+   "figures": {
+    "total": 5,
+    "matched": 5,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "KO",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 31,
+    "valid": 31,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "LLY",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 21,
+    "valid": 21,
+    "invalid": []
+   },
+   "figures": {
+    "total": 6,
+    "matched": 6,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "LMT",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 22,
+    "valid": 22,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "MA",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 15,
+    "valid": 15,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "MCD",
+   "tier": "partial",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 19,
+    "valid": 19,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "META",
+   "tier": "partial",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 56,
+    "valid": 56,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "MRK",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 25,
+    "valid": 25,
+    "invalid": []
+   },
+   "figures": {
+    "total": 6,
+    "matched": 6,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "MS",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 19,
+    "valid": 19,
+    "invalid": []
+   },
+   "figures": {
+    "total": 3,
+    "matched": 3,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "MSFT",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 66,
+    "valid": 66,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "NFLX",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 20,
+    "valid": 20,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "NKE",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 27,
+    "valid": 27,
+    "invalid": []
+   },
+   "figures": {
+    "total": 3,
+    "matched": 3,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "NVDA",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 75,
+    "valid": 75,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "ORCL",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 20,
+    "valid": 20,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "PEP",
+   "tier": "partial",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 20,
+    "valid": 20,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "PFE",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 28,
+    "valid": 28,
+    "invalid": []
+   },
+   "figures": {
+    "total": 8,
+    "matched": 8,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "PG",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 13,
+    "valid": 13,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "RTX",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 21,
+    "valid": 21,
+    "invalid": []
+   },
+   "figures": {
+    "total": 7,
+    "matched": 7,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "SBUX",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 9,
+    "valid": 9,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "T",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 14,
+    "valid": 14,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "TGT",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 14,
+    "valid": 14,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "TMO",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 17,
+    "valid": 17,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "TSLA",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 56,
+    "valid": 56,
+    "invalid": []
+   },
+   "figures": {
+    "total": 12,
+    "matched": 12,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "UNH",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 36,
+    "valid": 36,
+    "invalid": []
+   },
+   "figures": {
+    "total": 5,
+    "matched": 5,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "UPS",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 16,
+    "valid": 16,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "V",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 17,
+    "valid": 17,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "VZ",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 12,
+    "valid": 12,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "WMT",
+   "tier": "limited_history",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 19,
+    "valid": 19,
+    "invalid": []
+   },
+   "figures": {
+    "total": 10,
+    "matched": 10,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  },
+  {
+   "ticker": "XOM",
+   "tier": "deep",
+   "mode": "deterministic",
+   "calls": 0,
+   "schemaValid": true,
+   "integrityIssues": [],
+   "citations": {
+    "total": 25,
+    "valid": 25,
+    "invalid": []
+   },
+   "figures": {
+    "total": 8,
+    "matched": 8,
+    "unmatched": []
+   },
+   "banned": [],
+   "tierCorrect": true
+  }
+ ]
+}

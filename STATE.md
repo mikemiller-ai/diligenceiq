@@ -3,51 +3,39 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `2a4524c` (per-client creation cap 20 → 100). Phase 5: `fb54e18`. Phase 4: `9699b3b`, da-v4 follow-up `ab5de38`.
+`main` (no remote yet). Last code commit: `950a021` (product landing). Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
 
 ## Current phase
-**Phase 5 is built, gated (`pnpm gate` exit 0, 2026-10-02) committed (`fb54e18`, cap change `2a4524c`) and **deployed 2026-10-02**.** Handoff: `docs/handoffs/phase-05.md`. Mike chose Phase 5 before Phase 4b on 2026-10-02; SPEC v2 Appendix A.4 records it (confirmed by Mike, 2026-10-02).
-- **api** (`services/api`):
-  - HMAC sessions (cookie `__Host-diq_ws`, secret = SSM SecureString `/diligenceiq/session-secret`, admin-created).
-  - Demo workspace seeded from `seed/demo-workspace.json` (3 real pre-run briefs, 4 findings); reset.
-  - Spend controls: workspace hourly / global daily / per-client and global workspace-creation caps, and the kill switch.
-  - `POST /api/analyses` enqueues to the WorkerStack queue; the poll runs `expireIfPastDeadline`.
-  - Findings copied server-side; profiles read from the active set (SSM pointer `/diligenceiq/active-profile-set` + S3); Compare; health `indexAvailable`.
-- **web:** all workspace state comes from the api. The Deep Analysis page polls, shows the worker's real stages, the Interpretation panel, the coverage matrix and numeric badges (including `unit_unstated` near matches), and every SPEC §38.2 state. A Recent analyses list.
-- **Validator:** `preceding_unit` rule (a table's unit caption in the previous chunk of the same section). da-v4 numeric grounding 0.901 → **0.911** (489/537); near matches 47 → 42. Re-scored for free; all 42 remaining are Pfizer tables whose caption is "(MILLIONS)" in the same chunk, a form the detector does not read.
-- **Deployed 2026-10-02 from `2a4524c` (Mike approved each step):** SecureString `/diligenceiq/session-secret` created; `fixture-v2` uploaded to `intelligence/iv-9cf51c066743/fixture-v2/`; `pnpm deploy:infra` (Core, Worker with the `preceding_unit` validator, Api; Web unchanged); `/diligenceiq/active-profile-set` = `iv-9cf51c066743/fixture-v2`; `pnpm deploy:web`. Production smoke (read-only, no spend) passed: health (indexAvailable, fixture-v2), session (`__Host-diq_ws`, idempotent), seeded workspace (3 analyses, 4 findings), companies, profile, PROFILE_MISSING, compare, 401 without a session, `POST /api/analyses` → `ANALYSES_DISABLED`. The kill switch stays `false`.
-- **Spend this phase:** one in-region analysis ≈ $0.11 (seed and rescore are replay-only).
+**Phase 4b (offline Company Intelligence profiles) is built and gated (`pnpm gate` exit 0, 2026-10-02), not committed, not uploaded, not switched.** Handoff: `docs/handoffs/phase-04b.md`.
+- Sets built locally in `.index/intelligence/iv-9cf51c066743/`: **det-v2** (53 profiles, zero calls, every bar met) and **llm-v3** (42 model-written, 11 deterministic fallbacks; deep-tier fallback 3/12 = 25%: the provisional 10% bar was missed, and Mike revised it to ≤ 25% (SPEC A.4)). 53 = every corpus company but GE Capital (G2).
+- Spend (each approved by Mike): 59 profile calls, about $6.0 (v1 trial 3, v2 trial 3, v3 53). Ledger: `s3://diligenceiq-core-databuckete3889a50-cto74g4tj9kn/intelligence/ledger/iv-9cf51c066743/{1,2,3}/`.
+- Mike's decisions 2026-10-02: F4 settled (build both sets); cited-passage figure rule (SPEC A.4); active set will be **llm-v3** with det-v2 uploaded as the instant fallback.
+- The landing (committed `950a021`, deployed) still says "Preview today"; the working tree's new landing copy says every company has a profile and must deploy **after** the pointer switch.
+- Phase 5 remains deployed (2026-10-02, from `2a4524c`): active set `fixture-v2`, kill switch `false`.
 
 ## Gate
-`pnpm gate` on 2026-10-02 against the working tree: **exit 0**.
-- check-docs OK (14 files); lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 33, cdk 43, corpus 102, rag 346, web 145, api 102 (**771**).
+`pnpm gate` on 2026-10-02 against the Phase 4b working tree: **exit 0**.
+- check-docs OK; lint and typecheck clean.
+- Unit tests with `REQUIRE_CORPUS=1`: core 75, cdk 43, corpus 102, rag 393, web 172, api 116 (**901**).
 - `cdk:synth` and `build` succeeded; **e2e 39 passed**.
 
-Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all fixed, regression tests) → `/code-review` medium (2 findings: concurrent 401s minted several workspaces; profile finding IDs collided across profile sets; both fixed with tests) → `pnpm gate` green.
+Gate record: adversary (1 blocker: the deep-tier bar; 5 high: citations to passages the model never read, dead partial-upload guard, landing claim before the switch, unshown headline, unshown outlook) → fresh fixer (all fixed with tests; det-v2; validator v2; request hash; bucket pin; local outcome copies) → `/code-review` medium (no findings) → `pnpm gate` green.
 
 ## In flight
-- **Product landing (uncommitted, gated 2026-10-02):** Mike asked for a richer landing before Phase 4b, matching ResolveIQ, TrustResponse, ArchIQ and CareerOps (GenAIQ surveyed; no film). SPEC §7 rewritten, A.4 row added; design-tokens navy rule extended to the landing's "Shows its work" and closing bands.
-  - Navy hero with a real-filing preview (Apple FY2025 risk headings verbatim, canonical chips linking to the source view). The launch film sits under the hero (`#film`).
-  - Then: problem, how it works, shows its work, two ways in (with an honest "Preview today: Apple, Microsoft and NVIDIA" status line and a Compare link), how it is built, closing CTA, footer.
-  - **Launch film:** drop `apps/web/public/media/diligenceiq-launch-film.mp4` (plus `-poster.jpg` and `.vtt` captions) and rebuild. It is detected at build time; until then a labeled placeholder holds the slot.
-  - **Update at Phase 4b:** the status line and the "Notice" journey copy (tests pin the preview companies to fixture-v2).
-  - Gate record: adversary (1 blocker: e2e strict-mode on three "Ask any question" links; 5 high: copy overclaiming the pre-4b build, wrong signal vocabulary, measured heading count, a film test depending on the working tree) → fresh fixer (all fixed with tests; `filingHref` moved to `lib/links.ts`) → `/code-review` medium (1 low: GenAIQ wrongly cited as having a film; fixed) → `pnpm gate` exit 0 (unit 795: core 33, cdk 43, corpus 102, rag 346, web 169, api 102; e2e 39).
-  - Not deployed: `pnpm deploy:web` needs Mike's go-ahead.
-- **Verified in-region 2026-10-02 (Mike approved; about $0.11):** one analysis through the **production api**: session → `POST /api/analyses` (AAPL risk factors since 2023) → SQS → worker → COMPLETE. Stages queued → loading_index (cold, 3.5 s) → balancing → generating; queued to complete 50.4 s (generation 45.5 s); 1 generation call, 1 embedding; 20,117 in / 3,478 out tokens, $0.1125 estimated; 39/39 citations valid, none removed; context snapshot readable. Kill switch back to `false`. Note: a shell poller that `echo`es the JSON breaks on escaped newlines in the brief; parse the response with Python or jq directly.
-- Next phase: Phase 4b (offline profiles; must write the manifest format in `ProfileSetManifestSchema`), then Phase 6.
+- **Phase 4b deploy, in order, each needing Mike's go-ahead:** commit → `pnpm profiles:upload-set --root .index/intelligence --set iv-9cf51c066743/det-v2 --yes` → same for `llm-v3` → `aws ssm put-parameter --region us-east-1 --name /diligenceiq/active-profile-set --value iv-9cf51c066743/llm-v3 --type String --overwrite` → production smoke (health, companies, a profile, compare) → `pnpm deploy:web` (landing copy, dashboard outlook and summary).
+- Next phase: Phase 6.
 
 ## Decisions pending with Mike
-- **D12 (per-client creation cap keyed on `sourceIp`):** raised from 20 to 100 a day (Mike, 2026-10-02), because behind the Amplify rewrite `sourceIp` may be a shared proxy address. Verify which address the api sees in Phase 8; keying on the last untrusted `X-Forwarded-For` hop remains the option.
-- **Validator:** whether to also read a same-chunk "(MILLIONS)" caption (would address the 42 Pfizer near matches; free re-score). Do not loosen anything else.
+- **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
+- **Validator (Deep Analysis):** whether to read a same-chunk "(MILLIONS)" caption (42 Pfizer near matches; free re-score).
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.
-- **Sonnet 5.5:** still 0 quota (L-94A31E46, L-31AB82D0). Switching needs a SPEC §29.1 change first.
+- **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
 
 ## Known traps
 - **Phase 5 api routes need a session.** Every route except `GET /api/health` and `POST /api/session` returns 401 without the cookie. The cookie is `__Host-diq_ws` in production and `diq_ws` on the local http server (`secureCookies: false`). POST and PATCH bodies must be `content-type: application/json`: the retrieval-debug curl needs `-H 'content-type: application/json'`.
 - **The session secret is not in CDK.** CloudFormation cannot create SecureStrings. Without `/diligenceiq/session-secret` (≥ 32 bytes) every session fails closed with 500 (assumption D11).
-- **The api reads profiles only through the SSM pointer.** "none" (the CDK default) serves no profiles (`PROFILE_MISSING` everywhere). A set is immutable in S3 (If-None-Match; `upload-set` fails loudly on different content); a change is a new version. Phase 4b sets must match `ProfileSetManifestSchema` (core `intelligence.ts`).
+- **The api reads profiles only through the SSM pointer.** "none" (the CDK default) serves no profiles (`PROFILE_MISSING` everywhere). A set is immutable in S3 (If-None-Match; `upload-set` fails loudly on different content); a change is a new version. Phase 4b sets match `ProfileSetManifestSchema` (core `intelligence.ts`); extra telemetry fields are allowed.
 - **Finding IDs are derived from the source** (`fd-` + sha256 of the source key, scoped by `profileSetId` for profile sources), not ULIDs: one finding per stored item; repeat saves are 409 `ALREADY_SAVED`.
 - **Reset keeps META and `RATE#` counters.** Deleting META would strand a concurrent request; deleting `RATE#` would let reset bypass the hourly cap.
 - **Regenerate, never hand-edit:**
@@ -118,3 +106,4 @@ Gate record: adversary (0 blocker, 5 high, 11 medium, lows) → fresh fixer (all
 - **Evidence drawer regions scroll and are focusable** (axe `scrollable-region-focusable`); long passages broke the Phase 1 e2e axe scan.
 - **Corpus company names have no trailing period** ("Apple Inc", "Tesla Inc"). GE's display name is overridden to "General Electric Capital Corp (GE Capital)" (G2).
 - **`cdk diff` is not side-effect free.** It publishes template and Lambda assets to the CDK bootstrap bucket.
+- **Profile build (Phase 4b):** `pnpm intelligence:build` never calls without `--yes` and never calls a company twice at one `profilePromptVersion` (S3 ledger). `--llm --max-calls 0` rebuilds the LLM set from stored outcomes for free. Changing anything that alters the request (evidence, blocks, prompt) marks new-format outcomes `stale_outcome`; the v3 outcomes have no hash (`promptVerified: false`), so keep `assemble`'s block-relevant output, `evidence.ts` and `prompt.ts` unchanged or bump the version.

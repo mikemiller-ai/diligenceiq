@@ -2,7 +2,7 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-> **Status:** Phase 5 (sessions and the demo workspace, spend caps and the kill switch, the enqueue and poll routes, findings stored server-side, Company Intelligence served from the active profile set, and the real Deep Analysis UI) is built, gated and deployed to <https://diligenceiq.mikemiller.ai> (us-east-1). New analyses are paused (the kill switch is off), so the site shows the seeded example briefs and refuses new runs with `ANALYSES_DISABLED`. Until Phase 4b builds real profile sets, Company Intelligence shows the preview profiles for AAPL, MSFT and NVDA (cited risk headings, labeled placeholders, no figures). Evaluation results are in [docs/evaluation.md](docs/evaluation.md) §4–5 and the prompt history in [docs/prompt-iterations.md](docs/prompt-iterations.md). The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
+> **Status:** Phase 5 (sessions and the demo workspace, spend caps and the kill switch, the enqueue and poll routes, findings stored server-side, Company Intelligence served from the active profile set, and the real Deep Analysis UI) is built, gated and deployed to <https://diligenceiq.mikemiller.ai> (us-east-1). New analyses are paused (the kill switch is off), so the site shows the seeded example briefs and refuses new runs with `ANALYSES_DISABLED`. Production still serves the preview profiles for AAPL, MSFT and NVDA (cited risk headings, labeled placeholders, no figures). Phase 4b (offline Company Intelligence profiles for all 53 companies in the review window: a zero-call deterministic set `det-v2` and a model-written set `llm-v3` with per-company deterministic fallback) is built and gated but not yet uploaded or switched to; see `STATE.md` and [docs/evaluation.md](docs/evaluation.md) §6. Evaluation results are in [docs/evaluation.md](docs/evaluation.md) §4–5 and the prompt history in [docs/prompt-iterations.md](docs/prompt-iterations.md). The complete README and a ready-to-run example request in `examples/` are Phase 8 exit criteria (implementation plan).
 
 ## Develop
 Node ≥ 22 and pnpm 9.
@@ -49,10 +49,15 @@ Corpus facts in these docs are reproducible with `node scripts/ingestion/probe-c
 - `pnpm profiles:export-fixture`: writes the preview profiles as a profile set to `tests/fixtures/profile-sets/`. No AWS.
 - `pnpm profiles:upload-set --bucket <name> --set <indexVersion>/<profileSetId>`: uploads a set to S3 (dry run unless `--yes`). Switching the active set is a separate SSM parameter change.
 
+**Company Intelligence profiles (Phase 4b, admin-run):**
+- `pnpm intelligence:build --max-calls 0`: builds the deterministic profile set locally (zero model calls, no AWS). With `--llm` it also builds the model-written set: it reads the S3 build ledger, is a dry run unless `--yes`, and never calls a company twice at one prompt version (about $0.10 per call). `--llm --max-calls 0` rebuilds it from stored outputs for free.
+- `pnpm eval:profiles`: scores the built sets against `evals/profiles.yaml`. No AWS.
+- Upload with `pnpm profiles:upload-set --root .index/intelligence --set <indexVersion>/<set>`.
+
 **Generation (Phase 4, admin-run):**
 - `pnpm eval:retrieval --generate`: one generation call per eval question through the real pipeline, scored deterministically. It replays recorded responses for free; `--live` calls Bedrock for unrecorded requests (Sonnet 4.6, about $0.11 each); `--only <ids>` limits the run.
 - `pnpm eval:generation:rescore`: re-validates the stored briefs after a validator change. No AWS.
-- `pnpm prompts:render`: rewrites `prompts/final-diligence-prompt.md` from the runtime prompt. A test checks that they match.
+- `pnpm prompts:render`: rewrites `prompts/final-diligence-prompt.md` and `prompts/company-intelligence-prompt.md` from the runtime prompts. Tests check that they match.
 - `pnpm analysis:run --question "…"`: one analysis through the deployed worker, in-region. AWS writes and about $0.13 of Bedrock spend; it needs the kill switch on.
 
 ## Requirements

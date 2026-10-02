@@ -55,14 +55,17 @@ Tests that need the full corpus (e.g. header parsing over all 246 files) read `C
 - Every signal carries `evidenceByPeriod` with chunk IDs for each period compared, and a non-empty `investigateQuestion`.
 - Signal types that the Phase 3 go/no-go suppresses are never emitted (config-driven, tested).
 
-**Profiles and Compare (`packages/rag/profile`, `packages/rag/compare`, DD-16, DD-19)**
-- The profile validator rejects:
-  - citations outside the supplied set;
-  - currency or percent figures absent from the FACTS block;
-  - every phrase in the canonical banned list (DD-16), from `packages/core/vocabulary.ts`.
+**Profiles and Compare (`packages/rag/src/profile`, `packages/core/src/compare.ts`, DD-16, DD-19)**
+- The profile validator (`packages/rag/src/profile/validate.ts`, `PROFILE_VALIDATOR_VERSION` 2) rejects:
+  - citations outside the supplied set, which is exactly the SOURCE_IDs printed in the user message (the deterministic blocks and the `<filing_excerpts>` headers), recomputed from the request, never read from a stored outcome; a test parses the message and compares;
+  - currency or percent figures found neither in the FACTS block nor in a passage that the same item cites **and whose text was in `<filing_excerpts>`** (FACTS ∪ cited excerpt passages); a passage supplied only as an ID grounds nothing. A figure matches only under the verified rules (`exact`, `scaled`, `preceding_unit`); a near match (`unit_unstated`) does not count;
+  - a change in points ("N pp", "N percentage points") that FACTS does not print as points; points never match a percentage, or the other way round;
+  - figures in words: shares and multiples ("two-fifths", "a quarter of revenue", "doubled") and number words with percent or points ("five percentage points"), but not time phrases ("the last two quarters");
+  - every phrase in the canonical banned list (DD-16), from `packages/core/src/vocabulary.ts` ("credit rating of" is not a score).
 - **Banned-phrase list, both directions:** each banned pattern has a positive case ("Strong buy", "a 92/100 score", "rated a buy", "investors should sell", "undervalued"); each allow-listed term has a negative case ("share buybacks", "selling, general and administrative", "Apple sells iPhones", "strong demand", "credit ratings"). Deterministic coverage labels ("Strong evidence") and quoted passages are not scanned.
 - The deterministic set produces a schema-valid profile for every coverage tier, and "General context" text never names a company or states a figure.
-- **Build ledger:** a second run for the same (ticker, `indexVersion`, `profilePromptVersion`) makes no call, even from a fresh process; an interrupted run's call is still counted; a call that errors yields the deterministic fallback with `generationCallCount: 1` and is not retried at that version; there is no `--force` flag; a version bump is a new key; `--max-calls` stops the run.
+- **Build ledger:** a second run for the same (ticker, `indexVersion`, `profilePromptVersion`) makes no call, even from a fresh process; an interrupted run's call is still counted; a call that errors yields the deterministic fallback with `generationCallCount: 1` and is not retried at that version; there is no `--force` flag and `--max-calls` is required (both checked by spawning the CLI); a version bump is a new key (a ticker spent at version 1 is called once at the current version); `--max-calls` stops the run partway (two companies, cap 1: exactly one call); a claim that errors makes no call and records nothing (`ledger_error`, count 0), and S3's 409 conditional conflict reads as "exists"; a failed outcome write never stops the run and the local copy is reused later; a stored outcome whose request hash differs from the recomputed request falls back (`stale_outcome`) without a call; the ledger bucket is pinned to CoreStack's DataBucket output; `profiles:upload-set` refuses a partial set.
+- **Merge:** a model-written item carries the model's citations only; signal evidence stays deterministic; the headline is kept (absent on deterministic profiles). det-v2 templates use the short company name and mention the quarterly report only when there is one, and a test shows that what the model saw (`profileBlocks`) does not depend on any field det-v2 changed.
 - **Profile-set pointer:** changing `/diligenceiq/active-profile-set` switches `GET /api/companies/:ticker/intelligence` between `llm-v*` and `det-v*` with no rebuild (mocked SSM, cache expiry).
 - **Prompt file match:** `prompts/company-intelligence-prompt.md` equals the runtime profile prompt, as for `prompts/final-diligence-prompt.md`.
 - **Compare:** common, distinctive, diverging, management emphasis, and attention ranking are correct on fixture profiles, **including a pair with no change signals** (a deep-tier company vs a limited-history bank, the PDF Q1 shape); a missing profile lands in `missing`; fewer than two profiles → `PROFILE_MISSING`; its handlers never reach a model client.
@@ -116,7 +119,7 @@ Synthesize all stacks and assert:
 - **Absent:** OpenSearch (domain/serverless), NAT gateways, EC2 instances, ECS services/clusters, RDS/Aurora, WAF web ACLs, provisioned concurrency, reserved concurrency, EventBridge schedules / scheduled rules.
 - **Present:** every log group has explicit 14-day retention; DynamoDB billing mode is PAY_PER_REQUEST with TTL enabled; the worker event source mapping has `batchSize: 1` and `maximumConcurrency: 2`; queue visibility timeout 1080 s and `maxReceiveCount: 3`; the DLQ has its own event source mapping to the dlq-handler.
 - **IAM scoping:** Bedrock actions only on the configured inference profile and its foundation-model ARNs plus the embedding model; S3 read-only on `intelligence/*` and the index manifest (api; `corpus/processed/*` from Phase 6) and `index/*` (worker); no `*` resources on data-plane actions; only the worker can invoke Bedrock; the api Lambda has no Bedrock permission.
-- **No profile builder deployed:** no Lambda bundle contains `scripts/intelligence`, the profile prompt builder in `packages/rag/profile`, or `prompts/company-intelligence-prompt.md` (bundle-content test over the esbuild metafiles).
+- **No profile builder deployed:** no Lambda bundle contains `scripts/intelligence`, the profile prompt builder in `packages/rag/src/profile` (a separate entry, `@diligenceiq/rag/profile`, that the main entry does not re-export), or `prompts/company-intelligence-prompt.md` (bundle-content test over the esbuild metafiles).
 - api Lambda IAM (Phase 5): exactly `ssm:GetParameter` (kill switch, active profile set, session secret), `dynamodb:GetItem/PutItem/UpdateItem/DeleteItem/Query/BatchWriteItem`, `sqs:SendMessage`, and `s3:GetObject` on `intelligence/*` and `index/<indexVersion>/manifest.json` only; the environment carries the queue URL, the session-secret and active-profile-set parameter names and the global daily cap; CoreStack creates `/diligenceiq/active-profile-set` as `none`; still no Bedrock action. Read-only `index/*/adjacency/*` and `corpus/processed/*` are added with the Phase 6 routes.
 
 ## 6. End-to-end (Playwright)
@@ -159,13 +162,13 @@ A retrieval-only mode (no generation) supports the Phase 3 chunking, embedding, 
 
 | Metric | Provisional bar |
 |---|---|
-| Citation validity after validation | 100% |
-| Figure match against extracted facts | 100% |
+| Citation validity: profile citations are index chunks of the company, and model-written citations are inside the request recomputed from the deterministic profile | 100% |
+| Figure match: FACTS, or (model text) a passage the same item cites whose text was in the excerpts; points only as points; headline figures in FACTS | 100% |
 | Banned-phrase matches in shipped profiles (canonical list, DD-16) | 0 |
 | **Signal precision** on the hand-labeled AAPL, NVDA, MSFT set (Phase 3 go/no-go) | ≥ 0.8 |
 | Signal recall sanity check on the same set | ≥ 0.5 of labeled real changes found |
-| LLM-to-deterministic fallback rate, 12 deep-tier companies | ≤ 10% |
-| Coverage-tier correctness | 54/54 |
+| LLM-to-deterministic fallback rate, 12 deep-tier companies | ≤ 25% (revised from 10% after the first build; SPEC A.4) |
+| Coverage-tier correctness, recomputed from the index's 10-K and 10-Q document counts (53 profiles: GE Capital is outside the review window and has none) | 53/53 |
 | Generation calls per profile (from the ledger) | ≤ 1 |
 
 The SPEC §51.3 expert question ("How have Apple's regulatory disclosures changed from 2023 through 2025, and what actions does management describe?") is added to `evals/questions.yaml`.

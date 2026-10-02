@@ -35,7 +35,7 @@ Guidance for Claude Code in this repository.
   - Explicit log retention.
   - Never log chunk text or full prompts unless `DEBUG_LOG_PROMPTS=true`.
 - **Opening or rendering any page never calls an LLM.**
-  - Company Intelligence profiles are generated **offline** by the admin-run `scripts/intelligence/build-profiles.mjs` under the override above: two sets, `llm-v<profilePromptVersion>` (≤ 1 call per company, validated, deterministic fallback) and `det-v<templateVersion>` (zero calls). They are persisted in S3 and only read at runtime; `/diligenceiq/active-profile-set` picks the set (DD-16).
+  - Company Intelligence profiles are generated **offline** by the admin-run `scripts/intelligence/build-profiles.ts` (`pnpm intelligence:build`) under the override above: two sets, `llm-v<profilePromptVersion>` (≤ 1 call per company, validated, deterministic fallback) and `det-v<templateVersion>` (zero calls). They are persisted in S3 and only read at runtime; `/diligenceiq/active-profile-set` picks the set (DD-16).
   - The builder is never deployed, has no `--force` (a rebuild needs a version bump), and the api Lambda has no Bedrock permission.
   - Saving findings, Compare, Thesis, Watchlist, and IC Brief assembly are deterministic.
 - **Numbers come from deterministic extraction** (DD-17), never from the model. Signals carry evidence for each period (DD-18). No ratings, scores, or recommendation language: one canonical phrase-level banned list in DD-16 (bare "buy", "sell", "strong" are not banned; "buyback", "selling, general and administrative" are allowed).
@@ -70,6 +70,10 @@ pnpm gate
   - `pnpm seed:build` rebuilds `seed/demo-workspace.json` by replaying recorded da-v4 generations (free; fails rather than call live).
   - `pnpm profiles:export-fixture` writes the preview set to `tests/fixtures/profile-sets/` (no AWS).
   - `pnpm profiles:upload-set --bucket <b> --set <iv>/<set>` is an S3 write: dry run unless `--yes`; ask first. It never switches `/diligenceiq/active-profile-set`.
+- **Phase 4b tools (never in the gate):**
+  - `pnpm intelligence:build --max-calls 0` builds the deterministic set `det-v<templateVersion>` locally (free, no AWS). With `--llm --bucket <data bucket>` it builds the LLM set too: it reads the S3 build ledger, and is a dry run (calls and estimated cost) unless `--yes`. `--yes` makes Bedrock calls (about $0.13 each, one per company per `profilePromptVersion`, never repeated) and ledger writes: ask first. `--llm --max-calls 0` rebuilds the LLM set from stored outcomes only (free).
+  - `pnpm eval:profiles` scores the built sets against `evals/profiles.yaml` (no AWS).
+  - Upload with `pnpm profiles:upload-set --root .index/intelligence --set <iv>/<set>` (S3 write, ask first); switching `/diligenceiq/active-profile-set` is a separate `aws ssm put-parameter` (ask first).
 - **Generation tools (Phase 4, never in the gate):**
   - `pnpm eval:retrieval --generate` replays recorded generations (free). `--live` makes Bedrock generation calls, about $0.11 each, about $2.25 per run: ask first.
   - `pnpm eval:generation:rescore` re-validates stored briefs (no AWS).

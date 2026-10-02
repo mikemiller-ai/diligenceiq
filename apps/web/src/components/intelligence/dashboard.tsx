@@ -25,7 +25,7 @@ import { formatDate } from '@/lib/format';
 import { SIGNAL_TYPE_LABEL, TRAJECTORY_LABEL } from '@/lib/labels';
 import { compareHref, newAnalysisHref } from '@/lib/links';
 import { cn } from '@/lib/utils';
-import { FilingTextBadge, GeneralContextBadge, PlaceholderBadge, PlaceholderSlot } from './placeholder';
+import { FilingTextBadge, GeneralContextBadge, ModelWrittenBadge, PlaceholderBadge, PlaceholderSlot } from './placeholder';
 
 /** Performance metrics surfaced where the filings support them (SPEC §9). */
 export const PERFORMANCE_METRICS = [
@@ -64,6 +64,12 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
             <h1 className="mt-2 text-[26px] font-semibold leading-tight tracking-tight">
               {profile.company} <span className="font-mono text-lg font-medium text-white/60">({profile.ticker})</span>
             </h1>
+            {profile.headline && (
+              <div className="mt-3 max-w-3xl" data-testid="profile-headline">
+                <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/60">Model-written summary</p>
+                <p className="mt-1 text-[15px] leading-6 text-white/90">{profile.headline}</p>
+              </div>
+            )}
             <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-white/70">
               <span>{profile.sector}</span>
               <span>{TIER_COPY[profile.coverage.tier].label}</span>
@@ -142,6 +148,18 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
           </ul>
         )}
       </Section>
+
+      {profile.managementOutlook && (
+        <Section id="outlook" title="Management outlook" lede="What management says it expects, as summarized from the cited passages by the offline profile call.">
+          <div className="rounded-card border border-border bg-card px-5 py-4">
+            <ModelWrittenBadge />
+            <p className="mt-2 text-sm text-foreground/80">
+              {profile.managementOutlook.summary}{' '}
+              <CitationList ids={profile.managementOutlook.citationIds} context={citations} provenance="profile" />
+            </p>
+          </div>
+        </Section>
+      )}
 
       <Section
         id="current-risks"
@@ -229,13 +247,21 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
       </Section>
 
       <footer className="border-t border-border pt-4 font-mono text-[11px] text-muted-foreground" data-allow-figures>
-        Generation: {profile.generation.mode} · {profile.generation.generationCallCount} model calls to build · profile set{' '}
+        Generation: {generationLabel(profile)} · {callCount(profile.generation.generationCallCount)} to build · profile set{' '}
         {profile.version.profileSetId} · index {profile.version.indexVersion} · built {profile.version.builtAt} · no model call on
         page view
       </footer>
     </div>
   );
 }
+
+/** "llm", "deterministic", or "deterministic fallback" (a deterministic profile inside an LLM set: its call failed validation or was not made). */
+function generationLabel(p: CompanyIntelligenceProfile): string {
+  if (p.generation.mode === 'deterministic' && p.version.profileSetId.startsWith('llm-')) return 'deterministic fallback';
+  return p.generation.mode;
+}
+
+const callCount = (n: number) => `${n} model call${n === 1 ? '' : 's'}`;
 
 function Section({ id, title, lede, children }: { id: string; title: string; lede?: string; children: React.ReactNode }) {
   return (
@@ -303,6 +329,12 @@ function PerformanceTable({ profile, fixture }: { profile: CompanyIntelligencePr
                       </button>
                     ) : fixture ? (
                       <PlaceholderBadge />
+                    ) : trend ? (
+                      // A growth rate or margin has no single reported figure: it is derived in code
+                      // from two facts of one table (DD-17), and its basis says how.
+                      <span data-allow-figures className="text-xs text-muted-foreground">
+                        {trend.basis}
+                      </span>
                     ) : (
                       <span className="italic text-muted-foreground">Not extracted</span>
                     )}
@@ -444,7 +476,7 @@ function SignalCard({ profile, signal: s, citations }: { profile: CompanyIntelli
       <div className="mt-3 rounded-md bg-secondary px-3 py-2.5">
         <div className="flex items-center gap-2">
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Why this matters</p>
-          {s.whyThisMattersSource === 'general_context' ? <GeneralContextBadge /> : <Badge tone="outline">Company analysis</Badge>}
+          {s.whyThisMattersSource === 'general_context' ? <GeneralContextBadge /> : <ModelWrittenBadge>Model-written analysis</ModelWrittenBadge>}
         </div>
         <p className="mt-1 text-sm text-foreground/80">{s.whyThisMatters}</p>
       </div>

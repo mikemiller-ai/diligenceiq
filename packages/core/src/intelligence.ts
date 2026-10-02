@@ -204,6 +204,11 @@ export const CompanyIntelligenceProfileSchema = z
      * not the last entry of periodsCovered, which may be a quarter end.
      */
     fiscalYearEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    /**
+     * One model-written sentence on what stands out (LLM profiles only; Phase 4b). Absent on
+     * deterministic and preview profiles. Shown with a "Model-written summary" label.
+     */
+    headline: z.string().min(1).optional(),
     coverage: z
       .object({
         tier: CoverageTierSchema,

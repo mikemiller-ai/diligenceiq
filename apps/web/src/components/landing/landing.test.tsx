@@ -3,8 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PASSAGES, passage } from '@/fixtures';
-import { FIXTURE_PROFILES } from '@/fixtures/profiles';
+import { PASSAGES, companies, passage } from '@/fixtures';
 import { chipLabel } from '@/lib/citations';
 import { corpusStats } from '@/lib/corpus-stats';
 import { formatCount } from '@/lib/format';
@@ -14,7 +13,7 @@ import { LAUNCH_FILM_PATHS, defaultPublicDir, launchFilmAssets, type LaunchFilmA
 import { filingHref } from '@/lib/links';
 import { DESCRIPTIVE_LABELS } from './descriptive-labels';
 import { LaunchFilm } from './launch-film';
-import { PREVIEW_COMPANIES, previewCompanyList, riskPreview } from './risk-preview';
+import { riskPreview } from './risk-preview';
 import { SEEDED_QUESTIONS } from './seeded-questions';
 
 /** A fresh temporary directory, optionally holding the given launch-film files under public/. */
@@ -214,21 +213,15 @@ describe('landing page (SPEC §7)', () => {
     expect(screen.queryByTestId('launch-film-placeholder')).toBeNull();
   });
 
-  it('is honest about Company Intelligence today: the preview companies are the live preview profile set', async () => {
-    const tickers = PREVIEW_COMPANIES.map((c) => c.ticker).sort();
-    expect(tickers).toEqual([...FIXTURE_PROFILES.keys()].sort());
-    const p = [...FIXTURE_PROFILES.values()][0]!;
-    const manifestPath = join(__dirname, '../../../../../tests/fixtures/profile-sets', p.version.indexVersion, p.version.profileSetId, 'manifest.json');
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { companies: Array<{ ticker: string }> };
-    expect(tickers).toEqual(manifest.companies.map((c) => c.ticker).sort());
-    expect(previewCompanyList()).toBe('Apple, Microsoft and NVIDIA');
-
+  it('is honest about Company Intelligence: every company in the review window has an offline-built profile', async () => {
+    const inWindow = companies().filter((c) => !c.outsideWindow);
+    expect(inWindow).toHaveLength(53);
     const { container } = await renderLanding();
     expect(screen.getByTestId('intelligence-status')).toHaveTextContent(
-      `Preview today: ${previewCompanyList()}, with every risk heading from the latest annual report cited. Full profiles for every company arrive with the offline profile build.`,
+      `Every company in the review window has a profile (${inWindow.length} companies), built offline from its filings once per index version. Each says whether its narrative was written by the model and checked against the filings, or comes from templates.`,
     );
-    // No promise of performance figures or signals for any company before Phase 4b.
-    expect(container.textContent).not.toMatch(/how it is performing|what drives it|for any company/i);
+    // Only the detectors that passed the Phase 3 bar are promised (DD-18): no new or removed risks.
+    expect(container.textContent).not.toMatch(/new risks|removed risks|preview today|for any company/i);
   });
 
   it('links Compare from the "Two ways in" section', async () => {
@@ -266,13 +259,15 @@ describe('landing page (SPEC §7)', () => {
     expect(container.textContent).not.toMatch(BANNED);
   });
 
-  it('every number shown is a corpus count, a period year, the preview fiscal year or a step number', async () => {
+  it('every number shown is a corpus count (companies, profiled companies, filings), a period year, the preview fiscal year or a step number', async () => {
     const stats = corpusStats();
     const { container } = await renderLanding();
     const steps = container.querySelectorAll('ol[aria-label="How DiligenceIQ works"] > li').length;
     const allowed = new Set<string>([
       formatCount(stats.filings),
       String(stats.companies),
+      // Companies with a profile: the corpus companies in the review window, from the filing rows.
+      String(companies().filter((c) => !c.outsideWindow).length),
       stats.firstPeriod.slice(0, 4),
       stats.lastPeriod.slice(0, 4),
       riskPreview().company.fiscalLabel.replace(/\D/g, ''),

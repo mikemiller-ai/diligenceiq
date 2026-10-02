@@ -36,6 +36,22 @@
         "E2E_STAGE_MS": "1200"
       },
       "port": 4175
+    },
+    {
+      "name": "web-local-profiles",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "exec",
+        "tsx",
+        "tests/e2e/local-server.ts"
+      ],
+      "env": {
+        "E2E_PORT": "4176",
+        "E2E_STAGE_MS": "1200",
+        "E2E_PROFILE_SET": "iv-9cf51c066743/llm-v3",
+        "E2E_PROFILE_ROOT": ".index/intelligence"
+      },
+      "port": 4176
     }
   ]
 }

@@ -6,3 +6,4 @@ export * from './compare';
 export * from './finding-sources';
 export * from './api';
 export * from './catalog';
+export * from './vocabulary';

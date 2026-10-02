@@ -16,6 +16,11 @@ export function GeneralContextBadge() {
   return <Badge tone="info">General context</Badge>;
 }
 
+/** Text the offline profile call wrote (validated offline against the filings; SPEC §32.2). */
+export function ModelWrittenBadge({ children = 'Model-written' }: { children?: React.ReactNode }) {
+  return <Badge tone="outline">{children}</Badge>;
+}
+
 export function FilingTextBadge() {
   return <Badge tone="outline">Filing text</Badge>;
 }

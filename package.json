@@ -37,7 +37,9 @@
     "analysis:run": "tsx scripts/analysis/run-analysis.ts",
     "seed:build": "tsx scripts/seed/build-seed.ts",
     "profiles:export-fixture": "tsx scripts/intelligence/export-fixture-set.ts",
-    "profiles:upload-set": "tsx scripts/intelligence/upload-set.ts"
+    "profiles:upload-set": "tsx scripts/intelligence/upload-set.ts",
+    "intelligence:build": "tsx scripts/intelligence/build-profiles.ts",
+    "eval:profiles": "tsx scripts/evaluation/profile-eval.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "3.1144.0",

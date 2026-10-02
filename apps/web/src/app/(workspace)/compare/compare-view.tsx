@@ -260,11 +260,15 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
                 <li key={m.ticker} className="rounded-card border border-border bg-card px-4 py-3 text-sm">
                   <p className="font-semibold text-foreground">{companyName(m.ticker)}</p>
                   {m.summary === null ? (
-                    <p className="mt-1 italic text-muted-foreground">Not extracted</p>
+                    // Only the offline profile call writes an outlook: nothing was looked for and missed.
+                    <p className="mt-1 italic text-muted-foreground">Not summarized</p>
                   ) : (
-                    <p className="mt-1 text-foreground/80">
-                      {m.summary} <CitationList ids={m.citationIds} context={citations} provenance="profile" />
-                    </p>
+                    <>
+                      {m.source === 'model' && <p className="mt-1 text-xs text-muted-foreground">Model-written</p>}
+                      <p className="mt-1 text-foreground/80">
+                        {m.summary} <CitationList ids={m.citationIds} context={citations} provenance="profile" />
+                      </p>
+                    </>
                   )}
                 </li>
               ))}

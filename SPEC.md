@@ -1152,7 +1152,7 @@ Generation settings: one Bedrock request, forced tool `submit_diligence_brief`, 
 
 ## 29.2 Company Intelligence profile prompt
 
-The offline profile prompt (`prompts/company-intelligence-prompt.md`, forced tool `submit_company_profile`) uses the same model, the same rules, and the same untrusted-content framing, and adds three rules: explain only the supplied signals, risks and drivers; state no currency or percentage figure that is not in the supplied FACTS block; never rate, score, or recommend.
+The offline profile prompt (`prompts/company-intelligence-prompt.md`, forced tool `submit_company_profile`) uses the same model, the same rules, and the same untrusted-content framing, and adds three rules: explain only the supplied signals, risks and drivers; state no currency or percentage figure outside the FACTS block (the prompt is stricter than the validator, which also accepts a figure printed in a passage the same item cites, §32.2); never rate, score, or recommend.
 
 A test asserts that the file matches the runtime profile prompt.
 
@@ -1220,7 +1220,7 @@ Prefer **deterministic** extraction for: reported financial figures; periods; fi
 
 Use the **LLM** (offline profile call, or the live Deep Analysis call) primarily for: synthesis; explanation; categorization; plain-language interpretation; attention-signal explanation; recommended diligence; cross-document reasoning.
 
-Do not ask the LLM to recreate easily determinable numeric values. The model may select, explain, and categorize the supplied signals, risks, and drivers. It may not cite anything outside the supplied chunk and signal IDs, or state a figure that is not in the supplied facts.
+Do not ask the LLM to recreate easily determinable numeric values. The model may select, explain, and categorize the supplied signals, risks, and drivers. It may not cite anything outside the supplied chunk and signal IDs, or state a figure that is neither in the supplied facts nor printed in a passage that the same item cites (the Deep Analysis rule, §29.1); every figure is checked deterministically either way.
 
 ## 32.3 Two profile sets and a runtime pointer
 
@@ -1232,7 +1232,7 @@ Each set has a `manifest.json` (per-company generation mode, call count from the
 
 ## 32.4 Build ledger and limits
 
-- The builder (`scripts/intelligence/build-profiles.mjs`, run with `pnpm intelligence:build`) is **offline and admin-run**: it runs on an admin workstation with the admin's credentials, is never deployed, never scheduled, and never triggered by a page view or event.
+- The builder (`scripts/intelligence/build-profiles.ts`, run with `pnpm intelligence:build`) is **offline and admin-run**: it runs on an admin workstation with the admin's credentials, is never deployed, never scheduled, and never triggered by a page view or event.
 - `--max-calls` is required; the run stops at the cap.
 - An **append-only build ledger** enforces at most **one** generation call per company per (`indexVersion`, `profilePromptVersion`), across processes: one immutable S3 object per key, created with a conditional write **before** the call. If the object exists, no call is made.
 - There is **no `--force`**. Regenerating requires a `profilePromptVersion` bump, which is made only for a real prompt change with a real prompt-iteration entry, never just to retry.
@@ -1245,7 +1245,7 @@ A profile is versioned by index version, prompt version (`profilePromptVersion`)
 
 ## 32.6 Banned vocabulary (canonical list)
 
-One list, in `packages/core/vocabulary.ts`, used by both the profile validator and the evaluation harness. It applies only to **model-written** text (headline, what changed, why this matters, executive view, outlook, recommended diligence). Deterministic labels and quoted filing passages are exempt. Matching is case-insensitive and phrase-level with word boundaries:
+One list, in `packages/core/src/vocabulary.ts`, used by both the profile validator and the evaluation harness. It applies only to **model-written** text (headline, what changed, why this matters, executive view, outlook, recommended diligence). Deterministic labels and quoted filing passages are exempt. Matching is case-insensitive and phrase-level with word boundaries:
 
 | Banned phrases | Allowed (not matched) |
 |---|---|
@@ -1265,7 +1265,7 @@ The stored profile (Zod schema in `packages/core`; architecture §7.1) holds: co
 
 ## 32.9 Pass bars and the deterministic fallback
 
-Provisional bars (revisited after the first real build; §41.3): 0 invalid citations, 0 unsupported figures, 0 banned-phrase matches in shipped profiles, ≤ 1 call per profile, LLM-to-deterministic fallback rate ≤ 10% across the 12 deep-tier companies.
+Provisional bars (revisited after the first real build; §41.3): 0 invalid citations, 0 unsupported figures, 0 banned-phrase matches in shipped profiles, ≤ 1 call per profile, LLM-to-deterministic fallback rate ≤ 25% across the 12 deep-tier companies.
 
 Scope fallback: if Phase 4b slips, ship the deterministic set only; the UI is unchanged and the LLM set is described as an option on the Architecture page.
 
@@ -1653,7 +1653,7 @@ Do not add a runtime LLM-as-judge. Manual evaluation plus deterministic checks i
 | Banned-phrase matches in shipped profiles | 0 |
 | Signal precision on the hand-labeled AAPL, NVDA, MSFT set | ≥ 0.8 |
 | Signal recall sanity check on the same set | ≥ 0.5 of labeled real changes found |
-| LLM-to-deterministic fallback rate, 12 deep-tier companies | ≤ 10% |
+| LLM-to-deterministic fallback rate, 12 deep-tier companies | ≤ 25% (revised from 10% after the first build, A.4) |
 | Coverage-tier correctness | 54/54 |
 | Generation calls per profile (from the ledger) | ≤ 1 |
 
@@ -1933,7 +1933,7 @@ Phases run in table order. Every phase ends with the §48 gate. Phase 8b (P1) ru
 | 2 | Verify Bedrock invoke entitlement. Corpus ingestion: zip or directory input, manifest, headers, periods, overrides, preamble, sections, boilerplate; chunking; cached, resumable embeddings; S3 index, adjacency file, **index summary**; repeatable indexing CLI and index validation. **Time-boxed:** deterministic financial extraction, risk headings, drivers, per-company coverage | Header and period tests over all 246 files; section tests on representative filings (AAPL 10-K, NVDA 10-Q, JNJ 10-Q, XOM 10-Q, MS 10-K); the 287,855-character line; index summary recorded in the handoff; cold index load measured; extraction golden tests (AAPL, NVDA, MSFT, JNJ, XOM) |
 | 3 | Deterministic query analysis (companies, periods, filing types, topics); planner and lanes; hybrid search; balanced multi-company and longitudinal retrieval; deduplication; context builder; citation IDs; retrieval debug endpoint; retrieval evals on 15–20 questions covering every §41.1 category, including the three PDF examples and the expert question verbatim. **Time-boxed:** deterministic change detection and signal candidates | Multi-company queries do not collapse onto one company; chunk size, embedding and rerank decisions recorded; **signal go/no-go** recorded on the hand-labeled set (failing types suppressed); heading-diff viability recorded |
 | 4 | One-call generation pipeline: Deep Analysis prompt v1; `GenerationGateway`; schema, citation and numeric validation; SQS worker with claim, deadlines, generation budget, DLQ handler; real prompt iterations logged | `generationCallCount === 1` on success, error, malformed output, duplicate delivery, and redelivery after a claim; worker constructs only `purpose: 'analysis'`; temperature with forced tool use verified; latency measured |
-| 4b | Offline Company Intelligence build (§32), after the question is put to Eliza: builder, profile prompt, validator with the banned list, General context library, **both profile sets**, build ledger, SSM pointer, manifests, profile prompt iterations. If this slips, ship the deterministic set only | Every company has a schema-valid profile in both sets; 0 invalid citations; 0 unsupported figures; 0 banned-phrase matches; ≤ 1 call per profile per the ledger; fallback rate ≤ 10% (provisional); prompt file matches runtime; profile evals recorded |
+| 4b | Offline Company Intelligence build (§32), after the question is put to Eliza: builder, profile prompt, validator with the banned list, General context library, **both profile sets**, build ledger, SSM pointer, manifests, profile prompt iterations. If this slips, ship the deterministic set only | Every company has a schema-valid profile in both sets; 0 invalid citations; 0 unsupported figures; 0 banned-phrase matches; ≤ 1 call per profile per the ledger; fallback rate ≤ 25% (provisional; revised from 10% after the first build, A.4); prompt file matches runtime; profile evals recorded |
 | 5 | Product workflows: sessions, seed (real pipeline outputs), reset; spend caps and kill switch; Company Intelligence on real profiles; Compare; Recommended Diligence / Investigate prefill (never auto-run); Deep Analysis with real stages, Interpretation panel, coverage matrix and numeric badges; Save Finding from any source; Findings Board; error and degraded states | **Novice path** (select Apple → understand → Investigate → Deep Analysis → save) and **expert path** (typed question) run end to end with no broken steps; no LLM call on any page view (test); every §38.2 state has a test |
 | 6 | Evidence: clickable citations; evidence drawer for briefs and signals with **adjacent-period comparison**; deep-link passage highlight; readable source view; coverage matrix linked to evidence; citation-integrity tests | Every citation in seeded briefs, live briefs, and profiles resolves to its passage; adjacent-period lookup tested on AAPL and JNJ |
 | 7 | Evaluation, security, reliability, observability: eval harness and `docs/evaluation.md` (Deep Analysis and profiles); unsupported-query and injection tests; structured logging, request IDs, 14-day retention, metric filters; input validation; security headers and CSP; IAM review; accessibility and performance review; cost telemetry; **Architecture and business-value page** with measured numbers | Full regression green; eval results recorded; the Architecture page shows only measured numbers |
@@ -2195,6 +2195,8 @@ Changes made to this specification after its consolidation, each decided by Mike
 | 2026-10-02 | §26.3 | A change question that names no period reads each company's last 3 annual reports instead of the current view. | Phase 3 adversary H3: "How has Visa changed?" answered from one filing could not show change. Pending decision 1, settled at the start of Phase 4. |
 | 2026-10-02 | §49 | Phase 5 runs before Phase 4b. Phase 5 serves Company Intelligence through the real runtime profile path (the SSM pointer `/diligenceiq/active-profile-set` and an S3 profile set), with the preview set `fixture-v2` active until Phase 4b publishes the `det-v*` and `llm-v*` sets. The "Company Intelligence on real profiles" exit content lands with Phase 4b, which then needs only a pointer switch. Nothing else in §49 changes. Confirmed by Mike at the Phase 5 handoff (2026-10-02). | Mike chose to run Phase 5 first on 2026-10-02. The workflows, sessions, caps and the profile read path can be built and tested without the offline build (DD-20). |
 | 2026-10-02 | §7, §5.3 | The landing becomes a product landing in the family layout (navy hero with a real-filing preview, the launch film under it, then problem, how it works, shows its work, two ways in, how it is built, closing CTA). The primary CTA stays in the hero. Built before Phase 4b. | Mike asked for a richer landing matching ResolveIQ, GenAIQ, TrustResponse, ArchIQ and CareerOps, with the launch film in the same position as theirs. |
+| 2026-10-02 | §32.2, §29.2 | A figure in model-written profile text is valid if it is in the FACTS block **or printed in a passage that the same item cites** (the Deep Analysis rule; the passage's text must have been among the supplied filing excerpts, not only its ID), instead of FACTS only. Every figure is still checked deterministically; shares and multiples in words, and trend words that contradict their label, stay rejected. | The first full LLM build (llm-v3) fell back on 27 of 53 companies, 26 of them for guidance figures quoted from the cited discussion of results; Mike chose the cited-passage rule, applied by re-validating the stored outputs with no new calls. |
+| 2026-10-02 | §32.9, §41.3 | The provisional LLM-to-deterministic fallback bar for the 12 deep-tier companies is revised from ≤ 10% to ≤ 25%. | Revisited after the first real build, as §32.9 requires: llm-v3 fell back on 3 of 12 (JNJ, KO, UNH). A fallback is always the validated deterministic profile, labeled on the page, and the checks reject a whole profile for a single figure in words or an ungrounded figure. Mike chose the revision; the 10% miss stays recorded in docs/evaluation.md §6. |
 
 ---
 

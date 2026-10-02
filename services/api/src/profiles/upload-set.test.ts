@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { uploadableManifest } from '../../../../scripts/lib/profile-set';
 import { putImmutable } from '../../../../scripts/lib/s3-immutable';
 
 /* The admin upload of a profile set (scripts/intelligence/upload-set.ts): sets are immutable in S3. */
@@ -26,5 +27,19 @@ describe('putImmutable (profile set upload)', () => {
   it('other errors propagate', async () => {
     const send = vi.fn().mockRejectedValueOnce(Object.assign(new Error('denied'), { name: 'AccessDenied' }));
     await expect(putImmutable({ send } as never, 'b', 'k', body)).rejects.toThrow('denied');
+  });
+});
+
+/* Regression (Phase 4b adversary H2): the partial guard read the PARSED manifest, whose schema strips `partial`. */
+describe('uploadableManifest (profile set upload checks)', () => {
+  const manifest = { indexVersion: 'iv-abc', profileSetId: 'llm-v3', builtAt: 't', companies: [] };
+
+  it('refuses a partial (--tickers) set, read from the raw JSON', () => {
+    expect(() => uploadableManifest({ ...manifest, partial: true }, 'iv-abc/llm-v3')).toThrow(/partial set/);
+  });
+
+  it('accepts a full set and refuses a set that does not match --set', () => {
+    expect(uploadableManifest(manifest, 'iv-abc/llm-v3').profileSetId).toBe('llm-v3');
+    expect(() => uploadableManifest(manifest, 'iv-abc/det-v2')).toThrow(/does not match/);
   });
 });

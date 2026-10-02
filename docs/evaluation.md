@@ -267,3 +267,43 @@ What the numbers show:
 - **The deadline holds.** The longest eval generation (87 s) is under the 120 s budget, and the worst wall clock (64 s) is far inside the 240 s job deadline.
 - **Queue pickup:** PDF Q3 waited about 8 s in the queue before a warm worker claimed it; the SQS event source polls with a short delay.
 - Shorter briefs are the lever if latency becomes a product problem. Each 1K output tokens is about 11–14 s.
+
+## 6. Company Intelligence profiles (Phase 4b)
+
+`pnpm eval:profiles` over the two sets built for iv-9cf51c066743 on 2026-10-02 (bars: `evals/profiles.yaml`, provisional, SPEC §32.9). 53 companies: every corpus company but GE Capital, which is outside the review window. The deterministic set is `det-v2` (template version 2); the LLM set `llm-v3` was rebuilt from the 53 stored v3 outcomes with validator version 2 and no new call.
+
+| Metric | det-v2 | llm-v3 | Provisional bar |
+|---|---|---|---|
+| Citation validity | 100% | 100% | 100% |
+| Figure match | 100% | 100% | 100% |
+| Banned-phrase matches | 0 | 0 | 0 |
+| Coverage-tier correctness | 53/53 | 53/53 | 53/53 |
+| Generation calls per profile (max) | 0 | 1 | ≤ 1 |
+| Model-written profiles | 0 | 42 | — |
+| LLM-to-deterministic fallback, deep tier | n/a | 3/12 (25%) | ≤ 25% (revised from ≤ 10%, which this build missed; SPEC A.4) |
+
+**What is measured.** The eval does not trust what a profile says about itself:
+- *Citation validity:* every profile citation is a real index chunk of that company, and every citation on a model-written item is a SOURCE_ID of the request, which the eval recomputes from the company's det-v2 profile with the local index (evidence in BM25 mode, then the user message).
+- *Figure match:* each item's figures against FACTS or, for model text, a passage the same item cites whose text was in the request's excerpts, under the verified match rules only; points must be printed as points in FACTS; the headline cites nothing, so its figures must be in FACTS. Deterministic text is checked against FACTS and the item's cited passages.
+- *Coverage tier:* recomputed from the number of 10-K and 10-Q documents per ticker in the index's chunks, not from the profile's own counts.
+- *Calls:* the profile's `generationCallCount`, which counts the ledger.
+
+**What the fallback rate measures.** A fallback is a company whose one call produced text that failed a deterministic check, so its LLM-set profile is its deterministic profile (labeled "deterministic fallback" on the page). The checks reject the whole profile for a single violation. The eleven fallbacks:
+- figures in words: BA ("a third of revenue"), KO ("doubled"), LLY ("doubled"), ORCL ("tripled"), PG ("half of net sales"), UNH ("five percentage points");
+- figures printed in no cited excerpt passage: JNJ (43%), RTX (5.2%), TGT ($4, from "$4–$5 billion", whose only matching passage was supplied as an ID, not as text), VZ ($25 billion in the headline);
+- invented drivers: DE.
+
+The deep-tier misses are JNJ, KO and UNH. The validator-2 pass added three fallbacks to the first validation's eight (PG, TGT, UNH); UNH is deep tier, so the bar is now missed by two companies. Per SPEC §32.9 the bar is revisited after this first real build; it has not been changed.
+
+**Not verified by hash.** The 53 v3 outcomes predate the request hash (`promptSha256`), so every llm-v3 manifest row says `promptVerified: false`. They were re-validated against the request recomputed now; DD-16's implementation notes say what supports that the request is unchanged and why it is not proof.
+
+**What the validator does not check (prompt rules 7–9 are only partly enforced).** The validator enforces the label word for revenue acceleration only. It does not check that a persistent risk is described as persisting rather than growing (rule 8), that a cause is stated only when an excerpt states it (rule 8), or that the outlook is management's expectation rather than risk-factor language (rule 9). Examples that pass every check in llm-v3:
+- AAPL, signal `AAPL-PERSISTENT-regulatory-FY2025-8` (a PERSISTENT signal): its whatChanged calls it "a more recently emerged regulatory concern" and its whyThisMatters says the risk "has grown", which a persistence match does not show.
+- AAPL, management outlook: it paraphrases risk-factor language about trade disputes and tariffs and cites a risk-factor passage (`AAPL-FY2025-10K-1A-019`), which rule 9 says is not an outlook.
+- V, operating-margin signal: whyThisMatters calls the litigation provision "a non-recurring litigation accrual", a characterization no supplied figure or label establishes.
+
+These read as company analysis but are the model's interpretation; the page labels them "Model-written". Enforcing them deterministically would need semantic rules with real false-positive risk, so they are documented here rather than added to the validator.
+
+**History.** Prompt versions 1 and 2 were three-company trials, and version 3 is the full build; the first full validation (FACTS-only figures) gave 26 model-written profiles and a 42% deep-tier fallback, then the cited-passage rule (SPEC A.4) gave 45 and 2 of 12, and the validator-2 pass (supplied set = IDs in the message, excerpt-only figure passages, no near matches, points apart, more figures in words) gives 42 and 3 of 12 ([prompt-iterations.md](prompt-iterations.md), Company Intelligence v1–v3). Spend: about $6.0 for 59 calls (v1 3, v2 3, v3 53); nothing since.
+
+**Signal quality** is unchanged from §3: the profiles use only the detectors that passed (PERSISTENT, TREND_CHANGE).

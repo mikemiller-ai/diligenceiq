@@ -20,7 +20,8 @@ import Link from 'next/link';
 import { EvidenceCard, Eyebrow, NavyAtmosphere, Section } from '@/components/evidence/section';
 import { DESCRIPTIVE_LABELS } from '@/components/landing/descriptive-labels';
 import { LaunchFilm } from '@/components/landing/launch-film';
-import { RiskPreview, previewCompanyList } from '@/components/landing/risk-preview';
+import { RiskPreview } from '@/components/landing/risk-preview';
+import { companies } from '@/fixtures';
 import { SEEDED_QUESTIONS } from '@/components/landing/seeded-questions';
 import { BrandMark, Wordmark } from '@/components/shell/brand';
 import { Button } from '@/components/ui/button';
@@ -33,15 +34,15 @@ import { compareHref } from '@/lib/links';
  * Product landing (SPEC §7), in the family layout of ResolveIQ, TrustResponse, ArchIQ and
  * CareerOps: navy hero, the launch film under it, then problem → how it works → shows its work
  * → two ways in → how it is built → closing CTA. Static: opening it never calls the api.
- * Copy is product description and must be true of the current build (only the preview companies
- * have profiles until Phase 4b). The only numbers are corpus counts derived from the filing rows,
+ * Copy is product description and must be true of the current build: it describes the offline
+ * profile sets (Phase 4b) that the active set pointer serves. The only numbers are corpus counts derived from the filing rows,
  * the preview filing's fiscal year, the seeded questions and the citation labels (tested).
  */
 
 /** The journey (SPEC §5.1), as the surfaces a user meets in order. */
 const JOURNEY = [
   { step: 'Understand', surface: 'Company Intelligence', text: 'Pick a company and read what it faces in plain language, each point cited to its filing.', icon: Building2 },
-  { step: 'Notice', surface: 'What’s changed', text: 'What changed between filings and why it can matter, as the offline profile build reaches each company.', icon: ShieldCheck },
+  { step: 'Notice', surface: 'What’s changed', text: 'Risks that persist across annual reports and changes in reported trends, with why they can matter.', icon: ShieldCheck },
   { step: 'Investigate', surface: 'Compare · Deep Analysis', text: 'Put companies side by side, or ask any question for a cited Diligence Brief.', icon: Columns3 },
   { step: 'Verify', surface: 'Evidence', text: 'Every claim opens the filing passage it came from.', icon: FileSearch },
   { step: 'Capture', surface: 'Findings', text: 'Save what matters, with its evidence, for the Investment Committee.', icon: Bookmark },
@@ -79,6 +80,8 @@ const BUILT = [
 export default function LandingPage() {
   const stats = corpusStats();
   const film = launchFilmAssets();
+  // GE Capital's only filing predates the review window, so it has no profile (assumptions G2).
+  const profiled = companies().filter((c) => !c.outsideWindow).length;
 
   return (
     <div className="relative min-h-dvh bg-background text-foreground">
@@ -241,7 +244,7 @@ export default function LandingPage() {
               <h3 className="mt-4 text-xl font-semibold tracking-tight">Company Intelligence</h3>
               <p className="mt-1.5 text-sm text-muted-foreground">No question needed. Pick a company for a view built from its filings:</p>
               <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-                {['Current risks, grouped in plain language and cited to the filing', 'What changed between filings, and why it can matter', 'What to investigate next, one click from a prefilled question'].map((t) => (
+                {['How it is performing: reported figures with their source rows, and trends computed from them', 'Current risks, grouped in plain language and cited to the filing', 'Risks that persist across annual reports and changes in reported trends, with why they matter', 'What to investigate next, one click from a prefilled question'].map((t) => (
                   <li key={t} className="flex gap-2">
                     <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
                     {t}
@@ -249,14 +252,15 @@ export default function LandingPage() {
                 ))}
               </ul>
               <p className="mt-4 rounded-lg border border-border bg-secondary/60 px-3 py-2 text-[13px] leading-snug" data-testid="intelligence-status">
-                <span className="font-semibold">Preview today:</span> {previewCompanyList()}, with every risk heading from the
-                latest annual report cited. Full profiles for every company arrive with the offline profile build.
+                <span className="font-semibold">Every company in the review window has a profile</span> ({profiled} companies),
+                built offline from its filings once per index version. Each says whether its narrative was written by the
+                model and checked against the filings, or comes from templates.
               </p>
               <p className="mt-3 text-[13px] text-muted-foreground">
                 <Link href={compareHref()} className="inline-flex items-center gap-1 font-medium text-primary underline-offset-4 hover:underline">
                   <Columns3 aria-hidden className="size-3.5" /> Compare
                 </Link>{' '}
-                puts companies side by side; today it works across the preview companies.
+                puts two to five companies side by side, from the same profiles.
               </p>
               <div className="mt-auto pt-6">
                 <Button asChild variant="brand">

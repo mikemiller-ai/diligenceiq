@@ -13,8 +13,9 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { S3Client } from '@aws-sdk/client-s3';
-import { ProfileSetManifestSchema } from '@diligenceiq/core';
+import type { ProfileSetManifest } from '@diligenceiq/core';
 import { AWS_REGION, ROOT, arg, fail } from '../lib/common';
+import { uploadableManifest } from '../lib/profile-set';
 import { putImmutable } from '../lib/s3-immutable';
 
 const bucket = arg('bucket') ?? process.env.DATA_BUCKET;
@@ -23,8 +24,12 @@ const set = arg('set');
 if (!set || !/^iv-[a-z0-9]+\/(?:llm|det|fixture)-v\d+$/.test(set)) fail('profiles:upload-set: pass --set <indexVersion>/<profileSetId>');
 const root = arg('root') ?? join(ROOT, 'tests/fixtures/profile-sets');
 const dir = join(root, set);
-const manifest = ProfileSetManifestSchema.parse(JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')));
-if (`${manifest.indexVersion}/${manifest.profileSetId}` !== set) fail('manifest does not match --set');
+let manifest: ProfileSetManifest;
+try {
+  manifest = uploadableManifest(JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')), set);
+} catch (e) {
+  fail(`profiles:upload-set: ${(e as Error).message}`);
+}
 const files = readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'manifest.json');
 const missing = manifest.companies.filter((c) => !files.includes(`${c.ticker}.json`));
 if (missing.length) fail(`manifest lists companies without a profile file: ${missing.map((c) => c.ticker).join(', ')}`);

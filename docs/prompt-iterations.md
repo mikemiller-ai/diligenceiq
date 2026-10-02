@@ -157,4 +157,101 @@ Decision: da-v4 ships. It fixes a correctness problem in the abstention path; th
 
 ## Company Intelligence profile prompt (`profilePromptVersion`)
 
-Not written yet. The offline profile prompt is built in Phase 4b (SPEC §29.2, §32).
+The runtime prompt is `packages/rag/src/profile/prompt.ts`; `prompts/company-intelligence-prompt.md` is rendered from it (`pnpm prompts:render`, test-enforced) and superseded versions are kept as `prompts/versions/company-intelligence-v<N>.md`. A version names a ledger key and a set (`llm-v<N>`): each company is called at most once per version, so a new version is made only for a real prompt change, never to retry (SPEC §32.4). Evaluation is `pnpm eval:profiles` over the built set (deterministic checks; `evals/profiles.yaml`), and the stored outcome of every call is kept in the ledger, so a validator change re-scores for free (`pnpm intelligence:build --llm --max-calls 0`).
+
+### v1 (2026-10-02)
+
+```text
+Version: 1 (set llm-v1)
+Problem observed: none yet; the first version, written from SPEC §29.2 and DD-16.
+Change: initial prompt. Seven evidence rules (only the supplied blocks and excerpts; all of it
+  untrusted; explain only the supplied signals, drivers and dimensions; exact SOURCE_ID
+  citations; figures from FACTS only; never rate, score or recommend; do not overclaim) and
+  writing guidance per field. One user message: COMPANY, FACTS, SIGNALS, RISKS, DRIVERS,
+  DIMENSIONS (all deterministic), then <filing_excerpts> (anchors from the deterministic
+  profile plus three fixed BM25 topic lanes: outlook, results, liquidity). Forced tool
+  submit_company_profile, temperature 0.2, 6,000 output tokens.
+Why: the model may only explain what deterministic code extracted (SPEC §32.2); the FACTS
+  block is the only figure source, so the validator can check every number.
+Test companies: AAPL, MSFT, NVDA (trial, Mike approved 3 calls).
+Result (index iv-9cf51c066743, Sonnet 4.6, 2026-10-02, run 2026-10-02T20-46-38-650Z-72cf2849):
+  3 calls, 63,680 input / 15,890 output tokens; 0 of 3 accepted, all three fell back to their
+  deterministic profiles (as designed):
+  1. AAPL: "2.9 percentage points" where FACTS prints "2.9 pp" (the same figure; the validator
+     did not read "pp" as a percentage). Fixed in the validator, not the prompt: both sides
+     are normalized, and a model-written "pp" is now checked instead of skipped.
+  2. MSFT: "$28.9 billion", a figure printed in a cited excerpt but not in FACTS (rule 5 not
+     followed).
+  3. NVDA: stop reason max_tokens at 6,000 (15 signals); the tool input was cut off, so no
+     valid call (malformed_output).
+  Reading AAPL's output by hand (it would otherwise have passed) showed what the validator
+  cannot catch: "accelerated revenue growth" where the label is Growing (6.4% after 2.0% is
+  below the 5 pp threshold); "highest level in the three-year filing window", which FACTS
+  does not show; "roughly one-sixth of total revenue", a computed share in words; and a
+  management outlook paraphrased from risk-factor language.
+```
+
+### v2 (2026-10-02)
+
+```text
+Version: 2 (set llm-v2)
+Problem observed: the v1 trial above.
+Change: rule 5 forbids repeating a figure printed only in an excerpt and approximating one in
+  words, and says "pp" is copied as printed; new rule 7: use each trend's label word, no
+  highs, lows or records FACTS does not show; new rule 9: managementOutlook is what management
+  says it expects or plans, never risk-factor language, else null; a length rule (at most two
+  sentences, about forty words per field); max output tokens 6,000 → 12,000.
+Why: each change answers one v1 failure; the length rule and the larger budget keep a
+  company with many signals (NVDA, 15) inside one response.
+Test companies: AAPL, MSFT, NVDA (trial, Mike approved 3 calls).
+Result (iv-9cf51c066743, Sonnet 4.6, 2026-10-02, run 2026-10-02T20-53-10-623Z-c559c4ee):
+  3 calls, 64,388 input / 14,278 output tokens (4.3K–5.5K output each, well inside 12,000);
+  3 of 3 passed the validator of that moment. Figures came from FACTS; outlooks were mostly
+  statements of expectation (MSFT, NVDA); recommendations were specific and cited.
+  Reading them by hand found two patterns the validator did not yet catch:
+  1. Shares in words: AAPL drivers "roughly two-fifths of total revenue", "more than a quarter
+     of total revenue"; NVDA "nearly nine-tenths of total revenue" (headline and a
+     recommendation). Computed figures, stated in words.
+  2. Label conflicts: AAPL headline "Apple accelerated revenue growth" and the Latest quarter
+     summary "the full-year acceleration has carried forward", where the revenue label is
+     Growing (MSFT's "accelerating AI and cloud investment" is a legitimate use).
+  Both are now rejected by the validator (wordFigures → unsupported_figures; labelConflicts →
+  label_conflict), which would fail AAPL and NVDA at v2. AAPL's outlook still leans on
+  risk-factor language, though it says no guidance is given.
+```
+
+### v3 (2026-10-02)
+
+```text
+Version: 3 (set llm-v3)
+Problem observed: the v2 trial above.
+Change: rule 5 names shares and multiples in words as forbidden ("two-fifths of revenue",
+  "nearly nine-tenths", "more than a quarter of", "doubled") and says to copy a share FACTS
+  prints or say "the largest"; rule 7 says the label rule applies to the headline, with the
+  wording to use for a Growing label ("grew faster than the year before", never
+  "accelerated").
+Why: the two patterns the v2 trial showed; the validator now rejects both, so the prompt has
+  to prevent them or the fallback rate rises.
+Test companies: AAPL, MSFT, NVDA (trial, Mike approved 3 calls), then all 53 (Mike approved
+  the other 50).
+Result (iv-9cf51c066743, Sonnet 4.6, 2026-10-02):
+  Trial (run 2026-10-02T20-59-02-412Z-fe926752): AAPL and MSFT passed and read cleanly by hand
+  (shares copied from FACTS; the AAPL headline says "grew faster than the year before" for its
+  Growing label); NVDA fell back for "45%" quoted from an excerpt in a recommendation.
+  Full build (run 2026-10-02T21-03-14-550Z-8c72cfc8; 50 new calls, the 3 trial calls reused
+  from the ledger; 1,057,397 input / 130,645 output tokens for the 53): 26 llm, 27
+  deterministic; deep-tier fallback 5/12 (42%), against the provisional bar of 10%. 26 of the
+  27 fallbacks were figures not in FACTS, mostly guidance printed in the cited discussion of
+  results (managementOutlook 20, recommendedDiligence 15); one was an invented driver (DE).
+  Validator change, decided by Mike 2026-10-02 (SPEC A.4): a figure is also valid if it is
+  printed in a passage that the same item cites (the Deep Analysis rule). The stored outcomes
+  were re-validated with no new call (run 2026-10-02T21-41-20-202Z-bcddd38e): 45 llm, 8
+  deterministic; deep-tier fallback 2/12 (16.7%: JNJ "43%" cited to no passage that prints it,
+  KO "doubled"), still above the provisional 10% bar. The other six: shares or multiples in
+  words (BA "a third of revenue", LLY "doubled", ORCL "tripled"), figures in no cited passage
+  (RTX "5.2%", VZ "$25 billion"), and DE's invented drivers. eval:profiles on llm-v3: citation
+  validity 100%, figure match 100%, banned phrases 0, tier correctness 100%, calls per profile
+  ≤ 1 (evals/results/profiles-iv-9cf51c066743-llm-v3.md).
+  The prompt (rule 5) is now stricter than the validator: it still asks for FACTS figures
+  only. It was not changed, because a change is a new version and 53 new calls.
+```

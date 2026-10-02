@@ -59,7 +59,10 @@ export interface CompareTrajectoryRow {
 /** Per company, what its latest management discussion emphasizes (SPEC §13.1); null until extracted. */
 export interface ManagementEmphasis {
   ticker: string;
+  /** The profile's management outlook, or null when the profile has none ("Not summarized"). */
   summary: string | null;
+  /** 'model' when present: only the offline profile call writes an outlook (deterministic profiles never do). */
+  source: 'model' | null;
   citationIds: string[];
 }
 
@@ -213,6 +216,7 @@ export function composeCompare(
   const managementEmphasis: ManagementEmphasis[] = present.map((p) => ({
     ticker: p.ticker,
     summary: p.managementOutlook?.summary ?? null,
+    source: p.managementOutlook ? ('model' as const) : null,
     citationIds: p.managementOutlook?.citationIds ?? [],
   }));
 
