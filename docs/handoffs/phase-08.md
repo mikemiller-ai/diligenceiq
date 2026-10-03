@@ -84,7 +84,7 @@ Mike's decisions this phase:
   - The proxy pool looks small: 2 keys in 4 requests.
 
 ## Open
-- **D12:** the per-client cap is per Amplify proxy, not per visitor (see Deployed). Mike decides between accepting it, raising `PER_IP_DAILY_WORKSPACE_CAP`, or trusting a wider range. Anything wider than CloudFront lets other AWS tenants forge hops.
+- **D12:** the per-client cap is per Amplify proxy, not per visitor (see Deployed). Mike accepted it as is (2026-10-03).
 - **Budget attribution:** check that production Bedrock spend for 2026-10-03 lands in the `DiligenceIQ` cost category once billing data arrives. October's offline spend (about $17, under the admin's IAM user) is "Unattributed"; only the account-wide Budgets see it.
 - **The kill switch is on**, by Mike's choice, until after the panel.
 - **Pending with Mike:** da-v5, PERSISTENT basis, F1 rerank, Sonnet 5.5 quota, M3 profile citation subsections.
