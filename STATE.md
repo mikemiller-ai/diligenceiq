@@ -7,7 +7,7 @@ _Last updated: 2026-10-03 (local)_
 
 ## Current phase
 **Phase 7 (evaluation, security, reliability, observability; plan row 7) is complete: gated, committed (`2aeaec5`) and deployed (2026-10-03).** Handoff: `docs/handoffs/phase-07.md`. Phase 6r (steps 1–4) is complete and deployed.
-- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: `iv-9cf51c066743/det-v2`. Deployed: WorkerStack and ApiStack (2026-10-03 16:19 / 16:21 UTC), Amplify job 12.
+- Production: active profile set `iv-9cf51c066743/llm-v3`, **kill switch `true` since 2026-10-03 12:30 local** (Mike turned it on to test; whether to leave it on is pending with Mike, and there is no Budget alert yet). Instant fallback: `iv-9cf51c066743/det-v2`. Deployed: WorkerStack and ApiStack (2026-10-03 16:19 / 16:21 UTC), Amplify job 12.
 - **Phase 7 adds:**
   - **CSP** (assumptions D10, Mike's choice): after `next build`, `apps/web/src/build/csp.ts` writes each page's own `<meta>` CSP with `script-src 'self'` plus that page's inline-script hashes. Header CSP keeps `frame-ancestors`. The one residual allowance is `style-src 'unsafe-inline'` (sonner's runtime `<style>`). Zod runs `jitless` (`packages/core/src/zod-config.ts`, core's first import) so its `new Function` probe raises no violation.
   - **Validator: the caption rule** (Mike's decision). A bare currency caption ("(MILLIONS)") counts only as the first cell of a table header row, and states the unit of that table only (rule `caption_unit`). Any other scale caption in the passage disqualifies it, and it never overrides a preceding unit. `PROFILE_VALIDATOR_VERSION` is 3; the stored manifests keep 2, because a re-score changed nothing. da-v4 numeric grounding went from 0.911 to 0.989 (531/537).
@@ -36,7 +36,12 @@ Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with
   - **Read-only log checks (Mike pre-approved):** all 8 deployed metric filters were tested with `aws logs test-metric-filter`, and each matches its sample line and rejects the counter-example.
     - **They also match a line carrying Lambda's Text `console.log` prefix.** The adversary's H3 premise was wrong, and the Phase 4 one-call filter could always match. The docs are corrected.
     - `filter-log-events`: 126 production `api_request` lines arrived as raw JSON, all with route templates (no IDs or queries) and status 200, apart from one `HEAD` probe (404, `unmatched`).
-  - **Not checked in production:** the worker's filters against real lines and either alarm firing. No analysis has run since the deploy (the kill switch is off); running one needs Mike's go-ahead.
+  - **Worker filters seen in production (2026-10-03, after Mike turned the kill switch on):** two analyses completed, `0muslyw17JMsxAilaPv` and `0musm0ynvRQuu5G3z2r`.
+    - Each made 1 generation call: 27–30 s of generation, estimated $0.090 and $0.125, 0 citations removed.
+    - Each `apiRequestId` links to the api's `POST /api/analyses` line.
+    - CloudWatch published `GenerationDurationMs` and `AnalysisEstimatedCostUsd` datapoints for both, so the worker metric filters match real lines. Both alarms (`GenerationCallsOverOne`, `DlqHandlerInvokedAlarm`) are OK.
+    - A local `aws logs test-metric-filter` replay of those lines showed 0 matches, probably from shell quoting; the published datapoints are the evidence.
+  - **Still not seen in production:** either alarm firing (they have no notification target until Phase 8).
 - **Known limits recorded, not fixed:**
   - The seeded expert-question brief misdates the Apple DMA fines to FY2025 (they are in FY2024's 1A-017) and claims AI and tariffs were absent from FY2023/FY2024 (evaluation.md §8). Mike: document now, fix in a da-v5 prompt later (a live eval run and a reseed, ask first).
   - The JS is heavy (about 390 KB gzipped first load on workspace pages; Zod and the core schemas).
@@ -44,6 +49,7 @@ Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with
 - **Next:** Phase 8 (production hardening, alarm notification targets, Budget alert, prod smoke, README and `examples/`). Do not build the Deep Analysis or brief mockups without asking.
 
 ## Decisions pending with Mike
+- **Kill switch:** `/diligenceiq/analyses-enabled` is `true` since 2026-10-03 12:30 local. Mike wants it on through the panel-interview prep and the panel (a few days away), then off. The global daily cap (200 analyses, about $25 a day at most) bounds it; the Budget alert arrives in Phase 8.
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.
