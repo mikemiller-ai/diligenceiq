@@ -151,7 +151,7 @@ function CitationPanel({ citation: c, provenance, verified, from }: { citation: 
   return (
     <>
       <div className="relative overflow-hidden bg-navy px-6 pb-5 pt-5 pr-12 text-white">
-        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-primary/40 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-sapphire/40 blur-3xl" />
         <p className="relative font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-on-navy-accent">Evidence</p>
         <SheetTitle className="relative mt-1.5 text-xl font-semibold tracking-tight text-white">{c.company}</SheetTitle>
         <SheetDescription id="evidence-description" className="relative mt-1 font-mono text-[12px] text-white/70">
@@ -281,7 +281,7 @@ function AdjacentPanel({ citation: c, provenance }: { citation: Citation; proven
   return (
     <>
       <div className="relative overflow-hidden bg-navy px-6 pb-5 pt-5 pr-12 text-white">
-        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-primary/40 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-sapphire/40 blur-3xl" />
         <p className="relative font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-on-navy-accent">Compare periods</p>
         <SheetTitle className="relative mt-1.5 text-xl font-semibold tracking-tight text-white">{c.company}</SheetTitle>
         <SheetDescription id="evidence-description" className="relative mt-1 text-[13px] text-white/70">
@@ -317,11 +317,11 @@ function AdjacentPanel({ citation: c, provenance }: { citation: Citation; proven
                     onClick={() => setSelected(t.key)}
                     className={cn(
                       'rounded-full border px-3 py-1 text-[13px] transition-colors',
-                      t.key === active ? 'border-primary bg-primary text-white' : 'border-border bg-card text-foreground/80 hover:border-primary/50',
+                      t.key === active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-foreground/80 hover:border-primary/50',
                     )}
                   >
                     {t.label}
-                    <span className={cn('ml-1.5 font-mono text-[11px]', t.key === active ? 'text-white/80' : 'text-muted-foreground')}>{f ? `${f.fiscalLabel} ${f.filingType}` : 'none'}</span>
+                    <span className={cn('ml-1.5 font-mono text-[11px]', t.key === active ? 'text-primary-foreground/80' : 'text-muted-foreground')}>{f ? `${f.fiscalLabel} ${f.filingType}` : 'none'}</span>
                   </button>
                 );
               })}
@@ -487,7 +487,7 @@ export function CitationChip({
         'ml-1 inline-flex translate-y-[-1px] items-center whitespace-nowrap rounded-md border px-1.5 align-baseline font-mono text-[11px] font-medium leading-[18px] transition-colors',
         citation
           ? onNavy
-            ? 'border-white/15 bg-white/[0.06] text-[#b9c6fd] hover:border-on-navy-accent hover:bg-white/10 hover:text-white'
+            ? 'border-white/15 bg-white/[0.06] text-on-navy-ink hover:border-on-navy-accent hover:bg-white/10 hover:text-white'
             : 'border-primary/25 bg-primary/[0.06] text-primary hover:border-primary hover:bg-primary hover:text-white'
           : 'border-destructive/30 bg-destructive/10 text-foreground line-through decoration-destructive',
         className,

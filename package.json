@@ -26,6 +26,7 @@
     "extract": "tsx scripts/ingestion/extract.ts",
     "fixtures:risks": "tsx scripts/fixtures/build-risk-fixtures.ts",
     "fixtures:evidence": "tsx scripts/fixtures/build-evidence-fixtures.ts",
+    "fixtures:test-profiles": "tsx scripts/fixtures/export-test-profiles.ts",
     "evidence:check": "tsx scripts/evidence/check-evidence.ts",
     "index:upload": "tsx scripts/indexing/upload-index.ts",
     "index:measure-load": "tsx scripts/indexing/measure-load.ts",

@@ -14,6 +14,8 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       'edgar_corpus/**',
+      // Agent and session worktrees are separate checkouts with their own lint run.
+      '.claude/worktrees/**',
       'apps/web/next-env.d.ts',
     ],
   },

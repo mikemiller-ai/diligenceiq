@@ -11,35 +11,51 @@
  * Contrast pairs are asserted against this file in src/lib/tokens.test.ts.
  */
 :root {
-  --background: #f3f4f8;
-  --foreground: #14151f;
-  --card: #ffffff;
-  --card-foreground: #14151f;
-  --popover: #ffffff;
-  --popover-foreground: #14151f;
+  /*
+   * Dark mode (DD: docs/design-tokens.md, "Dark mode"). One definition per colour, resolved
+   * by light-dark() against `color-scheme`, as in CareerOps: the default ("System") stamps
+   * nothing and follows the OS; the toggle stamps data-theme on <html> to override it. A
+   * duplicated palette under a media query *and* an attribute selector would be two places
+   * to edit and would drift. Values are written light-first: light-dark(LIGHT, DARK).
+   *
+   * Dark elevation runs ground < card < secondary/popover: a raised surface is lighter than
+   * the ground it sits on, never darker. The navy grounds (hero, analysis headers, rail,
+   * evidence drawer header) do not vary: they are already dark and are the same in both modes.
+   */
+  color-scheme: light dark;
 
-  --primary: #2b48ca; /* Sapphire, hsl(229 65% 48%) — white label 7.29:1 */
-  --primary-hover: #213aab; /* white label 9.3:1 */
-  --primary-foreground: #ffffff;
+  --background: light-dark(#f3f4f8, #0b1020);
+  --foreground: light-dark(#14151f, #e7eaf3);
+  --card: light-dark(#ffffff, #131a2c);
+  --card-foreground: light-dark(#14151f, #e7eaf3);
+  --popover: light-dark(#ffffff, #182035);
+  --popover-foreground: light-dark(#14151f, #e7eaf3);
 
-  --secondary: #f6f6fa;
-  --secondary-foreground: #1a1c29;
-  --muted: #f3f3f8;
-  --muted-foreground: #5c6070;
+  /* Sapphire, hsl(229 65% 48%), white label 7.29:1. In dark the accent lightens and takes
+     an ink label (it is both a fill and the colour of links and eyebrows): 6.4:1 on card,
+     ink label 7.2:1. Use --sapphire, which never varies, for brand fills on navy. */
+  --primary: light-dark(#2b48ca, #8197f8);
+  --primary-hover: light-dark(#213aab, #a3b4fb); /* white label 9.3:1 / ink label 9.8:1 */
+  --primary-foreground: light-dark(#ffffff, #0a0b13);
+
+  --secondary: light-dark(#f6f6fa, #1a2236);
+  --secondary-foreground: light-dark(#1a1c29, #e7eaf3);
+  --muted: light-dark(#f3f3f8, #182033);
+  --muted-foreground: light-dark(#5c6070, #9ba4ba);
   /* shadcn meaning: a soft tinted fill, not the brand colour. */
-  --accent: #edf0fd;
-  --accent-foreground: #2b48ca;
+  --accent: light-dark(#edf0fd, #1c2752);
+  --accent-foreground: light-dark(#2b48ca, #b4c2fc);
 
-  --destructive: #d42531; /* family error red, hsl(358 75% 48%) */
-  --destructive-foreground: #ffffff;
+  --destructive: light-dark(#d42531, #f26b70); /* family error red, hsl(358 75% 48%) */
+  --destructive-foreground: light-dark(#ffffff, #0a0b13);
 
-  --border: #e6e7f0; /* decorative hairlines */
-  --input: #84899c; /* form-control boundary, ≥ 3:1 on --card (WCAG 1.4.11) */
-  --ring: #2b48ca;
+  --border: light-dark(#e6e7f0, #252e45); /* decorative hairlines */
+  --input: light-dark(#84899c, #6d7794); /* form-control boundary, ≥ 3:1 on --card (WCAG 1.4.11) */
+  --ring: light-dark(#2b48ca, #8197f8);
   --radius: 0.85rem;
 
   /* Navy grounds. --navy is the shared Evidence hero/analysis ground (do not change);
-     --rail is the app's sidebar. */
+     --rail is the app's sidebar. These are the same in both modes. */
   --navy: #0a0b13;
   --navy-raised: #12141f;
   --rail: #0a1124;
@@ -47,20 +63,42 @@
   --rail-ink: #c3cbe0;
   --rail-muted: #8c95ae;
   --on-navy-accent: #8ba1f9; /* eyebrows and links on navy, 8:1 */
+  --on-navy-ink: #c7d2fe; /* chip and icon ink on a sapphire tint over navy */
+  /* A navy panel on the dark ground is darker than its surroundings (1.04:1), so in dark it
+     takes a hairline to keep its edge. Invisible in light, where the ground does the work. */
+  --navy-edge: light-dark(transparent, #2a3350);
+  /* Brand fills that must not lighten in dark (orbs, tints on navy). */
+  --sapphire: #2b48ca;
+  --logo-blue: #1e58f7;
 
-  /* Status: a fill with ink text on it, never the colour of a word. */
-  --ok: #30a66d;
-  --risk-low: #12a594;
-  --risk-med: #e0a838;
-  --risk-high: #f58129;
-  --risk-critical: #e5484d;
+  /* Status: a fill with ink text on it, never the colour of a word. Dark values lift so the
+     dot and the icon stay ≥ 3:1 on a dark card; the label stays --foreground. */
+  --ok: light-dark(#30a66d, #3dbf80);
+  --risk-low: light-dark(#12a594, #2ac2ae);
+  --risk-med: light-dark(#e0a838, #e8b04a);
+  --risk-high: light-dark(#f58129, #f8934a);
+  --risk-critical: light-dark(#e5484d, #f0676b);
+  /* Direction-chip ink on its own status tint (DD-21): a word in the status hue needs a darker
+     ink to reach 4.5:1 at 12px in light (ok-ink on ok/12 4.7:1; risk-med-ink on risk-med/15
+     5.3:1; destructive-ink on destructive/10 5.5:1) and a lighter one on the dark tints. */
+  --ok-ink: light-dark(#1f7a4f, #6fdba5);
+  --risk-med-ink: light-dark(#8a5a00, #f0c46a);
+  --destructive-ink: light-dark(#b91c26, #ff9ea2);
 
   /* Gradients. Sapphire → logo blue is the family's only all-blue brand gradient. */
   --gradient-brand: linear-gradient(135deg, #2b48ca 0%, #1e58f7 100%);
   --gradient-hero-text: linear-gradient(90deg, #9cb2fc 0%, #b7a4fa 100%);
   --gradient-banner: linear-gradient(90deg, #020d2b 0%, #020d2b 30%, #07134c 50%, #12196f 70%, #1b2a9e 100%);
-  --gradient-wash: linear-gradient(103deg, rgb(43 72 202 / 0.075), transparent 34%);
+  --gradient-wash: linear-gradient(103deg, light-dark(rgb(43 72 202 / 0.075), rgb(129 151 248 / 0.1)), transparent 34%);
   --shadow-cta: 0 12px 30px -10px rgb(43 72 202 / 0.55);
+}
+
+/* The toggle writes data-theme; absent it, the OS decides (see lib/theme-script.ts). */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -91,11 +129,18 @@
   --color-rail-ink: var(--rail-ink);
   --color-rail-muted: var(--rail-muted);
   --color-on-navy-accent: var(--on-navy-accent);
+  --color-on-navy-ink: var(--on-navy-ink);
+  --color-navy-edge: var(--navy-edge);
+  --color-sapphire: var(--sapphire);
+  --color-logo-blue: var(--logo-blue);
   --color-ok: var(--ok);
   --color-risk-low: var(--risk-low);
   --color-risk-med: var(--risk-med);
   --color-risk-high: var(--risk-high);
   --color-risk-critical: var(--risk-critical);
+  --color-ok-ink: var(--ok-ink);
+  --color-risk-med-ink: var(--risk-med-ink);
+  --color-destructive-ink: var(--destructive-ink);
 
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -221,6 +266,11 @@
 }
 
 @media print {
+  /* Print is always the light palette, whatever the reader's theme. */
+  :root,
+  :root[data-theme='dark'] {
+    color-scheme: light;
+  }
   .no-print {
     display: none !important;
   }

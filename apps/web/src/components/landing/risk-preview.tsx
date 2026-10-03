@@ -41,7 +41,7 @@ export function riskPreview(ticker = 'AAPL') {
 export function RiskPreview() {
   const { company, name, rows } = riskPreview();
   return (
-    <figure className="rounded-3xl border border-white/10 bg-navy-raised shadow-2xl shadow-black/50" aria-label="Product preview">
+    <figure className="rounded-3xl border border-white/10 bg-navy-raised ring-1 ring-navy-edge shadow-2xl shadow-black/50" aria-label="Product preview">
       <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.03] px-4 py-3">
         <span aria-hidden className="flex gap-1.5">
           <span className="size-2.5 rounded-full bg-white/15" />
@@ -68,7 +68,7 @@ export function RiskPreview() {
                     href={filingHref(company.documentId, id, passage(id).indexVersion)}
                     aria-label={`View passage ${id}`}
                     data-citation-chip=""
-                    className="rounded-md border border-primary/40 bg-primary/15 px-1.5 py-0.5 font-mono text-[10.5px] text-[#c7d2fe] hover:border-on-navy-accent hover:text-white"
+                    className="rounded-md border border-sapphire/40 bg-sapphire/15 px-1.5 py-0.5 font-mono text-[10.5px] text-on-navy-ink hover:border-on-navy-accent hover:text-white"
                   >
                     {chipLabel(passage(id))}
                   </Link>

@@ -5,14 +5,16 @@ import {
   ProfileSetManifestSchema,
   SIGNAL_CATEGORIES,
   findBannedPhrases,
+  parseDriverChangeBasis,
+  parseTrendBasis,
   profileIntegrityIssues,
   type CompanyIntelligenceProfile,
 } from '@diligenceiq/core';
-import { companyCoverage, computeTrends, extractCompanyFacts, extractDrivers, extractRiskHeadings } from '@diligenceiq/corpus';
+import { type FinancialFact, companyCoverage, computeTrends, extractCompanyFacts, extractDrivers, extractRiskHeadings, growthTrend, latestQuarterGrowth, marginTrend } from '@diligenceiq/corpus';
 import { describe, expect, it } from 'vitest';
 import { HAVE_CORPUS, company, realCorpus } from '../../../corpus/src/testing/corpus';
 import type { GenerationClient, GenerationRequest, GenerationResponse } from '../generation/gateway';
-import { assembleDeterministicProfile, deterministicSetId, type ProfileExtraction } from './assemble';
+import { assembleDeterministicProfile, deterministicSetId, profileTrends, type ProfileExtraction } from './assemble';
 import { buildProfileSets, type BuildOptions } from './build';
 import { scoreProfile } from './evaluate';
 import { selectProfileEvidence } from './evidence';
@@ -654,5 +656,143 @@ describe.skipIf(!HAVE_CORPUS)('deterministic profiles on the real corpus (every 
     }
     const narrative = [...p.executiveView.map((e) => e.summary), ...p.recommendedDiligence.flatMap((r) => [r.question, r.why]), ...p.drivers.map((d) => d.explanation)].join(' ');
     expect(findBannedPhrases(narrative)).toEqual([]);
+  });
+});
+
+/*
+ * The dashboard reads a driver's change and share back from its `changeBasis` line (core
+ * `parseDriverChangeBasis`, DD-21). These pin the builder's format to that parser.
+ */
+describe('driver changeBasis ↔ parseDriverChangeBasis contract', () => {
+  const driver = (changePct: number | null, share: number): ProfileExtraction['drivers'][number] => ({
+    label: 'Greater China',
+    periods: ['FY2024', 'FY2025'],
+    values: [66952, 64377],
+    change: -2575,
+    changePct,
+    share,
+    chunkId: SYN_MDA,
+    rawRow: 'Greater China | 64,377 | 66,952 |',
+    totalRawRow: 'Total net sales | 416,161 | 391,035 |',
+    total: [391035, 416161],
+    scale: 1e6,
+    components: 5,
+    documentId: 'SYN_10K_2025',
+  });
+  const assembleWith = (d: ProfileExtraction['drivers'][number]) =>
+    assembleDeterministicProfile({ extraction: { ...synExtraction(), drivers: [d] }, chunks: synChunks(), profileSetId: deterministicSetId(), builtAt: 'x' }).drivers[0]!;
+
+  it.each([
+    [-0.0384, 0.155, -3.8, 15.5],
+    [0.0677, 0.4286, 6.8, 42.9],
+    [0, 0.01, 0, 1],
+  ])('changePct %s with share %s parses back', (changePct, share, pct, sharePct) => {
+    const d = assembleWith(driver(changePct, share));
+    expect(parseDriverChangeBasis(d.changeBasis)).toEqual({ changePct: pct, share: sharePct });
+  });
+
+  it('a driver with no prior-year value parses as no change, with its share', () => {
+    expect(parseDriverChangeBasis(assembleWith(driver(null, 0.2)).changeBasis)).toEqual({ changePct: null, share: 20 });
+  });
+
+  it('a negative share (an eliminations line) keeps its sign', () => {
+    expect(parseDriverChangeBasis(assembleWith(driver(null, -0.002)).changeBasis)).toEqual({ changePct: null, share: -0.2 });
+    expect(parseDriverChangeBasis(assembleWith(driver(-0.125, -0.031)).changeBasis)).toEqual({ changePct: -12.5, share: -3.1 });
+  });
+
+  it.skipIf(!HAVE_CORPUS)('every AAPL driver built from the real corpus parses back to its extracted change and share', () => {
+    const ex = extractionOf('AAPL');
+    const p = assembleDeterministicProfile({ extraction: ex, chunks: company('AAPL').chunks, profileSetId: 'det-v1', builtAt: 'x' });
+    expect(p.drivers.length).toBeGreaterThan(0);
+    p.drivers.forEach((d, i) => {
+      const src = ex.drivers[i]!;
+      expect(parseDriverChangeBasis(d.changeBasis)).toEqual({
+        changePct: src.changePct === null ? null : Number((src.changePct * 100).toFixed(1)),
+        share: Number((src.share * 100).toFixed(1)),
+      });
+    });
+  });
+});
+
+/*
+ * The dashboard reads every trend's numbers and label back from its `basis` line (core
+ * `parseTrendBasis`, DD-21), so the page and the builder cannot disagree. These pin the three
+ * formats the builder writes (packages/corpus trends.ts) to that parser.
+ */
+describe('trend basis ↔ parseTrendBasis contract', () => {
+  const f = (metric: FinancialFact['metric'], period: string, value: number, row: number, duration: FinancialFact['duration'] = 'annual'): FinancialFact => ({
+    metric,
+    period,
+    periodEnd: null,
+    duration,
+    value,
+    unit: 'USD',
+    scale: 1e6,
+    documentId: 'SYN_10K_2025',
+    fiscalLabel: 'FY2025',
+    chunkId: SYN_FS,
+    rawRow: `row ${row}`,
+    rowStart: row,
+    tableStart: 0,
+    section: 'financial_statements',
+    source: 'statement',
+    suspect: null,
+    crossCheck: 'single_source',
+  });
+  const growth = (v2: number, v1: number, v0: number) => growthTrend([f('revenue', 'FY2023', v2, 1), f('revenue', 'FY2024', v1, 1), f('revenue', 'FY2025', v0, 1)])!;
+
+  it.each([
+    // [FY2023, FY2024, FY2025] → trajectory, latest %, prior %
+    [100, 110, 132, 'accelerating', 20, 10],
+    [100, 120, 126, 'slowing', 5, 20],
+    [100, 102, 105, 'growing', 2.9, 2],
+    [100, 90, 99, 'growing', 10, -10],
+    [100, 104, 104, 'stable', 0, 4],
+    [100, 104, 100, 'declining', -3.8, 4],
+  ] as const)('growth %s → %s → %s reads back as %s', (v2, v1, v0, trajectory, pct, prior) => {
+    const t = growth(v2, v1, v0);
+    expect(t.trajectory).toBe(trajectory);
+    expect(parseTrendBasis(t.basis)).toEqual({ kind: 'growth', pct, period: 'FY2025', priorPct: prior, priorPeriod: 'FY2024', trajectory });
+  });
+
+  it('a growth line with no prior year reads back without one', () => {
+    const t = growthTrend([f('revenue', 'FY2024', 100, 1), f('revenue', 'FY2025', 90, 1)])!;
+    expect(parseTrendBasis(t.basis)).toEqual({ kind: 'growth', pct: -10, period: 'FY2025', priorPct: null, priorPeriod: null, trajectory: 'declining' });
+  });
+
+  it.each([
+    [-50, -20, 'improving', -5, -2],
+    [30, -10, 'declining', 3, -1],
+    [300, 305, 'stable', 30, 30.5],
+  ] as const)('a margin from %s to %s (losses included) reads back as %s', (n1, n0, trajectory, prior, latest) => {
+    const t = marginTrend([f('revenue', 'FY2024', 1000, 1), f('revenue', 'FY2025', 1000, 1), f('net_income', 'FY2024', n1, 2), f('net_income', 'FY2025', n0, 2)], 'net_income', 'net_margin')!;
+    const parsed = parseTrendBasis(t.basis);
+    expect(parsed).toMatchObject({ kind: 'margin', latest, period: 'FY2025', prior, priorPeriod: 'FY2024', trajectory });
+    expect(parsed && parsed.kind === 'margin' && parsed.changePp).toBeCloseTo(latest - prior, 5);
+  });
+
+  it('the latest quarter reads back', () => {
+    const t = latestQuarterGrowth([f('revenue', 'FY2025Q1', 100, 1, 'quarter'), f('revenue', 'FY2026Q1', 115.7, 1, 'quarter')])!;
+    expect(parseTrendBasis(t.basis)).toEqual({ kind: 'quarter', pct: 15.7, period: 'FY2026Q1', priorPeriod: 'FY2025Q1', trajectory: 'growing' });
+  });
+
+  it('any other text is not a basis', () => {
+    expect(parseTrendBasis('Revenue grew strongly.')).toBeNull();
+    expect(parseTrendBasis('Growth of 6.4% in FY2025 (soaring: above 2.0%).')).toBeNull();
+  });
+
+  it.skipIf(!HAVE_CORPUS)('every trend the builder computes for every company in the real corpus reads back, with its own trajectory', () => {
+    const tickers = [...new Set(realCorpus().filings.map((x) => x.meta.ticker))];
+    let n = 0;
+    for (const t of tickers) {
+      for (const trend of profileTrends(extractionOf(t))) {
+        const parsed = parseTrendBasis(trend.basis);
+        expect(parsed, `${t} ${trend.metric}: ${trend.basis}`).not.toBeNull();
+        expect(parsed!.trajectory, `${t} ${trend.metric}`).toBe(trend.trajectory);
+        expect(parsed!.period, `${t} ${trend.metric}`).toBe(trend.periods.at(-1));
+        n++;
+      }
+    }
+    expect(n).toBeGreaterThan(150);
   });
 });

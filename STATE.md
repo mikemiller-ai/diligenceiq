@@ -3,29 +3,25 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `bdd817e` (Phase 6). Phase 4b: `dfff25e`; go-live recorded `059ebbd`. Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
+`readability-prototype` (branched from `main` at `14295d0`; plan commit `6cee6eb`). Phase 6r step 1 is gated and staged for commit (awaiting Mike's go-ahead), then merge to `main`. `main`: Phase 6 `bdd817e`, deploy record `14295d0`.
 
 ## Current phase
-**Phase 6 (evidence: adjacent periods, readable source view, coverage matrix linked to evidence, citation integrity) is built, gated (`pnpm gate` exit 0, 2026-10-02), committed (`bdd817e`) and deployed (2026-10-02).** Handoff: `docs/handoffs/phase-06.md`.
-- Production: active profile set `iv-9cf51c066743/llm-v3` (SSM parameter version 5, re-verified read-only 2026-10-02), kill switch `false`, `/api/health` 200. Instant fallback: set the pointer to `iv-9cf51c066743/det-v2`.
-- Exit criteria: AAPL and JNJ adjacency tested in the gate; seed and fixture-profile citations resolve in the gate; `pnpm evidence:check` (offline) resolves every index chunk, adjacency reference, recorded live-brief citation and det-v2/llm-v3 citation (`evals/results/evidence-iv-9cf51c066743.json`). Production DynamoDB analyses are not covered by a repo check (adversary ID check: all resolve).
+**Phase 6r (readability, DD-21), step 1 of 3: the Company Intelligence dashboard plus dark mode, gated (`pnpm gate` exit 0, 2026-10-02), not yet committed or deployed.** Handoff: `docs/handoffs/phase-06r-step1.md`.
+- Production still runs Phase 6 (deployed 2026-10-02): active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: pointer to `iv-9cf51c066743/det-v2`.
+- Mike's decisions 2026-10-02: keep the current dashboard depth plus signals (BLUF, chips, sparklines, condensed sections, jump bar), not the plain-language redesign; gate and deploy after the dashboard step; ship dark mode (System / Light / Dark) with it.
 
 ## Gate
-`pnpm gate` on 2026-10-02 against the Phase 6 working tree: **exit 0**.
+`pnpm gate` on 2026-10-02 against the Phase 6r step 1 working tree: **exit 0**.
 - check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 394, web 189, api 135 (**941**).
-- `cdk:synth` and `build` succeeded; **e2e 44 passed**.
+- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 275, api 135 (**1,046**).
+- `cdk:synth` and `build` succeeded; **e2e 64 passed** (main suite on `fixture-v2`, the `built-profiles` project on committed real AAPL/TSLA/JPM profiles, the dark-mode axe suite).
 
-Gate record: adversary (1 blocker: typecheck; 2 high: source view ignored the index version, missing-key 403 → 500; 5 medium; 10 low) → fresh fixer (all fixed with tests) → `/code-review` medium (no findings) → `pnpm gate` green.
+Gate record: adversary (2 blockers, 7 high, 9 medium) → fresh fixer (all fixed with tests) → dark mode merged from its worktree → `/code-review` medium (no findings) → `pnpm gate` green.
 
 ## In flight
-- **Done 2026-10-02 (Mike approved):** `pnpm deploy:infra` (Worker and Api updated; Core and Web unchanged) → `pnpm deploy:web` (Amplify job 5) → production smoke (2 new demo sessions):
-  - all three seeded briefs: every citation and context passage resolves through `GET /api/sources` to its exact span (40/40, 36/36, 37/37); every coverage cell carries `chunkIds`; 200s send `cache-control: private, max-age=3600`;
-  - `GET /api/evidence/adjacent`: AAPL FY2025 10-K 1A (prev FY2024, next null), AAPL FY2024Q2 10-Q MD&A (prev FY2024Q1, next FY2024Q3, same quarter FY2023Q2), JNJ FY2021 10-K MD&A (prev null, next FY2022), JNJ FY2024Q2 10-Q MD&A (FY2024Q1 / FY2024Q3 / FY2023Q2); 320–1,160 ms;
-  - JPM 10-K (1,351,204 bytes, 499 chunks): 1,080 ms first request, 713 ms warm (well inside the 10 s timeout);
-  - a missing document → `404 SOURCE_MISSING` (no 500: the 403 mapping works on the real role); a missing adjacency entry → `404 NOT_FOUND`; another index version → `404 index_version`;
-  - `/sources/filing/` page 200. Kill switch still `false`; pointer still `iv-9cf51c066743/llm-v3`.
-- Next phase: Phase 7.
+- **Commit step 1** (Mike's go-ahead), merge `readability-prototype` into `main`, then **`pnpm deploy:web`** (ask first; web only) and a production check in light and dark.
+- Then Phase 6r step 2 (readable filing text and evidence), step 3 (brief and Compare), then Phase 7.
+- Housekeeping: the dark-mode worktree `.claude/worktrees/agent-ab8004e9c3c9d9634` (branch `worktree-agent-ab8004e9c3c9d9634`, uncommitted, already merged here by patch) can be removed after the commit.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
@@ -35,6 +31,10 @@ Gate record: adversary (1 blocker: typecheck; 2 high: source view ignored the in
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
 
 ## Known traps
+- **The dashboard derives nothing on its own (DD-21).** Every bottom-line line, chip colour and title comes from the builder's `trends[].trajectory` and its `basis` line (core `parseTrendBasis`) or a signal's type/measurement; facts only supply numbers from the trend's own source row. Changing the builder's basis wording breaks `parseTrendBasis` (contract tests in `packages/rag` `profile.test.ts` fail first), and a basis that no longer reads back hides that metric's line, chip and sparkline.
+- **Folded items stay in the DOM.** `ShowMore` sets `hidden` on folded items (Tailwind preflight enforces it). Tests that need every item must open "Show all" first (`expandAll` in `workflow.test.tsx`); the fixture-figure rule still scans hidden items.
+- **Dark mode is tokens only.** Every colour is a `light-dark()` token in `globals.css`; never a hex or `text-white` on a primary fill in className (use `text-primary-foreground`). On navy use `--sapphire` / `text-on-navy-ink`, never `primary` (which lightens in dark). The pre-paint `THEME_SCRIPT` must be allowed by hash in the Phase 7 CSP.
+- **Built-profile e2e** runs as the `built-profiles` Playwright project on its own local server (port 4194) over `tests/fixtures/built-profile-sets/` (a separate root from `profile-sets`, so `profiles:upload-set` never picks it up). Regenerate with `pnpm fixtures:test-profiles`, never hand-edit.
 - **Evidence routes recompute chunks at runtime.** `GET /api/sources` and `/api/evidence/adjacent` re-chunk `processed/<iv>/<doc>.json` with the bundled `chunkFiling`; the adjacency file holds chunk IDs only. The store refuses (`index_unavailable`) when the index manifest's `chunkerVersion` differs from the bundled `CHUNKER_VERSION`, so a chunker change needs a re-index before the api deploy. `pnpm evidence:check` proves byte-identity over the whole build.
 - **Without `s3:ListBucket`, S3 answers a missing key with 403 AccessDenied.** The api role deliberately has no ListBucket; `isMissingObject` (`services/api/src/s3-missing.ts`) reads 403 as missing and logs a warn with the key. A prefix missing from the IAM policy therefore shows as "not found" plus that warn, not as a 500.
 - **Source-view links carry the citation's index version** (`/sources/filing/?id=&iv=#chunk-`, `filingHref`). A citation from another version opens the current text with a notice and is never highlighted.

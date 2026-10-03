@@ -65,9 +65,9 @@ export function Sidebar({
     collapsed && 'justify-center px-0',
   );
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-rail text-rail-ink">
+    <div className="relative flex h-full flex-col overflow-hidden border-r border-navy-edge bg-rail text-rail-ink">
       {/* A faint sapphire glow at the top of the rail: the Evidence navy, quietly. */}
-      <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 size-64 rounded-full bg-primary/25 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 size-64 rounded-full bg-sapphire/25 blur-3xl" />
 
       <div className={cn('relative flex h-16 items-center gap-2.5 px-4', collapsed && 'justify-center px-0')}>
         <Link href="/" onClick={onNavigate} className="flex items-center gap-2.5 rounded-md" aria-label="DiligenceIQ home">

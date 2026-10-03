@@ -12,7 +12,7 @@ export function Toaster() {
         classNames: {
           toast: 'rounded-lg border border-border bg-card text-foreground shadow-sm text-sm font-sans',
           description: 'text-muted-foreground',
-          actionButton: 'bg-primary text-white',
+          actionButton: 'bg-primary text-primary-foreground',
         },
       }}
     />

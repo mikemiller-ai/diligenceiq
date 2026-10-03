@@ -114,14 +114,14 @@ export function NavyAtmosphere({ subtle = false }: { subtle?: boolean }) {
         aria-hidden
         className={cn(
           'pointer-events-none absolute -left-40 -top-40 size-[36rem] rounded-full blur-3xl',
-          subtle ? 'bg-primary/20' : 'bg-primary/30',
+          subtle ? 'bg-sapphire/20' : 'bg-sapphire/30',
         )}
       />
       <div
         aria-hidden
         className={cn(
           'pointer-events-none absolute -right-32 top-10 size-[30rem] rounded-full blur-3xl',
-          subtle ? 'bg-[#1e58f7]/10' : 'bg-[#1e58f7]/[0.18]',
+          subtle ? 'bg-logo-blue/10' : 'bg-logo-blue/[0.18]',
         )}
       />
       <div aria-hidden className="bg-evidence-grid pointer-events-none absolute inset-0 opacity-[0.05]" />

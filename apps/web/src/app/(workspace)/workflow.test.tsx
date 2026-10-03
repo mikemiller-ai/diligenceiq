@@ -1,9 +1,9 @@
 import type * as React from 'react';
 import { OTHER_RISKS_LABEL, SIGNAL_CATEGORY_LABELS, type CompanyIntelligenceProfile } from '@diligenceiq/core';
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { IntelligenceDashboard } from '@/components/intelligence/dashboard';
+import { IntelligenceDashboard, PERFORMANCE_METRICS } from '@/components/intelligence/dashboard';
 import { FIXTURE_PROFILES } from '@/fixtures/profiles';
 import { unsourcedFigures } from '@/test/figures';
 import { nav, setRoute } from '@/test/navigation-mock';
@@ -26,6 +26,11 @@ beforeEach(() => {
   nav.push.mockReset();
 });
 afterEach(() => fetchSpy.mockRestore());
+
+/** Opens every "Show all …" toggle inside `el`, so assertions see every item (DD-21 progressive disclosure). */
+function expandAll(el: HTMLElement) {
+  for (const b of within(el).queryAllByRole('button', { name: /^Show all \d+/ })) fireEvent.click(b);
+}
 
 describe('Company Intelligence', () => {
   it('features deep-coverage companies with Apple first and searches all companies', async () => {
@@ -80,6 +85,8 @@ describe('Company Intelligence', () => {
     // heading, then the unclassified headings under "Other risks", last.
     const aapl = FIXTURE_PROFILES.get('AAPL')!;
     const risks = screen.getByRole('heading', { name: 'Current risks' }).closest('section')!;
+    // Each area shows its first heading; "Show all N headings" reveals the rest (DD-21).
+    expandAll(risks);
     const groups = within(risks).getAllByRole('region').map((r) => r.getAttribute('aria-label'));
     const classified = [...new Set(aapl.currentRisks.flatMap((r) => (r.category ? [SIGNAL_CATEGORY_LABELS[r.category]] : [])))];
     expect(aapl.currentRisks.some((r) => r.category === null)).toBe(true);
@@ -119,7 +126,8 @@ describe('Company Intelligence', () => {
     renderInWorkspace(<IntelligenceView />);
     const table = screen.getByRole('table', { name: /performance/ });
     expect(within(table).queryByText('Not extracted')).not.toBeInTheDocument();
-    expect(within(table).getAllByText('Placeholder, not filing data')).toHaveLength(20);
+    // Two slots (trend, latest value) for each of the performance metrics.
+    expect(within(table).getAllByText('Placeholder, not filing data')).toHaveLength(2 * PERFORMANCE_METRICS.length);
   });
 
   it('labels profile evidence as filing text, not as passages supplied to a model', async () => {
@@ -137,6 +145,8 @@ describe('Company Intelligence', () => {
     setRoute('/intelligence/', 'ticker=AAPL');
     renderInWorkspace(<IntelligenceView />);
     const list = screen.getByRole('heading', { name: 'Recommended diligence' }).closest('section')!;
+    expandAll(list);
+    expandAll(screen.getByRole('heading', { name: 'Current risks' }).closest('section')!);
     expect(list).not.toHaveTextContent(/Templated|heading/);
     // One evidence chip per cited chunk; every recommendation cites at least one.
     const recs = FIXTURE_PROFILES.get('AAPL')!.recommendedDiligence;
@@ -168,6 +178,25 @@ describe('Company Intelligence', () => {
     setRoute('/intelligence/', `ticker=${ticker}`);
     const { container } = renderInWorkspace(<IntelligenceView />);
     expect(unsourcedFigures(container, FIXTURE_PROFILES.get(ticker)!)).toEqual([]);
+  });
+
+  it('the figure rule sees every item, folded ones included: all preview risk headings and recommendations are in the scanned DOM', () => {
+    // Folded items stay in the DOM with `hidden` (DD-21), so the check above covers them without expanding anything.
+    let headings = 0;
+    let recommendations = 0;
+    for (const [ticker, p] of FIXTURE_PROFILES) {
+      setRoute('/intelligence/', `ticker=${ticker}`);
+      const { container, unmount } = renderInWorkspace(<IntelligenceView />);
+      const text = container.textContent ?? '';
+      for (const r of p.currentRisks) expect(text, `${ticker}: ${r.heading}`).toContain(r.heading);
+      for (const r of p.recommendedDiligence) expect(text, `${ticker}: ${r.question}`).toContain(r.question);
+      // Some of them are folded: the scan really does include hidden items.
+      expect(container.querySelectorAll('li[hidden]').length, ticker).toBeGreaterThan(0);
+      headings += p.currentRisks.length;
+      recommendations += p.recommendedDiligence.length;
+      unmount();
+    }
+    expect([headings, recommendations]).toEqual([77, 17]);
   });
 
   it('the figure check catches figures React splits across text nodes, and other figure forms', () => {

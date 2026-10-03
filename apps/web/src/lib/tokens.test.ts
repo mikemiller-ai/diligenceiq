@@ -5,11 +5,17 @@ import { describe, expect, it } from 'vitest';
 // Contrast targets from docs/design-tokens.md (Evidence system), checked against the CSS that ships.
 const css = readFileSync(join(__dirname, '../app/globals.css'), 'utf8');
 const root = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')));
-const token = (name: string): string => {
+type Mode = 'light' | 'dark';
+/** A token's value in one mode. Mode-varying tokens are `light-dark(#LIGHT, #DARK)`; constants are a bare hex. */
+const valueIn = (name: string, mode: Mode): string => {
+  const pair = root.match(new RegExp(`--${name}:\\s*light-dark\\(\\s*(#[0-9a-fA-F]{6})\\s*,\\s*(#[0-9a-fA-F]{6})\\s*\\)`));
+  if (pair?.[1] && pair[2]) return mode === 'light' ? pair[1] : pair[2];
   const m = root.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})\\b`));
   if (!m?.[1]) throw new Error(`token --${name} not found`);
   return m[1];
 };
+const token = (name: string): string => valueIn(name, 'light');
+const dark = (name: string): string => valueIn(name, 'dark');
 
 const channels = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
 
@@ -88,6 +94,23 @@ describe('design token contrast (WCAG 2.1)', () => {
     }
   });
 
+  it('direction chips (DD-21) put their ink on their own tint at 4.5:1 or better, and the active jump-bar count clears 4.5:1', () => {
+    const chips: [string, string, number][] = [
+      ['ok-ink', 'ok', 0.12],
+      ['risk-med-ink', 'risk-med', 0.15],
+      ['destructive-ink', 'destructive', 0.1],
+      ['primary', 'primary', 0.1],
+      ['muted-foreground', 'secondary', 1],
+    ];
+    for (const [ink, tint, alpha] of chips) {
+      expect(contrast(token(ink), over(token(tint), alpha, token('card'))), `${ink} on ${tint}/${alpha}`).toBeGreaterThanOrEqual(4.5);
+    }
+    // The plain status hue is not enough on its tint, which is why the ink tokens exist.
+    expect(contrast(token('destructive'), over(token('destructive'), 0.1, token('card')))).toBeLessThan(4.5);
+    // Active jump link: primary-foreground on primary, its count on primary-foreground/20 over primary.
+    expect(contrast(token('primary-foreground'), over(token('primary-foreground'), 0.2, token('primary')))).toBeGreaterThanOrEqual(4.5);
+  });
+
   it('text on the navy grounds and the rail reaches 4.5:1', () => {
     for (const ground of ['navy', 'rail']) {
       expect(contrast(token('on-navy-accent'), token(ground))).toBeGreaterThanOrEqual(4.5);
@@ -96,6 +119,67 @@ describe('design token contrast (WCAG 2.1)', () => {
       // Secondary copy on navy is white at 55–70%.
       expect(contrast(over('#ffffff', 0.55, token(ground)), token(ground))).toBeGreaterThanOrEqual(4.5);
     }
+  });
+});
+
+describe('dark palette contrast (WCAG 2.1)', () => {
+  const grounds = ['background', 'card', 'popover', 'secondary', 'muted'];
+
+  it('declares the three theme states: System by default, light and dark by attribute', () => {
+    expect(root).toMatch(/color-scheme:\s*light dark/);
+    expect(css).toMatch(/:root\[data-theme='light'\]\s*\{\s*color-scheme:\s*light;/);
+    expect(css).toMatch(/:root\[data-theme='dark'\]\s*\{\s*color-scheme:\s*dark;/);
+  });
+
+  it.each(['foreground', 'muted-foreground', 'primary', 'destructive', 'accent-foreground'])(
+    'text token --%s reaches 4.5:1 on every dark ground',
+    (fg) => {
+      for (const bg of grounds) expect(contrast(dark(fg), dark(bg))).toBeGreaterThanOrEqual(4.5);
+    },
+  );
+
+  it('secondary body text (foreground at 80%) reaches 4.5:1 in dark', () => {
+    for (const bg of grounds) expect(contrast(over(dark('foreground'), 0.8, dark(bg)), dark(bg))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('raised surfaces are lighter than the ground (elevation order holds in dark)', () => {
+    expect(luminance(dark('card'))).toBeGreaterThan(luminance(dark('background')));
+    expect(luminance(dark('popover'))).toBeGreaterThan(luminance(dark('card')));
+    expect(luminance(dark('secondary'))).toBeGreaterThan(luminance(dark('card')));
+  });
+
+  it('the lightened accent takes an ink label at 4.5:1 or better', () => {
+    expect(contrast(dark('primary-foreground'), dark('primary'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(dark('primary-foreground'), dark('primary-hover'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(dark('destructive-foreground'), dark('destructive'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(dark('accent-foreground'), dark('accent'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(dark('primary'), dark('accent'))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('form-control boundaries reach 3:1 on dark cards (WCAG 1.4.11)', () => {
+    expect(contrast(dark('input'), dark('card'))).toBeGreaterThanOrEqual(3);
+  });
+
+  it('status badges keep ink on a tint at 4.5:1, and the dot at 3:1, on a dark card', () => {
+    const tints: [string, number][] = [
+      ['ok', 0.15],
+      ['risk-med', 0.2],
+      ['destructive', 0.1],
+      ['risk-low', 0.15],
+      ['risk-high', 0.15],
+      ['risk-critical', 0.15],
+    ];
+    for (const [status, alpha] of tints) {
+      expect(contrast(dark('foreground'), over(dark(status), alpha, dark('card')))).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(dark(status), dark('card'))).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('navy grounds and brand fills do not vary by mode', () => {
+    for (const name of ['navy', 'navy-raised', 'rail', 'rail-ink', 'rail-muted', 'on-navy-accent', 'on-navy-ink', 'sapphire', 'logo-blue']) {
+      expect(dark(name)).toBe(token(name));
+    }
+    expect(token('sapphire').toLowerCase()).toBe(token('primary').toLowerCase());
   });
 });
 

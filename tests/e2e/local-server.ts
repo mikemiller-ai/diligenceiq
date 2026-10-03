@@ -18,7 +18,7 @@
  */
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, resolve } from 'node:path';
 import { MemoryAnalysisStore } from '../../services/api/src/analyses/store';
 import { DEFAULT_CAPS, createApp } from '../../services/api/src/app';
 import { createProfileProvider, dirSetReader } from '../../services/api/src/profiles/provider';
@@ -105,10 +105,12 @@ const app = createApp({
       setTimeout(() => void stubWorker(workspaceId, analysisId), 50);
     },
   },
-  // E2E_PROFILE_SET / E2E_PROFILE_ROOT preview a locally built set (pnpm intelligence:build); the e2e suite uses the committed fixture set.
+  // The main suite uses the committed preview (fixture) set. E2E_PROFILE_SET / E2E_PROFILE_ROOT switch
+  // to another set: the "built-profiles" Playwright project serves the committed built test set
+  // (tests/fixtures/built-profile-sets), and a locally built set can be previewed the same way.
   profiles: createProfileProvider({
     pointer: async () => process.env.E2E_PROFILE_SET ?? 'iv-9cf51c066743/fixture-v2',
-    read: dirSetReader(process.env.E2E_PROFILE_ROOT ?? PROFILE_SET_ROOT),
+    read: dirSetReader(process.env.E2E_PROFILE_ROOT ? resolve(process.env.E2E_PROFILE_ROOT) : PROFILE_SET_ROOT),
   }),
   seed: SEED,
   indexVersion: 'iv-9cf51c066743',

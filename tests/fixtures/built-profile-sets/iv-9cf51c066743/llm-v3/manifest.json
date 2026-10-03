@@ -1,0 +1,100 @@
+{
+ "indexVersion": "iv-9cf51c066743",
+ "profileSetId": "llm-v3",
+ "builtAt": "2026-10-02T22:11:01.780Z",
+ "runId": "2026-10-02T22-11-01-779Z-a7b3eb28",
+ "templateVersion": "2",
+ "validatorVersion": "2",
+ "profilePromptVersion": "3",
+ "ledgerBucket": "diligenceiq-core-databuckete3889a50-cto74g4tj9kn",
+ "note": "TEST-ONLY subset of iv-9cf51c066743/llm-v3: AAPL, TSLA, JPM, copied verbatim by pnpm fixtures:test-profiles. Never upload.",
+ "companies": [
+  {
+   "ticker": "AAPL",
+   "company": "Apple Inc",
+   "sector": "Information Technology",
+   "tier": "deep",
+   "filings": 16,
+   "periodsCovered": [
+    "2022-09-24",
+    "2023-09-30",
+    "2024-09-28",
+    "2025-09-27"
+   ],
+   "mode": "llm",
+   "generationCallCount": 1,
+   "validation": {
+    "invalidCitations": 0,
+    "unsupportedFigures": 0,
+    "bannedPhrases": 0
+   },
+   "signals": 10,
+   "facts": 41,
+   "modelId": "us.anthropic.claude-sonnet-4-6",
+   "inputTokens": 22429,
+   "outputTokens": 4429,
+   "durationMs": 59491,
+   "ledgerRunId": "2026-10-02T20-59-02-412Z-fe926752",
+   "reusedOutcome": true,
+   "promptVerified": false,
+   "headline": "Apple's revenue grew faster than the year before in FY2025, net margin improved by 2.9 pp, but Greater China declined and operating cash flow fell—while a broad set of regulatory, competitive, and supply-chain risks has persisted across every annual report in the coverage period."
+  },
+  {
+   "ticker": "JPM",
+   "company": "JPMorgan Chase & Co",
+   "sector": "Financials",
+   "tier": "partial",
+   "filings": 4,
+   "periodsCovered": [
+    "2025-12-31"
+   ],
+   "mode": "llm",
+   "generationCallCount": 1,
+   "validation": {
+    "invalidCitations": 0,
+    "unsupportedFigures": 0,
+    "bannedPhrases": 0
+   },
+   "signals": 2,
+   "facts": 6,
+   "modelId": "us.anthropic.claude-sonnet-4-6",
+   "inputTokens": 20841,
+   "outputTokens": 2178,
+   "durationMs": 29921,
+   "ledgerRunId": "2026-10-02T21-03-14-550Z-8c72cfc8",
+   "reusedOutcome": true,
+   "promptVerified": false,
+   "headline": "JPMorgan Chase posted its highest-ever annual revenue in FY2025, but revenue growth slowed sharply and net income declined modestly as rising credit losses and expenses offset top-line gains."
+  },
+  {
+   "ticker": "TSLA",
+   "company": "Tesla Inc",
+   "sector": "Consumer Discretionary",
+   "tier": "deep",
+   "filings": 16,
+   "periodsCovered": [
+    "2022-12-31",
+    "2023-12-31",
+    "2024-12-31",
+    "2025-12-31"
+   ],
+   "mode": "llm",
+   "generationCallCount": 1,
+   "validation": {
+    "invalidCitations": 0,
+    "unsupportedFigures": 0,
+    "bannedPhrases": 0
+   },
+   "signals": 11,
+   "facts": 42,
+   "modelId": "us.anthropic.claude-sonnet-4-6",
+   "inputTokens": 20261,
+   "outputTokens": 3915,
+   "durationMs": 48677,
+   "ledgerRunId": "2026-10-02T21-03-14-550Z-8c72cfc8",
+   "reusedOutcome": true,
+   "promptVerified": false,
+   "headline": "Tesla's full-year revenue turned declining in FY2025 even as the most recent quarter showed growing revenue, while operating and net margins fell sharply and persistent supply chain, competition, and regulatory risks continued across all four annual reports in the corpus."
+  }
+ ]
+}

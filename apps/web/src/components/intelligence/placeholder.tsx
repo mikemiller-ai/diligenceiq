@@ -21,8 +21,12 @@ export function ModelWrittenBadge({ children = 'Model-written' }: { children?: R
   return <Badge tone="outline">{children}</Badge>;
 }
 
-export function FilingTextBadge() {
-  return <Badge tone="outline">Filing text</Badge>;
+export function FilingTextBadge({ className }: { className?: string } = {}) {
+  return (
+    <Badge tone="outline" className={className}>
+      Filing text
+    </Badge>
+  );
 }
 
 /**

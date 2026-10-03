@@ -190,3 +190,22 @@ test('Findings: the seeded board, save from Company Intelligence, filter, group,
   await page.getByRole('dialog').getByRole('button', { name: 'Reset workspace' }).click();
   await expect(page.getByText(`${SEED.findings.length} findings`)).toBeVisible();
 });
+
+test('Company Intelligence: Show all reveals every risk heading with its actions, and focus moves to the first one revealed (DD-21)', async ({ page }) => {
+  await page.goto('/intelligence/?ticker=AAPL');
+  await settle(page);
+  const risks = page.locator('section[aria-labelledby="current-risks"]');
+  const before = await risks.getByRole('link', { name: /Investigate/ }).count();
+  // Clicking renames the button ("Show fewer…"), so always click the first one left.
+  const showAll = risks.getByRole('button', { name: /^Show all \d+ headings/ });
+  const first = showAll.first();
+  await first.click();
+  // Focus lands on the first heading the click revealed, not back at the top.
+  await expect(page.locator(':focus')).toHaveCount(1);
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('LI');
+  while ((await showAll.count()) > 0) await showAll.first().click();
+  const after = await risks.getByRole('link', { name: /Investigate/ }).count();
+  expect(after).toBeGreaterThan(before);
+  expect(after).toBe(await risks.locator('blockquote').count());
+  await expectNoAxeViolations(page);
+});

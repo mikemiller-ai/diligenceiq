@@ -232,9 +232,9 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
         )}
       </div>
 
-      <header className="print-light relative overflow-hidden rounded-2xl bg-navy text-white shadow-xl shadow-navy/20">
+      <header className="print-light relative overflow-hidden rounded-2xl bg-navy text-white shadow-xl shadow-navy/20 ring-1 ring-navy-edge">
         <NavyAtmosphere subtle />
-        <div className="relative flex flex-wrap items-center gap-3 border-b border-white/10 bg-gradient-to-r from-primary/25 to-transparent px-6 py-3">
+        <div className="relative flex flex-wrap items-center gap-3 border-b border-white/10 bg-gradient-to-r from-sapphire/25 to-transparent px-6 py-3">
           <span className="grid size-7 place-items-center rounded-lg bg-brand-gradient">
             <FileText aria-hidden className="size-3.5" />
           </span>

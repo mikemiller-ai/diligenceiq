@@ -13,7 +13,7 @@ The tokens are CSS custom properties in `apps/web/src/app/globals.css` and are m
 - **Accent as text in one place.** The mono eyebrow is the only place the brand colour appears as running text. Links and chips use `--primary` as an interactive colour.
 - **Status is a fill, never a word.** A status colour is a tinted background with ink text on it and a coloured dot.
 - **Evidence is first-class.** Citation chips are mono and labelled `§ AAPL FY2025 · 1A`, and the full chunk ID stays in the accessible name. Each chip opens the evidence drawer, which has a navy header, a "Validated — supplied to the model" pill, the quote in a `--secondary` panel, and mono metadata.
-- **Light theme for v1.** Dark mode is deferred. When added, it is a real palette (the accent lightens and takes an ink label), not an inversion.
+- **Light and dark.** Both are authored palettes, not an inversion: in dark the accent lightens and takes an ink label. The navy grounds are the same in both modes. See Dark mode below.
 
 ## Color
 
@@ -45,12 +45,62 @@ That puts it inside the kit's 8–15 band from the nearest sibling. The test rep
 | `--rail-ink` / `--rail-muted` | `#C3CBE0` / `#8C95AE` | Rail text | 11.6 / 6.3 on rail |
 | `--on-navy-accent` | `#8BA1F9` | Eyebrows and links on navy | 8.0 on navy |
 | `--ok`, `--risk-low/med/high/critical` | `#30A66D`, `#12A594`, `#E0A838`, `#F58129`, `#E5484D` | Status fills and dots (ResolveIQ scale) | ink on tint ≥ 14 |
+| `--ok-ink`, `--risk-med-ink`, `--destructive-ink` | `#1F7A4F`, `#8A5A00`, `#B91C26` | Direction-chip text on its own tint (DD-21: up, slowing, down); the plain hue is too light for a 12px word there | 4.7 on ok/12, 5.3 on risk-med/15, 5.5 on destructive/10 |
 
 **Gradients.**
 - `--gradient-brand`: `135deg #2B48CA → #1E58F7`. It runs from Sapphire to the mikemiller.ai logo blue and is the family's only all-blue brand gradient. It is used on the brand tile, primary CTAs, the active-nav marker and the progress fill. White text is ≥ 5.5:1 at both ends.
 - `--gradient-hero-text`: `90deg #9CB2FC → #B7A4FA`. It is used only for the emphasised hero phrase on navy.
 - `--gradient-banner`: the closing band, derived from the identity `--mm-banner`.
 - `--gradient-wash`: a faint 103° Sapphire wash on stat tiles and pinned findings.
+
+## Dark mode
+
+Dark mode follows the CareerOps pattern, as on Mike's other products: a three-state **System / Light / Dark** choice. **System** is the default and follows the OS (`prefers-color-scheme`).
+
+**How it works.**
+- **One definition per colour.** Every mode-varying token is written once as `light-dark(LIGHT, DARK)` in `apps/web/src/app/globals.css`. `:root { color-scheme: light dark }` makes it follow the OS. `:root[data-theme='light']` and `:root[data-theme='dark']` pin `color-scheme`. There is no second palette under a media query plus an attribute selector, so there is only one place to edit and nothing to drift.
+- **The toggle.** `components/ui/theme-toggle.tsx` is a compact icon radiogroup ("Colour theme": sun, monitor, moon) in the app shell's top bar, next to "Ask a question". An `onNavy` variant sits in the landing and Architecture headers. Only the checked option is in the tab order, and the arrow keys move and select.
+  - Light and Dark set `data-theme` on `<html>` and store the choice in `localStorage` under `diligenceiq:theme`. Each access is wrapped in try/catch, so blocked storage still applies the choice to the page.
+  - System removes both the attribute and the stored value.
+  - The choice is read with `useSyncExternalStore`. A same-tab write dispatches `diligenceiq:themechange`, and other tabs follow through `storage`.
+- **No flash.** `lib/theme-script.ts` exports `THEME_SCRIPT`, a single string that the root layout renders inline in `<head>` (`<html suppressHydrationWarning>`). It stamps the stored choice before first paint.
+  - **The Phase 7 CSP must allow it by SHA-256 hash** (assumptions D10; architecture §11). Editing the string changes the hash.
+- **Print** always uses the light palette.
+
+**Rules.**
+- **The navy grounds do not vary.** These are the hero, the closing band, "Shows its work", the Company Intelligence and Diligence Brief headers, the evidence drawer header, the rail and the tooltip. They are already dark.
+  - Brand fills on navy use the constants `--sapphire` and `--logo-blue`, never `--primary`, which lightens in dark.
+  - Chip and icon ink on a sapphire tint uses `--on-navy-ink` (`#C7D2FE`), not a hex literal.
+- **Elevation stays ordered in dark:** ground < card < secondary/popover. A raised surface is lighter than the ground, never darker (asserted in `tokens.test.ts`).
+  - A navy panel on the dark ground is 1.04:1, so navy cards and the rail take a `--navy-edge` hairline. It is `#2A3350` in dark and transparent in light.
+- **The accent lightens and takes an ink label.** In dark, `--primary` is `#8197F8`, the `--on-navy-accent` family, so `text-primary` links and eyebrows stay readable. Fills on it use `text-primary-foreground` (ink `#0A0B13` in dark), never `text-white`.
+  - The brand gradient (`--gradient-brand`) keeps white labels in both modes.
+- **Status keeps "tinted fill with a dot".** The label stays `--foreground` in both modes. The status hues lift slightly in dark so the dot and icons stay ≥ 3:1 on a dark card.
+- **Components never name a hex value or `bg-white` / `text-black`.** White at an alpha (`text-white/70`, `border-white/10`) is allowed only on the navy grounds.
+
+| Token | Light | Dark | Dark contrast |
+|---|---|---|---|
+| `--background` | `#F3F4F8` | `#0B1020` | — |
+| `--card` | `#FFFFFF` | `#131A2C` | — |
+| `--popover` | `#FFFFFF` | `#182035` | — |
+| `--secondary` / `--muted` | `#F6F6FA` / `#F3F3F8` | `#1A2236` / `#182033` | — |
+| `--foreground` | `#14151F` | `#E7EAF3` | 15.7 on bg, 14.4 on card, ≥ 13.2 on every ground; at 80%, ≥ 8.9 |
+| `--muted-foreground` | `#5C6070` | `#9BA4BA` | 7.6 on bg, 6.9 on card, ≥ 6.3 on every ground |
+| `--primary` (text, ring) | `#2B48CA` | `#8197F8` | 7.0 on bg, 6.4 on card, ≥ 5.8 on every ground, 5.3 on `--accent` |
+| `--primary-foreground` | `#FFFFFF` | `#0A0B13` | ink label 7.2 on primary, 9.8 on `--primary-hover` (`#A3B4FB`) |
+| `--accent` / `--accent-foreground` | `#EDF0FD` / `#2B48CA` | `#1C2752` / `#B4C2FC` | 8.3 |
+| `--destructive` / `-foreground` | `#D42531` / `#FFFFFF` | `#F26B70` / `#0A0B13` | 5.9 on card (≥ 5.4 on every ground); ink label 6.7 |
+| `--border` | `#E6E7F0` | `#252E45` | decorative |
+| `--input` | `#84899C` | `#6D7794` | 3.9 on card (WCAG 1.4.11) |
+| `--ok` | `#30A66D` | `#3DBF80` | ink on a 15% tint 11.1; dot 7.4 |
+| `--risk-low` | `#12A594` | `#2AC2AE` | dot 7.8 |
+| `--risk-med` | `#E0A838` | `#E8B04A` | ink on a 20% tint 9.6; dot 8.9 |
+| `--risk-high` | `#F58129` | `#F8934A` | dot 7.6 |
+| `--risk-critical` | `#E5484D` | `#F0676B` | ink on a 15% tint 11.8; dot 5.7 |
+| `--navy-edge` | transparent | `#2A3350` | 1.5 against the ground (a hairline) |
+| `--navy`, `--rail`, `--on-navy-*`, `--sapphire`, `--logo-blue` | unchanged | unchanged | `--on-navy-ink` on a 30% sapphire tint over navy is 10.8 |
+
+`src/lib/tokens.test.ts` asserts these pairs against both halves of every `light-dark()` pair. The Playwright spec `tests/e2e/local/dark-mode.spec.ts` runs axe (WCAG 2.1 A/AA) in dark mode, reached both through the OS setting and through `data-theme=dark` over a light OS. It covers the landing, `/intelligence/?ticker=AAPL`, a seeded brief, the source view with a highlighted passage, and the evidence drawer with its period comparison. `DARK_SCREENSHOTS=1 pnpm exec playwright test tests/e2e/local/dark-mode.spec.ts` writes screenshots of both modes to `test-results/dark-mode/`.
 
 ## Typography
 - **Geist** (sans) and **Geist Mono**, self-hosted via `@fontsource-variable/*`, with no network fetch at build time. These are the product voice in the kit.
@@ -64,7 +114,7 @@ That puts it inside the kit's 8–15 band from the nearest sibling. The test rep
 - **Elevation:** cards use `shadow-sm`. Navy analysis cards use a soft navy shadow. Primary CTAs use `--shadow-cta`, a Sapphire glow.
 
 ## Layout
-- **App shell** (revised for DD-15): a navy rail (240px, collapsible to 64px) with the gradient brand tile, the "DiligenceIQ" wordmark (IQ in `--on-navy-accent`), a mono "Intelligence" group label over the primary nav (Company Intelligence, Compare, Deep Analysis, Findings; Thesis and Watchlist join in Phase 8b), a secondary group (Architecture), and active items with a 3px gradient marker. There is no engagement card. The top bar is translucent white with a mono company breadcrumb (`Company Intelligence / Apple · AAPL`) and a gradient **"Ask a question"** CTA that opens an empty Deep Analysis.
+- **App shell** (revised for DD-15): a navy rail (240px, collapsible to 64px) with the gradient brand tile, the "DiligenceIQ" wordmark (IQ in `--on-navy-accent`), a mono "Intelligence" group label over the primary nav (Company Intelligence, Compare, Deep Analysis, Findings; Thesis and Watchlist join in Phase 8b), a secondary group (Architecture), and active items with a 3px gradient marker. There is no engagement card. The top bar is a translucent `--card` with a mono company breadcrumb (`Company Intelligence / Apple · AAPL`), the colour-theme toggle and a gradient **"Ask a question"** CTA that opens an empty Deep Analysis.
 - **Provenance labels, not a permanent badge.** There is no global "Sample data" badge. Phase 1 fixture slots carry an inline "Placeholder, not filing data" label (muted, dashed border) and disappear once real profiles load. Seeded analyses and findings carry a small "Seeded from a real pipeline run" chip. Deterministic "why this matters" text carries a "General context" label (DD-16). The profile's `generation.mode` is shown in the dashboard footer.
 - **Brief:** a navy header card holds the title, question, mono metadata, executive summary with on-navy chips, and resolved scope. It is followed by light key-finding, comparison, consideration and gap sections, and a sticky Sources panel.
 

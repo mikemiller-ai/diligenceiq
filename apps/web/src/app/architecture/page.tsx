@@ -5,6 +5,7 @@ import { EvidenceCard, Eyebrow, NavyAtmosphere, Section } from '@/components/evi
 import { BrandMark, Wordmark } from '@/components/shell/brand';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export const metadata: Metadata = { title: 'Architecture and business value' };
 
@@ -109,6 +110,7 @@ export default function ArchitecturePage() {
                   <span className="max-sm:sr-only">Ask a question</span>
                 </Link>
               </Button>
+              <ThemeToggle onNavy />
             </div>
           </header>
           <div className="max-w-3xl py-16 sm:py-20">
@@ -185,10 +187,10 @@ export default function ArchitecturePage() {
             return (
               <li
                 key={f.step}
-                className={generate ? 'rounded-xl border border-primary/50 bg-primary/20 p-4 shadow-cta' : 'rounded-xl border border-white/10 bg-white/[0.03] p-4'}
+                className={generate ? 'rounded-xl border border-sapphire/50 bg-sapphire/20 p-4 shadow-cta' : 'rounded-xl border border-white/10 bg-white/[0.03] p-4'}
               >
                 <span
-                  className={`grid size-7 place-items-center rounded-md font-mono text-[11px] ${generate ? 'bg-brand-gradient text-white' : 'bg-primary/30 text-[#c7d2fe]'}`}
+                  className={`grid size-7 place-items-center rounded-md font-mono text-[11px] ${generate ? 'bg-brand-gradient text-white' : 'bg-sapphire/30 text-on-navy-ink'}`}
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>

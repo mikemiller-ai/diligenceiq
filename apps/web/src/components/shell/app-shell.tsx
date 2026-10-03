@@ -5,6 +5,7 @@ import Link from 'next/link';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { EvidenceProvider } from '@/components/diligence/evidence';
 import { useRecordPageViews } from '@/lib/in-app-history';
@@ -59,7 +60,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
       </Sheet>
 
       <div className={cn('flex min-h-dvh flex-col transition-[padding] duration-200 ease-out', collapsed ? 'md:pl-16' : 'md:pl-60')}>
-        <header className="no-print sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card/85 px-4 backdrop-blur-md md:px-8">
+        <header className="no-print sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card/90 px-4 backdrop-blur-md md:px-8">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -77,6 +78,7 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
             Know what changed · Know what matters · Know what to investigate next
           </p>
           <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle />
             {/* Global primary action (SPEC §5.2): an empty Deep Analysis from any page. */}
             <Button asChild size="sm" variant="brand" className="shadow-none max-sm:size-8 max-sm:px-0">
               <Link href="/analysis/new/" aria-label="Ask a question">

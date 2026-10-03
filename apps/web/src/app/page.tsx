@@ -25,6 +25,7 @@ import { companies } from '@/fixtures';
 import { SEEDED_QUESTIONS } from '@/components/landing/seeded-questions';
 import { BrandMark, Wordmark } from '@/components/shell/brand';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { corpusStats } from '@/lib/corpus-stats';
 import { formatCount } from '@/lib/format';
 import { launchFilmAssets } from '@/lib/launch-film';
@@ -108,6 +109,7 @@ export default function LandingPage() {
               <Network className="size-3.5" />
               <span>How it works</span>
             </Link>
+            <ThemeToggle onNavy className="ml-1" />
           </nav>
         </div>
       </header>
@@ -220,7 +222,7 @@ export default function LandingPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {EVIDENCE.map((e) => (
               <div key={e.title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <span className="grid size-9 place-items-center rounded-lg bg-primary/30 text-[#c7d2fe]">
+                <span className="grid size-9 place-items-center rounded-lg bg-sapphire/30 text-on-navy-ink">
                   <e.icon aria-hidden className="size-4" />
                 </span>
                 <h3 className="mt-3 text-[15px] font-semibold tracking-tight text-white">{e.title}</h3>

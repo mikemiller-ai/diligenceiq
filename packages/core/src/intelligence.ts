@@ -383,3 +383,57 @@ export const ProfileSetManifestSchema = z.object({
   ),
 });
 export type ProfileSetManifest = z.infer<typeof ProfileSetManifestSchema>;
+
+/**
+ * A driver's change and share, read back from its deterministic `changeBasis` line
+ * (`"$167,045 million in FY2024 to $178,353 million in FY2025 (+6.8%); 42.9% of revenue in FY2025."`,
+ * written by the profile builder). Both in percent, signs kept (an eliminations line can carry a
+ * negative share); null when the line does not state one (a driver with no prior-year value). The
+ * builder's format is pinned to this parser by a test in packages/rag.
+ */
+export function parseDriverChangeBasis(changeBasis: string): { changePct: number | null; share: number | null } {
+  const change = /\(([+-]?\d+(?:\.\d+)?)%\)/.exec(changeBasis);
+  const share = /(-?\d+(?:\.\d+)?)% of revenue in /.exec(changeBasis);
+  return { changePct: change ? Number(change[1]) : null, share: share ? Number(share[1]) : null };
+}
+
+/**
+ * A trend's `basis` line, read back (DD-21). The builder writes three fixed formats
+ * (packages/corpus `trends.ts`, pinned to this parser by a test in packages/rag):
+ * - growth: `Growth of 6.4% in FY2025, after 2.0% in FY2024 (growing: above 2.0%).`
+ * - margin: `26.9% in FY2025 vs 24.0% in FY2024, a change of 2.9 pp (improving: threshold 1.0 pp).`
+ * - quarter: `FY2026Q1 15.7% versus FY2025Q1 (growing; stable within ±2.0%).`
+ * Numbers are in percent (or percentage points) as written, rounded to 0.1. Null for any other text.
+ */
+export type TrendBasis =
+  | { kind: 'growth'; pct: number; period: string; priorPct: number | null; priorPeriod: string | null; trajectory: Trajectory }
+  | { kind: 'margin'; latest: number; period: string; prior: number; priorPeriod: string; changePp: number; trajectory: Trajectory }
+  | { kind: 'quarter'; pct: number; period: string; priorPeriod: string; trajectory: Trajectory };
+
+const NUM = '(-?\\d+(?:\\.\\d+)?)';
+const GROWTH_BASIS = new RegExp(`^Growth of ${NUM}% in (FY\\d{4})(?:, after ${NUM}% in (FY\\d{4}))? \\((\\w+): [^)]*\\)\\.$`);
+const MARGIN_BASIS = new RegExp(`^${NUM}% in (FY\\d{4}) vs ${NUM}% in (FY\\d{4}), a change of ${NUM} pp \\((\\w+): [^)]*\\)\\.$`);
+const QUARTER_BASIS = new RegExp(`^(FY\\d{4}Q\\d) ${NUM}% versus (FY\\d{4}Q\\d) \\((\\w+); [^)]*\\)\\.$`);
+const trajectoryOf = (s: string | undefined): Trajectory | null => {
+  const t = TrajectorySchema.safeParse(s);
+  return t.success ? t.data : null;
+};
+
+export function parseTrendBasis(basis: string): TrendBasis | null {
+  let m = GROWTH_BASIS.exec(basis);
+  if (m) {
+    const trajectory = trajectoryOf(m[5]);
+    return trajectory && { kind: 'growth', pct: Number(m[1]), period: m[2]!, priorPct: m[3] === undefined ? null : Number(m[3]), priorPeriod: m[4] ?? null, trajectory };
+  }
+  m = MARGIN_BASIS.exec(basis);
+  if (m) {
+    const trajectory = trajectoryOf(m[6]);
+    return trajectory && { kind: 'margin', latest: Number(m[1]), period: m[2]!, prior: Number(m[3]), priorPeriod: m[4]!, changePp: Number(m[5]), trajectory };
+  }
+  m = QUARTER_BASIS.exec(basis);
+  if (m) {
+    const trajectory = trajectoryOf(m[4]);
+    return trajectory && { kind: 'quarter', period: m[1]!, pct: Number(m[2]), priorPeriod: m[3]!, trajectory };
+  }
+  return null;
+}
