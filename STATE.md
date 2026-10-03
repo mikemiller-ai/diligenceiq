@@ -3,11 +3,11 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `dfff25e` (Phase 4b); go-live recorded `059ebbd`. Phase 6 is in the working tree, uncommitted (awaiting Mike's go-ahead). Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
+`main` (no remote yet). Last code commit: `bdd817e` (Phase 6). Phase 4b: `dfff25e`; go-live recorded `059ebbd`. Landing: `950a021`. Phase 5: `fb54e18` (+ cap `2a4524c`). Phase 4: `9699b3b`, `ab5de38`.
 
 ## Current phase
-**Phase 6 (evidence: adjacent periods, readable source view, coverage matrix linked to evidence, citation integrity) is built and gated (`pnpm gate` exit 0, 2026-10-02), not yet committed or deployed.** Handoff: `docs/handoffs/phase-06.md`.
-- Production runs the Phase 4b go-live build: active profile set `iv-9cf51c066743/llm-v3` (SSM parameter version 5, re-verified read-only 2026-10-02), kill switch `false`, `/api/health` 200. Instant fallback: set the pointer to `iv-9cf51c066743/det-v2`.
+**Phase 6 (evidence: adjacent periods, readable source view, coverage matrix linked to evidence, citation integrity) is built, gated (`pnpm gate` exit 0, 2026-10-02), committed (`bdd817e`) and deployed (2026-10-02).** Handoff: `docs/handoffs/phase-06.md`.
+- Production: active profile set `iv-9cf51c066743/llm-v3` (SSM parameter version 5, re-verified read-only 2026-10-02), kill switch `false`, `/api/health` 200. Instant fallback: set the pointer to `iv-9cf51c066743/det-v2`.
 - Exit criteria: AAPL and JNJ adjacency tested in the gate; seed and fixture-profile citations resolve in the gate; `pnpm evidence:check` (offline) resolves every index chunk, adjacency reference, recorded live-brief citation and det-v2/llm-v3 citation (`evals/results/evidence-iv-9cf51c066743.json`). Production DynamoDB analyses are not covered by a repo check (adversary ID check: all resolve).
 
 ## Gate
@@ -19,9 +19,13 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (1 blocker: typecheck; 2 high: source view ignored the index version, missing-key 403 → 500; 5 medium; 10 low) → fresh fixer (all fixed with tests) → `/code-review` medium (no findings) → `pnpm gate` green.
 
 ## In flight
-- **Commit Phase 6** after Mike's go-ahead.
-- **Deploy Phase 6** (ask Mike first; AWS writes): `pnpm deploy:infra` (api routes + IAM `index/<iv>/adjacency/*`, `processed/<iv>/*`; worker records coverage `chunkIds`) → `pnpm deploy:web` → read-only production smoke: `GET /api/sources/<doc>` span equals a seeded citation's text; `GET /api/evidence/adjacent` on AAPL and JNJ; the JPM 10-K (~1.36 MB) within the 10 s api timeout (record cold latency); a missing document answers `404 SOURCE_MISSING`, not 500 (confirms the 403 mapping on the real role). The S3 data is already in place (adversary: sha256 of all 246 processed and 54 adjacency objects match local).
-- Next phase after the deploy: Phase 7.
+- **Done 2026-10-02 (Mike approved):** `pnpm deploy:infra` (Worker and Api updated; Core and Web unchanged) → `pnpm deploy:web` (Amplify job 5) → production smoke (2 new demo sessions):
+  - all three seeded briefs: every citation and context passage resolves through `GET /api/sources` to its exact span (40/40, 36/36, 37/37); every coverage cell carries `chunkIds`; 200s send `cache-control: private, max-age=3600`;
+  - `GET /api/evidence/adjacent`: AAPL FY2025 10-K 1A (prev FY2024, next null), AAPL FY2024Q2 10-Q MD&A (prev FY2024Q1, next FY2024Q3, same quarter FY2023Q2), JNJ FY2021 10-K MD&A (prev null, next FY2022), JNJ FY2024Q2 10-Q MD&A (FY2024Q1 / FY2024Q3 / FY2023Q2); 320–1,160 ms;
+  - JPM 10-K (1,351,204 bytes, 499 chunks): 1,080 ms first request, 713 ms warm (well inside the 10 s timeout);
+  - a missing document → `404 SOURCE_MISSING` (no 500: the 403 mapping works on the real role); a missing adjacency entry → `404 NOT_FOUND`; another index version → `404 index_version`;
+  - `/sources/filing/` page 200. Kill switch still `false`; pointer still `iv-9cf51c066743/llm-v3`.
+- Next phase: Phase 7.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.

@@ -93,15 +93,8 @@ Phase 6 makes every citation verifiable against the full filing text and against
 - Deep Analysis is unchanged except that it records `chunkIds`.
 - The new comparison view adds insight, including sections that are new this period.
 
-## Not deployed
-Production still runs the Phase 4b go-live build. Deploying Phase 6 needs Mike's approval:
-1. `pnpm deploy:infra`: api routes and IAM, and the worker, so new analyses record `chunkIds`.
-2. `pnpm deploy:web`.
-3. A read-only production smoke:
-   - `GET /api/sources/<doc>` for a seeded citation, checking that the span equals the text;
-   - `GET /api/evidence/adjacent` for AAPL and JNJ;
-   - the largest filing (JPM 10-K, ~1.36 MB) within the 10 s timeout, with its cold latency recorded;
-   - a missing document returning `SOURCE_MISSING`, not 500 (confirms the 403 mapping on the real role).
+## Deployed (2026-10-02, Mike approved)
+`pnpm deploy:infra` (Worker and Api updated) → `pnpm deploy:web` → production smoke (2 new demo sessions): every citation and context passage of the three seeded briefs resolves to its exact span (40/40, 36/36, 37/37); adjacent lookups on AAPL and JNJ match the gate tests; the JPM 10-K (1.35 MB) answers in 1,080 ms cold-ish and 713 ms warm; a missing document is `404 SOURCE_MISSING`, not 500, so the 403 mapping works on the real role. Details in `STATE.md`.
 
 ## Next
-Deploy Phase 6 (above), then Phase 7 (evals for Deep Analysis and profiles, logging, security headers and CSP, Architecture page with measured numbers).
+Phase 7 (evals for Deep Analysis and profiles, logging, security headers and CSP, Architecture page with measured numbers).
