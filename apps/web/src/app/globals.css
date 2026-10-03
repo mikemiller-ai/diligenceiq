@@ -24,12 +24,12 @@
    */
   color-scheme: light dark;
 
-  --background: light-dark(#f3f4f8, #0b1020);
-  --foreground: light-dark(#14151f, #e7eaf3);
-  --card: light-dark(#ffffff, #131a2c);
-  --card-foreground: light-dark(#14151f, #e7eaf3);
-  --popover: light-dark(#ffffff, #182035);
-  --popover-foreground: light-dark(#14151f, #e7eaf3);
+  --background: light-dark(#f0f2f6, #0b1020);
+  --foreground: light-dark(#1e2130, #e7eaf3);
+  --card: light-dark(#fbfbfd, #131a2c);
+  --card-foreground: light-dark(#1e2130, #e7eaf3);
+  --popover: light-dark(#fbfbfd, #182035);
+  --popover-foreground: light-dark(#1e2130, #e7eaf3);
 
   /* Sapphire, hsl(229 65% 48%), white label 7.29:1. In dark the accent lightens and takes
      an ink label (it is both a fill and the colour of links and eyebrows): 6.4:1 on card,
@@ -38,8 +38,8 @@
   --primary-hover: light-dark(#213aab, #a3b4fb); /* white label 9.3:1 / ink label 9.8:1 */
   --primary-foreground: light-dark(#ffffff, #0a0b13);
 
-  --secondary: light-dark(#f6f6fa, #1a2236);
-  --secondary-foreground: light-dark(#1a1c29, #e7eaf3);
+  --secondary: light-dark(#f1f2f7, #1a2236);
+  --secondary-foreground: light-dark(#232636, #e7eaf3);
   --muted: light-dark(#f3f3f8, #182033);
   --muted-foreground: light-dark(#5c6070, #9ba4ba);
   /* shadcn meaning: a soft tinted fill, not the brand colour. */

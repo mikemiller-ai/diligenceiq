@@ -25,19 +25,21 @@ The tokens are CSS custom properties in `apps/web/src/app/globals.css` and are m
 
 That puts it inside the kit's 8–15 band from the nearest sibling. The test reproduces the kit's own calibration figure of 7.2 for mikemiller.ai vs ResolveIQ.
 
+Softer light palette (Mike, 2026-10-03): the light grounds were pure white and the ink near-black (18.2:1), which glared on long pages. Cards became `#FBFBFD`, the ground `#F0F2F6` (not `#EEF0F5` as previewed: the family red needs 4.5:1 on the ground, and it was 4.48 there), banded fills `#F1F2F7` and the ink `#1E2130` (15.4:1 on a card, still above AAA's 7:1). The accents, status hues, navy grounds and dark mode are unchanged.
+
 | Token | Value | Use | Contrast |
 |---|---|---|---|
-| `--background` | `#F3F4F8` | App ground | — |
-| `--card` / `--popover` | `#FFFFFF` | Cards, tables, drawers | — |
-| `--secondary` | `#F6F6FA` | Table heads, quote panels, banded ground | — |
+| `--background` | `#F0F2F6` | App ground | — |
+| `--card` / `--popover` | `#FBFBFD` | Cards, tables, drawers (just off white, to cut glare) | — |
+| `--secondary` | `#F1F2F7` | Table heads, quote panels, banded ground | — |
 | `--muted` | `#F3F3F8` | Neutral fills | — |
-| `--foreground` | `#14151F` | Primary text | 16.5 on bg, 18.2 on card |
-| foreground at 80% | — | Secondary body text | ≥ 8.4 on every ground |
-| `--muted-foreground` | `#5C6070` | Metadata, captions | ≥ 5.4 on every ground |
-| `--primary` | `#2B48CA` | Buttons, links, chips, focus ring | 6.6 on bg, 7.3 on card; white label 7.3 |
+| `--foreground` | `#1E2130` | Primary text | 14.2 on bg, 15.4 on card |
+| foreground at 80% | — | Secondary body text | ≥ 7.8 on every ground |
+| `--muted-foreground` | `#5C6070` | Metadata, captions | ≥ 5.6 on every ground |
+| `--primary` | `#2B48CA` | Buttons, links, chips, focus ring | 6.5 on bg, 7.0 on card; white label 7.3 |
 | `--primary-hover` | `#213AAB` | Hover/pressed | white label 9.3 |
 | `--accent` / `--accent-foreground` | `#EDF0FD` / `#2B48CA` | shadcn soft fill (ticker badges, icon tiles) | 6.4 |
-| `--destructive` | `#D42531` | Errors, invalid citations (family red, `hsl(358 75% 48%)`) | 5.1 on card; white label 5.1 |
+| `--destructive` | `#D42531` | Errors, invalid citations (family red, `hsl(358 75% 48%)`) | 4.9 on card, 4.56 on bg; white label 5.1 |
 | `--border` | `#E6E7F0` | Decorative hairlines | — |
 | `--input` | `#84899C` | Form-control boundaries | ≥ 3:1 on card (WCAG 1.4.11) |
 | `--navy` | `#0A0B13` | Shared Evidence hero and analysis ground (never changes) | — |
@@ -80,11 +82,11 @@ Dark mode follows the CareerOps pattern, as on Mike's other products: a three-st
 
 | Token | Light | Dark | Dark contrast |
 |---|---|---|---|
-| `--background` | `#F3F4F8` | `#0B1020` | — |
-| `--card` | `#FFFFFF` | `#131A2C` | — |
-| `--popover` | `#FFFFFF` | `#182035` | — |
-| `--secondary` / `--muted` | `#F6F6FA` / `#F3F3F8` | `#1A2236` / `#182033` | — |
-| `--foreground` | `#14151F` | `#E7EAF3` | 15.7 on bg, 14.4 on card, ≥ 13.2 on every ground; at 80%, ≥ 8.9 |
+| `--background` | `#F0F2F6` | `#0B1020` | — |
+| `--card` | `#FBFBFD` | `#131A2C` | — |
+| `--popover` | `#FBFBFD` | `#182035` | — |
+| `--secondary` / `--muted` | `#F1F2F7` / `#F3F3F8` | `#1A2236` / `#182033` | — |
+| `--foreground` | `#1E2130` | `#E7EAF3` | 15.7 on bg, 14.4 on card, ≥ 13.2 on every ground; at 80%, ≥ 8.9 |
 | `--muted-foreground` | `#5C6070` | `#9BA4BA` | 7.6 on bg, 6.9 on card, ≥ 6.3 on every ground |
 | `--primary` (text, ring) | `#2B48CA` | `#8197F8` | 7.0 on bg, 6.4 on card, ≥ 5.8 on every ground, 5.3 on `--accent` |
 | `--primary-foreground` | `#FFFFFF` | `#0A0B13` | ink label 7.2 on primary, 9.8 on `--primary-hover` (`#A3B4FB`) |
