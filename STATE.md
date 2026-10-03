@@ -3,10 +3,10 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`main`, pushed to the **public** repo https://github.com/mikemiller-ai/diligenceiq (public by Mike's choice for the panel; make it private again after: `gh repo edit mikemiller-ai/diligenceiq --visibility private`). Phase 8 is `d60b539` (+ `adf7db2`); Phase 9 is gated and deployed, awaiting Mike's go-ahead to commit and push.
+`main`, pushed to the **public** repo https://github.com/mikemiller-ai/diligenceiq (public by Mike's choice for the panel; make it private again after: `gh repo edit mikemiller-ai/diligenceiq --visibility private`). Phase 8 is `d60b539` (+ `adf7db2`); Phase 9 is `1c86e96`, pushed.
 
 ## Current phase
-**Phase 9 (interview polish; plan row 9) is complete apart from the commit: gated, deployed (2026-10-03, WorkerStack and ApiStack by Mike, Amplify job 14), production-checked.** Handoff: `docs/handoffs/phase-09.md`. Phases 1–8 are complete; Phase 8b (P1: Thesis, Watchlist, IC Brief) is not built and is described in `docs/future-state.md`, never claimed.
+**Phase 9 (interview polish; plan row 9) is complete: committed (`1c86e96`), pushed, gated, deployed (2026-10-03, WorkerStack and ApiStack by Mike, Amplify job 14), production-checked.** Handoff: `docs/handoffs/phase-09.md`. Phases 1–8 are complete; Phase 8b (P1: Thesis, Watchlist, IC Brief) is not built and is described in `docs/future-state.md`, never claimed.
 - Production: profile set `iv-9cf51c066743/llm-v3` (fallback `det-v2`); **Deep Analysis prompt da-v4** (da-v5 tried and reverted); the deterministic period-claim check ("Period not cited") is live; seed rebuilt from da-v4 recordings; **kill switch `true`** (Mike: on through the panel prep and the panel, then off).
 - Alerts: SNS `diligenceiq-alerts` (email confirmed) from three alarms: `GenerationCallsOverOne`, `DlqHandlerInvokedAlarm`, `AnalysisFailedAlarm` (any failed analysis except `NO_RELEVANT_EVIDENCE` and `ANALYSES_DISABLED`; pattern tested with `test-metric-filter`). Budget: the account's "Product - DiligenceIQ - Monthly" ($25).
 - Deliverables for Eliza: `docs/deliverables.md` (linked from the README top). Demo: `docs/demo-script.md`; future state: `docs/future-state.md`.
@@ -15,9 +15,8 @@ _Last updated: 2026-10-03 (local)_
 `pnpm gate` on 2026-10-03 against the final Phase 9 tree: **exit 0**. Unit tests: core 79, cdk 49, corpus 102, rag 476, web 526, api 175 (**1,407**); cdk:synth and build (CSP: 11 pages, 79 hashes); **e2e 112 passed, 4 skipped**. `pnpm e2e:prod` 19/19 after the deploy.
 
 ## In flight
-- **Commit and push Phase 9** (Mike's go-ahead).
 - **Budget attribution check** once billing data for 2026-10-03 arrives: does production Bedrock spend land in the `DiligenceIQ` cost category? (October's offline spend, about $17 + $2.47 da-v5 eval, is "Unattributed".)
-- **Rehearsal** of the three PDF example questions before the panel (about $0.12 each, ask first; docs/demo-script.md).
+- **Rehearsal done (2026-10-03, $0.4133):** the three PDF questions verbatim in production all reached COMPLETE, 1 call each, citations 100% valid. Example 2 again dates NVIDIA's FY2023 Compute & Networking figure ($15,068M) to FY2024; it is marked Unverified figure (docs/demo-script.md §3).
 - **Known limits, recorded, not fixed:**
   - No recorded da-v4 brief survived a strict claim-by-claim reading (7 of 7 rejected for overreach or attribution; every figure was correct; `evals/results/seed-verification-2026-10-03.md`). The seeded Apple brief shows 7 "Period not cited" marks and still misdates the DMA fines (a contradiction the check cannot see).
   - PDF example 1's recorded da-v4 comparison was ragged (8 rows of 3 values and 1 of 2 under 4 columns), flagged with a notice; PDF example 3 (pharma) misses mitigation passages (gold recall 7/18). Both are framed honestly in the demo script.

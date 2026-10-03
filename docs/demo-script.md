@@ -267,6 +267,17 @@ The panel may type these word for word. All three are in the evaluation set (`pd
 - **Say:** "This is our measured weak spot, and I'd rather show it than hide it. Each of the five companies gets its own retrieval lane, so none is dropped, but a lane's few passages aren't always the ones that describe mitigation. Check the evidence coverage matrix and the gaps section: the brief tells you where it is thin. The fix is retrieval depth, a reranker or more passages per lane, measured against these same gold passages; we didn't tune this one question, because tuning to the test set would make the number meaningless."
 - Do not read its "all five companies" generalisations aloud as fact (seed-verification-2026-10-03.md, earlier record: `pdf-3`).
 
+**Production rehearsal, 2026-10-03 (da-v4, typed verbatim with no company filter, Mike approved; `examples/analysis-request.sh`).** All three reached COMPLETE with 1 call each and every citation valid:
+
+| Question | Analysis | Time | Est. cost | Citations | Flags |
+|---|---|---|---|---|---|
+| Example 1 | `0musx03h1TLGDolI_hq` | 53 s | $0.1264 | 59/59 | none: the table lined up this time; scope AAPL, TSLA, JPM |
+| Example 2 | `0musx19r1nya9FEfodC` | 45 s | $0.1511 | 61/61 | 7 of 102 figures unverified |
+| Example 3 | `0musx28sx6Zd33o3PYK` | 60 s | $0.1358 | 62/62 | none; scope JNJ, PFE, MRK, LLY, ABBV, IRA named |
+
+- **Example 2 repeats a model error:** key finding 1 says Compute & Networking grew "from $15,068 million in FY2024". That is the FY2023 figure (FY2024 was $47,405M, `NVDA-FY2025-10K-MDA-008`), so its "up 145%" is wrong too. The brief marks "$15,068 million" **Unverified figure** in place. If the panel asks this question, point at that mark before they find it: "the validator couldn't find that number in the passage it cites, so it says so; here's the filing." The same error appeared under da-v5 (evaluation.md §11), so expect it.
+- Each run took 45–60 s; plan the talk for step 12 around a minute.
+
 ---
 
 ## 4. Known weak spots, and how to answer
