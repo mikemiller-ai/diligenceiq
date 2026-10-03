@@ -556,3 +556,39 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 - Phase 4b ships by writing a set in the same layout and switching `/diligenceiq/active-profile-set`.
 - A finding cannot be saved twice from the same item; deleting it frees the source to be saved again.
 - The E2E suite proves the page-view rule (no POST except the session, and the worker receives nothing) against the real api.
+
+## DD-21 · Readability: bottom line first, visual signals, progressive disclosure, readable evidence
+**Status:** Proposed (Phase 6r plan, 2026-10-02). Direction chosen by Mike on 2026-10-02 from the `readability-prototype` branch and the Claude Design file "Company Intelligence - current" (with its "refined" jump bar).
+
+**Context**
+- After Phase 6, the dashboard, the evidence drawer and the source view are complete but hard to consume. The Apple dashboard is a long scroll: Attention signals (10 cards), Current risks (28 headings), Recommended diligence (6) and long paragraphs everywhere. It is hard to demo.
+- Filing text is shown as processed: headings, paragraphs, page footers ("Apple Inc. | 2025 Form 10-K | 6") and `|` table rows run together, so a passage reads as a blob.
+- Mike reviewed four directions and chose the **current dashboard's depth plus signals**: keep every section and its text, add a bottom line up front (BLUF), colored direction chips, sparklines, condensed sections and a jump bar. He rejected the plain-language "readable" redesign ("missing too much depth") and the question-card mockups.
+
+**Decision**
+- **(a) Bottom line up front, by fixed rules.** A "Bottom line" box under the header lists at most five lines in a fixed order: revenue, profit per sale, cash from operations, the largest declining segment (or "all segments grew"), and risk changes (new or expanded, else "risk areas unchanged"). Each 30-second-view card gets a bold lead line with its key number. All of it is computed in the web from the stored profile: extracted facts (DD-17), trend labels and signals (DD-18). There is no model call, no new stored text and no profile rebuild.
+  - *Rejected:* a paid profile rebuild for plain-English summaries (Mike: not needed with this view; optional later, about $6 for 53 companies). Also rejected: model text on page view, which SPEC forbids.
+- **(b) Colors describe direction, never a judgment.** Green ▲ up and red ▼ down apply only to "more is more" metrics: revenue, profit, cash and segment sales. Amber ↘ means "slowing". Gray means about the same, or a metric where neither direction is better (debt, capital spending), which keeps its arrow but no color. ↻ marks a repeated disclosure, and blue + marks a new or expanded one. Thresholds match the trend labels (±2% and 1.0 pp). A legend under the bottom line says so. The DD-16 vocabulary rules apply to every fixed-rule string (tested).
+- **(c) Progressive disclosure, nothing removed.**
+  - Long paragraphs are clamped to two lines with "More".
+  - Each risk area shows its first heading, then "Show all N".
+  - Attention signals show the first four (changes before repeats), then "Show all N".
+  - Recommended diligence shows the first three.
+  - Persistent signals fold into one row in What's changed.
+  - Every item, citation, Investigate and Save stays one click away and reachable by keyboard.
+- **(d) Jump bar.** A sticky "On this page" bar below the top bar links every section the profile actually shows. It carries counts on the long sections, marks the section in view (`aria-current="location"`) and writes shareable `#section` URLs. On phones it is a single "Jump to section" menu. Headings land clear of the bars (`scroll-margin`).
+- **(e) Readable filing text is a display layer that preserves offsets.** The source view and the drawer render the processed text with:
+  - paragraph breaks restored at glued sentence boundaries;
+  - headings detected (risk-factor headings already extracted);
+  - bullets as lists;
+  - `|` rows as tables;
+  - page furniture hidden.
+
+  The stored text, chunk offsets and citations never change. A test proves that the rendered characters equal the source minus the hidden furniture, for all 246 filings.
+- **(f) Evidence answers "why does this support the claim".** The drawer first shows the one to three sentences of the passage that best match the claim. They are picked by term and figure overlap, deterministically, and highlighted in place, with the full passage one click away. Figures the validator matched are bold. The passage title is its section and subsection, not its chunk ID. Compare periods adds a sentence-level diff: new this period, removed, and unchanged (collapsed).
+- **(g) Same treatment for the brief and Compare.** A bottom line and jump bar on the brief, and condensed sections and chips on Compare, with the same rules.
+
+**Consequences**
+- Web-only change: no api, CDK, profile-set or S3 change, no spend. The deploy is `pnpm deploy:web`.
+- Driver change and share are read from the builder's deterministic `changeBasis` text. A contract test pins that format to the parser. A structured field would need a new profile-set version (a later option).
+- The existing web tests that expect every heading and recommendation in the DOM are updated to expand first.
