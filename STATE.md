@@ -3,33 +3,30 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `a5cbf2b` (Phase 6r step 2), fast-forwarded from `phase-6r-step2`. Phase 6r step 1: `c4a4797`; Phase 6: `bdd817e`.
+`phase-6r-step3`, branched from `main` at `7ee692c`; the step 3 work is uncommitted, waiting for Mike's go-ahead (no remote yet). On `main`: Phase 6r step 2 `a5cbf2b` (deployed), step 1 `c4a4797`, Phase 6 `bdd817e`.
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 2 of 3 is gated, committed (`a5cbf2b`) and deployed (2026-10-03): readable evidence.** Handoff: `docs/handoffs/phase-06r-step2.md`. Step 1 (readable dashboard plus dark mode) is committed (`c4a4797`) and deployed (2026-10-02; handoff `docs/handoffs/phase-06r-step1.md`).
-- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point it at `iv-9cf51c066743/det-v2`.
-- **Step 2 adds:**
-  - an offset-preserving display layer for the source view and the drawer: paragraphs, headings including risk headings, lists, column-aligned tables, and page furniture hidden;
-  - a drawer that leads with the closest sentences to the statement and bolds only exact, verified figures, with section › subsection titles;
-  - a Compare periods sentence diff.
+**Phase 6r (readability, DD-21), step 3 of 4 is gated (2026-10-03), not committed and not deployed: the brief and Compare (DD-21 g).** Handoff: `docs/handoffs/phase-06r-step3.md`. Steps 1 and 2 are deployed (handoffs `phase-06r-step1.md`, `phase-06r-step2.md`).
+- Production (unchanged by step 3): active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`, steps 1 and 2 live. Instant fallback: point the set at `iv-9cf51c066743/det-v2`.
+- **Step 3 adds:**
+  - **Brief:** a bottom line (each key finding's stored title linking to the finding, with chips for basis, companies and the validator's figure check; no direction colours, Mike's choice); a status line of counts; a jump bar (`components/diligence/jump-bar.tsx`, now shared with the dashboard) that links only shown sections, plus Sources.
+  - **Compare:** trend cells on direction chips with the builder's change and year (`trendRead`: the dashboard's rules, plus no colour for a trend about an older year than the latest annual report); a legend; one chip per company in Diverging trends; long lists folded (areas 4, ranking 5, questions 3); management emphasis clamped to 3 lines.
+  - Fix in passing: the `Table` wrapper is `relative`, so an sr-only header no longer makes the brief and Compare scroll sideways on a phone.
+- **Step 4 is planned, not started** (SPEC A.4 2026-10-03; implementation-plan row 6r): the refined Compare and Findings from the mockups Mike chose, `Compare - refined.html` and `Findings - refined.html`, in `~/Library/Mobile Documents/com~apple~CloudDocs/Downloads/DiligenceIQ redesign for readabilityv2/`. Ask follow-up is in (prefill only, `finding` origin, which core already accepts). The Deep Analysis and brief mockups in the same folder were not chosen. DD-21 (h) is still to be written at the start of step 4.
 
 ## Gate
-`pnpm gate` on 2026-10-03 against the Phase 6r step 2 working tree: **exit 0**.
+`pnpm gate` on 2026-10-03 against the Phase 6r step 3 working tree: **exit 0**.
 - check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 340, api 135 (**1,111**).
-- `cdk:synth` and `build` succeeded. **e2e: 69 passed, 4 skipped.** The skipped ones are the `DARK_SCREENSHOTS`-only screenshot tests.
+- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 377, api 135 (**1,148**).
+- `cdk:synth` and `build` succeeded. **e2e: 79 passed, 4 skipped.** The skipped ones are the `DARK_SCREENSHOTS`-only screenshot tests.
 
-Gate record: adversary (0 blockers, 6 high, 4 medium) → fresh fixer (all fixed with tests, except M3, a known limit) → `/code-review` medium (2 low, fixed with tests) → `pnpm gate` green.
+Gate record: adversary (1 blocker, 1 high, 5 medium, 7 low) → fresh fixer (all 15 fixed with regression tests) → `/code-review` medium (1 confirmed: the Sources jump on a wide screen; fixed with a test) → `pnpm gate` green.
 
 ## In flight
-- **Done 2026-10-03 (Mike approved):** commit `a5cbf2b`, fast-forward to `main`, then `pnpm deploy:web` (Amplify job 8). The headless production check passed:
-  - **AAPL 10-K source view** (`#chunk-AAPL-FY2025-10K-1A-001`): the passage is highlighted and focused; 28 risk headings; 54 tables, 36 with a header row; 15 scroll boxes, focusable only where a table overflows. No "Apple Inc. | 2025 Form 10-K | N" footers and no page-number back-links remain, and the page has no sideways scroll.
-  - **AAPL dashboard risk citation:** the statement is shown and one closest sentence is highlighted; Show full passage works.
-  - **Compare periods:** "New in FY2025 10-K, in the shared stretch (6)", "Removed since FY2024 10-K, in the shared stretch (6)", "Unchanged (12)".
-  - **Light and dark:** dark renders; in light the body is #F3F4F8 and the key highlight is #FBEFC4 behind #14151F text. Axe was not run against production; it is clean in the e2e suite.
-  - **Requests:** only reads and `POST /api/session`.
-- **Known limit (M3):** profile citations carry no subsection, so their drawer titles show only the section. A fix needs a profile-builder or api change and a new profile-set version.
-- **Next:** Phase 6r step 3 (the brief and Compare, DD-21 g), then Phase 7.
+- **Waiting for Mike:** commit the step 3 tree on `phase-6r-step3` → fast-forward `main` → `pnpm deploy:web` → production check: a seeded brief's bottom line and jump bar (including Evidence coverage and Sources), Compare `AAPL,MSFT,NVDA` chips, legend and Show all, light and dark, phone width with no sideways scroll, and only reads plus `POST /api/session`.
+- `.claude/launch.json` is unchanged in git. A `design-mock` server (port 4180, serving the mockup folder) was started during the session from a temporary config entry that was then reverted.
+- **Known limit (M3, from step 2):** profile citations carry no subsection, so their drawer titles show only the section.
+- **Next:** step 4 (DD-21 h), then Phase 7.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
@@ -39,6 +36,15 @@ Gate record: adversary (0 blockers, 6 high, 4 medium) → fresh fixer (all fixed
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
 
 ## Known traps
+- **Jump bar (shared, `components/diligence/jump-bar.tsx`).**
+  - Targets need `scroll-mt-40`.
+  - The section in view is the lowest heading at or above the line; on equal tops the earlier in the list wins.
+  - After a jump, the target stays marked until reader input (wheel, touch, key, pointer) or the page moves away from where it landed.
+  - A heading inside a computed `position: sticky` box (the brief's Sources rail at lg) is never tracked, and a jump to it only focuses it: scrolling the page to a sticky element lands nowhere useful.
+  - A jump moves focus to the heading (`tabindex=-1`).
+- **Two `nav` landmarks on the brief and dashboard.** e2e locators must scope to the sidebar (`getByRole('navigation', { name: 'Primary' })`): an unscoped "Findings" link also matched "Key findings" and broke the novice path.
+- **Absolutely positioned children of a scroll box need a `relative` box.** An sr-only header escaped the `Table` wrapper and widened the page on phones. The e2e checks 390 px on the brief and Compare.
+- **Compare colours a trend only through `trendRead`** (`compare-view.tsx`): it must read back with the same trajectory, be about the latest annual report's year (`isCurrent`) and have a labelled change (`rowChange`). PFE's FY2022 operating cash flow is the real stale case.
 - **The readable view is a display layer, never stored text (DD-21 e).**
   - `apps/web/src/lib/readable/` partitions offsets into shown and hidden runs. Only furniture and layout (pipes, whitespace) may be hidden; `readable-corpus.test.ts` enforces this over all 246 filings.
   - Any new hiding rule must keep the furniture oracle at **zero** visible footers and back-links. It must also never hide content: table-of-contents rows and reference numbers ("Note 12") stay.

@@ -91,7 +91,7 @@ export const SEED = seedJson as unknown as {
   analyses: Array<{
     analysisId: string;
     question: string;
-    brief: { title: string };
+    brief: { title: string; keyFindings: Array<{ title: string }> };
     citations: Array<{ chunkId: string; text: string }>;
     coverage: { cells: Array<{ ticker: string; period: string; contextChunks: number; citedChunks: number; chunkIds?: string[] }> };
   }>;

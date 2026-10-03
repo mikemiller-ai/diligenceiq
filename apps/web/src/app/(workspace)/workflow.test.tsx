@@ -444,6 +444,7 @@ describe('Compare', () => {
     expect(screen.getByRole('heading', { name: 'Risk Factors · 1' })).toBeInTheDocument();
     // The same row in the attention ranking is the same stored item, so it shows as saved too.
     const ranking = screen.getByRole('heading', { name: 'Attention ranking' }).closest('section')!;
+    expandAll(ranking);
     expect(within(ranking).getAllByRole('link', { name: 'Saved' })).toHaveLength(1);
     expect(fetchSpy).not.toHaveBeenCalled();
   });

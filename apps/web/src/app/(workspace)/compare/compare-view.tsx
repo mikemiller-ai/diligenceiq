@@ -10,6 +10,7 @@ import {
   type CompanyIntelligenceProfile,
   type CompareResult,
   type CompareTheme,
+  type Trajectory,
 } from '@diligenceiq/core';
 import { ArrowUpRight, Columns3, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -22,7 +23,9 @@ import { PageContainer, PageHeader } from '@/components/diligence/page';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
 import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { EmptyState, NoticeBar } from '@/components/diligence/states';
+import { Clamp, ShowMore } from '@/components/intelligence/condense';
 import { PlaceholderBadge, PlaceholderSlot } from '@/components/intelligence/placeholder';
+import { DIRECTION_WORD, LEGEND, SignalChip, isCurrent, readTrend, rowChange, type RowChange } from '@/components/intelligence/signals';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/input';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
@@ -30,7 +33,6 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { companies, companyName } from '@/fixtures';
 import { TIER_COPY } from '@/fixtures/profiles';
 import { formatDate } from '@/lib/format';
-
 import { TRAJECTORY_LABEL } from '@/lib/labels';
 import { compareHref, newAnalysisHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
@@ -181,18 +183,25 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
               <Row label="Coverage" cells={result.companies.map((c) => TIER_COPY[c.tier].label)} />
               <Row label="Fiscal year ends" cells={result.companies.map((c) => formatDate(c.fiscalYearEnd))} />
               {result.trajectories.map((t) => (
-                <Row
-                  key={t.metric}
-                  label={`${t.metric} trend`}
-                  cells={t.values.map((v) => (isPreview(v.ticker) && v.trajectory === 'not_extracted' ? 'Placeholder' : TRAJECTORY_LABEL[v.trajectory]))}
-                  muted
-                  action={<SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.trajectory(t.metric) }} variant="ghost" label="Save" />}
-                />
+                <TR key={t.metric} className="hover:bg-transparent">
+                  <TH scope="row" className="h-auto py-2.5 text-sm font-medium normal-case tracking-normal text-foreground">
+                    {t.metric} trend
+                  </TH>
+                  {t.values.map((v) => (
+                    <TD key={`${t.metric}-${v.ticker}`} className="align-top">
+                      <TrendCell profile={profiles.get(v.ticker)} metric={t.metric} trajectory={v.trajectory} preview={isPreview(v.ticker)} />
+                    </TD>
+                  ))}
+                  <TD className="text-right">
+                    <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.trajectory(t.metric) }} variant="ghost" label="Save" />
+                  </TD>
+                </TR>
               ))}
               <Row label="Major attention area" cells={tickers.map((t) => (preview ? 'Placeholder' : majorArea(t)))} muted={preview} />
             </TBody>
           </Table>
         </div>
+        {!preview && <TrendLegend />}
       </section>
 
       {preview ? (
@@ -238,8 +247,29 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
             <ul className="flex flex-col gap-2">
               {result.diverging.map((d) => (
                 <li key={d.metric} className="flex flex-wrap items-center gap-3 rounded-card border border-border bg-card px-4 py-3 text-sm">
-                  <span className="min-w-0 flex-1">
-                    {d.metric}: rising at {d.up.map(companyName).join(', ')}; falling at {d.down.map(companyName).join(', ')}.
+                  <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <span className="font-semibold text-foreground">{d.metric}</span>
+                    <span className="flex flex-wrap gap-1.5">
+                      {[...d.up.map((t) => [t, 'rising'] as const), ...d.down.map((t) => [t, 'falling'] as const)].map(([t, word]) => {
+                        const trajectory = result.trajectories.find((r) => r.metric === d.metric)?.values.find((v) => v.ticker === t)?.trajectory;
+                        const read = trajectory ? trendRead(profiles.get(t), d.metric, trajectory) : null;
+                        if (read?.kind !== 'chip') {
+                          // Not read back, or about an older year than the latest annual report: no colour, and the year is named.
+                          return (
+                            <span key={t} className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-border px-2 py-0.5 text-[12px] font-medium text-foreground/80">
+                              {companyName(t)}: {word}
+                              {read?.kind === 'stale' && <span data-allow-figures className="font-normal text-muted-foreground">(latest trend {read.period})</span>}
+                            </span>
+                          );
+                        }
+                        return (
+                          <SignalChip key={t} direction={read.change.direction} neutral={read.change.neutral}>
+                            {companyName(t)}: {word}
+                            {read.change.neutral && <span className="sr-only">, neither direction is better</span>}
+                          </SignalChip>
+                        );
+                      })}
+                    </span>
                   </span>
                   <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.diverging(d.metric) }} variant="ghost" />
                 </li>
@@ -265,9 +295,9 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
                   ) : (
                     <>
                       {m.source === 'model' && <p className="mt-1 text-xs text-muted-foreground">Model-written</p>}
-                      <p className="mt-1 text-foreground/80">
-                        {m.summary} <CitationList ids={m.citationIds} context={citations} provenance="profile" claim={m.summary} />
-                      </p>
+                      <Clamp text={m.summary} lines={3} className="mt-1 text-foreground/80" after={<CitationList ids={m.citationIds} context={citations} provenance="profile" claim={m.summary} />}>
+                        {m.summary}
+                      </Clamp>
                     </>
                   )}
                 </li>
@@ -301,22 +331,29 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
         ) : (
           <>
             <p className="mt-1 text-sm text-muted-foreground">{RANK_RULE} It is an order for investigation, not a rating.</p>
-            <ol className="mt-3 flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card">
-              {result.attentionRanking.map((r) => (
-                <li key={r.category} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
-                  <span className="w-6 font-mono text-xs text-muted-foreground">{String(r.rank).padStart(2, '0')}</span>
-                  <span className="min-w-40 text-sm font-medium text-foreground">{r.label}</span>
-                  <span className="flex flex-wrap gap-1">
-                    {r.tickers.map((t) => (
-                      <TickerBadge key={t} ticker={t} />
-                    ))}
-                  </span>
-                  <span className="ml-auto">
-                    <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.theme(r.category) }} variant="ghost" label="Save" />
-                  </span>
-                </li>
-              ))}
-            </ol>
+            <div className="mt-3">
+              <ShowMore
+                as="ol"
+                items={result.attentionRanking}
+                initial={5}
+                noun={['area', 'areas']}
+                className="flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card"
+                render={(r) => (
+                  <li key={r.category} className="flex flex-wrap items-center gap-3 px-4 py-2.5">
+                    <span className="w-6 font-mono text-xs text-muted-foreground">{String(r.rank).padStart(2, '0')}</span>
+                    <span className="min-w-40 text-sm font-medium text-foreground">{r.label}</span>
+                    <span className="flex flex-wrap gap-1">
+                      {r.tickers.map((t) => (
+                        <TickerBadge key={t} ticker={t} />
+                      ))}
+                    </span>
+                    <span className="ml-auto">
+                      <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.theme(r.category) }} variant="ghost" label="Save" />
+                    </span>
+                  </li>
+                )}
+              />
+            </div>
           </>
         )}
       </section>
@@ -331,21 +368,27 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
             <PlaceholderSlot title="Questions from common, distinctive and diverging areas">{PREVIEW_COPY}</PlaceholderSlot>
           </div>
         )}
-        <ul className="mt-3 flex flex-col gap-2">
-          {questions.map((r) => (
-            <li key={r.ref} className="flex flex-col gap-3 rounded-card border border-border bg-card px-4 py-3 sm:flex-row sm:items-center">
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] text-foreground">{r.question}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">Why suggested: {r.why}</p>
-              </div>
-              <Button asChild size="sm">
-                <Link href={newAnalysisHref({ question: r.question, tickers: r.tickers, origin: { kind: 'compare', tickers, ref: r.ref } })}>
-                  Investigate <ArrowUpRight />
-                </Link>
-              </Button>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-3">
+          <ShowMore
+            items={questions}
+            initial={3}
+            noun={['question', 'questions']}
+            className="flex flex-col gap-2"
+            render={(r) => (
+              <li key={r.ref} className="flex flex-col gap-3 rounded-card border border-border bg-card px-4 py-3 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] text-foreground">{r.question}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Why suggested: {r.why}</p>
+                </div>
+                <Button asChild size="sm">
+                  <Link href={newAnalysisHref({ question: r.question, tickers: r.tickers, origin: { kind: 'compare', tickers, ref: r.ref } })}>
+                    Investigate <ArrowUpRight />
+                  </Link>
+                </Button>
+              </li>
+            )}
+          />
+        </div>
       </section>
     </div>
   );
@@ -390,25 +433,106 @@ function ThemeList({
       {themes.length === 0 ? (
         <p className="mt-3 rounded-card border border-border bg-card px-4 py-3 text-sm text-muted-foreground">{empty}</p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {themes.map((t) => (
-            <li key={t.category} className="rounded-card border border-border bg-card px-4 py-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">{t.label}</span>
-                {t.tickers.map((tk) => (
-                  <TickerBadge key={tk} ticker={tk} />
-                ))}
-                <span className="ml-auto">
-                  <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.theme(t.category) }} variant="ghost" />
-                </span>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                From the latest risk headings: <CitationList ids={t.citationIds} context={citations} provenance="profile" claim={t.label} />
-              </p>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-3">
+          <ShowMore
+            items={themes}
+            initial={4}
+            noun={['area', 'areas']}
+            className="flex flex-col gap-2"
+            render={(t) => (
+              <li key={t.category} className="rounded-card border border-border bg-card px-4 py-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">{t.label}</span>
+                  {t.tickers.map((tk) => (
+                    <TickerBadge key={tk} ticker={tk} />
+                  ))}
+                  <span className="ml-auto">
+                    <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.theme(t.category) }} variant="ghost" />
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  From the latest risk headings: <CitationList ids={t.citationIds} context={citations} provenance="profile" claim={t.label} />
+                </p>
+              </li>
+            )}
+          />
+        </div>
       )}
     </section>
+  );
+}
+
+/**
+ * How a company's trend for a metric may be shown (DD-21 g, the dashboard's rules):
+ * - `chip`: the trend's basis reads back with the same trajectory, the builder labeled its change
+ *   (`rowChange`), and it is about the latest annual report's year (`isCurrent`, as on the dashboard);
+ * - `stale`: it reads back but is about an older year (e.g. a FY2022 cash flow beside FY2024
+ *   revenue): never a direction colour, and the year is named;
+ * - `plain`: anything else (no profile, no trend, no read-back, or no labeled change).
+ */
+export function trendRead(
+  profile: CompanyIntelligenceProfile | undefined,
+  metric: string,
+  trajectory: Trajectory,
+): { kind: 'chip'; change: RowChange } | { kind: 'stale'; period: string } | { kind: 'plain' } {
+  const trend = profile ? readTrend(profile, metric) : null;
+  if (!profile || !trend || trend.trajectory !== trajectory) return { kind: 'plain' };
+  if (!isCurrent(profile, trend.basis.period)) return { kind: 'stale', period: trend.basis.period };
+  const change = rowChange(profile, metric);
+  return change ? { kind: 'chip', change } : { kind: 'plain' };
+}
+
+/**
+ * A trend cell: the builder's trajectory label on a direction chip, with the builder's change and
+ * the period it is for. Green and red only for more-is-more metrics; a Financials company's
+ * operating cash flow keeps its arrow without a colour. A trend about an older year than the latest
+ * annual report gets the plain label and a note naming its year; one that does not read back gets
+ * the plain label only.
+ */
+function TrendCell({ profile, metric, trajectory, preview }: { profile: CompanyIntelligenceProfile | undefined; metric: string; trajectory: Trajectory; preview: boolean }) {
+  if (preview && trajectory === 'not_extracted') return <PlaceholderBadge />;
+  const label = TRAJECTORY_LABEL[trajectory];
+  const read = trendRead(profile, metric, trajectory);
+  if (read.kind === 'stale') {
+    return (
+      <span className="flex flex-col items-start gap-0.5" data-allow-figures>
+        <span className="text-foreground">{label}</span>
+        <span className="text-xs text-muted-foreground">latest trend {read.period}</span>
+      </span>
+    );
+  }
+  if (read.kind === 'plain') return <span className={trajectory === 'not_extracted' || trajectory === 'limited_history' ? 'italic text-muted-foreground' : 'text-foreground'}>{label}</span>;
+  const change = read.change;
+  return (
+    <span className="flex flex-col items-start gap-0.5" data-allow-figures>
+      <SignalChip direction={change.direction} neutral={change.neutral}>
+        {label}
+        {change.neutral && <span className="sr-only">, neither direction is better</span>}
+      </SignalChip>
+      <span className="text-xs tabular-nums text-muted-foreground">
+        {change.text} in {change.period}
+      </span>
+    </span>
+  );
+}
+
+const TREND_LEGEND = LEGEND.filter((l) => l.direction === 'up' || l.direction === 'down' || l.direction === 'slowing' || l.direction === 'flat');
+
+/** What the trend chips mean, under the side-by-side table. */
+function TrendLegend() {
+  return (
+    <div className="mt-2 flex flex-col gap-1.5 text-xs text-muted-foreground">
+      <p>Each trend is the change from the prior year in that company’s own latest fiscal year, so the years can differ. A trend about an older year names its year and has no direction colour.</p>
+      <ul aria-label="Legend" className="flex flex-wrap gap-x-3 gap-y-1">
+        {TREND_LEGEND.map((l) => (
+          <li key={l.direction} className="inline-flex items-center gap-1.5">
+            <SignalChip direction={l.direction} className="px-1">
+              <span className="sr-only">{DIRECTION_WORD[l.direction]}</span>
+            </SignalChip>
+            {l.text}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

@@ -41,7 +41,8 @@ test('novice path: Apple → dashboard → Investigate regulatory risk → Run �
   await page.getByRole('dialog').getByRole('button', { name: 'Save finding' }).click();
   await expect(page.getByRole('link', { name: 'Saved' }).first()).toBeVisible();
 
-  await page.getByRole('navigation').getByRole('link', { name: 'Findings' }).click();
+  // The primary nav, by name: the brief's "On this page" bar also has a "Key findings" link.
+  await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Findings' }).click();
   await expect(page.getByText(title).first()).toBeVisible();
 });
 

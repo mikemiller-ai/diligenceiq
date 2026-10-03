@@ -16,6 +16,7 @@ import { ArrowUpRight, Columns3, FileSearch, ScrollText } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import { CitationList, useEvidence } from '@/components/diligence/evidence';
+import { JumpBar, type JumpLink } from '@/components/diligence/jump-bar';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
 import { NavyAtmosphere } from '@/components/evidence/section';
 import { Badge } from '@/components/ui/badge';
@@ -131,7 +132,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
         )}
       </header>
 
-      <JumpBar profile={profile} fixture={fixture} />
+      <DashboardJumpBar profile={profile} fixture={fixture} />
 
       {!fixture && <BottomLine profile={profile} />}
 
@@ -811,14 +812,10 @@ function DerivedValue({ profile, metric, basis }: { profile: CompanyIntelligence
   );
 }
 
-/**
- * "On this page": a sticky row of links to the dashboard's sections, under the top bar. Built from
- * the sections this profile actually shows, with counts on the long ones, and the section in view
- * marked (`aria-current`). Below `md` it is a single "Jump to" menu.
- */
-function JumpBar({ profile, fixture }: { profile: CompanyIntelligenceProfile; fixture: boolean }) {
+/** The dashboard's "On this page" links: only the sections this profile shows, with counts on the long ones. */
+function DashboardJumpBar({ profile, fixture }: { profile: CompanyIntelligenceProfile; fixture: boolean }) {
   const changes = profile.signals.filter((s) => CHANGE_TYPES.has(s.type)).length;
-  const links: Array<{ id: string; label: string; count?: number }> = [
+  const links: JumpLink[] = [
     ...(fixture || bottomLine(profile).length === 0 ? [] : [{ id: 'bottom-line', label: 'Bottom line' }]),
     { id: 'thirty-second', label: '30-second view' },
     { id: 'performance', label: 'Performance' },
@@ -830,98 +827,5 @@ function JumpBar({ profile, fixture }: { profile: CompanyIntelligenceProfile; fi
     { id: 'recommended', label: 'Recommended', count: profile.recommendedDiligence.length },
     { id: 'coverage', label: 'Coverage' },
   ];
-  const active = useActiveSection(links.map((l) => l.id));
-  const go = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    // URL first: replacing the history entry after starting a smooth scroll can cancel the scroll.
-    history.replaceState(null, '', `#${id}`);
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-  return (
-    <nav aria-label="On this page" className="sticky top-14 z-20 -mt-4 border-b border-border bg-background/90 px-1 py-2.5 backdrop-blur-md">
-      <div className="hidden flex-wrap items-center gap-1 md:flex">
-        <span className="mr-1 hidden shrink-0 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground 2xl:inline">On this page</span>
-        {links.map((l) => (
-          <a
-            key={l.id}
-            href={`#${l.id}`}
-            aria-current={active === l.id ? 'location' : undefined}
-            onClick={(e) => {
-              e.preventDefault();
-              go(l.id);
-            }}
-            // No colour transition: the active link changes as the page scrolls, and a half-faded
-            // state fails contrast (it made the e2e axe checks flaky).
-            className={cn(
-              'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border px-1.5 py-0.5 text-[12px] font-medium',
-              active === l.id ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground hover:border-primary hover:text-primary',
-            )}
-          >
-            {l.label}
-            {l.count !== undefined && (
-              <span data-allow-figures className={cn('rounded px-1 text-[11px] tabular-nums', active === l.id ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-secondary text-foreground/70')}>
-                {l.count}
-              </span>
-            )}
-          </a>
-        ))}
-      </div>
-      <label className="flex items-center gap-2 md:hidden">
-        <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Jump to</span>
-        <select
-          aria-label="Jump to section"
-          // Always back on the placeholder, so picking any section (even the one in view) jumps.
-          value=""
-          onChange={(e) => {
-            if (e.target.value) go(e.target.value);
-          }}
-          className="h-9 flex-1 rounded-md border border-border bg-card px-2 text-sm text-foreground"
-        >
-          <option value="">{active ? `In view: ${links.find((l) => l.id === active)?.label ?? ''}` : 'Choose a section'}</option>
-          {links.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.label}
-              {l.count !== undefined ? ` (${l.count})` : ''}
-            </option>
-          ))}
-        </select>
-      </label>
-    </nav>
-  );
-}
-
-/** The section whose heading was passed last on the way down (under the two sticky bars), or null above the first. */
-function useActiveSection(ids: string[]): string | null {
-  const [active, setActive] = React.useState<string | null>(null);
-  const key = ids.join(',');
-  React.useEffect(() => {
-    const list = key.split(',');
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      // Just below the two sticky bars and the 160 px scroll offset a jump lands headings on.
-      const line = 200;
-      let current: string | null = null;
-      for (const id of list) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= line) current = id;
-      }
-      // At the very bottom, the last section is the one in view even if its heading never reaches the line.
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = list.at(-1) ?? current;
-      setActive(current);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [key]);
-  return active;
+  return <JumpBar links={links} className="-mt-4" />;
 }

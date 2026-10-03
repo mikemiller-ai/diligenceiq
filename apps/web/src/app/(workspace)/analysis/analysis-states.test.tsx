@@ -172,7 +172,8 @@ describe('Diligence Brief panels (SPEC §15.2, P0)', () => {
       }),
     };
     renderInWorkspace(<AnalysisView />, { initial: { analyses: [analysis] }, contexts: SAMPLE_CONTEXTS });
-    const first = screen.getAllByRole('listitem').find((li) => li.textContent?.includes(complete.brief!.keyFindings[0]!.title))!;
+    const findings = screen.getByRole('heading', { name: 'Key findings' }).closest('section')!;
+    const first = within(findings).getAllByRole('listitem').find((li) => li.textContent?.includes(complete.brief!.keyFindings[0]!.title))!;
     expect(within(first).getByText('Unverified figure: $4.2 billion')).toBeInTheDocument();
     expect(within(screen.getAllByRole('table')[0]!).getByText('Unit not stated: 1,234')).toBeInTheDocument();
     expect(screen.queryByText(/12%/)).not.toBeInTheDocument();

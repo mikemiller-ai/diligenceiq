@@ -289,6 +289,8 @@ export interface RowChange {
   neutral: boolean;
   /** Comparable values for the sparkline, oldest first (may be shorter than two: no sparkline). */
   series: Array<{ period: string; value: number }>;
+  /** The period the builder's basis line states the change for, e.g. "FY2025". */
+  period: string;
 }
 
 /**
@@ -307,18 +309,18 @@ export function rowChange(profile: CompanyIntelligenceProfile, metric: string): 
     const rebound = b.priorPct < 0;
     const called: Partial<Record<Trajectory, Direction>> = { accelerating: 'up', slowing: 'slowing', ...(rebound ? {} : { growing: 'flat' as const }) };
     const direction = called[t.trajectory] ?? (pp > 0 ? 'up' : pp < 0 ? 'down' : 'flat');
-    return { text: signedPp(pp), direction, neutral: called[t.trajectory] === undefined, series: growthSeries(comparableSeries(profile, 'Revenue', t)) };
+    return { text: signedPp(pp), direction, neutral: called[t.trajectory] === undefined, series: growthSeries(comparableSeries(profile, 'Revenue', t)), period: b.period };
   }
   const margin = MARGINS[metric];
   if (margin) {
     if (b.kind !== 'margin') return null;
     const series = comparableMarginSeries(profile, margin[0], t);
-    return { text: changeText('margin', b.changePp, t.trajectory, exactMarginChange(series, b)), direction: trajectoryDirection(t.trajectory, metric), neutral: false, series };
+    return { text: changeText('margin', b.changePp, t.trajectory, exactMarginChange(series, b)), direction: trajectoryDirection(t.trajectory, metric), neutral: false, series, period: b.period };
   }
   if (GROWTH_ROWS.has(metric) && b.kind === 'growth') {
     const points = comparableSeries(profile, metric, t);
     const neutral = metric === 'Operating cash flow' && neutralCashFlow(profile);
-    return { text: changeText('growth', b.pct, t.trajectory, exactGrowth(points, b)), direction: trajectoryDirection(t.trajectory, metric), neutral, series: points.map(({ period, value }) => ({ period, value })) };
+    return { text: changeText('growth', b.pct, t.trajectory, exactGrowth(points, b)), direction: trajectoryDirection(t.trajectory, metric), neutral, series: points.map(({ period, value }) => ({ period, value })), period: b.period };
   }
   return null;
 }

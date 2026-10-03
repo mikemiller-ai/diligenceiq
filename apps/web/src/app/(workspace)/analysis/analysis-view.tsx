@@ -1,13 +1,14 @@
 'use client';
 
 import { citationLabel, comparisonHeaders, type AnalysisDetail, type Citation } from '@diligenceiq/core';
-import { ArrowLeft, ArrowUpRight, FileQuestion, FileText, Printer, WifiOff } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowUpRight, CheckCircle2, FileQuestion, FileText, Printer, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 import { TickerBadge } from '@/components/diligence/badges';
 import { NavyAtmosphere } from '@/components/evidence/section';
 import { CitationList, CitedText, useEvidence } from '@/components/diligence/evidence';
+import { JumpBar, type JumpLink } from '@/components/diligence/jump-bar';
 import { PageContainer, SectionHeading } from '@/components/diligence/page';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
 import { CoverageMatrix, FigureBadges, InterpretationPanel, ValidationSummary, figuresAt } from '@/components/diligence/brief-panels';
@@ -18,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import { ApiRequestError } from '@/lib/api';
+import { briefHeadlines, briefStatus, figureChip, findingAnchor } from '@/lib/brief-summary';
 import { formatDate, formatDateTime, formatDurationSeconds, pluralize } from '@/lib/format';
 import { FAILURE_COPY } from '@/lib/labels';
 import { companies } from '@/fixtures';
@@ -266,7 +268,7 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
           </p>
           {analysis.status === 'COMPLETE' && analysis.brief && (
             <section aria-labelledby="exec-summary" className="mt-6 border-t border-white/10 pt-5">
-              <h2 id="exec-summary" className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
+              <h2 id="exec-summary" className="scroll-mt-40 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
                 Executive summary
               </h2>
               <p className="mt-2 max-w-[880px] text-[15.5px] leading-7 text-white/90">
@@ -324,163 +326,255 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
   ]);
 
   return (
-    <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,760px)_minmax(0,1fr)]">
-      <article className="min-w-0">
-        <section aria-labelledby="key-findings">
-          <SectionHeading id="key-findings">Key findings</SectionHeading>
-          <ol className="mt-3 flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
-            {brief.keyFindings.map((k, i) => (
-              <li key={`${i}-${k.title}`} className="px-5 py-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, '0')}</span>
-                      {k.tickers.map((t) => (
-                        <TickerBadge key={t} ticker={t} />
-                      ))}
-                      <Badge tone={k.basis === 'reported' ? 'outline' : 'info'}>
-                        {k.basis === 'reported' ? 'Reported' : 'Analysis'}
-                      </Badge>
+    <>
+      <BriefJumpBar analysis={analysis} passages={passages.length} />
+      <BriefBottomLine analysis={analysis} citedPassages={citedIds.size} />
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,760px)_minmax(0,1fr)]">
+        <article className="min-w-0">
+          <section aria-labelledby="key-findings">
+            <SectionHeading id="key-findings" className="scroll-mt-40">Key findings</SectionHeading>
+            <ol className="mt-3 flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
+              {brief.keyFindings.map((k, i) => (
+                <li key={`${i}-${k.title}`} id={findingAnchor(i)} className="scroll-mt-40 px-5 py-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, '0')}</span>
+                        {k.tickers.map((t) => (
+                          <TickerBadge key={t} ticker={t} />
+                        ))}
+                        <Badge tone={k.basis === 'reported' ? 'outline' : 'info'}>
+                          {k.basis === 'reported' ? 'Reported' : 'Analysis'}
+                        </Badge>
+                      </div>
+                      <h3 className="mt-1.5 text-base font-semibold text-foreground">{k.title}</h3>
+                      <p className="mt-1 text-[15px] leading-6 text-foreground/80">
+                        {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" claim={k.finding} figureChecks={figuresAt(v, `keyFindings[${i}].`)} />
+                        <FigureBadges figures={figuresAt(v, `keyFindings[${i}].`)} />
+                      </p>
                     </div>
-                    <h3 className="mt-1.5 text-base font-semibold text-foreground">{k.title}</h3>
-                    <p className="mt-1 text-[15px] leading-6 text-foreground/80">
-                      {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" claim={k.finding} figureChecks={figuresAt(v, `keyFindings[${i}].`)} />
-                      <FigureBadges figures={figuresAt(v, `keyFindings[${i}].`)} />
-                    </p>
+                    <SaveFindingButton source={{ kind: 'keyFinding', analysisId: analysis.analysisId, index: i }} />
                   </div>
-                  <SaveFindingButton source={{ kind: 'keyFinding', analysisId: analysis.analysisId, index: i }} />
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
+                </li>
+              ))}
+            </ol>
+          </section>
 
-        {brief.comparison && brief.comparison.rows.length > 0 && (
-          <section aria-labelledby="comparison" className="mt-8">
-            <SectionHeading id="comparison">{brief.comparison.kind === 'trend' ? 'Trend' : 'Comparison'}</SectionHeading>
-            <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card">
-              <Table>
-                <caption className="sr-only">{brief.title}: comparison</caption>
-                <THead>
-                  <tr>
-                    <TH className="normal-case tracking-normal">{comparisonHeaders(brief.comparison).labelHeader ?? (brief.comparison.kind === 'trend' ? 'Measure' : 'Dimension')}</TH>
-                    {comparisonHeaders(brief.comparison).valueColumns.map((c, i) => (
-                      <TH key={`${i}-${c}`} className="normal-case tracking-normal">
-                        {c}
-                      </TH>
-                    ))}
-                    <TH className="normal-case tracking-normal">Sources</TH>
-                    <TH className="no-print normal-case tracking-normal">
-                      <span className="sr-only">Actions</span>
-                    </TH>
-                  </tr>
-                </THead>
-                <TBody>
-                  {brief.comparison.rows.map((r, rowIndex) => (
-                    <TR key={`${rowIndex}-${r.label}`} className="hover:bg-transparent">
-                      <TH scope="row" className="h-auto whitespace-normal py-2.5 align-top text-sm font-medium normal-case tracking-normal text-foreground">
-                        {r.label}
-                        <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].label`)} />
-                      </TH>
-                      {r.values.map((value, i) => (
-                        <TD key={i} className={value.startsWith('Not in') ? 'align-top italic text-muted-foreground' : 'align-top tabular-nums text-foreground'}>
-                          {value}
-                          <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
-                        </TD>
+          {brief.comparison && brief.comparison.rows.length > 0 && (
+            <section aria-labelledby="comparison" className="mt-8">
+              <SectionHeading id="comparison" className="scroll-mt-40">{brief.comparison.kind === 'trend' ? 'Trend' : 'Comparison'}</SectionHeading>
+              <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card">
+                <Table>
+                  <caption className="sr-only">{brief.title}: comparison</caption>
+                  <THead>
+                    <tr>
+                      <TH className="normal-case tracking-normal">{comparisonHeaders(brief.comparison).labelHeader ?? (brief.comparison.kind === 'trend' ? 'Measure' : 'Dimension')}</TH>
+                      {comparisonHeaders(brief.comparison).valueColumns.map((c, i) => (
+                        <TH key={`${i}-${c}`} className="normal-case tracking-normal">
+                          {c}
+                        </TH>
                       ))}
-                      <TD className="align-top">
-                        <CitationList
-                          ids={r.citationIds}
-                          context={context}
-                          provenance="brief"
-                          claim={[r.label, ...r.values].join(' · ')}
-                          figureChecks={figuresAt(v, `comparison.rows[${rowIndex}].`)}
-                        />
-                      </TD>
-                      <TD className="no-print align-top">
-                        <SaveFindingButton source={{ kind: 'comparisonRow', analysisId: analysis.analysisId, index: rowIndex }} label="Save" variant="ghost" />
-                      </TD>
-                    </TR>
-                  ))}
-                </TBody>
-              </Table>
-            </div>
-          </section>
-        )}
+                      <TH className="normal-case tracking-normal">Sources</TH>
+                      <TH className="no-print normal-case tracking-normal">
+                        <span className="sr-only">Actions</span>
+                      </TH>
+                    </tr>
+                  </THead>
+                  <TBody>
+                    {brief.comparison.rows.map((r, rowIndex) => (
+                      <TR key={`${rowIndex}-${r.label}`} className="hover:bg-transparent">
+                        <TH scope="row" className="h-auto whitespace-normal py-2.5 align-top text-sm font-medium normal-case tracking-normal text-foreground">
+                          {r.label}
+                          <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].label`)} />
+                        </TH>
+                        {r.values.map((value, i) => (
+                          <TD key={i} className={value.startsWith('Not in') ? 'align-top italic text-muted-foreground' : 'align-top tabular-nums text-foreground'}>
+                            {value}
+                            <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
+                          </TD>
+                        ))}
+                        <TD className="align-top">
+                          <CitationList
+                            ids={r.citationIds}
+                            context={context}
+                            provenance="brief"
+                            claim={[r.label, ...r.values].join(' · ')}
+                            figureChecks={figuresAt(v, `comparison.rows[${rowIndex}].`)}
+                          />
+                        </TD>
+                        <TD className="no-print align-top">
+                          <SaveFindingButton source={{ kind: 'comparisonRow', analysisId: analysis.analysisId, index: rowIndex }} label="Save" variant="ghost" />
+                        </TD>
+                      </TR>
+                    ))}
+                  </TBody>
+                </Table>
+              </div>
+            </section>
+          )}
 
-        <section aria-labelledby="considerations" className="mt-8">
-          <SectionHeading id="considerations">Investment considerations</SectionHeading>
-          <ul className="mt-3 flex flex-col gap-3">
-            {brief.investmentConsiderations.map((c, i) => (
-              <li key={`${i}-${c.text}`} className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-3.5 sm:flex-row sm:items-start">
-                <p className="flex-1 text-[15px] leading-6 text-foreground/80">
-                  {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" claim={c.text} figureChecks={figuresAt(v, `investmentConsiderations[${i}].`)} />
-                  <FigureBadges figures={figuresAt(v, `investmentConsiderations[${i}].`)} />
-                </p>
-                <SaveFindingButton source={{ kind: 'consideration', analysisId: analysis.analysisId, index: i }} />
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <CoverageMatrix analysis={analysis} passages={context} />
-
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <section aria-labelledby="gaps">
-            <SectionHeading id="gaps">Evidence gaps</SectionHeading>
-            {brief.evidenceGaps.length === 0 ? (
-              <p className="mt-2 text-sm text-muted-foreground">None identified.</p>
-            ) : (
-              <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-sm text-foreground/80 marker:text-risk-med">
-                {brief.evidenceGaps.map((g, i) => (
-                  <li key={`${i}-${g}`}>
-                    {g}
-                    <FigureBadges figures={figuresAt(v, `evidenceGaps[${i}]`)} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-          <section aria-labelledby="follow-ups" className="no-print">
-            <SectionHeading id="follow-ups">Suggested follow-up questions</SectionHeading>
-            <ul className="mt-2 flex flex-col gap-1">
-              {brief.followUpQuestions.map((q, i) => (
-                <li key={`${i}-${q}`}>
-                  <Link
-                    href={newAnalysisHref({
-                      question: q,
-                      ...filtersAsPrefill(analysis.filters),
-                      origin: { kind: 'brief', analysisId: analysis.analysisId, index: i },
-                    })}
-                    className="group -mx-2 flex items-start gap-2 rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-accent hover:text-foreground"
-                  >
-                    <span className="flex-1">{q}</span>
-                    <ArrowUpRight aria-hidden className="mt-0.5 size-3.5 shrink-0 text-muted-foreground group-hover:text-primary" />
-                  </Link>
+          <section aria-labelledby="considerations" className="mt-8">
+            <SectionHeading id="considerations" className="scroll-mt-40">Investment considerations</SectionHeading>
+            <ul className="mt-3 flex flex-col gap-3">
+              {brief.investmentConsiderations.map((c, i) => (
+                <li key={`${i}-${c.text}`} className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-3.5 sm:flex-row sm:items-start">
+                  <p className="flex-1 text-[15px] leading-6 text-foreground/80">
+                    {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" claim={c.text} figureChecks={figuresAt(v, `investmentConsiderations[${i}].`)} />
+                    <FigureBadges figures={figuresAt(v, `investmentConsiderations[${i}].`)} />
+                  </p>
+                  <SaveFindingButton source={{ kind: 'consideration', analysisId: analysis.analysisId, index: i }} />
                 </li>
               ))}
             </ul>
           </section>
-        </div>
-      </article>
 
-      <aside aria-label="Sources and interpretation" className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:h-fit">
-        <InterpretationPanel analysis={analysis} />
-        <div className="rounded-lg border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-semibold text-foreground">Sources</h2>
-            <span className="text-xs text-muted-foreground">{pluralize(passages.length, 'passage')}</span>
+          <CoverageMatrix analysis={analysis} passages={context} />
+
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <section aria-labelledby="gaps">
+              <SectionHeading id="gaps" className="scroll-mt-40">Evidence gaps</SectionHeading>
+              {brief.evidenceGaps.length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">None identified.</p>
+              ) : (
+                <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 text-sm text-foreground/80 marker:text-risk-med">
+                  {brief.evidenceGaps.map((g, i) => (
+                    <li key={`${i}-${g}`}>
+                      {g}
+                      <FigureBadges figures={figuresAt(v, `evidenceGaps[${i}]`)} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            {/* No follow-ups: no heading over an empty list (the jump bar leaves the link out too). */}
+            {brief.followUpQuestions.length > 0 && (
+              <section aria-labelledby="follow-ups" className="no-print">
+                <SectionHeading id="follow-ups" className="scroll-mt-40">Suggested follow-up questions</SectionHeading>
+                <ul className="mt-2 flex flex-col gap-1">
+                  {brief.followUpQuestions.map((q, i) => (
+                    <li key={`${i}-${q}`}>
+                      <Link
+                        href={newAnalysisHref({
+                          question: q,
+                          ...filtersAsPrefill(analysis.filters),
+                          origin: { kind: 'brief', analysisId: analysis.analysisId, index: i },
+                        })}
+                        className="group -mx-2 flex items-start gap-2 rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-accent hover:text-foreground"
+                      >
+                        <span className="flex-1">{q}</span>
+                        <ArrowUpRight aria-hidden className="mt-0.5 size-3.5 shrink-0 text-muted-foreground group-hover:text-primary" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
-          <ValidationSummary validation={v} citedCount={citedIds.size} />
-          {snapshot === false && (
-            <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">
-              The full set of passages supplied to the model is unavailable for this analysis; the passages the brief cites are listed.
-            </p>
-          )}
-          <SourceList passages={passages} cited={citedIds} />
-        </div>
-      </aside>
-    </div>
+        </article>
+
+        <aside aria-label="Sources and interpretation" className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-32 lg:h-fit">
+          <InterpretationPanel analysis={analysis} />
+          <div className="rounded-lg border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <h2 id="sources" className="scroll-mt-40 text-sm font-semibold text-foreground">
+                Sources
+              </h2>
+              <span className="text-xs text-muted-foreground">{pluralize(passages.length, 'passage')}</span>
+            </div>
+            <ValidationSummary validation={v} citedCount={citedIds.size} />
+            {snapshot === false && (
+              <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">
+                The full set of passages supplied to the model is unavailable for this analysis; the passages the brief cites are listed.
+              </p>
+            )}
+            <SourceList passages={passages} cited={citedIds} />
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
+
+/**
+ * "On this page" for a complete brief (DD-21 g): only the sections this brief shows, with counts on
+ * the lists, and the Sources rail last. Below `lg` the rail stacks under the whole brief, so the link
+ * is the one-click way to it; on a wide screen the rail is a sticky box, which the jump bar does not
+ * track as the section in view (it would always read as in view).
+ */
+function BriefJumpBar({ analysis, passages }: { analysis: AnalysisDetail; passages: number }) {
+  const brief = analysis.brief!;
+  const rows = brief.comparison?.rows.length ?? 0;
+  const links: JumpLink[] = [
+    { id: 'exec-summary', label: 'Summary' },
+    ...(brief.keyFindings.length ? [{ id: 'bottom-line', label: 'Bottom line' }] : []),
+    { id: 'key-findings', label: 'Key findings', count: brief.keyFindings.length },
+    ...(rows ? [{ id: 'comparison', label: brief.comparison!.kind === 'trend' ? 'Trend' : 'Comparison', count: rows }] : []),
+    { id: 'considerations', label: 'Considerations', count: brief.investmentConsiderations.length },
+    ...(analysis.coverage?.cells.length ? [{ id: 'coverage', label: 'Evidence coverage' }] : []),
+    { id: 'gaps', label: 'Evidence gaps', ...(brief.evidenceGaps.length ? { count: brief.evidenceGaps.length } : {}) },
+    ...(brief.followUpQuestions.length ? [{ id: 'follow-ups', label: 'Follow-up questions', count: brief.followUpQuestions.length }] : []),
+    { id: 'sources', label: 'Sources', count: passages },
+  ];
+  return <JumpBar links={links} className="mt-4" />;
+}
+
+const CHIP_ICON = { ok: CheckCircle2, warning: AlertTriangle, neutral: AlertTriangle } as const;
+const CHIP_TONE = { ok: 'success', warning: 'warning', neutral: 'neutral' } as const;
+
+/**
+ * Bottom line up front for a brief (DD-21 g): each key finding's title as the brief states it,
+ * linking to the finding, with chips for what is stored about it (its basis, companies, and the
+ * validator's figure checks). A brief stores no direction for a finding, so nothing here is coloured
+ * up or down. The status line is counts from the brief and its validation.
+ */
+function BriefBottomLine({ analysis, citedPassages }: { analysis: AnalysisDetail; citedPassages: number }) {
+  const brief = analysis.brief!;
+  const items = briefHeadlines(brief, analysis.validation);
+  if (items.length === 0) return null;
+  // Tickers only when the brief covers more than one company: the companies the question was read
+  // as covering, or, for a brief recorded without an interpretation, the findings' own tickers.
+  const covered = analysis.interpretation?.companies.length ? analysis.interpretation.companies : items.flatMap((h) => h.tickers);
+  const multi = new Set(covered).size > 1;
+  return (
+    <section aria-labelledby="bottom-line" className="mt-6 rounded-card border border-border border-l-4 border-l-primary bg-card px-5 py-4 shadow-sm">
+      <h2 id="bottom-line" className="scroll-mt-40 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+        Bottom line
+      </h2>
+      <p className="mt-1 text-xs text-muted-foreground">The key findings at a glance, titled as in the brief. Select one for the full finding and its sources.</p>
+      <ol className="mt-2 flex flex-col divide-y divide-border">
+        {items.map((h) => {
+          const chip = figureChip(h.figures);
+          const Icon = chip ? CHIP_ICON[chip.tone] : null;
+          return (
+            <li key={h.anchor} className="flex flex-col gap-1.5 py-2 sm:flex-row sm:items-baseline sm:gap-3">
+              <span className="flex min-w-0 flex-1 items-baseline gap-2">
+                <span aria-hidden className="font-mono text-xs text-muted-foreground">
+                  {String(h.index + 1).padStart(2, '0')}
+                </span>
+                <a href={`#${h.anchor}`} className="text-[15px] font-semibold leading-snug text-foreground hover:text-primary">
+                  {h.title}
+                </a>
+              </span>
+              <span className="flex shrink-0 flex-wrap items-center gap-1.5 pl-6 sm:pl-0">
+                {multi && h.tickers.map((t) => <TickerBadge key={t} ticker={t} />)}
+                <Badge tone={h.basis === 'reported' ? 'outline' : 'info'}>{h.basis === 'reported' ? 'Reported' : 'Analysis'}</Badge>
+                {chip && Icon && (
+                  <Badge tone={CHIP_TONE[chip.tone]}>
+                    <Icon aria-hidden className="size-3" />
+                    {chip.text}
+                    <span className="sr-only">. {chip.description}</span>
+                  </Badge>
+                )}
+                {!h.cited && <Badge tone="warning">No valid citation</Badge>}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="mt-2 text-xs text-muted-foreground" data-allow-figures>
+        {briefStatus(brief, analysis.validation, citedPassages).join(' · ')}
+      </p>
+    </section>
   );
 }
 

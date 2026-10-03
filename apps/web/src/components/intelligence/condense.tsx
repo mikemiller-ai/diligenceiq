@@ -71,13 +71,15 @@ const firstWords = (text: string, n = 6) => text.trim().split(/\s+/).slice(0, n)
 
 /**
  * Text clamped to `lines` lines with a More/Less toggle when it is long enough to be clamped.
- * `after` (the citation chips) renders outside the clamp, so it is never cut off.
+ * `after` (the citation chips) renders outside the clamp, so it is never cut off. The default
+ * threshold scales with the lines shown (140 characters for two, 210 for three), so a three-line
+ * clamp does not offer More over text that fits.
  */
 export function Clamp({
   children,
   lines = 2,
   className,
-  threshold = 140,
+  threshold,
   text,
   after,
 }: {
@@ -90,7 +92,7 @@ export function Clamp({
 }) {
   const [open, setOpen] = React.useState(false);
   const id = React.useId();
-  const long = text.length > threshold;
+  const long = text.length > (threshold ?? (lines === 3 ? 210 : 140));
   return (
     <div className={className}>
       <p id={id} className={cn(!open && long && (lines === 2 ? 'line-clamp-2' : 'line-clamp-3'))}>

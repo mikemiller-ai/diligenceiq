@@ -175,7 +175,9 @@ export function CoverageMatrix({ analysis, passages }: { analysis: AnalysisDetai
   const tickers = [...new Set(cells.map((c) => c.ticker))];
   return (
     <section aria-labelledby="coverage" className="mt-8">
-      <SectionHeading id="coverage">Evidence coverage</SectionHeading>
+      <SectionHeading id="coverage" className="scroll-mt-40">
+        Evidence coverage
+      </SectionHeading>
       <p className="mt-1 text-sm text-muted-foreground">Passages supplied for each company and period, and how many the brief cites. An empty cell means the filings had nothing relevant for it.</p>
       <div className="mt-3 overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full text-sm">
