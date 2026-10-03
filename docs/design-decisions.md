@@ -558,7 +558,7 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 - The E2E suite proves the page-view rule (no POST except the session, and the worker receives nothing) against the real api.
 
 ## DD-21 · Readability: bottom line first, visual signals, progressive disclosure, readable evidence
-**Status:** Accepted for step 1, the Company Intelligence dashboard (gated 2026-10-02), step 2, readable evidence (gated and deployed 2026-10-03), step 3, the brief and Compare (gated and deployed 2026-10-03), and step 4, the refined Compare and Findings (gated 2026-10-03 on `phase-6r-step4`, not yet deployed). Planned 2026-10-02. Direction chosen by Mike on 2026-10-02 from the `readability-prototype` branch and the Claude Design file "Company Intelligence - current" (with its "refined" jump bar).
+**Status:** Accepted for step 1, the Company Intelligence dashboard (gated 2026-10-02), step 2, readable evidence (gated and deployed 2026-10-03), step 3, the brief and Compare (gated and deployed 2026-10-03), and step 4, the refined Compare and Findings (gated and deployed 2026-10-03). Planned 2026-10-02. Direction chosen by Mike on 2026-10-02 from the `readability-prototype` branch and the Claude Design file "Company Intelligence - current" (with its "refined" jump bar).
 
 **Context**
 - After Phase 6, the dashboard, the evidence drawer and the source view are complete but hard to consume. The Apple dashboard is a long scroll: Attention signals (10 cards), Current risks (28 headings), Recommended diligence (6) and long paragraphs everywhere. It is hard to demo.

@@ -3,10 +3,10 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`phase-6r-step4` (from `main` at `0494871`, "Soften the light palette"), **uncommitted**: Phase 6r step 4 is gated and waiting for Mike's go-ahead to commit. `main` (no remote yet) has step 3 (`280660b`), the step 4 plan (`d3ce536`), the step 3 deploy record (`35af2d0`) and the light-palette change (`0494871`).
+`main` (no remote yet). Last commits: `feef6ff` (Phase 6r step 4), fast-forwarded from `phase-6r-step4`; `0494871` (light palette); `35af2d0` (step 3 deploy record). Step 3: `280660b`; step 2: `a5cbf2b`; step 1: `c4a4797`.
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 4 of 4 is gated (2026-10-03), not committed and not deployed: the refined Compare and Findings (DD-21 h).** Handoff: `docs/handoffs/phase-06r-step4.md`. Steps 1–3 are deployed (handoffs `phase-06r-step1.md` … `phase-06r-step3.md`).
+**Phase 6r (readability, DD-21) is complete: step 4 of 4, the refined Compare and Findings (DD-21 h), is gated, committed (`feef6ff`) and deployed (2026-10-03).** Handoff: `docs/handoffs/phase-06r-step4.md`. Steps 1–3 are deployed too (handoffs `phase-06r-step1.md` … `phase-06r-step3.md`).
 - Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point the set at `iv-9cf51c066743/det-v2`.
 - **Step 4 adds:**
   - **Compare:**
@@ -31,12 +31,20 @@ _Last updated: 2026-10-03 (local)_
 Gate record: adversary (3 high, 7 medium, 11 low) → fresh fixer (all 21 fixed with regression tests) → `/code-review` medium (2 findings, both fixed with tests: duplicate card IDs when grouped by company, and a note draft lost on a Board move) → `pnpm gate` green.
 
 ## In flight
-- **Waiting for Mike:** commit on `phase-6r-step4` (handoff, DD-21 h, code and tests), then a fast-forward of `main`, then `pnpm deploy:web`.
-- **Production check after that deploy:**
-  - Compare `AAPL,MSFT,NVDA`: bottom line plus its "Opposite directions: Operating cash flow …" footer, and a grid cell popover;
-  - Findings: strip, search, Board, Ask follow-up prefill;
-  - light and dark, and 390 px;
-  - only reads and `POST /api/session` are sent.
+- **Done 2026-10-03 (Mike approved):** the commit, the fast-forward to `main`, then `pnpm deploy:web` (Amplify job 11). The headless production check passed:
+  - **Compare** `AAPL,MSFT,NVDA` in light and dark:
+    - the five bottom-line lines ("Revenue grew at all three" … "2 areas only at NVIDIA Corporation");
+    - the footer "Opposite directions: Operating cash flow (rising at Microsoft Corporation and NVIDIA Corporation, falling at Apple Inc).";
+    - the Apple Inc · Regulatory grid popover opens with its headings.
+    - Body #F0F2F6 in light, #0B1020 in dark.
+  - **Findings** in light and dark:
+    - the summary strip (4 findings across 5 companies; 1 needs follow-up);
+    - search narrows 4 → 1;
+    - Board columns Needs Follow-Up · 1, Active · 3, Resolved · 0.
+  - **Ask follow-up** lands on `/analysis/new/` with `origin=finding:fd-…`, the question filled in and the "A saved finding" label. Nothing posts an analysis.
+  - **Phone, 390 px:** no sideways scroll on Compare or Findings.
+  - **Requests:** only reads and `POST /api/session` (`/api/session`, `/api/analyses`, `/api/findings`, `/api/companies`, `/api/companies/<t>/intelligence`, `/api/health`).
+  - Axe was not run against production; it is clean in the e2e suite in light and dark.
 - **Known limit (M3, from step 2):** profile citations carry no subsection, so their drawer titles show only the section.
 - **Next:** Phase 7. The Deep Analysis and brief mockups (same v2 folder) were not chosen; ask Mike before building them.
 

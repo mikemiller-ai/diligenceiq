@@ -90,17 +90,14 @@ Mike reviewed the readability v2 mockups on 2026-10-03 and chose `Compare - refi
 - Ask follow-up is a generic template over the title.
 - Not checked with a real screen reader, or on Safari or Firefox.
 
-## Not deployed yet
-Next, each with Mike's go-ahead:
-1. Commit on `phase-6r-step4`.
-2. Fast-forward `main`.
-3. `pnpm deploy:web`.
-
-It is web only. Then check production:
-- Compare AAPL,MSFT,NVDA: bottom line, footer, grid popover;
-- Findings: strip, search, Board, Ask follow-up prefill;
+## Deployed
+2026-10-03, with Mike's go-ahead: commit `feef6ff`, a fast-forward of `main`, then `pnpm deploy:web` (Amplify job 11). The production check passed:
+- Compare AAPL,MSFT,NVDA: the bottom line and its footer, and a grid popover;
+- Findings: the summary strip, search, Board, and Ask follow-up prefill;
 - light and dark, and 390 px;
-- only reads and `POST /api/session` are sent.
+- only reads and `POST /api/session` were sent.
+
+Details are in STATE.md.
 
 ## Next
 Phase 7. The Deep Analysis and brief mockups were not chosen; ask Mike before building them.
