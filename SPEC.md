@@ -333,7 +333,7 @@ A product landing in the family layout of Mike's other products (ResolveIQ, Trus
   - **Primary CTA:** "Open Company Intelligence".
   - **Secondary CTAs:** "Ask any question" (an empty Deep Analysis), "How it works" (the Architecture and business-value page), and "Watch the launch film" (`#film`) once the film is present.
   - **Product preview:** real filing content only, for example the latest Apple 10-K's risk headings verbatim, each with canonical citation chips that open the passage in the source view. Never a sample figure, invented company or narrative presented as fact.
-- **Launch film** (`#film`), the first section after the hero: a native `<video>` (controls, no autoplay, 16:9, poster, WebVTT captions when present) from `apps/web/public/media/diligenceiq-launch-film.mp4`. Until the file exists, a labeled placeholder holds the slot and the header's "Launch film" link is hidden; the page detects the files at build time, and a video without captions builds with a warning.
+- **Launch film** (`#film`), the first section after the hero: a native `<video>` (controls, no autoplay, 16:9, poster, WebVTT captions when present) from `apps/web/public/media/diligenceiq-launch-film.mp4`. Until the file exists, the section is not rendered and the header's "Launch film" link is hidden (A.4, 2026-10-03); the page detects the files at build time, and a video without captions builds with a warning.
 - **Then, in order:** the client problem; how it works (the journey, §5.1); a navy "shows its work" band (citations, dollar and percentage figures checked against their cited passages, descriptive labels from the product's own vocabulary, no ratings); two ways in (Company Intelligence without a question, with an honest status line naming the companies that have a profile today until Phase 4b covers every company, and a link to Compare; Deep Analysis for any question, with the demo workspace's pre-run questions as real examples); how it is built (at most one generation call per analysis, offline profiles, scale to zero, spend controls) linking to `/architecture`; a closing CTA; the footer. All copy must be true of the current build.
 - **Copy rules:** plain language; no Eliza, FDE or assessment wording (the client framing); no measured or invented numbers other than corpus counts derived from the filing rows (plus the digits inside the seeded questions, the preview filing's fiscal label and the citation labels); no ratings or recommendation language (§32.6).
 - **Opening the landing never calls the api.**
@@ -348,7 +348,7 @@ Company Intelligence is the primary product experience.
 
 - The user selects a company, for example `Apple (AAPL)`.
 - Deep-coverage companies are featured, Apple first, with search across all 54 corpus companies.
-- `GE_10K_2015` (General Electric Capital Corp, FY2014) is labeled outside the review window and not featured. It has no Company Intelligence profile; its page says so and offers Deep Analysis instead (assumptions G2; A.4, 2026-10-03).
+- `GE_10K_2015` (General Electric Capital Corp, FY2014) is labeled outside the review window and not featured. It has no Company Intelligence profile; its page says so and offers its filing to read; it is not a Deep Analysis company filter (assumptions G2; A.4, 2026-10-03).
 
 ## 8.2 What the dashboard answers
 
@@ -357,12 +357,12 @@ DiligenceIQ immediately presents an understandable analysis, without requiring a
 ## 8.3 Dashboard sections
 
 1. **30-second view** (§8.4).
-2. **Performance** (§9).
-3. **Drivers:** MD&A segment or product rows with the largest reported change, each cited.
-4. **Current risks:** the latest 10-K's risk headings, grouped by category with plain labels, each cited.
-5. **What's Changed** (§10), one of the most prominent sections.
-6. **Attention Signals with Why This Matters** (§11).
-7. **Recommended Diligence** (§12).
+2. **What's Changed** (§10), one of the most prominent sections.
+3. **Attention Signals with Why This Matters** (§11); the first two show Why This Matters unfolded.
+4. **Recommended Diligence** (§12).
+5. **Performance** (§9).
+6. **Drivers:** MD&A segment or product rows with the largest reported change, each cited.
+7. **Current risks:** the latest 10-K's risk headings, grouped by category with plain labels, each cited.
 8. **Coverage note:** the company's coverage tier, the periods covered, and what is not known.
 9. **Footer:** the profile's generation mode (`llm` or `deterministic`) and index version.
 
@@ -1424,7 +1424,7 @@ Bedrock usage is demand-driven. The application must:
 | Offline | Runs on an admin workstation with the admin's credentials. Never deployed as a Lambda or any other runtime component. |
 | Admin-run | Started by hand. Never on page view, never scheduled, never triggered by an event. |
 | Bounded | At most **one** generation call per company per (`indexVersion`, `profilePromptVersion`), enforced by the append-only build ledger. No `--force`. |
-| Budget-capped | `--max-calls` is required; the run stops at the cap. A full LLM build is at most 54 calls. |
+| Budget-capped | `--max-calls` is required; the run stops at the cap. A full LLM build is at most 53 calls (one per company in the review window; A.4). |
 | Live plane untouched | Every user question is still exactly one live call. The api Lambda has no Bedrock permission. |
 | Withdrawable | A zero-call deterministic set is always built, and `/diligenceiq/active-profile-set` switches to it instantly, without a rebuild or deploy. |
 | Disclosed | Stated plainly on the Architecture page and in the README. |
@@ -1990,7 +1990,7 @@ It is finished when:
 - a prefilled Deep Analysis never runs without an explicit Run;
 - citations are real and validated;
 - evidence is inspectable, including adjacent periods and the readable source view (source browsing in P0);
-- Company Intelligence works for every corpus company, with no LLM call on page view;
+- Company Intelligence works for all 53 companies in the review window, with no LLM call on page view (GE Capital, outside the window, is labeled and has no profile; A.4);
 - What's Changed, Attention Signals, Why This Matters, and Recommended Diligence are evidence-backed;
 - Compare works;
 - the brief shows the Interpretation panel, coverage matrix, and numeric-grounding badges;
@@ -2201,7 +2201,9 @@ Changes made to this specification after its consolidation, each decided by Mike
 | 2026-10-02 | §49, §8.3, §16.2, §5.4 | A readability phase **6r** runs after Phase 6 and before Phase 7: bottom line up front, direction chips and sparklines, progressive disclosure, a jump bar, readable filing text and sentence-level evidence (DD-21). Colors describe direction only (green/red for more-is-more metrics, gray otherwise). Nothing is generated on page view and no stored text is added. | Mike reviewed the Phase 6 dashboard and evidence views: correct but too long and hard to read or demo. He chose the current depth plus visual signals and condensed sections over a plain-language redesign. |
 | 2026-10-02 | §37, §5 | The app supports dark mode: a System / Light / Dark choice in the top bar (System follows the OS), the pattern of Mike's other products. Every colour is a token with a light and a dark value; the navy hero and analysis panels look the same in both. A stored choice is applied before first paint by one inline script, which the Phase 7 CSP must allow by hash (architecture §11). Shipped with Phase 6r step 1. | Mike asked for dark mode like his other products, toggled or following the system. |
 | 2026-10-03 | §49, §21, §17.2, §5.4 | Phase 6r gains a **step 4** after step 3: the refined **Compare** (a bottom line of fixed-rule lines over the stored profiles, the side-by-side table with direction chips, latest values and sparklines, one risk-area grid of category × company replacing the separate common, distinctive and ranking lists, management emphasis clamped, Ask next folded) and the refined **Findings** board (a summary strip by status and theme, one filter row with text search and the other filters under More filters, compact cards with two-line text and a source count that opens the evidence, status as one chip menu, a Board view grouped by status, and Ask follow-up, which only prefills Deep Analysis with a fixed-template question and the `finding` origin). Nothing is removed; nothing is generated on page view; web only (DD-21 h). | Mike reviewed the mockups `Compare - refined` and `Findings - refined` (the readability v2 design folder) on 2026-10-03 and chose both. The Deep Analysis and brief mockups were not chosen. |
-| 2026-10-03 | §8, §49 | GE Capital (`GE_10K_2015`, FY2014 only) has **no** Company Intelligence profile: it is listed and labeled outside the review window, and its page offers Deep Analysis instead. The Phase 8 exit criterion reads "profiles loaded for all 53 companies in the review window" instead of "all 54". | The Phase 8 adversary found the criterion and §8 promised a labeled GE profile, while every profile set since Phase 4b has 53 companies and the app already labels GE this way. Mike chose to amend the SPEC rather than build a profile for a filing outside the window. |
+| 2026-10-03 | §8, §35.7, §49, §51.1 | GE Capital (`GE_10K_2015`, FY2014 only) has **no** Company Intelligence profile: it is listed and labeled outside the review window, and its page offers its filing to read (it is not a Deep Analysis company filter). The Phase 8 exit criterion reads "profiles loaded for all 53 companies in the review window" instead of "all 54"; for the same reason the §51.1 success criterion reads "all 53 companies in the review window" instead of "every corpus company", and §35.7's full LLM build is at most 53 calls instead of 54. | The Phase 8 adversary found the criterion and §8 promised a labeled GE profile, while every profile set since Phase 4b has 53 companies and the app already labels GE this way. Mike chose to amend the SPEC rather than build a profile for a filing outside the window. |
+| 2026-10-03 | §7 | Until the launch film exists, the landing renders no film section (it was a labeled "Coming soon" placeholder). | The Phase 9 UX review: an empty video box as the first section under the hero read as an unfinished product. Mike chose to hide it until the film is ready. |
+| 2026-10-03 | §8.3 | Dashboard order: 30-second view, What's Changed, Attention Signals (the first two with Why This Matters unfolded), Recommended Diligence, then Performance, Drivers and Current risks. Nothing is removed. | The Phase 9 60-second novice test: "what deserves attention, why it matters, what to investigate next" sat about 4,000 px down, after the full list of risk headings in legal language. Mike chose to move the risks last. |
 
 ---
 

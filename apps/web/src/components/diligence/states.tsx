@@ -33,14 +33,19 @@ export function EmptyState({
 }
 
 export function RequestId({ id }: { id: string }) {
+  return <CopyableId label="Request ID" id={id} />;
+}
+
+/** A support identifier with a copy button ("Request ID", "Analysis ID"). */
+export function CopyableId({ label, id }: { label: string; id: string }) {
   const [copied, setCopied] = React.useState(false);
   return (
     <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-      Request ID
+      {label}
       <code className="rounded-sm bg-secondary px-1.5 py-0.5 font-mono text-[11px] text-foreground/80 ring-1 ring-inset ring-border">{id}</code>
       <button
         type="button"
-        aria-label="Copy request ID"
+        aria-label={`Copy ${label.charAt(0).toLowerCase()}${label.slice(1)}`}
         className="rounded-sm p-0.5 hover:bg-secondary hover:text-foreground"
         onClick={() => {
           void navigator.clipboard?.writeText(id).then(() => {
@@ -55,7 +60,10 @@ export function RequestId({ id }: { id: string }) {
   );
 }
 
-/** Plain-language error with a request ID and a recovery action. Never a stack trace. */
+/**
+ * Plain-language error with a recovery action, and a request ID for support. Never a stack trace.
+ * The error code is shown only next to the request ID (Phase 9 review: a raw code badge read as noise).
+ */
 export function ErrorPanel({
   title,
   message,
@@ -80,11 +88,18 @@ export function ErrorPanel({
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-destructive">{title}</p>
           <div className="mt-1 text-sm text-foreground/80">{message}</div>
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-            {requestId && <RequestId id={requestId} />}
-            {code && <span className="rounded-sm bg-destructive/10 px-1.5 py-0.5 font-mono text-[11px] text-foreground/80">{code}</span>}
-            {action}
-          </div>
+          {action && <div className="mt-3 flex flex-wrap items-center gap-2">{action}</div>}
+          {/* Support details: the error code only beside a request ID, never as a badge of its own. */}
+          {requestId && (
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <RequestId id={requestId} />
+              {code && (
+                <span>
+                  · Error code <code className="font-mono text-[11px] text-foreground/80">{code}</code>
+                </span>
+              )}
+            </p>
+          )}
         </div>
       </div>
     </div>

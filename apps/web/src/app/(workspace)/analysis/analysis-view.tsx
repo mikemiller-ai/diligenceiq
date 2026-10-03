@@ -11,16 +11,16 @@ import { CitationList, CitedText, useEvidence } from '@/components/diligence/evi
 import { JumpBar, type JumpLink } from '@/components/diligence/jump-bar';
 import { PageContainer, SectionHeading } from '@/components/diligence/page';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
-import { CoverageMatrix, FigureBadges, InterpretationPanel, ValidationSummary, figuresAt } from '@/components/diligence/brief-panels';
+import { CoverageMatrix, FigureBadges, InterpretationPanel, PeriodBadges, ValidationSummary, figuresAt } from '@/components/diligence/brief-panels';
 import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { StageTracker } from '@/components/diligence/stage-tracker';
-import { EmptyState, ErrorPanel, NoticeBar, RetryButton } from '@/components/diligence/states';
+import { CopyableId, EmptyState, ErrorPanel, NoticeBar, RetryButton } from '@/components/diligence/states';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import { ApiRequestError } from '@/lib/api';
-import { briefHeadlines, briefStatus, figureChip, findingAnchor } from '@/lib/brief-summary';
-import { formatDate, formatDateTime, formatDurationSeconds, pluralize } from '@/lib/format';
+import { briefHeadlines, briefStatus, figureChip, findingAnchor, uncitedPeriodsAt } from '@/lib/brief-summary';
+import { formatDate, formatDurationSeconds, formatLocalDateTime, pluralize } from '@/lib/format';
 import { FAILURE_COPY } from '@/lib/labels';
 import { companies } from '@/fixtures';
 import { filtersAsPrefill, newAnalysisHref } from '@/lib/links';
@@ -242,21 +242,27 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
           </span>
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-on-navy-accent">Diligence Brief</p>
           <NavyStatus status={analysis.status} />
-          <span className="ml-auto font-mono text-[11px] text-white/50">{analysis.analysisId}</span>
         </div>
         <div className="relative px-6 pb-6 pt-5">
+          {/* Until the brief's title arrives (queued, running, failed) the question is the title, shown once. */}
           <h1 className="max-w-[860px] text-[22px] font-semibold leading-tight tracking-tight sm:text-[26px]">
             {analysis.brief?.title ?? analysis.question}
             {analysis.brief && <FigureBadges figures={figuresAt(analysis.validation, 'title')} />}
           </h1>
-          <p className="mt-2 max-w-[860px] text-[15px] text-white/70">
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">Question · </span>
-            {analysis.question}
-          </p>
+          {analysis.brief && (
+            <p className="mt-2 max-w-[860px] text-[15px] text-white/70">
+              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">Question · </span>
+              {analysis.question}
+            </p>
+          )}
           <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11.5px] text-white/55">
-            <span>{formatDateTime(analysis.createdAt)}</span>
+            <span>{formatLocalDateTime(analysis.createdAt)}</span>
             {/* A seeded analysis is a replayed recording: its durations would not be real, so none is shown. */}
-            {!seeded && analysis.completedAt && <span>completed in {formatDurationSeconds(analysis.createdAt, analysis.completedAt)}</span>}
+            {!seeded && analysis.completedAt && (
+              <span>
+                {analysis.status === 'FAILED' ? 'failed after' : 'completed in'} {formatDurationSeconds(analysis.createdAt, analysis.completedAt)}
+              </span>
+            )}
             {analysis.status === 'COMPLETE' && (
               <span>
                 {pluralize(passages.length, 'source passage')}
@@ -275,6 +281,7 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
                 <CitedText text={analysis.brief.executiveSummary} context={context} onNavy figureChecks={figuresAt(analysis.validation, 'executiveSummary')} />
               </p>
               <FigureBadges figures={figuresAt(analysis.validation, 'executiveSummary')} />
+              <PeriodBadges periods={uncitedPeriodsAt(analysis.validation, 'executiveSummary')} onNavy />
             </section>
           )}
         </div>
@@ -289,8 +296,8 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
       {analysis.status === 'FAILED' && analysis.error && (
         <div className="mt-6 max-w-3xl">
           <ErrorPanel
-            title={FAILURE_COPY[analysis.error.code]?.title ?? 'The analysis failed'}
-            message={analysis.error.message}
+            title={failureTitle(analysis.error.code)}
+            message={failureMessage(analysis.error.code, analysis.error.message)}
             requestId={analysis.error.requestId}
             code={analysis.error.code}
             action={
@@ -301,7 +308,7 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
               </Button>
             }
           />
-          {analysis.error.code === 'NO_RELEVANT_EVIDENCE' && <NoEvidenceHelp />}
+          {analysis.error.code === 'NO_RELEVANT_EVIDENCE' && <NoEvidenceHelp companiesDetected={(analysis.interpretation?.companies.length ?? 0) > 0} />}
           {analysis.interpretation && (
             <div className="mt-6 max-w-xl">
               <InterpretationPanel analysis={analysis} />
@@ -311,6 +318,11 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
       )}
 
       {analysis.status === 'COMPLETE' && analysis.brief && <BriefBody analysis={analysis} context={context} passages={passages} snapshot={ctx?.snapshot ?? null} />}
+
+      {/* The analysis ID is for support, not for reading: kept here, copyable, out of the header. */}
+      <p className="no-print mt-10 border-t border-border pt-3 text-xs text-muted-foreground">
+        <CopyableId label="Analysis ID" id={analysis.analysisId} />
+      </p>
     </PageContainer>
   );
 }
@@ -351,6 +363,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                       <p className="mt-1 text-[15px] leading-6 text-foreground/80">
                         {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" claim={k.finding} figureChecks={figuresAt(v, `keyFindings[${i}].`)} />
                         <FigureBadges figures={figuresAt(v, `keyFindings[${i}].`)} />
+                        <PeriodBadges periods={uncitedPeriodsAt(v, `keyFindings[${i}].`)} />
                       </p>
                     </div>
                     <SaveFindingButton source={{ kind: 'keyFinding', analysisId: analysis.analysisId, index: i }} />
@@ -391,6 +404,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                           <TD key={i} className={value.startsWith('Not in') ? 'align-top italic text-muted-foreground' : 'align-top tabular-nums text-foreground'}>
                             {value}
                             <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
+                            <PeriodBadges periods={uncitedPeriodsAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
                           </TD>
                         ))}
                         <TD className="align-top">
@@ -403,7 +417,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                           />
                         </TD>
                         <TD className="no-print align-top">
-                          <SaveFindingButton source={{ kind: 'comparisonRow', analysisId: analysis.analysisId, index: rowIndex }} label="Save" variant="ghost" />
+                          <SaveFindingButton source={{ kind: 'comparisonRow', analysisId: analysis.analysisId, index: rowIndex }} variant="ghost" />
                         </TD>
                       </TR>
                     ))}
@@ -421,6 +435,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                   <p className="flex-1 text-[15px] leading-6 text-foreground/80">
                     {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" claim={c.text} figureChecks={figuresAt(v, `investmentConsiderations[${i}].`)} />
                     <FigureBadges figures={figuresAt(v, `investmentConsiderations[${i}].`)} />
+                    <PeriodBadges periods={uncitedPeriodsAt(v, `investmentConsiderations[${i}].`)} />
                   </p>
                   <SaveFindingButton source={{ kind: 'consideration', analysisId: analysis.analysisId, index: i }} />
                 </li>
@@ -565,6 +580,13 @@ function BriefBottomLine({ analysis, citedPassages }: { analysis: AnalysisDetail
                     <span className="sr-only">. {chip.description}</span>
                   </Badge>
                 )}
+                {h.uncitedPeriods.length > 0 && (
+                  <Badge tone="warning">
+                    <AlertTriangle aria-hidden className="size-3" />
+                    Period not cited: {h.uncitedPeriods.join(', ')}
+                    <span className="sr-only">. This finding claims something about {h.uncitedPeriods.join(' and ')} but cites no passage from {h.uncitedPeriods.length === 1 ? 'that period' : 'those periods'}.</span>
+                  </Badge>
+                )}
                 {!h.cited && <Badge tone="warning">No valid citation</Badge>}
               </span>
             </li>
@@ -625,17 +647,47 @@ function NavyStatus({ status }: { status: AnalysisDetail['status'] }) {
 }
 
 /** The companies Deep Analysis covers (the static catalog; GE Capital's pre-window filing excluded). */
-const COVERED = companies().filter((c) => !c.outsideWindow);
+const ALL_COMPANIES = companies();
+const COVERED = ALL_COMPANIES.filter((c) => !c.outsideWindow);
+const NOT_COVERED = ALL_COMPANIES.filter((c) => c.outsideWindow);
+
+/** The failure's plain title (FAILURE_COPY), or a generic one for an unknown code. */
+export function failureTitle(code: string): string {
+  return FAILURE_COPY[code]?.title ?? 'The analysis failed';
+}
 
 /**
- * NO_RELEVANT_EVIDENCE (SPEC §38.2; architecture §9.1): no model call was made. Lists the
- * covered companies, so a question about a company outside the corpus has an answer.
+ * The failure's message without repeating its title: a server message that only restates the title
+ * ("The analysis took too long.") is replaced by the recovery action.
  */
-export function NoEvidenceHelp() {
+export function failureMessage(code: string, message: string): string {
+  const norm = (t: string) => t.toLowerCase().replace(/[’']/g, "'").replace(/[.\s]+$/, '').trim();
+  const title = norm(failureTitle(code));
+  const action = FAILURE_COPY[code]?.action;
+  const m = message.trim();
+  if (!norm(m).startsWith(title)) return m;
+  const rest = m.slice(failureTitle(code).length).replace(/^[.\s]+/, '').trim();
+  return rest || action || m;
+}
+
+/**
+ * NO_RELEVANT_EVIDENCE (SPEC §38.2; architecture §9.1): no model call was made. When the question
+ * named no company the filings hold, lists the covered ones, so a question about a company outside
+ * the corpus has an answer; when it did, the list would not help and is left out.
+ */
+export function NoEvidenceHelp({ companiesDetected = false }: { companiesDetected?: boolean }) {
+  if (companiesDetected) {
+    return (
+      <p className="mt-4 rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground/80">
+        No model request was made. Try different words, a wider period, or both filing types.
+      </p>
+    );
+  }
   return (
     <section aria-labelledby="covered-companies" className="mt-4 rounded-lg border border-border bg-card px-4 py-3">
       <h2 id="covered-companies" className="text-sm font-semibold text-foreground">
-        No model request was made. The filings cover these {COVERED.length} companies:
+        No model request was made, and the question didn’t name a company DiligenceIQ covers. Deep Analysis covers these {COVERED.length} of the{' '}
+        {ALL_COMPANIES.length} companies whose filings it holds:
       </h2>
       <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-foreground/80" aria-label="Covered companies">
         {COVERED.map((c) => (
@@ -644,6 +696,11 @@ export function NoEvidenceHelp() {
           </li>
         ))}
       </ul>
+      {NOT_COVERED.length > 0 && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Not covered: {NOT_COVERED.map((c) => `${c.company} (only a ${c.latestAnnualPeriodEnd.slice(0, 4)} report, older than the period DiligenceIQ covers)`).join('; ')}.
+        </p>
+      )}
       <p className="mt-2 text-xs text-muted-foreground">
         Which years each company covers:{' '}
         <Link href="/intelligence/" className="text-primary hover:underline">

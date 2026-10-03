@@ -52,10 +52,11 @@ function ShellLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-[280px] border-none bg-rail p-0 text-rail-ink" hideClose>
+        {/* A visible scrim behind the phone drawer (tap it, or Esc, to close); no Collapse control in the drawer. */}
+        <SheetContent side="left" className="w-[280px] border-none bg-rail p-0 text-rail-ink" hideClose overlayClassName="bg-navy/60 backdrop-blur-[2px]">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only">Primary workspace navigation</SheetDescription>
-          <Sidebar collapsed={false} onToggle={() => setMobileOpen(false)} onNavigate={() => setMobileOpen(false)} />
+          <Sidebar collapsed={false} onNavigate={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
 

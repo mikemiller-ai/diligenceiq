@@ -180,6 +180,44 @@ describe('Diligence Brief panels (SPEC §15.2, P0)', () => {
     expect(screen.getByText(/1 of 3 figures found in their cited passages \(1 more match a table whose unit is not stated\)/)).toBeInTheDocument();
   });
 
+  it('period claims: "Period not cited" on the finding, its Bottom line item, a comparison cell, a consideration and the summary', () => {
+    const analysis: AnalysisDetail = {
+      ...complete,
+      validation: validationWith({
+        periodClaims: [
+          { location: 'keyFindings[0].finding', periods: ['FY2023'], cue: 'absent' },
+          { location: 'comparison.rows[0].values[0]', periods: ['FY2022'], cue: 'not disclosed' },
+          { location: 'investmentConsiderations[0].text', periods: ['FY2023', 'FY2024'], cue: 'not present' },
+          { location: 'executiveSummary', periods: ['FY2021'], cue: 'new in' },
+        ],
+        notices: ['4 claims say something is new or absent in a period none of its citations is from (marked "period not cited").'],
+      }),
+    };
+    renderInWorkspace(<AnalysisView />, { initial: { analyses: [analysis] }, contexts: SAMPLE_CONTEXTS });
+    const title = complete.brief!.keyFindings[0]!.title;
+    const findings = screen.getByRole('heading', { name: 'Key findings' }).closest('section')!;
+    const first = within(findings).getAllByRole('listitem').find((li) => li.textContent?.includes(title))!;
+    expect(within(first).getByText(/^Period not cited: FY2023/)).toHaveTextContent('This claims something about FY2023 but cites no FY2023 passage.');
+    const bottom = screen.getByRole('heading', { name: 'Bottom line' }).closest('section')!;
+    const headline = within(bottom).getAllByRole('listitem').find((li) => li.textContent?.includes(title))!;
+    expect(within(headline).getByText(/^Period not cited: FY2023/)).toBeInTheDocument();
+    expect(within(screen.getAllByRole('table')[0]!).getByText(/^Period not cited: FY2022/)).toBeInTheDocument();
+    const considerations = screen.getByRole('heading', { name: 'Investment considerations' }).closest('section')!;
+    expect(within(considerations).getByText(/^Period not cited: FY2023/)).toBeInTheDocument();
+    expect(within(considerations).getByText(/^Period not cited: FY2024/)).toBeInTheDocument();
+    expect(within(screen.getByRole('heading', { name: 'Executive summary' }).closest('section')!).getByText(/^Period not cited: FY2021/)).toBeInTheDocument();
+    // The Sources rail states the count once, as a row (the notice is not repeated).
+    const rail = screen.getByRole('list', { name: 'Validation' });
+    expect(within(rail).getByText('4 claims about a period none of their citations is from; marked "Period not cited".')).toBeInTheDocument();
+    expect(within(rail).queryByText(/claims say something is new/)).not.toBeInTheDocument();
+  });
+
+  it('period claims: an analysis stored before the check (no periodClaims) shows no period badge', () => {
+    const { periodClaims: _none, ...older } = validationWith({});
+    renderInWorkspace(<AnalysisView />, { initial: { analyses: [{ ...complete, validation: older }] }, contexts: SAMPLE_CONTEXTS });
+    expect(screen.queryByText(/Period not cited/)).not.toBeInTheDocument();
+  });
+
   it('M1: every validated location is badged: the title, a comparison row label, an evidence gap', () => {
     const fig = (location: string, figure: string) => ({ location, figure, verified: false, rule: null, chunkId: null });
     const analysis: AnalysisDetail = {
@@ -270,22 +308,70 @@ describe('every analysis failure state has a designed screen (SPEC §38.2)', () 
       const rerun = within(alert).getByRole('link', { name: 'Edit and run again' });
       expect(new URLSearchParams(rerun.getAttribute('href')!.split('?')[1]).get('q')).toBe(complete.question);
       if (code === 'NO_RELEVANT_EVIDENCE') {
-        // SPEC §38.2: an out-of-corpus question is told which companies the filings cover.
+        // The question named a covered company, so the covered-company list would not help (Phase 9 review item 14).
+        expect(complete.interpretation?.companies.length).toBeGreaterThan(0);
         expect(screen.getByText(/No model request was made/)).toBeInTheDocument();
-        const covered = screen.getByRole('list', { name: 'Covered companies' });
-        expect(within(covered).getAllByRole('listitem').length).toBe(53);
-        expect(covered).toHaveTextContent('Apple Inc');
-        expect(covered).not.toHaveTextContent('GE Capital');
+        expect(screen.queryByRole('list', { name: 'Covered companies' })).not.toBeInTheDocument();
       }
+      // The title is not repeated as the message, and the code sits only beside the request ID.
+      expect(alert.textContent!.split(FAILURE_COPY[code]!.title)).toHaveLength(2);
+      expect(alert).toHaveTextContent(new RegExp(`Request ID\\s*req-${code}.*Error code ${code}`));
     });
   }
+});
+
+describe('a failed analysis header and copy (Phase 9 review items 13, 14, 18, 19)', () => {
+  const failed = (over: Partial<AnalysisDetail>): AnalysisDetail => ({
+    ...complete,
+    analysisId: 'an-failed-h',
+    status: 'FAILED',
+    brief: undefined,
+    citations: undefined,
+    validation: undefined,
+    completedAt: new Date(Date.parse(complete.createdAt) + 2000).toISOString(),
+    error: { code: 'GENERATION_TIMEOUT', message: 'The analysis took too long.', requestId: 'req-h' },
+    ...over,
+  });
+
+  it('says "failed after", shows the question once as the title, and keeps the analysis ID out of the header', () => {
+    setRoute('/analysis/', 'id=an-failed-h');
+    renderInWorkspace(<AnalysisView />, { initial: { analyses: [failed({})] } });
+    const header = screen.getByRole('heading', { level: 1 }).closest('header')!;
+    expect(header).toHaveTextContent('failed after 2s');
+    expect(header).not.toHaveTextContent(/completed in/);
+    expect(header.textContent!.split(complete.question)).toHaveLength(2);
+    expect(header).not.toHaveTextContent('an-failed-h');
+    expect(header).not.toHaveTextContent('UTC');
+    // The ID stays one copy away, below the analysis.
+    expect(screen.getByRole('button', { name: 'Copy analysis ID' })).toBeInTheDocument();
+    const alert = screen.getByRole('alert');
+    // "The analysis took too long" once: the server message only restated it, so the action replaces it.
+    expect(alert.textContent!.split('The analysis took too long')).toHaveLength(2);
+    expect(alert).toHaveTextContent(FAILURE_COPY.GENERATION_TIMEOUT!.action);
+  });
+
+  it('NO_RELEVANT_EVIDENCE without a detected company: "No passages matched", and the covered list, with 53 of 54 stated precisely', () => {
+    const none = failed({
+      error: { code: 'NO_RELEVANT_EVIDENCE', message: 'The filings had no passages relevant to this question.', requestId: 'req-n' },
+      interpretation: complete.interpretation ? { ...complete.interpretation, companies: [] } : undefined,
+    });
+    setRoute('/analysis/', 'id=an-failed-h');
+    renderInWorkspace(<AnalysisView />, { initial: { analyses: [none] } });
+    expect(screen.getByRole('alert')).toHaveTextContent('No passages matched this question');
+    const covered = screen.getByRole('list', { name: 'Covered companies' });
+    expect(within(covered).getAllByRole('listitem').length).toBe(53);
+    expect(covered).toHaveTextContent('Apple Inc');
+    expect(covered).not.toHaveTextContent('GE Capital');
+    expect(screen.getByText(/Deep Analysis covers these 53 of the 54 companies whose filings it holds/)).toBeInTheDocument();
+    expect(screen.getByText(/Not covered: General Electric Capital Corp \(GE Capital\) \(only a 2014 report/)).toBeInTheDocument();
+  });
 });
 
 describe('Company Intelligence states (SPEC §38.2)', () => {
   it('profile missing offers Deep Analysis; index/profile version skew is stated on the dashboard', async () => {
     setRoute('/intelligence/', 'ticker=KO');
     const { unmount } = renderInWorkspace(<IntelligenceView />);
-    expect(await screen.findByText(/isn’t built for this index version/)).toBeInTheDocument();
+    expect(await screen.findByText(/Company Intelligence for .* isn’t ready yet/)).toBeInTheDocument();
     unmount();
     setRoute('/intelligence/', 'ticker=AAPL');
     renderInWorkspace(<IntelligenceView />, { memory: createMemoryClient({ profiles: FIXTURE_PROFILES, indexVersion: 'iv-newer000000' }) });

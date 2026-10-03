@@ -1,5 +1,6 @@
-import { type BriefValidation, type DiligenceBrief, DiligenceBriefSchema } from '@diligenceiq/core';
+import { type BriefValidation, type DiligenceBrief, DiligenceBriefSchema, INLINE_CITATION } from '@diligenceiq/core';
 import { isTableRow } from '@diligenceiq/corpus';
+import { citedFiscalYears, periodClaimIn, periodsIn } from './period-claims';
 
 /**
  * Deterministic output validation (SPEC §31; architecture §6.9). Nothing here calls a model:
@@ -14,6 +15,9 @@ import { isTableRow } from '@diligenceiq/corpus';
  * 3. Numeric grounding: every currency or percentage figure must be printed in a passage its own
  *    item cites (the title, summary and evidence gaps: any passage some item cites; follow-up
  *    questions are not checked), otherwise it is "unverified". The rules are on `matchFigure`.
+ * 4. Period claims: a sentence saying something is new, a first, added or absent in a fiscal
+ *    period that none of the item's own citations belongs to (the summary: none of the brief's
+ *    cited passages) is flagged with that period. The rules are in `period-claims.ts`.
  *
  * What a verified figure proves: a number with these digits and this unit (percent, "$", a scale
  * word, or a table unit the passage states) is printed in a cited passage. It does not prove the
@@ -34,6 +38,62 @@ function tryJson(v: string): unknown {
   }
 }
 
+/**
+ * Escapes raw control characters (a literal newline, carriage return or tab) inside JSON string
+ * literals, the usual way a model's hand-serialized JSON field breaks. Characters outside strings
+ * are left alone, so this never changes valid JSON's meaning.
+ */
+export function escapeControlCharsInStrings(v: string): string {
+  let out = '';
+  let inString = false;
+  let escaped = false;
+  for (const ch of v) {
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      else if (ch === '\n') {
+        out += '\\n';
+        continue;
+      } else if (ch === '\r') {
+        out += '\\r';
+        continue;
+      } else if (ch === '\t') {
+        out += '\\t';
+        continue;
+      }
+    } else if (ch === '"') inString = true;
+    out += ch;
+  }
+  return out;
+}
+
+/**
+ * Why a string is not valid JSON, without any of its content (the field may quote a filing): the
+ * error kind and the character position from the parser's message, plus the length.
+ */
+export function jsonFailureShape(v: string): string {
+  try {
+    JSON.parse(v);
+    return 'valid JSON';
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    const kind = /Unexpected end/i.test(msg)
+      ? 'unexpected end'
+      : /Bad control character/i.test(msg)
+        ? 'bad control character'
+        : /Unterminated string/i.test(msg)
+          ? 'unterminated string'
+          : /Unexpected token|Unexpected non-whitespace/i.test(msg)
+            ? 'unexpected token'
+            : /Expected/i.test(msg)
+              ? 'expected token missing'
+              : 'parse error';
+    const pos = /position (\d+)/.exec(msg)?.[1];
+    return `${kind}${pos ? ` at ${pos}` : ''} of ${v.length} chars`;
+  }
+}
+
 const ANSWER_TYPES = ['single_company', 'comparison', 'trend', 'sector', 'insufficient_evidence'] as const;
 
 export function repairBrief(input: unknown): RepairResult {
@@ -47,6 +107,7 @@ export function repairBrief(input: unknown): RepairResult {
   }
   if (!isObj(root)) return { ok: false, repairs, issues: ['tool input is not an object'] };
   const b: Record<string, unknown> = { ...root };
+  const unparsed: string[] = [];
 
   /** A field the model returned as a JSON string ("[...]" or "{...}") is parsed. */
   const unstring = (obj: Record<string, unknown>, key: string, path: string) => {
@@ -56,7 +117,16 @@ export function repairBrief(input: unknown): RepairResult {
       if (parsed !== undefined) {
         obj[key] = parsed;
         repairs.push(`${path}: parsed from a JSON string`);
+        return;
       }
+      const lenient = tryJson(escapeControlCharsInStrings(v));
+      if (lenient !== undefined) {
+        obj[key] = lenient;
+        repairs.push(`${path}: parsed from a JSON string after escaping raw control characters`);
+        return;
+      }
+      // Still invalid: the Zod issue below names the field; this says why it would not parse.
+      unparsed.push(`${path}: a JSON-looking string that does not parse (${jsonFailureShape(v)})`);
     }
   };
   /** A string list given as one string becomes a list (split on commas for ID lists). */
@@ -144,7 +214,7 @@ export function repairBrief(input: unknown): RepairResult {
   }
 
   const parsed = DiligenceBriefSchema.safeParse(b);
-  if (!parsed.success) return { ok: false, repairs, issues: parsed.error.issues.slice(0, 10).map((i) => `${i.path.join('.')}: ${i.message}`) };
+  if (!parsed.success) return { ok: false, repairs, issues: [...unparsed, ...parsed.error.issues.slice(0, 10).map((i) => `${i.path.join('.')}: ${i.message}`)] };
   return { ok: true, brief: parsed.data, repairs };
 }
 
@@ -540,6 +610,26 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
   out.investmentConsiderations.forEach((c, i) => check(c.text, `investmentConsiderations[${i}].text`, c.citationIds));
   out.evidenceGaps.forEach((g, i) => check(g, `evidenceGaps[${i}]`, cited));
 
+  // Period claims: each item against the fiscal years of its own valid citations; the summary
+  // against every cited passage (its inline citations included). A comparison cell that names no
+  // period of its own is read against its column header's (or row label's) period.
+  const periodClaims: NonNullable<BriefValidation['periodClaims']> = [];
+  const periodCheck = (text: string, location: string, ids: Iterable<string>, fallback: readonly number[] = []) => {
+    const claim = periodClaimIn(text, citedFiscalYears(ids), fallback);
+    if (claim) periodClaims.push({ location, ...claim });
+  };
+  const summaryInline = [...out.executiveSummary.matchAll(INLINE_CITATION)].map((m) => m[1] ?? '').filter((id) => passages.has(id));
+  periodCheck(out.executiveSummary, 'executiveSummary', [...cited, ...summaryInline]);
+  out.keyFindings.forEach((f, i) => {
+    periodCheck(f.title, `keyFindings[${i}].title`, f.citationIds);
+    periodCheck(f.finding, `keyFindings[${i}].finding`, f.citationIds);
+  });
+  out.comparison?.rows.forEach((r, i) => {
+    const header = (j: number) => periodsIn(out.comparison!.columns[j] ?? '');
+    r.values.forEach((v, j) => periodCheck(v, `comparison.rows[${i}].values[${j}]`, r.citationIds, header(j).length ? header(j) : periodsIn(r.label)));
+  });
+  out.investmentConsiderations.forEach((c, i) => periodCheck(c.text, `investmentConsiderations[${i}].text`, c.citationIds));
+
   const verified = figures.filter((f) => f.verified).length;
   const unitUnstated = figures.filter((f) => f.rule === 'unit_unstated').length;
   const notices: string[] = [];
@@ -547,6 +637,7 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
   if (removed.length) notices.push(`${plural(removed.length, 'citation', 'citations')} removed: not in the supplied evidence.`);
   if (uncited.length) notices.push(`${plural(uncited.length, 'item has', 'items have')} no supporting citation.`);
   if (figures.length - verified > 0) notices.push(`${plural(figures.length - verified, 'figure', 'figures')} not found in the cited passages (marked "unverified figure").`);
+  if (periodClaims.length) notices.push(`${plural(periodClaims.length, 'claim says', 'claims say')} something is new or absent in a period none of its citations is from (marked "period not cited").`);
   if (comparisonMisaligned.length) notices.push(`${plural(comparisonMisaligned.length, 'comparison row does', 'comparison rows do')} not line up with the table's columns.`);
   if (repairs.length) notices.push(`The model output needed ${plural(repairs.length, 'deterministic repair', 'deterministic repairs')} before validation.`);
 
@@ -559,6 +650,7 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
       uncited,
       numeric: { figures, total: figures.length, verified, unitUnstated },
       comparisonMisaligned,
+      periodClaims,
       notices,
     },
   };

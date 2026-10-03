@@ -77,7 +77,7 @@ describe('findings filters', () => {
     expect(byCompany[2]!.findings.map((f) => f.findingId)).toEqual(['c']);
     expect(groupFindings(FINDINGS, 'status').map((g) => [g.label, g.findings.length])).toEqual([
       ['Active', 3],
-      ['Needs Follow-Up', 1],
+      ['Needs follow-up', 1],
     ]);
     expect(groupFindings(FINDINGS, 'origin').map((g) => g.key)).toEqual(['analysis', 'intelligence', 'compare']);
   });

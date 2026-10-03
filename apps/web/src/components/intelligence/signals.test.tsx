@@ -30,6 +30,7 @@ import {
   latestFiscalYear,
   pctChange,
   profitTitle,
+  profitTrend,
   readTrend,
   rowChange,
   signalDirection,
@@ -159,8 +160,34 @@ describe('bottom line (the builder’s labels and figures, latest annual report 
     expect(profitTitle(parseTrendBasis(basis) as never)).toBe(title);
   });
 
-  it('no Net margin trend means no profit line (it is never recomputed from facts)', () => {
-    expect(bottomLine(withoutTrend(BUILT.AAPL, 'Net margin')).some((b) => b.key === 'profit')).toBe(false);
+  // Phase 9 review item 2 (CAT: net income not extracted, operating margin fell 3.7 pp, and the bottom line said only "Revenue grew").
+  it('no Net margin trend: the profit line falls back to the builder’s Operating margin trend, worded as operating profit', () => {
+    const p = withoutTrend(BUILT.AAPL, 'Net margin');
+    const op = readTrend(BUILT.AAPL, 'Operating margin')!;
+    expect(op.basis.kind).toBe('margin');
+    const line = bottomLine(p).find((b) => b.key === 'profit');
+    expect(line).toMatchObject({ direction: trajectoryDirection(op.trajectory), title: 'Operating profit per sale about the same', anchor: 'performance' });
+    expect(line!.detail).toMatch(/^operating margin \d+\.\d% in FY2024 → \d+\.\d% in FY2025$/);
+    expect(bottomLine(p).map((b) => b.key)).toEqual(['revenue', 'profit', 'cash', 'lines', 'risks']);
+  });
+
+  it.each([
+    ['16.5% in FY2025 vs 20.2% in FY2024, a change of -3.7 pp (declining: threshold 1.0 pp).', 'down', 'Keeps less of each sale as operating profit', 'operating margin 20.2% in FY2024 → 16.5% in FY2025'],
+    ['22.0% in FY2025 vs 20.2% in FY2024, a change of 1.8 pp (improving: threshold 1.0 pp).', 'up', 'Keeps more of each sale as operating profit', 'operating margin 20.2% in FY2024 → 22.0% in FY2025'],
+    ['-3.0% in FY2025 vs -6.0% in FY2024, a change of 3.0 pp (improving: threshold 1.0 pp).', 'up', 'Operating loss narrowed', 'operating margin −6.0% in FY2024 → −3.0% in FY2025'],
+    ['-2.0% in FY2025 vs 4.0% in FY2024, a change of -6.0 pp (declining: threshold 1.0 pp).', 'down', 'Swung to an operating loss', 'operating margin 4.0% in FY2024 → −2.0% in FY2025'],
+  ] as const)('operating margin fallback “%s” → %s “%s”', (basis, direction, title, detail) => {
+    const p = withTrend(withoutTrend(BUILT.AAPL, 'Net margin'), 'Operating margin', basis);
+    expect(bottomLine(p).find((b) => b.key === 'profit')).toMatchObject({ direction, title, detail });
+    expect(profitTitle(parseTrendBasis(basis) as never, true)).toBe(title);
+  });
+
+  it('a stale Net margin trend also falls back to a current Operating margin; neither current means no profit line (never recomputed from facts)', () => {
+    const staleNet = withTrend(BUILT.AAPL, 'Net margin', '25.0% in FY2024 vs 24.0% in FY2023, a change of 1.0 pp (improving: threshold 1.0 pp).');
+    expect(bottomLine(staleNet).find((b) => b.key === 'profit')?.detail).toMatch(/^operating margin /);
+    expect(bottomLine(withoutTrend(withoutTrend(BUILT.AAPL, 'Net margin'), 'Operating margin')).some((b) => b.key === 'profit')).toBe(false);
+    const staleBoth = withTrend(staleNet, 'Operating margin', '30.0% in FY2024 vs 29.0% in FY2023, a change of 1.0 pp (improving: threshold 1.0 pp).');
+    expect(bottomLine(staleBoth).some((b) => b.key === 'profit')).toBe(false);
   });
 
   // H4: stale periods.
@@ -432,8 +459,9 @@ describe('label agreement across the page', () => {
         if (rowChange(p, 'Revenue')?.direction !== revLine.direction) out.push(`table ${rowChange(p, 'Revenue')?.direction} vs line ${revLine.direction}`);
       }
     }
+    // The profit line follows Net margin, or the Operating margin fallback (profitTrend), never anything else.
     for (const [key, metric] of [
-      ['profit', 'Net margin'],
+      ['profit', profitTrend(p)?.trend.metric ?? 'Net margin'],
       ['cash', 'Operating cash flow'],
     ] as const) {
       const line = lines.find((b) => b.key === key);
@@ -537,6 +565,64 @@ describe('progressive disclosure (DD-21 c)', () => {
   });
 });
 
+describe('dashboard: Phase 9 launch review (order, unfolded signals, measurement, labels)', () => {
+  it('AAPL: the first two attention signals show Why this matters in full; the rest are clamped with More', () => {
+    renderDashboard(BUILT.AAPL);
+    const attention = screen.getByRole('heading', { name: 'Attention signals' }).closest('section')!;
+    const cards = within(attention).getAllByRole('listitem', { hidden: true }).filter((li) => li.querySelector('h3'));
+    expect(cards.length).toBeGreaterThan(2);
+    cards.forEach((card, i) => {
+      const why = within(card).getByText('Why this matters').closest('div')!.parentElement!;
+      if (i < 2) {
+        expect(why.querySelector('[data-unfolded]')).not.toBeNull();
+        expect(why.querySelector('.line-clamp-2')).toBeNull();
+      } else expect(why.querySelector('[data-unfolded]')).toBeNull();
+    });
+  });
+
+  it('AAPL: a signal’s measurement sits behind “How this was measured”, never as a bare “Measured:” line', () => {
+    renderDashboard(BUILT.AAPL);
+    const changed = screen.getByRole('heading', { name: 'What’s changed' }).closest('section')!;
+    expect(changed).not.toHaveTextContent('Measured:');
+    const disclosures = within(changed).getAllByText('How this was measured');
+    expect(disclosures.length).toBe(BUILT.AAPL.signals.length);
+    for (const d of disclosures) expect(d.tagName).toBe('SUMMARY');
+    const trend = BUILT.AAPL.signals.find((x) => x.type === 'TREND_CHANGE')!;
+    expect(within(changed).getByText(trend.measurement).closest('details')).not.toBeNull();
+  });
+
+  it('AAPL: a reported value without a trend reads “No trend”, never “Not extracted” beside a real figure', () => {
+    renderDashboard(BUILT.AAPL);
+    expect(BUILT.AAPL.trends.some((t) => t.metric === 'Debt')).toBe(false);
+    const debt = screen.getByRole('rowheader', { name: 'Debt' }).closest('tr')!;
+    expect(debt.querySelector('[data-metric-value]')).not.toBeNull();
+    expect(debt).toHaveTextContent('No trend');
+    expect(debt).not.toHaveTextContent('Not extracted');
+    // A metric with neither a value nor a trend still says Not extracted.
+    const cash = screen.getByRole('rowheader', { name: 'Cash and liquidity' }).closest('tr')!;
+    expect(within(cash).getAllByText('Not extracted')).toHaveLength(2);
+  });
+
+  it('AAPL: counts name their unit (headings, areas, disclosures), and the footer shows the build date, not a timestamp', () => {
+    renderDashboard(BUILT.AAPL);
+    const risks = screen.getByRole('heading', { name: 'Current risks' }).closest('section')!;
+    const areas = new Set(BUILT.AAPL.currentRisks.map((r) => r.category)).size;
+    expect(risks).toHaveTextContent(`${BUILT.AAPL.currentRisks.length} risk headings in ${areas} areas, from the latest annual report.`);
+    const persistent = BUILT.AAPL.signals.filter((x) => x.type === 'PERSISTENT');
+    const persistentAreas = new Set(persistent.map((x) => x.category)).size;
+    expect(screen.getByText(`${persistent.length} repeated disclosures in ${persistentAreas} risk areas, across annual reports`)).toBeInTheDocument();
+    const footer = screen.getByText(/no model call on page view/);
+    expect(footer).toHaveTextContent('built Oct 2, 2026');
+    expect(footer).not.toHaveTextContent(BUILT.AAPL.version.builtAt);
+  });
+
+  it('AAPL: no "Track" or bare "Save": every save button reads “Save finding”', () => {
+    renderDashboard(BUILT.AAPL);
+    expect(screen.queryAllByRole('button', { name: /^(Track|Save)$/, hidden: true })).toHaveLength(0);
+    expect(screen.getAllByRole('button', { name: 'Save finding', hidden: true }).length).toBeGreaterThan(BUILT.AAPL.signals.length);
+  });
+});
+
 describe('dashboard: bottom line, legend, chips and jump bar on a real profile', () => {
   it('AAPL: the bottom line links to its sections; its icons read as words; the legend covers every symbol', () => {
     renderDashboard(BUILT.AAPL);
@@ -563,17 +649,23 @@ describe('dashboard: bottom line, legend, chips and jump bar on a real profile',
     expect(links.map((l) => l.getAttribute('href'))).toEqual([
       '#bottom-line',
       '#thirty-second',
+      '#whats-changed',
+      '#attention',
+      '#recommended',
       '#performance',
       '#drivers',
       '#outlook',
       '#current-risks',
-      '#whats-changed',
-      '#attention',
-      '#recommended',
       '#coverage',
     ]);
     for (const l of links) expect(document.getElementById(l.getAttribute('href')!.slice(1))).not.toBeNull();
-    expect(within(jump).getByRole('link', { name: /Current risks/ })).toHaveTextContent(String(BUILT.AAPL.currentRisks.length));
+    // SPEC §8.3 (A.4 2026-10-03): the page's sections are in the jump bar's order.
+    const ids = links.map((l) => l.getAttribute('href')!.slice(1));
+    const headings = [...document.querySelectorAll('h2[id]')].map((h) => h.id).filter((id) => ids.includes(id));
+    expect(headings).toEqual(ids);
+    // Counts are labelled with what they count: headings, not areas.
+    expect(within(jump).getByRole('link', { name: /Current risks/ })).toHaveTextContent(`${BUILT.AAPL.currentRisks.length} headings`);
+    expect(within(jump).getByRole('link', { name: /Attention signals/ })).toHaveTextContent(`${BUILT.AAPL.signals.length} signals`);
   });
 
   it('the phone menu starts on a neutral placeholder and jumps even when the section picked is the one in view', () => {

@@ -25,6 +25,7 @@
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse as parseYaml } from 'yaml';
 import { type Citation, briefCitationIds, citationMatchesSource, tickerOfChunkId } from '@diligenceiq/core';
 import { type Chunk, chunkSectionLabel } from '@diligenceiq/corpus';
 import { buildDirEvidenceReader } from '../../services/api/src/evidence/local';
@@ -122,6 +123,18 @@ for (const a of seed.analyses) {
 }
 for (const f of seed.findings ?? []) for (const c of f.citations ?? []) check('seed finding citations', c);
 
+// The robustness set inserts one synthetic passage into a question's context (`evals/robustness.yaml`
+// `plant`; eval only, packages/rag/src/eval/plant.ts). Its ID is deliberately not an index chunk,
+// so it is skipped as context and counted apart; a CITATION of it still fails below.
+const plantedIds = new Map<string, string>();
+for (const q of (parseYaml(readFileSync(join(ROOT, 'evals/robustness.yaml'), 'utf8')) as { questions: Array<{ id: string; plant?: { id?: string } }> }).questions) {
+  if (q.plant) plantedIds.set(q.id, q.plant.id ?? 'PLANTED-');
+}
+const isPlanted = (name: string, qid: string | undefined, id: string) => {
+  const planted = name.endsWith('-robustness.json') && qid ? plantedIds.get(qid) : undefined;
+  return planted !== undefined && (planted === 'PLANTED-' ? id.startsWith(planted) : id === planted);
+};
+
 const liveRuns = readdirSync(join(ROOT, 'evals/results')).filter((n) => n.startsWith(`generation-${iv}-`) && n.endsWith('.json'));
 for (const name of liveRuns) {
   const run = JSON.parse(readFileSync(join(ROOT, 'evals/results', name), 'utf8')) as { records: Array<{ id?: string; brief?: unknown; contextChunkIds?: string[] }> };
@@ -129,7 +142,10 @@ for (const name of liveRuns) {
     const { ids, malformed } = briefCitationIds(r.brief ?? null);
     for (const id of malformed) fail(`live brief ${name} ${r.id ?? '?'}: "${id}" is cited but is not a chunk ID`);
     for (const id of ids) checkId('live brief citations', id);
-    for (const id of r.contextChunkIds ?? []) checkId('live brief context', id);
+    for (const id of r.contextChunkIds ?? []) {
+      if (isPlanted(name, r.id, id)) counts['planted context passages (eval only, skipped)'] = (counts['planted context passages (eval only, skipped)'] ?? 0) + 1;
+      else checkId('live brief context', id);
+    }
   }
 }
 

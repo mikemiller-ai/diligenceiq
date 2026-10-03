@@ -27,6 +27,7 @@ export * from './generation/prompt';
 export * from './generation/gateway';
 export * from './generation/bedrock';
 export * from './generation/validate';
+export * from './generation/period-claims';
 export * from './generation/pipeline';
 export * from './eval/generation-eval';
 export * from './eval/plant';

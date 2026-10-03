@@ -20,7 +20,10 @@ for (const ticker of ['AAPL', 'TSLA', 'JPM']) {
     while ((await showAll.count()) > 0) await showAll.first().click();
     const more = page.getByRole('button', { name: /^More:/ });
     while ((await more.count()) > 0) await more.first().click();
-    for (const d of await page.locator('details:not([open]) > summary').all()) await d.click();
+    // Open every closed disclosure (the persistent group, and each signal's "How this was measured"), always the
+    // first one left: an outer group precedes the disclosures inside it, so the first is always visible.
+    const closed = page.locator('details:not([open]) > summary');
+    while ((await closed.count()) > 0) await closed.first().click();
     await expectNoAxeViolations(page);
     expect(requests.every(isViewSafe)).toBe(true);
   });

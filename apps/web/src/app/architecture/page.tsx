@@ -73,7 +73,7 @@ const TODAY: { item: string; status: BuildStatus }[] = [
   { item: 'Security headers, and a per-page Content-Security-Policy under which scripts run only by their hash', status: 'Built' },
   { item: 'Structured logs with request IDs, 14-day retention, and metrics for generation latency, cost and failures; an alarm if an analysis ever makes a second call', status: 'Built' },
   { item: 'A CDK test that fails the build if an always-on resource appears', status: 'Built' },
-  { item: 'AWS Budget alert and alarm notifications', status: 'Designed · Phase 8' },
+  { item: 'Alarm notifications by email (SNS) and the AWS Budget alert on the account’s DiligenceIQ budget', status: 'Built' },
 ];
 
 const FUTURE: { stage: string; scope: string; state: 'In progress' | 'Next' | 'Later' }[] = [
@@ -85,244 +85,293 @@ const FUTURE: { stage: string; scope: string; state: 'In progress' | 'Next' | 'L
   { stage: 'Portfolio intelligence', scope: 'KPI monitoring, new-filing alerts, covenant risk, operating signals, benchmarking', state: 'Later' },
 ];
 
+/**
+ * The future live monitoring pipeline (DD-19; SPEC §21.3, §45). Not built: today nothing is
+ * scheduled and nothing polls the SEC; this is the design, drawn so it cannot be mistaken for the build.
+ */
+const MONITORING = [
+  { step: 'EventBridge schedule', detail: 'A daily trigger (the first scheduled job; none exists today).' },
+  { step: 'SEC new-filing check', detail: 'Looks for new 10-K and 10-Q filings of watched companies.' },
+  { step: 'Ingestion', detail: 'The same parsing and chunking as today, for the new filing only.' },
+  { step: 'Index update', detail: 'New passages embedded and added to the hybrid index.' },
+  { step: 'Change detection', detail: 'The deterministic signal detectors, run against the prior filing.' },
+  { step: 'Watch match', detail: 'Changes matched to the companies and themes a team watches.' },
+  { step: 'Intelligence events', detail: 'Stored events with their evidence, shown in Watchlist.' },
+  { step: 'SNS / email', detail: 'A notification that links to the event and its passages.' },
+];
+
+function LiveMonitoring() {
+  return (
+    <section aria-labelledby="live-monitoring" className="mt-8 rounded-card border border-dashed border-border bg-card p-4" data-testid="live-monitoring">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 id="live-monitoring" className="text-[15px] font-semibold tracking-tight">
+          Live monitoring pipeline
+        </h3>
+        <Badge tone="neutral">Not built · future state</Badge>
+      </div>
+      <p className="mt-1 max-w-3xl text-[13px] leading-snug text-muted-foreground">
+        How new filings would reach a deal team without anyone asking. Nothing here runs in this deployment.
+      </p>
+      <ol aria-label="Live monitoring pipeline, not built" className="mt-3 flex flex-col gap-2 md:flex-row md:flex-wrap md:items-stretch">
+        {MONITORING.map((m, i) => (
+          <li key={m.step} className="flex items-center gap-2 md:w-[calc(25%-0.5rem)]">
+            <div className="flex-1 rounded-lg border border-border bg-secondary/60 px-3 py-2">
+              <p className="text-[13px] font-semibold text-foreground">{m.step}</p>
+              <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">{m.detail}</p>
+            </div>
+            {i < MONITORING.length - 1 && <ArrowRight aria-hidden className="size-3.5 shrink-0 rotate-90 text-muted-foreground md:rotate-0" />}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 export default function ArchitecturePage() {
   return (
-    <div className="min-h-dvh bg-background">
-      <section className="relative overflow-hidden bg-navy text-white">
-        <NavyAtmosphere />
-        <div className="relative mx-auto max-w-shell px-5 py-6 sm:px-8">
-          <header className="flex items-center justify-between gap-3">
-            <Link href="/" className="flex items-center gap-2.5" aria-label="DiligenceIQ home">
-              <BrandMark />
-              <Wordmark inverted />
-            </Link>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button asChild variant="ghost-dark" size="sm">
-                <Link href="/intelligence/">
-                  Open Company Intelligence <ArrowRight />
-                </Link>
-              </Button>
-              {/* Global primary action (SPEC §5.2): an empty Deep Analysis from every page. */}
-              <Button asChild variant="brand" size="sm">
-                <Link href="/analysis/new/" aria-label="Ask a question">
-                  <MessageSquareText />
-                  <span className="max-sm:sr-only">Ask a question</span>
-                </Link>
-              </Button>
-              <ThemeToggle onNavy />
-            </div>
-          </header>
-          <div className="max-w-3xl py-16 sm:py-20">
-            <Eyebrow onNavy>Architecture and business value</Eyebrow>
-            <h1 className="mt-5 text-[38px] font-light leading-[1.06] tracking-tight text-balance sm:text-5xl">
-              General AI answers questions. <span className="text-gradient-hero">DiligenceIQ structures</span>{' '}
-              <span className="font-semibold">the diligence before them.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
-              Investors get value before they know what to ask: what is happening, what changed, what deserves attention,
-              and why. When they need to go deeper, any question becomes a cited brief written by exactly one model call.
-              This page describes the design; each part not built yet is marked with the phase that builds it.
-            </p>
+    <div className="relative min-h-dvh bg-background">
+      {/* The header sits over the navy hero; <main> holds everything else, so every region is in a landmark (axe). */}
+      <header className="absolute inset-x-0 top-0 z-10 text-white">
+        <div className="mx-auto flex max-w-shell items-center justify-between gap-3 px-5 py-6 sm:px-8">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="DiligenceIQ home">
+            <BrandMark />
+            <Wordmark inverted />
+          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="ghost-dark" size="sm">
+              <Link href="/intelligence/">
+                Open Company Intelligence <ArrowRight />
+              </Link>
+            </Button>
+            {/* Global primary action (SPEC §5.2): an empty Deep Analysis from every page. */}
+            <Button asChild variant="brand" size="sm">
+              <Link href="/analysis/new/" aria-label="Ask a question">
+                <MessageSquareText />
+                <span className="max-sm:sr-only">Ask a question</span>
+              </Link>
+            </Button>
+            <ThemeToggle onNavy />
           </div>
         </div>
-      </section>
+      </header>
 
-      <Section
-        eyebrow="Business value"
-        headline="How this creates value for a private-equity deal team."
-        lede="It knows how to structure the diligence process, so associates spend their time on judgment rather than on finding the right page of a 10-K."
-      >
-        <ul className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-          {VALUE.map((v) => (
-            <li key={v.title} className="rounded-card border border-border bg-card p-4 shadow-sm">
-              <h3 className="text-[15px] font-semibold tracking-tight">{v.title}</h3>
-              <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">{v.text}</p>
-            </li>
-          ))}
-        </ul>
-      </Section>
+      <main id="main">
+        <section className="relative overflow-hidden bg-navy text-white">
+          <NavyAtmosphere />
+          <div className="relative mx-auto max-w-shell px-5 pb-6 pt-20 sm:px-8">
+            <div className="max-w-3xl py-16 sm:py-20">
+              <Eyebrow onNavy>Architecture and business value</Eyebrow>
+              <h1 className="mt-5 text-[38px] font-light leading-[1.06] tracking-tight text-balance sm:text-5xl">
+                General AI answers questions. <span className="text-gradient-hero">DiligenceIQ structures</span>{' '}
+                <span className="font-semibold">the diligence before them.</span>
+              </h1>
+              <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
+                Investors get value before they know what to ask: what is happening, what changed, what deserves attention,
+                and why. When they need to go deeper, any question becomes a cited brief written by exactly one model call.
+                This page describes what runs in this deployment; the future state at the end is marked as not built.
+              </p>
+            </div>
+          </div>
+        </section>
 
-      <Section
-        ground="banded"
-        eyebrow="Two planes"
-        headline="Questions run live. Company profiles are built offline."
-        lede="Everything a user opens is read from storage. Only an explicit Run analysis will reach a model."
-      >
-        <div className="grid gap-3.5 md:grid-cols-2">
-          <EvidenceCard label="LIVE · BUILT, PHASES 3–5" title="One generative call per question">
-            Deep Analysis is retrieval, then exactly one generation request, then validation, in a worker that runs only
-            when an analysis is queued. Every run, including a re-run after a failure, is a new analysis with its own
-            single call. The api queues analyses after checking the kill switch and the spend caps. Compare, Save Finding
-            and the Findings Board are deterministic application logic.
-          </EvidenceCard>
-          <EvidenceCard label="OFFLINE · BUILT, PHASE 4B" title="Profiles computed once per index version">
-            Company Intelligence profiles are built by an admin-run script after indexing: deterministic figures, risks and
-            change signals, plus at most one model call per company per index and prompt version, enforced by a build ledger
-            and a required call budget. The builder is never deployed and never scheduled, and pages only read the stored
-            result.
-          </EvidenceCard>
-        </div>
-        <div className="mt-3.5 rounded-card border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-foreground/85">
-          <p className="font-semibold text-foreground">The one cost exception, stated plainly</p>
-          <p className="mt-1">
-            The offline profile build is the only place a model call is not a direct response to a user’s question. It was
-            chosen deliberately, it is bounded as described above, and it can be withdrawn at any time: a zero-call
-            deterministic profile set is always built alongside it, and one parameter switches the product to that set
-            instantly, with no rebuild or deploy.
-          </p>
-        </div>
-      </Section>
-
-      <Section
-        ground="navy"
-        eyebrow="Single-call guarantee · built, Phase 4"
-        headline="Six steps. One of them talks to a model."
-        lede="Defense in depth: a conditional claim, an SDK client with retries off, a per-analysis gateway that refuses a second call, a persisted call count, and tests that assert exactly one call on success, error, malformed output and redelivery."
-      >
-        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {FLOW.map((f, i) => {
-            const generate = f.step === 'Generate';
-            return (
-              <li
-                key={f.step}
-                className={generate ? 'rounded-xl border border-sapphire/50 bg-sapphire/20 p-4 shadow-cta' : 'rounded-xl border border-white/10 bg-white/[0.03] p-4'}
-              >
-                <span
-                  className={`grid size-7 place-items-center rounded-md font-mono text-[11px] ${generate ? 'bg-brand-gradient text-white' : 'bg-sapphire/30 text-on-navy-ink'}`}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <p className="mt-3 text-[15px] font-semibold text-white">{f.step}</p>
-                <p className="mt-1 text-[13px] leading-snug text-white/65">{f.detail}</p>
-                {generate && (
-                  <p className="mt-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-on-navy-accent">The one model call</p>
-                )}
+        <Section
+          eyebrow="Business value"
+          headline="How this creates value for a private-equity deal team."
+          lede="It knows how to structure the diligence process, so associates spend their time on judgment rather than on finding the right page of a 10-K."
+        >
+          <ul className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+            {VALUE.map((v) => (
+              <li key={v.title} className="rounded-card border border-border bg-card p-4 shadow-sm">
+                <h3 className="text-[15px] font-semibold tracking-tight">{v.title}</h3>
+                <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">{v.text}</p>
               </li>
-            );
-          })}
-        </ol>
-      </Section>
+            ))}
+          </ul>
+        </Section>
 
-      <Section
-        eyebrow="System"
-        headline="Serverless tiers that scale to near zero when idle."
-        lede="State lives in on-demand DynamoDB; the corpus, the pre-built index and the profile sets live in S3. Every stack is CDK TypeScript."
-      >
-        <ol className="grid gap-3.5 md:grid-cols-3">
-          {SYSTEM.map((s, i) => (
-            <li key={s.title} className="rounded-card border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-semibold text-primary">{String(i + 1).padStart(2, '0')}</span>
-                <span className="grid size-8 place-items-center rounded-lg bg-accent text-primary">
-                  <s.icon aria-hidden className="size-4" />
+        <Section
+          ground="banded"
+          eyebrow="Two planes"
+          headline="Questions run live. Company profiles are built offline."
+          lede="Everything a user opens is read from storage. Only an explicit Run analysis will reach a model."
+        >
+          <div className="grid gap-3.5 md:grid-cols-2">
+            <EvidenceCard label="LIVE · BUILT, PHASES 3–5" title="One generative call per question">
+              Deep Analysis is retrieval, then exactly one generation request, then validation, in a worker that runs only
+              when an analysis is queued. Every run, including a re-run after a failure, is a new analysis with its own
+              single call. The api queues analyses after checking the kill switch and the spend caps. Compare, Save Finding
+              and the Findings Board are deterministic application logic.
+            </EvidenceCard>
+            <EvidenceCard label="OFFLINE · BUILT, PHASE 4B" title="Profiles computed once per index version">
+              Company Intelligence profiles are built by an admin-run script after indexing: deterministic figures, risks and
+              change signals, plus at most one model call per company per index and prompt version, enforced by a build ledger
+              and a required call budget. The builder is never deployed and never scheduled, and pages only read the stored
+              result.
+            </EvidenceCard>
+          </div>
+          <div className="mt-3.5 rounded-card border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-foreground/85">
+            <p className="font-semibold text-foreground">The one cost exception, stated plainly</p>
+            <p className="mt-1">
+              The offline profile build is the only place a model call is not a direct response to a user’s question. It was
+              chosen deliberately, it is bounded as described above, and it can be withdrawn at any time: a zero-call
+              deterministic profile set is always built alongside it, and one parameter switches the product to that set
+              instantly, with no rebuild or deploy.
+            </p>
+          </div>
+        </Section>
+
+        <Section
+          ground="navy"
+          eyebrow="Single-call guarantee · built, Phase 4"
+          headline="Six steps. One of them talks to a model."
+          lede="Defense in depth: a conditional claim, an SDK client with retries off, a per-analysis gateway that refuses a second call, a persisted call count, and tests that assert exactly one call on success, error, malformed output and redelivery."
+        >
+          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {FLOW.map((f, i) => {
+              const generate = f.step === 'Generate';
+              return (
+                <li
+                  key={f.step}
+                  className={generate ? 'rounded-xl border border-sapphire/50 bg-sapphire/20 p-4 shadow-cta' : 'rounded-xl border border-white/10 bg-white/[0.03] p-4'}
+                >
+                  <span
+                    className={`grid size-7 place-items-center rounded-md font-mono text-[11px] ${generate ? 'bg-brand-gradient text-white' : 'bg-sapphire/30 text-on-navy-ink'}`}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <p className="mt-3 text-[15px] font-semibold text-white">{f.step}</p>
+                  <p className="mt-1 text-[13px] leading-snug text-white/65">{f.detail}</p>
+                  {generate && (
+                    <p className="mt-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-on-navy-accent">The one model call</p>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+
+        <Section
+          eyebrow="System"
+          headline="Serverless tiers that scale to near zero when idle."
+          lede="State lives in on-demand DynamoDB; the corpus, the pre-built index and the profile sets live in S3. Every stack is CDK TypeScript."
+        >
+          <ol className="grid gap-3.5 md:grid-cols-3">
+            {SYSTEM.map((s, i) => (
+              <li key={s.title} className="rounded-card border border-border bg-card p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-semibold text-primary">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="grid size-8 place-items-center rounded-lg bg-accent text-primary">
+                    <s.icon aria-hidden className="size-4" />
+                  </span>
+                </div>
+                <h3 className="mt-3 text-[15px] font-semibold tracking-tight">{s.title}</h3>
+                <div className="mt-1.5">
+                  <StatusBadge status={s.status} />
+                </div>
+                <ul className="mt-1.5 space-y-1 text-[13px] text-muted-foreground">
+                  {s.lines.map((l) => (
+                    <li key={l}>{l}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-3.5 grid gap-3.5 md:grid-cols-2">
+            <EvidenceCard label="IDLE" title="Storage only">
+              No search cluster, NAT gateway, servers, containers, relational database, firewall, provisioned concurrency or
+              scheduled jobs. A CDK test fails the build if one appears.
+            </EvidenceCard>
+            <EvidenceCard label="IN USE" title="Proportional to questions asked">
+              The single generation request dominates the cost of an analysis. Spend is bounded by a kill switch, a global
+              daily cap, per-workspace caps and a cap on new workspaces, with an AWS Budget alert by email.
+            </EvidenceCard>
+          </div>
+        </Section>
+
+        <Section
+          tight
+          eyebrow="This build"
+          headline="What exists today."
+          lede="Built means it runs in this deployment."
+        >
+          <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
+            {TODAY.map((t) => (
+              <li key={t.item} className="flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-foreground/85">{t.item}</span>
+                <span className="shrink-0">
+                  <StatusBadge status={t.status} />
                 </span>
-              </div>
-              <h3 className="mt-3 text-[15px] font-semibold tracking-tight">{s.title}</h3>
-              <div className="mt-1.5">
-                <StatusBadge status={s.status} />
-              </div>
-              <ul className="mt-1.5 space-y-1 text-[13px] text-muted-foreground">
-                {s.lines.map((l) => (
-                  <li key={l}>{l}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-3.5 grid gap-3.5 md:grid-cols-2">
-          <EvidenceCard label="IDLE" title="Storage only">
-            No search cluster, NAT gateway, servers, containers, relational database, firewall, provisioned concurrency or
-            scheduled jobs. A CDK test fails the build if one appears.
-          </EvidenceCard>
-          <EvidenceCard label="IN USE" title="Proportional to questions asked">
-            The single generation request dominates the cost of an analysis. Spend is bounded by a kill switch, a global
-            daily cap, per-workspace caps and a cap on new workspaces, with an AWS Budget alert to come in Phase 8.
-          </EvidenceCard>
-        </div>
-      </Section>
+              </li>
+            ))}
+          </ul>
+        </Section>
 
-      <Section
-        tight
-        eyebrow="This build"
-        headline="What exists today, and what is designed."
-        lede="Built means it runs in this deployment. Designed means a later phase builds it."
-      >
-        <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
-          {TODAY.map((t) => (
-            <li key={t.item} className="flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-foreground/85">{t.item}</span>
-              <span className="shrink-0">
-                <StatusBadge status={t.status} />
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Section>
+        <Section
+          ground="banded"
+          tight
+          eyebrow="Evaluation"
+          headline="Measured, not claimed."
+          lede="Every number here was measured by the evaluation harness or in production, and names its record in docs/evaluation.md. There are no estimated or illustrative numbers on this page."
+        >
+          <div className="space-y-6">
+            {MEASURED.map((group) => (
+              <section key={group.title} aria-labelledby={`measured-${group.items[0]!.id}`}>
+                <h3 id={`measured-${group.items[0]!.id}`} className="text-[15px] font-semibold tracking-tight">
+                  {group.title}
+                </h3>
+                <p className="mt-1 max-w-3xl text-[13px] leading-snug text-muted-foreground">{group.note}</p>
+                <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.items.map((m) => (
+                    <li key={m.id} data-measured={m.id} className="rounded-card border border-border bg-card p-4 shadow-sm">
+                      <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">{m.value}</p>
+                      <p className="mt-0.5 text-[13px] font-medium text-foreground/90">{m.label}</p>
+                      <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">{m.detail}</p>
+                      <p className="mt-2 font-mono text-[10.5px] leading-snug text-muted-foreground">Source: {m.source}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </Section>
 
-      <Section
-        ground="banded"
-        tight
-        eyebrow="Evaluation"
-        headline="Measured, not claimed."
-        lede="Every number here was measured by the evaluation harness or in production, and names its record in docs/evaluation.md. There are no estimated or illustrative numbers on this page."
-      >
-        <div className="space-y-6">
-          {MEASURED.map((group) => (
-            <section key={group.title} aria-labelledby={`measured-${group.items[0]!.id}`}>
-              <h3 id={`measured-${group.items[0]!.id}`} className="text-[15px] font-semibold tracking-tight">
-                {group.title}
-              </h3>
-              <p className="mt-1 max-w-3xl text-[13px] leading-snug text-muted-foreground">{group.note}</p>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {group.items.map((m) => (
-                  <li key={m.id} data-measured={m.id} className="rounded-card border border-border bg-card p-4 shadow-sm">
-                    <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">{m.value}</p>
-                    <p className="mt-0.5 text-[13px] font-medium text-foreground/90">{m.label}</p>
-                    <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">{m.detail}</p>
-                    <p className="mt-2 font-mono text-[10.5px] leading-snug text-muted-foreground">Source: {m.source}</p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      </Section>
-
-      <Section
-        tight
-        eyebrow="Future state"
-        headline="From public filings to the whole deal."
-        lede="What is being built now, what comes next, and the longer-term direction. Nothing marked next or later exists yet."
-      >
-        <div className="overflow-hidden rounded-card border border-border bg-card shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary">
-              <tr>
-                {['Stage', 'Scope', 'Status'].map((h) => (
-                  <th key={h} scope="col" className="px-4 py-2.5 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {FUTURE.map((f) => (
-                <tr key={f.stage} className="border-t border-border">
-                  <td className="px-4 py-3 font-medium text-foreground">{f.stage}</td>
-                  <td className="px-4 py-3 text-foreground/80">{f.scope}</td>
-                  <td className="px-4 py-3">
-                    <Badge tone={f.state === 'In progress' ? 'info' : f.state === 'Next' ? 'warning' : 'neutral'}>{f.state}</Badge>
-                  </td>
+        <Section
+          tight
+          eyebrow="Future state"
+          headline="From public filings to the whole deal."
+          lede="What is being built now, what comes next, and the longer-term direction. Nothing marked next or later exists yet."
+        >
+          <div className="overflow-hidden rounded-card border border-border bg-card shadow-sm">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary">
+                <tr>
+                  {['Stage', 'Scope', 'Status'].map((h) => (
+                    <th key={h} scope="col" className="px-4 py-2.5 text-left font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Scenario questions, such as which areas look most exposed if demand weakens, are future state. DiligenceIQ does not
-          produce price targets or financial forecasts.
-        </p>
-      </Section>
+              </thead>
+              <tbody>
+                {FUTURE.map((f) => (
+                  <tr key={f.stage} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium text-foreground">{f.stage}</td>
+                    <td className="px-4 py-3 text-foreground/80">{f.scope}</td>
+                    <td className="px-4 py-3">
+                      <Badge tone={f.state === 'In progress' ? 'info' : f.state === 'Next' ? 'warning' : 'neutral'}>{f.state}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Scenario questions, such as which areas look most exposed if demand weakens, are future state. DiligenceIQ does not
+            produce price targets or financial forecasts.
+          </p>
+          <LiveMonitoring />
+        </Section>
+      </main>
     </div>
   );
 }

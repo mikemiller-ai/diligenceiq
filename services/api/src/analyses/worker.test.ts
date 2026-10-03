@@ -4,7 +4,7 @@ import type * as Rag from '@diligenceiq/rag';
 import type { SQSEvent } from 'aws-lambda';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleDeadLetters, requireTableName } from '../dlq-handler';
-import { ANALYSIS_DEADLINE_MS, ClaimLostError, DynamoAnalysisStore, MemoryAnalysisStore } from './store';
+import { ANALYSIS_DEADLINE_MS, ClaimLostError, DynamoAnalysisStore, FAILURE_DETAIL_MAX_CHARS, MemoryAnalysisStore, boundedFailureDetail } from './store';
 import { type IndexProvider, type WorkerDeps, processAnalysisMessage } from './worker';
 import { spyOnLog } from '../test-log';
 
@@ -132,6 +132,35 @@ describe('worker: one generation call on every path (SPEC §30; testing-strategy
     await processAnalysisMessage(s.deps, s.body(), s.ctx);
     expect(s.client.invocations).toBe(1);
     expect(s.record()).toMatchObject({ status: 'FAILED', generationCallCount: 1, error: { code: 'MALFORMED_OUTPUT' } });
+    expect(s.record().failureDetail).toMatch(/^stop reason max_tokens; tool input is not valid JSON/);
+  });
+
+  it('malformed output (the 2026-10-03 production case): the record keeps a content-free failureDetail; the public error is unchanged', async () => {
+    spyOnLog();
+    // keyFindings returned as a JSON-looking string that does not parse; its text must never be stored.
+    const s = setup({ toolInput: { ...briefCiting([]), keyFindings: '[{"title": "SECRET-FILING-TEXT\u0007 cut' }, stopReason: 'end_turn' });
+    await s.queue();
+    expect(await processAnalysisMessage(s.deps, s.body(), s.ctx)).toBe('failed');
+    const r = s.record();
+    expect(r.error).toEqual({ code: 'MALFORMED_OUTPUT', message: "The answer couldn't be validated.", requestId: 'msg-1' });
+    expect(r.failureDetail).toContain('stop reason end_turn');
+    expect(r.failureDetail).toContain('keyFindings: a JSON-looking string that does not parse (');
+    expect(r.failureDetail).toContain('keyFindings: Invalid input: expected array, received string');
+    expect(r.failureDetail).not.toContain('SECRET');
+    expect(r.failureDetail).not.toContain(r.question);
+    expect(r.failureDetail!.length).toBeLessThanOrEqual(FAILURE_DETAIL_MAX_CHARS);
+  });
+
+  it('an unexpected error: FAILED WORKER_FAILED; failureDetail names the error type, never its message', async () => {
+    spyOnLog();
+    const s = setup(okBrief, {
+      createEmbedder: () => {
+        throw new TypeError('SECRET message text');
+      },
+    });
+    await s.queue();
+    expect(await processAnalysisMessage(s.deps, s.body(), s.ctx)).toBe('failed');
+    expect(s.record()).toMatchObject({ status: 'FAILED', error: { code: 'WORKER_FAILED' }, failureDetail: 'unexpected_error (TypeError)' });
   });
 
   it('duplicate delivery, concurrently: one generation; the other is acknowledged without work', async () => {
@@ -398,6 +427,30 @@ describe('DynamoAnalysisStore condition expressions (architecture §4.3)', () =>
     await store.fail(WS, 'a1', 'tok', { code: 'GENERATION_FAILED', message: 'm', requestId: 'r' }, T0);
     expect(doc.sent[0]!.input.ConditionExpression).toBe('#status = :running AND claimToken = :token');
     expect(await new DynamoAnalysisStore(fakeDoc(true), 't').fail(WS, 'a1', 'tok', { code: 'GENERATION_FAILED', message: 'm', requestId: 'r' }, T0)).toBe(false);
+  });
+
+  it('fail: failureDetail is stored bounded, the same in both stores, and only when given', async () => {
+    const long = `stop reason end_turn;\n${'keyFindings: Invalid input: expected array, received string; '.repeat(10)}`;
+    const doc = fakeDoc();
+    await new DynamoAnalysisStore(doc, 't').fail(WS, 'a1', 'tok', { code: 'MALFORMED_OUTPUT', message: 'm', requestId: 'r' }, T0, { failureDetail: long });
+    const input = doc.sent[0]!.input as { UpdateExpression: string; ExpressionAttributeValues: Record<string, unknown> };
+    expect(input.UpdateExpression).toContain('failureDetail = :failureDetail');
+    const stored = input.ExpressionAttributeValues[':failureDetail'] as string;
+    expect(stored).toBe(boundedFailureDetail(long));
+    expect(stored).toHaveLength(FAILURE_DETAIL_MAX_CHARS);
+    expect(stored.endsWith('…')).toBe(true);
+    expect(stored).not.toMatch(/\p{Cc}/u);
+    expect(boundedFailureDetail('short')).toBe('short');
+
+    const mem = new MemoryAnalysisStore();
+    await mem.createQueued({ workspaceId: WS, analysisId: 'a1', question: 'q', origin: { kind: 'direct' }, now: T0 });
+    await mem.claim(WS, 'a1', 'tok', T0);
+    await mem.fail(WS, 'a1', 'tok', { code: 'MALFORMED_OUTPUT', message: 'm', requestId: 'r' }, T0, { failureDetail: long });
+    expect((await mem.get(WS, 'a1'))!.failureDetail).toBe(stored);
+
+    const none = fakeDoc();
+    await new DynamoAnalysisStore(none, 't').fail(WS, 'a1', 'tok', { code: 'GENERATION_FAILED', message: 'm', requestId: 'r' }, T0);
+    expect((none.sent[0]!.input as { UpdateExpression: string }).UpdateExpression).not.toContain('failureDetail');
   });
 
   it('poll expiry tries QUEUE_TIMEOUT, then GENERATION_TIMEOUT, then PIPELINE_TIMEOUT, each conditional on the deadline', async () => {

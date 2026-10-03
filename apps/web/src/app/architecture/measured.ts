@@ -25,7 +25,7 @@ export interface MeasuredGroup {
 export const MEASURED: MeasuredGroup[] = [
   {
     title: 'Deep Analysis answers',
-    note: 'The 20-question evaluation set (including the assessment’s three example questions, word for word) plus 6 robustness questions, prompt da-v4, Claude Sonnet 4.6. Deterministic checks, no model judging a model.',
+    note: 'The 20-question evaluation set (including the assessment’s three example questions, word for word) plus 6 robustness questions, prompt da-v4, Claude Sonnet 4.6. Deterministic checks, no model judging a model. A later prompt, da-v5, was tried and reverted: it did not improve these checks (evaluation.md §11).',
     items: [
       {
         id: 'calls',
@@ -69,6 +69,13 @@ export const MEASURED: MeasuredGroup[] = [
         detail: 'A year, a company and market data the filings do not contain: each brief says so instead of answering.',
         source: 'generation-…-da-v4 and -robustness (abstention) · evaluation.md §4, §7',
       },
+      {
+        id: 'periodClaims',
+        value: '9',
+        label: 'claims marked “Period not cited”',
+        detail: 'Sentences in 3 of the 20 main-set briefs that say something is new or absent in a fiscal year none of their own citations is from. Shown on the brief; reported, not counted as a failed check.',
+        source: 'generation-…-da-v4 (periodClaims) · evaluation.md §12',
+      },
     ],
   },
   {
@@ -106,8 +113,8 @@ export const MEASURED: MeasuredGroup[] = [
         id: 'cost',
         value: '$0.12–0.13',
         label: 'model cost per analysis',
-        detail: 'Estimated from the tokens each call used.',
-        source: 'evaluation.md §5',
+        detail: 'Estimated from the tokens each call used, at the $3 / $15 per million tokens then in the code; the account is billed 10% more.',
+        source: 'evaluation.md §5 · evals/results/idle-cost-2026-10-03.json',
       },
     ],
   },

@@ -26,3 +26,9 @@ UPDATED_FDE-AI-RAG-Assessment.pdf
 .DS_Store
 .idea/
 .vscode/
+
+# Launch film: pipeline tracked, generated media not (the web copy lives in apps/web/public/media)
+/marketing/launch-film/assets/
+/marketing/launch-film/out/
+/marketing/launch-film/review/
+/DiligenceIQ Launch Film.mp4

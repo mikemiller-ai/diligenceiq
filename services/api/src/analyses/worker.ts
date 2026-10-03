@@ -159,7 +159,15 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
       return 'claim_lost';
     }
     if (outcome.status === 'FAILED') {
-      const written = await fail(outcome.code, outcome.message, { ...(outcome.interpretation ? { interpretation: outcome.interpretation } : {}), telemetry });
+      // The pipeline's detail is content-free (Zod issue paths and messages, the stop reason, a JSON
+      // parse shape, an SDK error's name and message; never the question, chunk text or the brief's
+      // fields). It is already in the summary line; the record keeps it as the internal, bounded
+      // `failureDetail`, so a failure stays diagnosable after the 14-day logs expire.
+      const written = await fail(outcome.code, outcome.message, {
+        ...(outcome.interpretation ? { interpretation: outcome.interpretation } : {}),
+        telemetry,
+        ...(outcome.detail ? { failureDetail: outcome.detail } : {}),
+      });
       summary(written ? 'failed' : 'claim_lost', telemetry, { ...ids, code: outcome.code, detail: outcome.detail });
       return written ? 'failed' : 'claim_lost';
     }
@@ -186,7 +194,9 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
       return 'claim_lost';
     }
     log('error', 'analysis failed unexpectedly', { ...ids, errorName: (err as Error)?.name, errorMessage: (err as Error)?.message });
-    const written = await fail('WORKER_FAILED', 'The analysis could not be processed. Run it again.').catch(() => false);
+    // Only the error's name is stored: its message may quote anything.
+    const failureDetail = `unexpected_error (${(err as Error)?.name ?? 'unknown'})`;
+    const written = await fail('WORKER_FAILED', 'The analysis could not be processed. Run it again.', { failureDetail }).catch(() => false);
     if (written) failedSummary({ ...ids, code: 'WORKER_FAILED', detail: 'unexpected_error' }, gateway?.sentCount ?? 0);
     return 'failed';
   }

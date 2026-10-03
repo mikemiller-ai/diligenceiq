@@ -284,7 +284,30 @@ export function FigureBadges({ figures }: { figures: readonly Figure[] }) {
   );
 }
 
-/** Validation summary for the Sources rail: citations, removed IDs, figures, uncited items, notices. */
+/**
+ * Period-claim badges (architecture §6.9): the validator flagged a sentence here that says
+ * something is new, a first, added or absent in a fiscal period, and none of the item's citations
+ * is from that period. One badge per period; analyses stored before the check have none.
+ */
+export function PeriodBadges({ periods, onNavy = false }: { periods: readonly string[]; onNavy?: boolean }) {
+  if (periods.length === 0) return null;
+  return (
+    <span className="ml-1 inline-flex flex-wrap gap-1 align-middle">
+      {periods.map((p) => (
+        <Tooltip key={p} content={`This claims something about ${p} but cites no ${p} passage. Check that period's filing before relying on it.`}>
+          {/* On the navy header a translucent warning fill would sit on navy: a card-coloured pill keeps its contrast in both themes. */}
+          <Badge tone={onNavy ? 'outline' : 'warning'} className={cn('cursor-help', onNavy && 'ring-risk-med')}>
+            <AlertTriangle aria-hidden className={cn('size-3', onNavy && 'text-risk-med')} />
+            Period not cited: {p}
+            <span className="sr-only">. This claims something about {p} but cites no {p} passage.</span>
+          </Badge>
+        </Tooltip>
+      ))}
+    </span>
+  );
+}
+
+/** Validation summary for the Sources rail: citations, removed IDs, figures, period claims, uncited items, notices. */
 export function ValidationSummary({ validation, citedCount }: { validation: BriefValidation | undefined; citedCount: number }) {
   if (!validation) return null;
   const removed = validation.citations.removed.length;
@@ -299,8 +322,10 @@ export function ValidationSummary({ validation, citedCount }: { validation: Brie
         ? { ok: true, text: `All ${total} figures found in their cited passages.` }
         : { ok: false, text: `${verified} of ${total} figures found in their cited passages${unitUnstated ? ` (${unitUnstated} more match a table whose unit is not stated)` : ''}; the rest are marked.` },
   ];
+  const periodClaims = validation.periodClaims?.length ?? 0;
+  if (periodClaims) rows.push({ ok: false, text: `${pluralize(periodClaims, 'claim')} about a period none of ${periodClaims === 1 ? 'its' : 'their'} citations is from; marked "Period not cited".` });
   if (validation.uncited.length) rows.push({ ok: false, text: `${pluralize(validation.uncited.length, 'item')} left without a valid citation.` });
-  const notices = validation.notices.filter((n) => !/citation removed|figure/i.test(n));
+  const notices = validation.notices.filter((n) => !/citation removed|figure|period not cited/i.test(n));
   return (
     <ul className="flex flex-col gap-1.5 border-b border-border px-4 py-2.5 text-xs" aria-label="Validation">
       {rows.map((r) => (

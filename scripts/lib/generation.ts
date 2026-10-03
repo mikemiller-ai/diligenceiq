@@ -91,6 +91,7 @@ export function renderGenerationReport(r: { indexVersion: string; promptVersion:
     `| Numeric grounding (figures found in cited passages) | ${sum.numericGrounding ?? 'n/a'} (${sum.figuresVerified}/${sum.figuresTotal}) |`,
     `| Unverified near matches (digits in a table cell; passage states no unit) | ${sum.figuresUnitUnstated} |`,
     `| Briefs with every figure verified | ${sum.briefsFullyGrounded}/${sum.completed} |`,
+    `| Period claims flagged (new or absent in a period none of the claim's citations is from; reported, not a check) | ${sum.periodClaims ? `${sum.periodClaims.claims} in ${sum.periodClaims.briefs} briefs` : 'not checked'} |`,
     `| Comparison tables aligned (one value per column in every row) | ${tally(sum.comparisonAligned)} |`,
     `| Abstention | ${tally(sum.abstention)} |`,
     `| Follow-ups answerable (abstention questions) | ${tally(sum.followUpsAnswerable)} |`,
@@ -104,11 +105,11 @@ export function renderGenerationReport(r: { indexVersion: string; promptVersion:
     '',
     '## Per question',
     '',
-    '| Question | Result | Answer type | Citations valid / returned | Figures verified (near matches) | Tokens in / out | Generation ms | Failed checks |',
-    '|---|---|---|---|---|---|---|---|',
+    '| Question | Result | Answer type | Citations valid / returned | Figures verified (near matches) | Period claims | Tokens in / out | Generation ms | Failed checks |',
+    '|---|---|---|---|---|---|---|---|---|',
     ...r.scores.map(
       (s) =>
-        `| \`${s.id}\` | ${s.pass ? 'pass' : 'fail'} | ${s.answerType ?? s.code ?? s.status} | ${s.citations.valid}/${s.citations.returned} | ${s.figures.verified}/${s.figures.total}${s.figures.unitUnstated ? ` (${s.figures.unitUnstated})` : ''} | ${s.inputTokens} / ${s.outputTokens} | ${s.generationMs} | ${s.checks.filter((c) => !c.pass).map((c) => `${c.name}: ${c.detail.replace(/\|/g, '/')}`).join('; ') || '—'} |`,
+        `| \`${s.id}\` | ${s.pass ? 'pass' : 'fail'} | ${s.answerType ?? s.code ?? s.status} | ${s.citations.valid}/${s.citations.returned} | ${s.figures.verified}/${s.figures.total}${s.figures.unitUnstated ? ` (${s.figures.unitUnstated})` : ''} | ${s.periodClaims ?? '—'} | ${s.inputTokens} / ${s.outputTokens} | ${s.generationMs} | ${s.checks.filter((c) => !c.pass).map((c) => `${c.name}: ${c.detail.replace(/\|/g, '/')}`).join('; ') || '—'} |`,
     ),
     '',
   ].join('\n');

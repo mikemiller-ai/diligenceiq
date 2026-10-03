@@ -83,7 +83,7 @@ test('a question about companies the filings do not cover fails honestly and lis
   await page.goto('/analysis/new/');
   await page.getByRole('textbox', { name: 'Question', exact: true }).fill('What does Acme Widgets say about tariffs?');
   await page.getByRole('button', { name: 'Run analysis' }).click();
-  const alert = page.getByRole('alert').filter({ hasText: 'The filings don’t cover this' });
+  const alert = page.getByRole('alert').filter({ hasText: 'No passages matched this question' });
   await expect(alert).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText(/No model request was made/)).toBeVisible();
   await expect(page.getByRole('list', { name: 'Covered companies' })).toContainText('Apple Inc');

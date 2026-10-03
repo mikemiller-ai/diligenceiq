@@ -36,6 +36,10 @@
   "figuresUnitUnstated": 0,
   "numericGrounding": 0.9772,
   "briefsFullyGrounded": 14,
+  "periodClaims": {
+   "claims": 4,
+   "briefs": 3
+  },
   "comparisonAligned": {
    "passed": 15,
    "total": 15
@@ -143,7 +147,8 @@
       "pass": true,
       "detail": "all 3 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Primary Risk Factor Comparison: Apple, Tesla, and JPMorgan (FY2025)",
@@ -411,6 +416,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -567,7 +573,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "NVIDIA Revenue Trajectory: FY2024–FY2026 YTD Acceleration and Emerging Headwinds",
@@ -1406,6 +1413,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "2 figures not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -1548,7 +1556,8 @@
       "pass": true,
       "detail": "all 5 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Regulatory Risk Landscape Across Major Pharma: JNJ, PFE, MRK, LLY, ABBV",
@@ -1819,6 +1828,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -2004,7 +2014,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 2
    },
    "brief": {
     "title": "Apple Regulatory Disclosure Evolution: FY2023–FY2025",
@@ -2260,7 +2271,25 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
-    "notices": []
+    "periodClaims": [
+     {
+      "location": "keyFindings[3].finding",
+      "periods": [
+       "FY2023"
+      ],
+      "cue": "do not mention"
+     },
+     {
+      "location": "comparison.rows[3].values[0]",
+      "periods": [
+       "FY2023"
+      ],
+      "cue": "not disclosed"
+     }
+    ],
+    "notices": [
+     "2 claims say something is new or absent in a period none of its citations is from (marked \"period not cited\")."
+    ]
    },
    "interpretation": {
     "companies": [
@@ -2398,7 +2427,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Microsoft FY2025 Revenue Growth: Cloud and AI as Primary Drivers",
@@ -3142,6 +3172,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "1 figure not found in the cited passages (marked \"unverified figure\").",
      "The model output needed 1 deterministic repair before validation."
@@ -3273,7 +3304,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Tesla FY2025: Demand and Pricing Risk Assessment",
@@ -3425,6 +3457,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -3558,7 +3591,8 @@
       "pass": true,
       "detail": "all 3 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Cloud Business Comparison: Microsoft Azure, AWS, and Google Cloud",
@@ -4075,6 +4109,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "1 figure not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -4231,7 +4266,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Pfizer Revenue Trend: FY2022–FY2025 YTD",
@@ -5026,6 +5062,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -5172,7 +5209,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "NVIDIA Export Controls: Escalating Restrictions and China Market Foreclosure",
@@ -5417,6 +5455,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -5552,7 +5591,8 @@
       "pass": true,
       "detail": "all 2 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Inflation & Interest Rate Exposure: Walmart vs. JPMorgan Chase (FY2025)",
@@ -5887,6 +5927,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "2 figures not found in the cited passages (marked \"unverified figure\").",
      "The model output needed 1 deterministic repair before validation."
@@ -6033,7 +6074,8 @@
       "pass": true,
       "detail": "all 3 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Cybersecurity Risk Profiles: Visa, UnitedHealth Group & Boeing",
@@ -6314,6 +6356,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "The model output needed 1 deterministic repair before validation."
     ]
@@ -6473,7 +6516,8 @@
       "pass": true,
       "detail": "all 4 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Big-Bank Capital & Liquidity Positioning: JPM, BAC, GS, MS",
@@ -7175,6 +7219,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -7348,7 +7393,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Meta Platforms FY2025: Revenue Acceleration, Surging Capex, and Rising Legal Exposure",
@@ -8215,6 +8261,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "1 figure not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -8360,7 +8407,8 @@
       "pass": true,
       "detail": "15/15 rows have 3 values (after repair dropped a row-label column)"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Tariff Risk Disclosure Across the Corpus: Sector-Wide Concern",
@@ -8798,6 +8846,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": [
      "5 figures not found in the cited passages (marked \"unverified figure\").",
      "The model output needed 1 deterministic repair before validation."
@@ -8923,7 +8972,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 1
    },
    "brief": {
     "title": "Coca-Cola Pricing Trends: FY2022–FY2025 YTD",
@@ -9297,7 +9347,18 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
-    "notices": []
+    "periodClaims": [
+     {
+      "location": "comparison.rows[5].values[0]",
+      "periods": [
+       "FY2022"
+      ],
+      "cue": "not mentioned"
+     }
+    ],
+    "notices": [
+     "1 claim says something is new or absent in a period none of its citations is from (marked \"period not cited\")."
+    ]
    },
    "interpretation": {
     "companies": [
@@ -9438,7 +9499,8 @@
       "pass": false,
       "detail": "4 of 4 follow-ups ask about /2015/, which the corpus cannot answer: followUpQuestions[0], followUpQuestions[1], followUpQuestions[2], followUpQuestions[3]"
      }
-    ]
+    ],
+    "periodClaims": 1
    },
    "brief": {
     "title": "Apple FY2015 Risk Factors: Requested Period Not in Corpus",
@@ -9538,8 +9600,18 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [
+     {
+      "location": "keyFindings[1].finding",
+      "periods": [
+       "FY2015"
+      ],
+      "cue": "not present"
+     }
+    ],
     "notices": [
-     "1 item has no supporting citation."
+     "1 item has no supporting citation.",
+     "1 claim says something is new or absent in a period none of its citations is from (marked \"period not cited\")."
     ]
    },
    "interpretation": {
@@ -9676,7 +9748,8 @@
       "pass": false,
       "detail": "4 of 4 follow-ups ask about /Ford/, which the corpus cannot answer: followUpQuestions[0], followUpQuestions[1], followUpQuestions[2], followUpQuestions[3]"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Ford EV Strategy: Insufficient Evidence — Ford Not in Corpus",
@@ -9712,6 +9785,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -9840,7 +9914,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Apple Inc. (AAPL): Supply Chain Risk Assessment — FY2025",
@@ -9979,6 +10054,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -10117,7 +10193,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Netflix FY2025: Key Risk Factors from Annual 10-K Filing",
@@ -10324,6 +10401,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -10459,7 +10537,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Alphabet Q2 2025: Advertising Revenue Performance and Drivers",
@@ -11010,6 +11089,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -11076,7 +11156,7 @@
   }
  ],
  "rescore": {
-  "rescoredAt": "2026-10-03T15:44:44.979Z",
+  "rescoredAt": "2026-10-03T20:52:46.007Z",
   "by": "pnpm eval:generation:rescore",
   "note": "Recorded responses re-validated and re-scored with the current validator and checks; no model call. Telemetry (generation latency, tokens, cost) is from the original run."
  }

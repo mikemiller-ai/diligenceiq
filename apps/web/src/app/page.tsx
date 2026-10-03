@@ -33,7 +33,7 @@ import { compareHref } from '@/lib/links';
 
 /*
  * Product landing (SPEC §7), in the family layout of ResolveIQ, TrustResponse, ArchIQ and
- * CareerOps: navy hero, the launch film under it, then problem → how it works → shows its work
+ * CareerOps: navy hero, the launch film under it (only once the file exists), then problem → how it works → shows its work
  * → two ways in → how it is built → closing CTA. Static: opening it never calls the api.
  * Copy is product description and must be true of the current build: it describes the offline
  * profile sets (Phase 4b) that the active set pointer serves. The only numbers are corpus counts derived from the filing rows,
@@ -162,15 +162,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* LAUNCH FILM: first after the hero, as on every sibling product */}
-        <Section
-          id="film"
-          eyebrow="Launch film"
-          headline="From a company’s filings to findings you can defend."
-          lede="Pick a company, see what changed and why it matters, ask a question, check the evidence and save the finding, in the working product."
-        >
-          <LaunchFilm film={film} />
-        </Section>
+        {/* LAUNCH FILM: first after the hero, as on every sibling product. Not rendered until the
+            film file exists (SPEC §7, A.4 2026-10-03): an empty video box read as unfinished. */}
+        {film && (
+          <Section
+            id="film"
+            eyebrow="Launch film"
+            headline="From a company’s filings to findings you can defend."
+            lede="Pick a company, see what changed and why it matters, ask a question, check the evidence and save the finding, in the working product."
+          >
+            <LaunchFilm film={film} />
+          </Section>
+        )}
 
         {/* PROBLEM */}
         <Section

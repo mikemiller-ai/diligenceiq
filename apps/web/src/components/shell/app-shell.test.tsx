@@ -51,4 +51,13 @@ describe('AppShell', () => {
     expect(screen.getByRole('button', { name: 'Expand navigation' })).toHaveAttribute('aria-expanded', 'false');
     expect(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Compare' })).toBeInTheDocument();
   });
+
+  it('the phone drawer has a visible scrim and no Collapse control (Phase 9 review item 24)', async () => {
+    shell();
+    await userEvent.click(screen.getByRole('button', { name: 'Open navigation' }));
+    const drawer = await screen.findByRole('dialog', { name: 'Navigation' });
+    expect(within(drawer).queryByRole('button', { name: /Collapse navigation/ })).not.toBeInTheDocument();
+    expect(within(drawer).getByRole('link', { name: 'Compare' })).toBeInTheDocument();
+    expect(screen.getByTestId('sheet-scrim')).toHaveClass('bg-navy/60');
+  });
 });

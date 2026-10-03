@@ -14,7 +14,7 @@ import {
   defangQuestion,
 } from './prompt';
 import { FakeGenerationClient, type Script, briefCiting, fixtureChunks, fixtureRetriever } from './testing';
-import { extractFigures, headerScale, matchFigure, passageNumbers, repairBrief, significantDigits, validateBrief } from './validate';
+import { escapeControlCharsInStrings, extractFigures, headerScale, matchFigure, passageNumbers, repairBrief, significantDigits, validateBrief } from './validate';
 
 const gatewayFor = (client: FakeGenerationClient, beforeCall = vi.fn(async () => {})) => new GenerationGateway({ purpose: 'analysis', client, beforeCall });
 
@@ -200,6 +200,33 @@ describe('deterministic repair (SPEC §31)', () => {
     expect(r.brief.followUpQuestions).toEqual(['One question?']);
     expect(r.brief.comparison).toBeUndefined();
     expect(r.repairs.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('a stringified field with raw newlines or tabs inside its strings is parsed after escaping them (production 2026-10-03)', () => {
+    const raw = briefCiting(['A-1']);
+    const stringified = '[{"title": "DMA\tcompliance", "finding": "Line one.\nLine two.", "basis": "reported", "tickers": ["AAPL"], "citationIds": ["A-1"]}]';
+    expect(() => JSON.parse(stringified)).toThrow();
+    const r = repairBrief({ ...raw, keyFindings: stringified });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.brief.keyFindings[0]).toMatchObject({ title: 'DMA\tcompliance', finding: 'Line one.\nLine two.' });
+    expect(r.repairs).toContain('keyFindings: parsed from a JSON string after escaping raw control characters');
+  });
+
+  it('escaping control characters never changes valid JSON, and leaves characters outside strings alone', () => {
+    const valid = '[\n  {"a": "x\\ny", "b": "q\\"uote\\\\"}\n]';
+    expect(escapeControlCharsInStrings(valid)).toBe(valid);
+    expect(JSON.parse(escapeControlCharsInStrings(valid))).toEqual(JSON.parse(valid));
+  });
+
+  it('a stringified field that still does not parse fails with its shape, never its content', () => {
+    const raw = briefCiting(['A-1']);
+    const r = repairBrief({ ...raw, keyFindings: '[{"title": "Secret filing text", "finding": ' });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.issues[0]).toMatch(/^keyFindings: a JSON-looking string that does not parse \((unexpected end|unterminated string|expected token missing|parse error)( at \d+)? of \d+ chars\)$/);
+    expect(r.issues.join(' ')).not.toContain('Secret filing text');
+    expect(r.issues.some((i) => i.startsWith('keyFindings: Invalid input'))).toBe(true);
   });
 
   it('comparison: a row-label header in columns (every row one value short) is dropped and recorded; other mismatches are kept', () => {
@@ -446,7 +473,7 @@ describe('runDeepAnalysis (one call on every path)', () => {
     expect(beforeCall).toHaveBeenCalledTimes(1);
     expect(stages).toEqual(['analyzing', 'retrieving', 'balancing', 'context', 'generating', 'validating']);
     expect(o.output.telemetry).toMatchObject({ generationCallCount: 1, embeddingCallCount: 0, rerankCallCount: 0, promptVersion: DEEP_ANALYSIS_PROMPT_VERSION, indexVersion: 'iv-fixture', inputTokens: 1000, outputTokens: 200, requestId: 'req-1', analysisId: 'an-1' });
-    expect(o.output.telemetry.estimatedCostUsd).toBeCloseTo(0.006, 6);
+    expect(o.output.telemetry.estimatedCostUsd).toBeCloseTo(0.0066, 6); // 1,000 in × $3.30 + 200 out × $16.50 per 1M (billed rates)
     expect(o.output.validation.citations.removed).toEqual([{ location: 'keyFindings[1]', id: 'NOT-SUPPLIED-1' }]);
     expect(o.output.citations.map((c) => c.chunkId)).toEqual([seen[0]]);
     expect(o.output.citations[0]!.text.length).toBeGreaterThan(20);
@@ -533,7 +560,10 @@ describe('runDeepAnalysis (one call on every path)', () => {
   });
 
   it('cost estimate uses the pricing table (an estimate)', () => {
-    expect(estimateCostUsd({ modelId: 'us.anthropic.claude-sonnet-4-6', inputTokens: 25_000, outputTokens: 2_000 }, { modelId: 'amazon.titan-embed-text-v2:0', inputTokens: 20 })).toBeCloseTo(0.1050004, 6);
+    // The us. inference profile at the billed $3.30 / $16.50 per 1M (Cost Explorer, evals/results/idle-cost-2026-10-03.json).
+    expect(estimateCostUsd({ modelId: 'us.anthropic.claude-sonnet-4-6', inputTokens: 25_000, outputTokens: 2_000 }, { modelId: 'amazon.titan-embed-text-v2:0', inputTokens: 20 })).toBeCloseTo(0.1155004, 6);
+    // The in-region ID was never billed here and keeps the $3 / $15 list price.
+    expect(estimateCostUsd({ modelId: 'anthropic.claude-sonnet-4-6', inputTokens: 25_000, outputTokens: 2_000 }, null)).toBeCloseTo(0.105, 6);
     expect(estimateCostUsd({ modelId: 'unknown', inputTokens: 1e6, outputTokens: 0 }, null)).toBe(0);
   });
 });

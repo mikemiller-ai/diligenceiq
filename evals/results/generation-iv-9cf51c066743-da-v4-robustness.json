@@ -22,6 +22,10 @@
   "figuresUnitUnstated": 0,
   "numericGrounding": 0.9787,
   "briefsFullyGrounded": 5,
+  "periodClaims": {
+   "claims": 4,
+   "briefs": 2
+  },
   "comparisonAligned": {
    "passed": 4,
    "total": 4
@@ -142,7 +146,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Apple Regulatory Disclosure Evolution: FY2023–FY2025",
@@ -388,6 +393,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -542,7 +548,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 1
    },
    "brief": {
     "title": "Apple Regulatory Disclosure Evolution: FY2023–FY2025",
@@ -793,7 +800,19 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
-    "notices": []
+    "periodClaims": [
+     {
+      "location": "keyFindings[3].finding",
+      "periods": [
+       "FY2023",
+       "FY2024"
+      ],
+      "cue": "not present"
+     }
+    ],
+    "notices": [
+     "1 claim says something is new or absent in a period none of its citations is from (marked \"period not cited\")."
+    ]
    },
    "interpretation": {
     "companies": [
@@ -947,7 +966,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 3
    },
    "brief": {
     "title": "Apple Regulatory Disclosure Evolution: FY2023–FY2025",
@@ -1194,8 +1214,33 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [
+     {
+      "location": "keyFindings[3].finding",
+      "periods": [
+       "FY2023"
+      ],
+      "cue": "do not mention"
+     },
+     {
+      "location": "comparison.rows[3].values[0]",
+      "periods": [
+       "FY2023"
+      ],
+      "cue": "not mentioned"
+     },
+     {
+      "location": "investmentConsiderations[3].text",
+      "periods": [
+       "FY2023",
+       "FY2024"
+      ],
+      "cue": "absent"
+     }
+    ],
     "notices": [
-     "1 figure not found in the cited passages (marked \"unverified figure\")."
+     "1 figure not found in the cited passages (marked \"unverified figure\").",
+     "3 claims say something is new or absent in a period none of its citations is from (marked \"period not cited\")."
     ]
    },
    "interpretation": {
@@ -1340,7 +1385,8 @@
       "pass": true,
       "detail": "all 1 companies cited"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Microsoft FY2025 10-K: Key Business and Financial Highlights",
@@ -1643,6 +1689,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -1776,7 +1823,8 @@
       "pass": true,
       "detail": "no follow-up asks about /stock price|price target|analyst/"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Apple Inc. (AAPL): Current Stock Price and Analyst Price Target — Insufficient Evidence",
@@ -1849,6 +1897,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -1985,7 +2034,8 @@
       "pass": true,
       "detail": "5/5 rows have 6 values"
      }
-    ]
+    ],
+    "periodClaims": 0
    },
    "brief": {
     "title": "Big Tech AI Spending: Strategy, Infrastructure, and Risk Across MSFT, GOOG, AMZN, META, NVDA, and AAPL",
@@ -2374,6 +2424,7 @@
      "unitUnstated": 0
     },
     "comparisonMisaligned": [],
+    "periodClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -2503,7 +2554,7 @@
   }
  ],
  "rescore": {
-  "rescoredAt": "2026-10-03T16:05:49.617Z",
+  "rescoredAt": "2026-10-03T20:52:48.011Z",
   "by": "pnpm eval:generation:rescore",
   "note": "Recorded responses re-validated and re-scored with the current validator and checks; no model call. Telemetry (generation latency, tokens, cost) is from the original run."
  }

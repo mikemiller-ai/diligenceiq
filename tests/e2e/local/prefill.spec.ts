@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { e2eStats, isAnalysisPost, isViewSafe, recordRequests, setKillSwitch, setWorker, settle } from './helpers';
+import { e2eStats, isAnalysisPost, isViewSafe, mockAnalysesDisabled, recordRequests, setKillSwitch, setWorker, settle } from './helpers';
 
 /*
  * SPEC §14.2 / §51.1: a prefilled Deep Analysis never runs without an explicit Run.
@@ -42,9 +42,10 @@ test('loading a prefilled Deep Analysis URL sends no analysis request; Run sends
   await expect(page.getByRole('heading', { name: 'Key findings' })).toBeVisible({ timeout: 10_000 });
 });
 
-test('Ask a question from a prefilled Deep Analysis opens an empty form: no stale question, origin or filter', async ({ page, request }) => {
-  // Regression (adversary finding 2). Analyses are paused here so the form stays put after Run.
-  await setKillSwitch(request, false);
+test('Ask a question from a prefilled Deep Analysis opens an empty form: no stale question, origin or filter', async ({ page }) => {
+  // Regression (adversary finding 2). The server answers Run with ANALYSES_DISABLED so the form stays put after
+  // Run (the browser's health check still says enabled, so Run is enabled until the server refuses).
+  await mockAnalysesDisabled(page);
   const requests = recordRequests(page);
   await page.goto('/analysis/new/?q=Prefilled%20Q&tickers=AAPL&origin=recommendation:AAPL:rec-1');
   await expect(page.getByRole('textbox', { name: 'Question', exact: true })).toHaveValue('Prefilled Q');

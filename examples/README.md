@@ -8,7 +8,7 @@
 
 On `COMPLETE` it prints the title, summary, key findings, comparison, considerations, evidence gaps, follow-up questions, every citation with its chunk ID and filing, the server-side validation result, and the telemetry (model, prompt version, the single generation call, tokens and estimated cost). On `FAILED` it prints the error code and message.
 
-> **Cost.** Each run against production makes **one paid Bedrock generation call** (Claude Sonnet 4.6, estimated $0.09–0.13 per analysis) plus one query embedding, and creates one demo workspace (it expires after 30 days). The api's spend caps apply: 10 analyses per workspace per hour and 200 a day across the demo.
+> **Cost.** Each run against production makes **one paid Bedrock generation call** (Claude Sonnet 4.6, estimated about $0.10–0.14 per analysis at the billed rate; the recorded run below, $0.1316) plus one query embedding, and creates one demo workspace (it expires after 30 days). The api's spend caps apply: 10 analyses per workspace per hour and 200 a day across the demo.
 
 ## Run it
 
@@ -82,10 +82,11 @@ The request and response shapes are `CreateAnalysisRequestSchema` in `packages/c
 
 ## Recorded sample output
 
-The run against production is recorded in Phase 8 as `examples/sample-output.txt` (the printed brief) and `examples/sample-analysis.json` (the raw final poll response, from `--json-out`). They are real output from one approved production run, never written by hand. Two caveats:
+The run against production is recorded as `examples/sample-output.txt` (the printed brief) and `examples/sample-analysis.json` (the raw final poll response, from `--json-out`): analysis `0muswoje69MPT2ATVia`, 2026-10-03, prompt da-v4 (the final prompt), 1 generation call, estimated $0.1299, 53 of 53 citation references valid, 0 unverified figures. They are real output from one approved production run, never written by hand.
 
-- **Known unsupported claim.** The recorded summary says tariffs and AI were absent from the FY2023 filings. That is a claim about absence that the retrieved passages cannot support (the corpus mentions both, but those passages were not in the model's context); it is documented in [docs/evaluation.md §8](../docs/evaluation.md) and is to be addressed by the next Deep Analysis prompt version (da-v5, pending with Mike).
-- **Older wording.** `sample-output.txt` predates the current wording of the citation lines: it prints "Citations (12, …)" and "Citations: 53 of 53 valid", which the script now prints as "Cited passages (12 unique, …)" and "Citation references: 53 of 53 valid".
+**Two claims are marked "Period not cited".** Investment considerations 2 and 3 say something was not present or absent in FY2023 (and FY2024) while citing no passage from those years. The deterministic period check (docs/evaluation.md §12) flags them in the brief and in the printed output. The marks are the point: the model's period claims are checked against its own citations, not taken on trust.
+
+An earlier recording (analysis `0must6j1040hob_pHpm`) was a da-v5 run, the prompt that was tried and reverted (docs/evaluation.md §11); this one replaces it.
 
 ## Trying it locally for free
 
@@ -98,4 +99,4 @@ BASE_URL=http://127.0.0.1:4175 bash examples/analysis-request.sh -q "What drove 
 curl -X POST 'http://127.0.0.1:4175/__e2e/kill-switch?enabled=false'                   # then a run shows ANALYSES_DISABLED
 ```
 
-The local output is a recorded brief replayed by the stub, not a new analysis.
+The local output is a recorded brief replayed by the stub, not a new analysis: the seeded Apple brief (prompt da-v4, the recorded evaluation run), whose validation notices include its 7 period claims ("period not cited").

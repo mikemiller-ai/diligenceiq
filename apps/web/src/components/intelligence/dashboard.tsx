@@ -67,6 +67,9 @@ export const PERFORMANCE_METRICS = [
   'Operating cash flow',
 ] as const;
 
+/** A metric with a reported latest value but no trend: never "Not extracted" beside a real figure. */
+export const NO_TREND = 'No trend';
+
 const CHANGE_TYPES = new Set<ProfileSignal['type']>(['NEW', 'EXPANDED', 'REDUCED', 'TREND_CHANGE', 'OUTLOOK_CHANGE', 'PERSISTENT']);
 
 /**
@@ -167,6 +170,63 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
         </ul>
       </Section>
 
+      <Section id="whats-changed" title="What’s changed">
+        <WhatsChanged profile={profile} citations={citations} />
+      </Section>
+
+      <Section id="attention" title="Attention signals" lede="Something changed or appears important enough to investigate. A signal is not a judgment that the company is good or bad.">
+        {profile.signals.length === 0 ? (
+          <PlaceholderSlot title="Attention signals and why they matter">
+            Each signal will say what was detected, why it deserves attention, and the evidence for each period, with
+            Investigate, View evidence and Save finding actions.
+          </PlaceholderSlot>
+        ) : (
+          <ShowMore
+            items={[...profile.signals].sort((a, b) => Number(a.type === 'PERSISTENT') - Number(b.type === 'PERSISTENT'))}
+            initial={4}
+            noun={['signal', 'signals']}
+            className="grid gap-3 lg:grid-cols-2"
+            // The first two show Why this matters in full (SPEC §8.3); the rest are clamped with More.
+            render={(s, i) => <SignalCard key={s.signalId} profile={profile} signal={s} citations={citations} unfolded={i < 2} />}
+          />
+        )}
+      </Section>
+
+      <Section id="recommended" title="Recommended diligence" lede="Questions worth investigating next. Each one opens Deep Analysis with the question filled in; nothing runs until you click Run analysis.">
+        <ShowMore
+          as="ol"
+          items={profile.recommendedDiligence}
+          initial={3}
+          noun={['question', 'questions']}
+          className="flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm"
+          render={(r, i) => (
+            <li key={r.question} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start">
+              <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, '0')}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] font-medium text-foreground">{r.question}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Why suggested: {r.why} <CitationList ids={r.citationIds} context={citations} provenance="profile" claim={r.why} />
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Button asChild size="sm">
+                  <Link
+                    href={newAnalysisHref({
+                      question: r.question,
+                      tickers: r.tickers,
+                      origin: { kind: 'recommendation', ticker: profile.ticker, ref: profileRef.recommendation(i) },
+                    })}
+                  >
+                    Investigate <ArrowUpRight />
+                  </Link>
+                </Button>
+                <SaveFindingButton source={{ kind: 'recommendation', ticker: profile.ticker, ref: profileRef.recommendation(i) }} />
+              </div>
+            </li>
+          )}
+        />
+      </Section>
+
       <Section id="performance" title="Performance">
         <PerformanceTable profile={profile} fixture={fixture} />
       </Section>
@@ -213,68 +273,13 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
         id="current-risks"
         title="Current risks"
         lede={
-          fixture
-            ? 'Risk headings extracted from the latest annual report, grouped by area. A preview: the extraction rule can miss some headings and can include a sentence that is not a heading.'
-            : 'Risk headings from the latest annual report, grouped by area.'
+          <>
+            <span data-allow-figures>{riskCounts(profile)}</span>, {fixture ? 'extracted from' : 'from'} the latest annual report.
+            {fixture && ' A preview: the extraction rule can miss some headings and can include a sentence that is not a heading.'}
+          </>
         }
       >
         <CurrentRisks profile={profile} citations={citations} />
-      </Section>
-
-      <Section id="whats-changed" title="What’s changed">
-        <WhatsChanged profile={profile} citations={citations} />
-      </Section>
-
-      <Section id="attention" title="Attention signals" lede="Something changed or appears important enough to investigate. A signal is not a judgment that the company is good or bad.">
-        {profile.signals.length === 0 ? (
-          <PlaceholderSlot title="Attention signals and why they matter">
-            Each signal will say what was detected, why it deserves attention, and the evidence for each period, with
-            Investigate, View evidence and Track actions.
-          </PlaceholderSlot>
-        ) : (
-          <ShowMore
-            items={[...profile.signals].sort((a, b) => Number(a.type === 'PERSISTENT') - Number(b.type === 'PERSISTENT'))}
-            initial={4}
-            noun={['signal', 'signals']}
-            className="grid gap-3 lg:grid-cols-2"
-            render={(s) => <SignalCard key={s.signalId} profile={profile} signal={s} citations={citations} />}
-          />
-        )}
-      </Section>
-
-      <Section id="recommended" title="Recommended diligence" lede="Questions worth investigating next. Each one opens Deep Analysis with the question filled in; nothing runs until you click Run analysis.">
-        <ShowMore
-          as="ol"
-          items={profile.recommendedDiligence}
-          initial={3}
-          noun={['question', 'questions']}
-          className="flex flex-col divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm"
-          render={(r, i) => (
-            <li key={r.question} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start">
-              <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, '0')}</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-medium text-foreground">{r.question}</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Why suggested: {r.why} <CitationList ids={r.citationIds} context={citations} provenance="profile" claim={r.why} />
-                </p>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <Button asChild size="sm">
-                  <Link
-                    href={newAnalysisHref({
-                      question: r.question,
-                      tickers: r.tickers,
-                      origin: { kind: 'recommendation', ticker: profile.ticker, ref: profileRef.recommendation(i) },
-                    })}
-                  >
-                    Investigate <ArrowUpRight />
-                  </Link>
-                </Button>
-                <SaveFindingButton source={{ kind: 'recommendation', ticker: profile.ticker, ref: profileRef.recommendation(i) }} label="Save" />
-              </div>
-            </li>
-          )}
-        />
       </Section>
 
       <Section id="coverage" title="Coverage">
@@ -302,7 +307,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
 
       <footer className="border-t border-border pt-4 font-mono text-[11px] text-muted-foreground" data-allow-figures>
         Generation: {generationLabel(profile)} · {callCount(profile.generation.generationCallCount)} to build · profile set{' '}
-        {profile.version.profileSetId} · index {profile.version.indexVersion} · built {profile.version.builtAt} · no model call on
+        {profile.version.profileSetId} · index {profile.version.indexVersion} · built {formatDate(profile.version.builtAt)} · no model call on
         page view
       </footer>
     </div>
@@ -310,6 +315,13 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
 }
 
 /** "llm", "deterministic", or "deterministic fallback" (a deterministic profile inside an LLM set: its call failed validation or was not made). */
+/** "28 risk headings in 7 areas": the Current risks units, named (headings are the filing's own; areas are the classifier's groups). */
+export function riskCounts(profile: Pick<CompanyIntelligenceProfile, 'currentRisks'>): string {
+  const n = profile.currentRisks.length;
+  const areas = new Set(profile.currentRisks.map((r) => r.category)).size;
+  return `${n} risk heading${n === 1 ? '' : 's'} in ${areas} area${areas === 1 ? '' : 's'}`;
+}
+
 function generationLabel(p: CompanyIntelligenceProfile): string {
   if (p.generation.mode === 'deterministic' && p.version.profileSetId.startsWith('llm-')) return 'deterministic fallback';
   return p.generation.mode;
@@ -317,7 +329,7 @@ function generationLabel(p: CompanyIntelligenceProfile): string {
 
 const callCount = (n: number) => `${n} model call${n === 1 ? '' : 's'}`;
 
-function Section({ id, title, lede, children }: { id: string; title: string; lede?: string; children: React.ReactNode }) {
+function Section({ id, title, lede, children }: { id: string; title: string; lede?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section aria-labelledby={id}>
       <h2 id={id} className="scroll-mt-40 text-lg font-semibold tracking-tight text-foreground">
@@ -370,7 +382,7 @@ function PerformanceTable({ profile, fixture }: { profile: CompanyIntelligencePr
                   <TD data-metric-slot className={cn(!trend && 'italic text-muted-foreground')}>
                     {trend ? (
                       trend.trajectory === 'not_extracted' || trend.trajectory === 'limited_history' ? (
-                        <span className="italic text-muted-foreground">{TRAJECTORY_LABEL[trend.trajectory]}</span>
+                        <span className="italic text-muted-foreground">{trend.trajectory === 'not_extracted' && latest ? NO_TREND : TRAJECTORY_LABEL[trend.trajectory]}</span>
                       ) : (
                         <SignalChip direction={trajectoryDirection(trend.trajectory, metric)} neutral={metric === 'Operating cash flow' && neutralCashFlow(profile)}>
                           {TRAJECTORY_LABEL[trend.trajectory]}
@@ -378,6 +390,9 @@ function PerformanceTable({ profile, fixture }: { profile: CompanyIntelligencePr
                       )
                     ) : fixture ? (
                       <PlaceholderBadge />
+                    ) : latest ? (
+                      // A reported value without a trend: the figure was found, a comparison was not.
+                      NO_TREND
                     ) : (
                       TRAJECTORY_LABEL.not_extracted
                     )}
@@ -531,9 +546,12 @@ function WhatsChanged({ profile, citations }: { profile: CompanyIntelligenceProf
       <p className="mt-1 text-sm text-foreground/80">
         {s.whatChanged} <CitationList ids={s.citationIds} context={citations} provenance="profile" claim={s.whatChanged} />
       </p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        Measured: <span data-allow-figures>{s.measurement}</span>
-      </p>
+      <details className="mt-1 text-xs text-muted-foreground">
+        <summary className="w-fit cursor-pointer select-none font-medium text-primary hover:underline">How this was measured</summary>
+        <p className="mt-1" data-allow-figures>
+          {s.measurement}
+        </p>
+      </details>
     </li>
   );
   return (
@@ -544,7 +562,7 @@ function WhatsChanged({ profile, citations }: { profile: CompanyIntelligenceProf
           <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 px-5 py-4 [&::-webkit-details-marker]:hidden">
             <SignalChip direction="repeat">Persistent</SignalChip>
             <span className="text-[15px] font-semibold text-foreground" data-allow-figures>
-              {persistent.length} disclosure{persistent.length === 1 ? '' : 's'} repeated across annual reports
+              {persistentSummary(persistent)}
             </span>
             <span className="text-sm text-muted-foreground">{[...new Set(persistent.map((s) => SIGNAL_CATEGORY_LABELS[s.category]))].join(' · ')}</span>
             <span className="ml-auto text-sm font-medium text-primary group-open:hidden">Show all</span>
@@ -557,16 +575,25 @@ function WhatsChanged({ profile, citations }: { profile: CompanyIntelligenceProf
   );
 }
 
+/** "9 repeated disclosures in 6 risk areas": signals and areas, each named, so the count reads beside the bottom line's areas. */
+export function persistentSummary(persistent: ProfileSignal[]): string {
+  const areas = new Set(persistent.map((s) => s.category)).size;
+  return `${persistent.length} repeated disclosure${persistent.length === 1 ? '' : 's'} in ${areas} risk area${areas === 1 ? '' : 's'}, across annual reports`;
+}
+
 function SignalCard({
   profile,
   signal: s,
   citations,
   hidden,
   tabIndex,
+  unfolded = false,
 }: {
   profile: CompanyIntelligenceProfile;
   signal: ProfileSignal;
   citations: Map<string, Citation>;
+  /** Show Why this matters in full, without a More toggle. */
+  unfolded?: boolean;
   /** Set by ShowMore while the card is folded. */
   hidden?: boolean;
   tabIndex?: number;
@@ -594,9 +621,15 @@ function SignalCard({
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Why this matters</p>
           {s.whyThisMattersSource === 'general_context' ? <GeneralContextBadge /> : <ModelWrittenBadge>Model-written analysis</ModelWrittenBadge>}
         </div>
-        <Clamp text={s.whyThisMatters} className="mt-1 text-sm text-foreground/80">
-          {s.whyThisMatters}
-        </Clamp>
+        {unfolded ? (
+          <p className="mt-1 text-sm text-foreground/80" data-unfolded>
+            {s.whyThisMatters}
+          </p>
+        ) : (
+          <Clamp text={s.whyThisMatters} className="mt-1 text-sm text-foreground/80">
+            {s.whyThisMatters}
+          </Clamp>
+        )}
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         <Button asChild size="sm">
@@ -607,7 +640,7 @@ function SignalCard({
         <Button size="sm" variant="secondary" onClick={() => show({ kind: 'periods', title: s.headline, periods, claim: s.whatChanged })}>
           <ScrollText /> View evidence
         </Button>
-        <SaveFindingButton source={{ kind: 'signal', ticker: profile.ticker, ref: profileRef.signal(s) }} label="Track" variant="ghost" />
+        <SaveFindingButton source={{ kind: 'signal', ticker: profile.ticker, ref: profileRef.signal(s) }} variant="ghost" />
       </div>
     </li>
   );
@@ -646,10 +679,10 @@ function BottomLine({ profile }: { profile: CompanyIntelligenceProfile }) {
               {it.title}
             </a>
             <span className="text-sm text-muted-foreground">
-              {it.key === 'profit' && it.detail.startsWith('net margin ') ? (
+              {it.key === 'profit' && /^(net|operating) margin /.test(it.detail) ? (
                 <>
-                  <Term term="Net margin">net margin</Term>
-                  {it.detail.slice('net margin'.length)}
+                  <Term term={it.detail.startsWith('net') ? 'Net margin' : 'Operating margin'}>{it.detail.startsWith('net') ? 'net margin' : 'operating margin'}</Term>
+                  {it.detail.slice(it.detail.indexOf(' margin') + ' margin'.length)}
                 </>
               ) : (
                 it.detail
@@ -819,13 +852,15 @@ function DashboardJumpBar({ profile, fixture }: { profile: CompanyIntelligencePr
   const links: JumpLink[] = [
     ...(fixture || bottomLine(profile).length === 0 ? [] : [{ id: 'bottom-line', label: 'Bottom line' }]),
     { id: 'thirty-second', label: '30-second view' },
+    { id: 'whats-changed', label: 'What’s changed', ...(changes ? { count: changes, unit: ['signal', 'signals'] as [string, string] } : {}) },
+    { id: 'attention', label: 'Attention signals', count: profile.signals.length, unit: ['signal', 'signals'] },
+    { id: 'recommended', label: 'Recommended', count: profile.recommendedDiligence.length, unit: ['question', 'questions'] },
     { id: 'performance', label: 'Performance' },
-    ...(fixture || profile.drivers.length ? [{ id: 'drivers', label: 'Drivers', ...(profile.drivers.length ? { count: profile.drivers.length } : {}) }] : []),
+    ...(fixture || profile.drivers.length
+      ? [{ id: 'drivers', label: 'Drivers', ...(profile.drivers.length ? { count: profile.drivers.length, unit: ['line', 'lines'] as [string, string] } : {}) }]
+      : []),
     ...(profile.managementOutlook ? [{ id: 'outlook', label: 'Outlook' }] : []),
-    { id: 'current-risks', label: 'Current risks', count: profile.currentRisks.length },
-    { id: 'whats-changed', label: 'What’s changed', ...(changes ? { count: changes } : {}) },
-    { id: 'attention', label: 'Attention signals', count: profile.signals.length },
-    { id: 'recommended', label: 'Recommended', count: profile.recommendedDiligence.length },
+    { id: 'current-risks', label: 'Current risks', count: profile.currentRisks.length, unit: ['heading', 'headings'], showUnit: true },
     { id: 'coverage', label: 'Coverage' },
   ];
   return <JumpBar links={links} className="-mt-4" />;

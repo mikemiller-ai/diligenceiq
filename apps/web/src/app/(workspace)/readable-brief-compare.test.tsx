@@ -232,8 +232,8 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
     const revenue = within(diverging).getByText('Revenue').closest('li')!;
     const chips = [...revenue.querySelectorAll('[data-direction]')].map((c) => [c.textContent, c.getAttribute('data-direction')]);
     expect(chips).toEqual([
-      ['Apple Inc: rising', 'up'],
-      ['Tesla Inc: falling', 'down'],
+      ['Apple: rising', 'up'],
+      ['Tesla: falling', 'down'],
     ]);
   });
 
@@ -270,8 +270,8 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
     expect(stale).toHaveTextContent('latest trend FY2022');
     // Diverging (AAPL falling, TSLA rising): TSLA's chip carries no direction colour and names the year.
     const ocf = within(section('Diverging trends')).getByText('Operating cash flow').closest('li')!;
-    expect([...ocf.querySelectorAll('[data-direction]')].map((c) => c.textContent)).toEqual(['Apple Inc: falling']);
-    expect(ocf).toHaveTextContent('Tesla Inc: rising(latest trend FY2022)');
+    expect([...ocf.querySelectorAll('[data-direction]')].map((c) => c.textContent)).toEqual(['Apple: falling']);
+    expect(ocf).toHaveTextContent('Tesla: rising(latest trend FY2022)');
   });
 
   it('over every built test profile, a cell has a chip exactly when its trend reads back, is current and has a labeled change', () => {
@@ -311,7 +311,7 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
     expect(trendRead(p.get('JPM'), 'Operating cash flow', 'growing')).toMatchObject({ kind: 'chip', change: { neutral: true } });
     // Revenue: AAPL growing, TSLA "growing" (not read back), JPM slowing: no diverging pair for revenue.
     const revenue = within(diverging).queryByText('Revenue')?.closest('li');
-    if (revenue) expect([...revenue.querySelectorAll('[data-direction]')].map((c) => c.textContent)).not.toContain('Tesla Inc: rising');
+    if (revenue) expect([...revenue.querySelectorAll('[data-direction]')].map((c) => c.textContent)).not.toContain('Tesla: rising');
   });
 
   it('a legend explains the chips for built profiles', () => {
@@ -347,7 +347,7 @@ describe('Compare: condensed sections (DD-21 c, g)', () => {
     expect(rows.filter((r) => !r.hidden)).toHaveLength(total);
     // Focus moves to the first revealed area.
     expect(document.activeElement).toBe(rows[5]);
-    expect(within(grid).getAllByRole('button', { name: 'Save' })).toHaveLength(total);
+    expect(within(grid).getAllByRole('button', { name: 'Save finding' })).toHaveLength(total);
   });
 
   it('Ask next shows three questions, every one a click away', () => {
@@ -405,17 +405,37 @@ describe('Compare: refined bottom line and risk grid (DD-21 h, after the adversa
     // One company differs: its arrow without colour.
     expect(chipOf(margin!)).toHaveAttribute('data-direction', 'neutral');
     expect(chipOf(cash!)).toHaveAttribute('data-direction', 'neutral');
-    expect(box).toHaveTextContent('Opposite directions: Operating cash flow (rising at Microsoft Corporation and NVIDIA Corporation, falling at Apple Inc).');
+    expect(box).toHaveTextContent('Opposite directions: Operating cash flow (rising at Microsoft and NVIDIA, falling at Apple).');
     expect(box).not.toHaveTextContent('No metric');
     const legend = within(box).getByRole('list', { name: 'Legend' });
     expect(legend).toHaveTextContent('increased at every company');
     expect(legend).toHaveTextContent('no colour: one company differs, or neither direction is better');
   });
 
+  // Phase 9 review item 16: short names, and one shared attention area stated once.
+  it('uses short company names, and states a major attention area every company shares once', () => {
+    const p = built(['AAPL', 'MSFT', 'NVDA']);
+    renderWith(p);
+    const table = screen.getByRole('table', { name: 'Companies side by side' });
+    expect(within(table).getByRole('columnheader', { name: /Apple/ })).not.toHaveTextContent('Apple Inc');
+    const row = within(table).getByRole('rowheader', { name: 'Major attention area' }).closest('tr')!;
+    const cells = row.querySelectorAll('td');
+    const same = row.querySelector('[data-same-value]');
+    if (same) {
+      expect(same).toHaveAttribute('colspan', '3');
+      expect(same.textContent).toMatch(/^[A-Z][\w &]+, at all three$/);
+    } else {
+      // Not all the same: one cell per company (plus the actions cell), and they are not all equal.
+      expect(cells.length).toBe(4);
+      expect(new Set([...cells].slice(0, 3).map((c) => c.textContent)).size).toBeGreaterThan(1);
+    }
+    expect(section('Bottom line')).not.toHaveTextContent(/\b(Inc|Corporation)\b/);
+  });
+
   it('mixed directions get the distinct "directions differ" symbol, explained in the legend', () => {
     renderWith(built(['AAPL', 'TSLA']));
     const box = section('Bottom line');
-    const revenue = within(box).getByRole('link', { name: 'Revenue grew at Apple Inc; fell at Tesla Inc' });
+    const revenue = within(box).getByRole('link', { name: 'Revenue grew at Apple; fell at Tesla' });
     expect(chipOf(revenue)).toHaveAttribute('data-direction', 'neutral');
     expect(chipOf(revenue)).toHaveTextContent('directions differ');
     expect(chipOf(revenue).querySelector('svg.lucide-arrow-left-right')).not.toBeNull();
@@ -436,11 +456,11 @@ describe('Compare: refined bottom line and risk grid (DD-21 h, after the adversa
     expect(within(grid).getAllByText('Not in this company’s areas')[0]).toHaveClass('sr-only');
     const showAll = within(grid).queryByRole('button', { name: /^Show all \d+ areas$/ });
     if (showAll) fireEvent.click(showAll);
-    const cell = within(grid).getByRole('button', { name: /^Microsoft Corporation, .*: No heading · 1 signal$/ });
+    const cell = within(grid).getByRole('button', { name: /^Microsoft, .*: No heading · 1 signal$/ });
     expect(cell).toHaveTextContent('No heading');
     fireEvent.click(cell);
     const popover = screen.getByRole('dialog');
-    expect(popover).toHaveAccessibleName(expect.stringMatching(/^Microsoft Corporation · /));
+    expect(popover).toHaveAccessibleName(expect.stringMatching(/^Microsoft · /));
   });
 
   it('a stale or unread cell keeps its plain label; a slowing cell names the prior year', () => {

@@ -54,7 +54,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(table.locator('[data-direction="up"]').first()).toBeVisible();
     await expect(table.locator('[data-direction="down"]').first()).toBeVisible();
     await expect(side.getByRole('list', { name: 'Legend' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Diverging trends' }).getByText('Apple Inc: rising').first()).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Diverging trends' }).getByText('Apple: rising').first()).toBeVisible();
     await expectNoAxeViolations(page);
 
     const grid = page.getByRole('region', { name: 'Risk areas' });
@@ -121,31 +121,47 @@ test('brief, wide: a jump to Follow-up questions (beside Evidence gaps, equal to
 });
 
 for (const scheme of ['light', 'dark'] as const) {
-  test(`brief (${scheme}): warning, unit-not-stated and "No valid citation" badges pass axe`, async ({ page }) => {
+  test(`brief (${scheme}): warning, unit-not-stated, "No valid citation" and "Period not cited" badges pass axe`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme });
     // The seeded brief as served, with its validation changed in the response only (no test hook in the app):
-    // an unverified key-finding figure, a unit-not-stated one, and a finding left without a valid citation.
+    // an unverified key-finding figure, a unit-not-stated one, and a finding left without a valid citation. They go on
+    // three key findings whose seeded figures are all verified and cited, so the seed's own marks (the da-v5 seed has
+    // some) never change the expected text.
+    let clean: number[] = [];
     await page.route(new RegExp(`/api/analyses/${SEEDED.analysisId}$`), async (route) => {
       const response = await route.fetch();
       const body = await response.json();
       const v = body.validation;
+      const figures = v.numeric.figures as Array<{ location: string; verified: boolean }>;
+      const marked = (i: number) => figures.some((f) => f.location.startsWith(`keyFindings[${i}].`) && !f.verified) || v.uncited.includes(`keyFindings[${i}]`);
+      clean = (body.brief.keyFindings as unknown[]).map((_, i) => i).filter((i) => !marked(i)).slice(0, 3);
+      const [a, b, c] = clean;
       v.numeric.figures.push(
-        { location: 'keyFindings[0].finding', figure: '$9.9 billion', verified: false, rule: null, chunkId: null },
-        { location: 'keyFindings[1].finding', figure: '12.3%', verified: false, rule: 'unit_unstated', chunkId: null },
+        { location: `keyFindings[${a}].finding`, figure: '$9.9 billion', verified: false, rule: null, chunkId: null },
+        { location: `keyFindings[${b}].finding`, figure: '12.3%', verified: false, rule: 'unit_unstated', chunkId: null },
       );
       v.numeric.total += 2;
       v.numeric.unitUnstated = (v.numeric.unitUnstated ?? 0) + 1;
-      v.uncited = [...v.uncited, 'keyFindings[2]'];
+      v.uncited = [...v.uncited, `keyFindings[${c}]`];
+      // Period claims (architecture §6.9) on a clean finding and on the executive summary (the navy header).
+      v.periodClaims = [
+        { location: `keyFindings[${a}].finding`, periods: ['FY2019'], cue: 'absent' },
+        { location: 'executiveSummary', periods: ['FY2018'], cue: 'new in' },
+      ];
       await route.fulfill({ response, json: body });
     });
     await page.goto(`/analysis/?id=${SEEDED.analysisId}`);
     await settle(page);
+    expect(clean, 'the seeded brief needs three key findings with no unverified figure or missing citation').toHaveLength(3);
     const items = page.getByRole('region', { name: 'Bottom line' }).getByRole('listitem');
-    await expect(items.nth(0)).toContainText('1 unverified figure');
-    await expect(items.nth(1)).toContainText('1 figure: unit not stated');
-    await expect(items.nth(2)).toContainText('No valid citation');
+    await expect(items.nth(clean[0]!)).toContainText('1 unverified figure');
+    await expect(items.nth(clean[1]!)).toContainText('1 figure: unit not stated');
+    await expect(items.nth(clean[2]!)).toContainText('No valid citation');
     await expect(page.getByText('Unverified figure: $9.9 billion')).toBeVisible();
     await expect(page.getByText('Unit not stated: 12.3%')).toBeVisible();
+    await expect(items.nth(clean[0]!)).toContainText('Period not cited: FY2019');
+    await expect(page.getByRole('heading', { name: 'Key findings' }).locator('..').getByText(/^Period not cited: FY2019/)).toBeVisible();
+    await expect(page.locator('section[aria-labelledby="exec-summary"]').getByText(/^Period not cited: FY2018/)).toBeVisible();
     await expectNoAxeViolations(page);
   });
 }

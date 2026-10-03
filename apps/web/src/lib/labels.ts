@@ -4,7 +4,7 @@ type Tone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info';
 
 export const FINDING_STATUS: Record<FindingStatus, { label: string; tone: Tone }> = {
   ACTIVE: { label: 'Active', tone: 'accent' },
-  NEEDS_FOLLOW_UP: { label: 'Needs Follow-Up', tone: 'warning' },
+  NEEDS_FOLLOW_UP: { label: 'Needs follow-up', tone: 'warning' },
   RESOLVED: { label: 'Resolved', tone: 'success' },
 };
 
@@ -50,7 +50,7 @@ export const FAILURE_COPY: Record<string, { title: string; action: string }> = {
   GENERATION_TIMEOUT: { title: 'The analysis took too long', action: 'Run it again; a re-run creates a new analysis.' },
   GENERATION_FAILED: { title: 'The brief could not be generated', action: 'Run it again in a moment.' },
   MALFORMED_OUTPUT: { title: 'The answer couldn’t be validated', action: 'Run it again; no partial brief was saved.' },
-  NO_RELEVANT_EVIDENCE: { title: 'The filings don’t cover this', action: 'Rephrase the question or widen the filters.' },
+  NO_RELEVANT_EVIDENCE: { title: 'No passages matched this question', action: 'Rephrase the question or widen the filters.' },
   INDEX_UNAVAILABLE: { title: 'Filing search is unavailable right now', action: 'Try again shortly.' },
   WORKER_FAILED: { title: 'The analysis failed unexpectedly', action: 'Run it again. Share the request ID if it repeats.' },
   ANALYSES_DISABLED: { title: 'New analyses are paused', action: 'Company Intelligence, Compare and saved findings remain available.' },

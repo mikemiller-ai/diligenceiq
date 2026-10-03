@@ -12,7 +12,7 @@ import type * as ssm from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
 import { CONFIG, PATHS } from './config';
 import { lambdaRole } from './lambda-role';
-import { METRIC_NAMESPACE, WORKER_METRICS } from './worker-stack';
+import { METRIC_NAMESPACE, WORKER_METRICS, failedFaultFilter } from './worker-stack';
 
 /** Phase 7 (architecture §12): server errors, from the api's one access line per request. */
 export const API_5XX = 'Api5xx';
@@ -161,6 +161,8 @@ export class ApiStack extends Stack {
       metricValue: '1',
       dimensions: { Code: '$.code' },
     });
+    // The same lines feed WorkerStack's AnalysisFailedAlarm (QUEUE_TIMEOUT, a run past its deadline).
+    failedFaultFilter(this, 'AnalysisFailedFaultFilter', logGroup);
 
     new CfnOutput(this, 'ApiEndpoint', { value: this.apiEndpoint });
   }

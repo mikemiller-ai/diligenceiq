@@ -236,7 +236,8 @@ export function FindingRow({ finding, layout = 'list' }: { finding: Finding; lay
             </div>
           )}
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          {/* Each item keeps its own words together; no separator dots, so a wrapped line never starts or ends with one. */}
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" data-testid="finding-meta">
             {n === 1 ? (
               <button
                 type="button"
@@ -262,8 +263,7 @@ export function FindingRow({ finding, layout = 'list' }: { finding: Finding; lay
             ) : (
               <span>No sources</span>
             )}
-            <span>{FINDING_ORIGIN[finding.origin.kind]}</span>
-            <span aria-hidden>·</span>
+            <span className="whitespace-nowrap">{FINDING_ORIGIN[finding.origin.kind]}</span>
             <label htmlFor={themeId} className="sr-only">
               Theme for {finding.title}
             </label>
@@ -279,10 +279,8 @@ export function FindingRow({ finding, layout = 'list' }: { finding: Finding; lay
                 </option>
               ))}
             </NativeSelect>
-            <span aria-hidden>·</span>
-            <span>Saved {formatDate(finding.createdAt)}</span>
-            <span aria-hidden>·</span>
-            <span>
+            <span className="whitespace-nowrap">Saved {formatDate(finding.createdAt)}</span>
+            <span className="whitespace-nowrap">
               From{' '}
               {href ? (
                 <Link href={href} className="text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary">
@@ -293,7 +291,7 @@ export function FindingRow({ finding, layout = 'list' }: { finding: Finding; lay
               )}
             </span>
             {/* Provenance (SPEC §40): saved by the demo seed, not by this analyst. */}
-            {finding.seeded && <span>· Example from the demo workspace</span>}
+            {finding.seeded && <span className="whitespace-nowrap">Example from the demo workspace</span>}
           </div>
           {n > 1 && (
             <div id={sourcesId} hidden={!sourcesOpen} className="mt-2">

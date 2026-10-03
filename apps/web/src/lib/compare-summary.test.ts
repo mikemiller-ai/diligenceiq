@@ -30,14 +30,14 @@ describe('Compare bottom line: AAPL, MSFT, NVDA (the mockup’s companies)', () 
     const l = ls[0]!;
     expect(l.title).toBe('Revenue grew at all three');
     expect(l.direction).toBe('up');
-    expect(l.detail).toBe('largest at NVIDIA Corporation, +114.2% in FY2025, slowing from +125.9% in FY2024');
+    expect(l.detail).toBe('largest at NVIDIA, +114.2% in FY2025, slowing from +125.9% in FY2024');
     expect(l.neutral).toBe(false);
   });
 
   it('the one company whose margin moved leads, with the levels from the basis lines', () => {
     const l = ls[1]!;
-    expect(l.title).toBe('NVIDIA Corporation’s operating margin widened 8.3 pp');
-    expect(l.detail).toBe('to 62.4% in FY2025; Apple Inc (32.0%) and Microsoft Corporation (45.6%) about the same');
+    expect(l.title).toBe('NVIDIA’s operating margin widened 8.3 pp');
+    expect(l.detail).toBe('to 62.4% in FY2025; Apple (32.0%) and Microsoft (45.6%) about the same');
     // One company differs: its arrow, no direction colour (the companies do not share a direction).
     expect(l.direction).toBe('up');
     expect(l.neutral).toBe(true);
@@ -46,17 +46,17 @@ describe('Compare bottom line: AAPL, MSFT, NVDA (the mockup’s companies)', () 
 
   it('the one company whose cash flow fell leads; the others are described by class', () => {
     const l = ls[2]!;
-    expect(l.title).toBe('Apple Inc’s operating cash flow fell 5.7%');
-    expect(l.detail).toBe('in FY2025; Microsoft Corporation and NVIDIA Corporation still growing, more slowly');
+    expect(l.title).toBe('Apple’s operating cash flow fell 5.7%');
+    expect(l.detail).toBe('in FY2025; Microsoft and NVIDIA still growing, more slowly');
     expect(l.direction).toBe('down');
     expect(l.neutral).toBe(true);
-    expect(l.opposite).toEqual({ rising: ['Microsoft Corporation', 'NVIDIA Corporation'], falling: ['Apple Inc'] });
+    expect(l.opposite).toEqual({ rising: ['Microsoft', 'NVIDIA'], falling: ['Apple'] });
   });
 
   it('the footer agrees with the lines: slowing counts as still rising, so cash flow points in opposite directions', () => {
     // Core's Diverging rule excludes slowing, so core reports nothing here; the footer follows the bottom line.
     expect(compare(['AAPL', 'MSFT', 'NVDA']).diverging).toEqual([]);
-    expect(oppositeNote(ls)).toBe('Opposite directions: Operating cash flow (rising at Microsoft Corporation and NVIDIA Corporation, falling at Apple Inc).');
+    expect(oppositeNote(ls)).toBe('Opposite directions: Operating cash flow (rising at Microsoft and NVIDIA, falling at Apple).');
   });
 
   it('the risk lines come from core composeCompare as is', () => {
@@ -64,7 +64,7 @@ describe('Compare bottom line: AAPL, MSFT, NVDA (the mockup’s companies)', () 
     expect(ls[3]!.title).toBe(`${r.common.length} risk areas shared by all three`);
     expect(ls[3]!.detail).toBe(r.common.map((t) => t.label).join(', '));
     expect(r.distinctive.every((t) => t.tickers[0] === 'NVDA')).toBe(true);
-    expect(ls[4]!.title).toBe(`${r.distinctive.length} areas only at NVIDIA Corporation`);
+    expect(ls[4]!.title).toBe(`${r.distinctive.length} areas only at NVIDIA`);
     expect(ls[4]!.detail).toBe(r.distinctive.map((t) => t.label).join(', '));
   });
 });
@@ -76,9 +76,9 @@ describe('Compare bottom line: rules', () => {
     expect(isCurrent(BUILT.PFE, pfe.basis.period)).toBe(false);
     const l = line(['AAPL', 'MSFT', 'PFE'], 'Operating cash flow')!;
     expect(l.title).not.toMatch(/all three/);
-    expect(l.detail).toContain(`Pfizer Inc (latest trend ${pfe.basis.period})`);
-    expect(l.title).toContain('Apple Inc');
-    expect(l.title).toContain('Microsoft Corporation');
+    expect(l.detail).toContain(`Pfizer (latest trend ${pfe.basis.period})`);
+    expect(l.title).toContain('Apple');
+    expect(l.title).toContain('Microsoft');
   });
 
   it('a metric with fewer than two companies read gets no line', () => {
@@ -88,7 +88,7 @@ describe('Compare bottom line: rules', () => {
 
   it('two companies in different directions: the directions by company, uncoloured', () => {
     const l = line(['AAPL', 'TSLA'], 'Revenue')!;
-    expect(l.title).toBe('Revenue grew at Apple Inc; fell at Tesla Inc');
+    expect(l.title).toBe('Revenue grew at Apple; fell at Tesla');
     expect(l.neutral).toBe(true);
     // Core reports revenue as diverging for these two: the line links to that section.
     expect(compare(['AAPL', 'TSLA']).diverging.map((d) => d.metric)).toContain('Revenue');
@@ -97,7 +97,7 @@ describe('Compare bottom line: rules', () => {
 
   it('a Financials company’s operating cash flow keeps its arrow but no colour', () => {
     // JPM has no operating cash flow trend: it is named as not compared, never counted.
-    expect(line(['AAPL', 'MSFT', 'NVDA', 'TSLA', 'JPM'], 'Operating cash flow')!.detail).toContain('not compared: JPMorgan Chase & Co (not extracted)');
+    expect(line(['AAPL', 'MSFT', 'NVDA', 'TSLA', 'JPM'], 'Operating cash flow')!.detail).toContain('not compared: JPMorgan Chase (not extracted)');
     // A stored profile with only its sector changed: its cash flow line is uncoloured, the other metrics are not.
     const bank = new Map(profiles).set('MSFT', { ...BUILT.MSFT, sector: 'Financials' });
     const out = composeCompare(['MSFT', 'NVDA'], bank);
@@ -196,72 +196,72 @@ const rev = (pct: number, prior: number, t: Trend['trajectory']) => growth('Reve
 
 describe('Compare bottom line: every rule, on synthetic basis lines', () => {
   it('every company about the same: uncoloured, each company’s change named', () => {
-    const l = lineOf([synth('AAA', 'Alpha Inc', [rev(0.5, 3.0, 'stable')]), synth('BBB', 'Beta Inc', [rev(-1.2, 4.0, 'stable')]), synth('CCC', 'Gamma Inc', [rev(1.9, 1.0, 'stable')])], 'Revenue')!;
+    const l = lineOf([synth('AAA', 'Alpha', [rev(0.5, 3.0, 'stable')]), synth('BBB', 'Beta', [rev(-1.2, 4.0, 'stable')]), synth('CCC', 'Gamma', [rev(1.9, 1.0, 'stable')])], 'Revenue')!;
     expect(l).toMatchObject({ title: 'Revenue about the same at all three', direction: 'flat', neutral: false, opposite: null });
-    expect(l.detail).toBe('Alpha Inc +0.5% in FY2025; Beta Inc −1.2% in FY2025; Gamma Inc +1.9% in FY2025');
+    expect(l.detail).toBe('Alpha +0.5% in FY2025; Beta −1.2% in FY2025; Gamma +1.9% in FY2025');
   });
 
   it('every company falling: red, with the largest decline by the builder’s figure', () => {
-    const l = lineOf([synth('AAA', 'Alpha Inc', [rev(-4.0, 3.0, 'declining')]), synth('BBB', 'Beta Inc', [rev(-9.0, 4.0, 'declining')]), synth('CCC', 'Gamma Inc', [rev(-3.0, 1.0, 'declining')])], 'Revenue')!;
-    expect(l).toMatchObject({ title: 'Revenue fell at all three', detail: 'largest decline at Beta Inc, −9.0% in FY2025', direction: 'down', neutral: false, chipText: 'decreased' });
-    const m = lineOf([synth('AAA', 'Alpha Inc', [margin(20.0, 24.0, 'declining')]), synth('BBB', 'Beta Inc', [margin(10.0, 12.5, 'declining')])], 'Operating margin')!;
-    expect(m).toMatchObject({ title: 'Operating margin narrowed at both', detail: 'largest decline at Alpha Inc, −4.0 pp in FY2025', direction: 'down', neutral: false });
+    const l = lineOf([synth('AAA', 'Alpha', [rev(-4.0, 3.0, 'declining')]), synth('BBB', 'Beta', [rev(-9.0, 4.0, 'declining')]), synth('CCC', 'Gamma', [rev(-3.0, 1.0, 'declining')])], 'Revenue')!;
+    expect(l).toMatchObject({ title: 'Revenue fell at all three', detail: 'largest decline at Beta, −9.0% in FY2025', direction: 'down', neutral: false, chipText: 'decreased' });
+    const m = lineOf([synth('AAA', 'Alpha', [margin(20.0, 24.0, 'declining')]), synth('BBB', 'Beta', [margin(10.0, 12.5, 'declining')])], 'Operating margin')!;
+    expect(m).toMatchObject({ title: 'Operating margin narrowed at both', detail: 'largest decline at Alpha, −4.0 pp in FY2025', direction: 'down', neutral: false });
   });
 
   it('every company rising, the largest one slowing: the prior year is named; another slowing company is listed after', () => {
     const l = lineOf(
-      [synth('AAA', 'Alpha Inc', [rev(30.0, 50.0, 'slowing')]), synth('BBB', 'Beta Inc', [rev(10.0, 30.0, 'slowing')]), synth('CCC', 'Gamma Inc', [rev(12.0, 9.0, 'growing')])],
+      [synth('AAA', 'Alpha', [rev(30.0, 50.0, 'slowing')]), synth('BBB', 'Beta', [rev(10.0, 30.0, 'slowing')]), synth('CCC', 'Gamma', [rev(12.0, 9.0, 'growing')])],
       'Revenue',
     )!;
     expect(l).toMatchObject({ title: 'Revenue grew at all three', direction: 'up', neutral: false });
-    expect(l.detail).toBe('largest at Alpha Inc, +30.0% in FY2025, slowing from +50.0% in FY2024; slowing at Beta Inc');
-    const all = lineOf([synth('AAA', 'Alpha Inc', [rev(30.0, 50.0, 'slowing')]), synth('BBB', 'Beta Inc', [rev(10.0, 30.0, 'slowing')])], 'Revenue')!;
+    expect(l.detail).toBe('largest at Alpha, +30.0% in FY2025, slowing from +50.0% in FY2024; slowing at Beta');
+    const all = lineOf([synth('AAA', 'Alpha', [rev(30.0, 50.0, 'slowing')]), synth('BBB', 'Beta', [rev(10.0, 30.0, 'slowing')])], 'Revenue')!;
     expect(all).toMatchObject({ title: 'Revenue growth slowed at both', direction: 'slowing', neutral: false });
-    expect(all.detail).toBe('still growing at each; largest at Alpha Inc, +30.0% in FY2025, slowing from +50.0% in FY2024');
+    expect(all.detail).toBe('still growing at each; largest at Alpha, +30.0% in FY2025, slowing from +50.0% in FY2024');
   });
 
   it('one company differs while the others are about the same: it leads, uncoloured, with its own arrow', () => {
-    const others = [synth('BBB', 'Beta Inc', [rev(0.5, 3.0, 'stable')]), synth('CCC', 'Gamma Inc', [rev(-1.0, 2.0, 'stable')])];
-    const l = lineOf([synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]), ...others], 'Revenue')!;
-    expect(l).toMatchObject({ title: 'Alpha Inc’s revenue grew 10.0%', detail: 'in FY2025; Beta Inc and Gamma Inc about the same', direction: 'up', neutral: true });
+    const others = [synth('BBB', 'Beta', [rev(0.5, 3.0, 'stable')]), synth('CCC', 'Gamma', [rev(-1.0, 2.0, 'stable')])];
+    const l = lineOf([synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]), ...others], 'Revenue')!;
+    expect(l).toMatchObject({ title: 'Alpha’s revenue grew 10.0%', detail: 'in FY2025; Beta and Gamma about the same', direction: 'up', neutral: true });
     expect(l.chipText).toBe('increased at one company only');
     // A lone slowing company: "grew 20.4%, more slowly than the year before", never "grew more slowly 20.4%".
-    const s = lineOf([synth('AAA', 'Alpha Inc', [rev(20.4, 40.0, 'slowing')]), ...others], 'Revenue')!;
-    expect(s.title).toBe('Alpha Inc’s revenue grew 20.4%, more slowly than the year before');
-    expect(s.detail).toBe('in FY2025, after +40.0% in FY2024; Beta Inc and Gamma Inc about the same');
+    const s = lineOf([synth('AAA', 'Alpha', [rev(20.4, 40.0, 'slowing')]), ...others], 'Revenue')!;
+    expect(s.title).toBe('Alpha’s revenue grew 20.4%, more slowly than the year before');
+    expect(s.detail).toBe('in FY2025, after +40.0% in FY2024; Beta and Gamma about the same');
     expect(s).toMatchObject({ direction: 'slowing', neutral: true });
   });
 
   it('three or more in three directions: the directions by company under the distinct "directions differ" symbol', () => {
     const l = lineOf(
       [
-        synth('AAA', 'Alpha Inc', [rev(30.0, 50.0, 'slowing')]),
-        synth('BBB', 'Beta Inc', [rev(10.0, 8.0, 'growing')]),
-        synth('CCC', 'Gamma Inc', [rev(0.5, 1.0, 'stable')]),
-        synth('DDD', 'Delta Inc', [rev(-5.0, 1.0, 'declining')]),
+        synth('AAA', 'Alpha', [rev(30.0, 50.0, 'slowing')]),
+        synth('BBB', 'Beta', [rev(10.0, 8.0, 'growing')]),
+        synth('CCC', 'Gamma', [rev(0.5, 1.0, 'stable')]),
+        synth('DDD', 'Delta', [rev(-5.0, 1.0, 'declining')]),
       ],
       'Revenue',
     )!;
-    expect(l.title).toBe('Revenue grew at Beta Inc; growth slowed at Alpha Inc; about the same at Gamma Inc; fell at Delta Inc');
+    expect(l.title).toBe('Revenue grew at Beta; growth slowed at Alpha; about the same at Gamma; fell at Delta');
     expect(l).toMatchObject({ direction: 'mixed', neutral: true, chipText: 'directions differ' });
-    expect(l.opposite).toEqual({ rising: ['Alpha Inc', 'Beta Inc'], falling: ['Delta Inc'] });
-    expect(l.detail).toBe('Alpha Inc +30.0% in FY2025; Beta Inc +10.0% in FY2025; Gamma Inc +0.5% in FY2025; Delta Inc −5.0% in FY2025');
+    expect(l.opposite).toEqual({ rising: ['Alpha', 'Beta'], falling: ['Delta'] });
+    expect(l.detail).toBe('Alpha +30.0% in FY2025; Beta +10.0% in FY2025; Gamma +0.5% in FY2025; Delta −5.0% in FY2025');
   });
 
   it('loss-making margins never widen or narrow: loss wording, and neutral words in a group', () => {
     // INTC's real basis line: an operating loss that narrowed.
-    const intc = synth('INTX', 'Intel-like Inc', [margin(-4.2, -22.0, 'improving')]);
+    const intc = synth('INTX', 'Intel-like', [margin(-4.2, -22.0, 'improving')]);
     expect(intc.trends[0]!.basis).toBe('-4.2% in FY2025 vs -22.0% in FY2024, a change of 17.8 pp (improving: threshold 1.0 pp).');
-    const flat = [synth('BBB', 'Beta Inc', [margin(32.0, 31.5, 'stable')]), synth('CCC', 'Gamma Inc', [margin(45.6, 44.8, 'stable')])];
+    const flat = [synth('BBB', 'Beta', [margin(32.0, 31.5, 'stable')]), synth('CCC', 'Gamma', [margin(45.6, 44.8, 'stable')])];
     const lone = lineOf([intc, ...flat], 'Operating margin')!;
-    expect(lone.title).toBe('Intel-like Inc’s operating loss narrowed');
-    expect(lone.detail).toBe('to −4.2% in FY2025, +17.8 pp; Beta Inc (32.0%) and Gamma Inc (45.6%) about the same');
-    const group = lineOf([intc, synth('BBB', 'Beta Inc', [margin(62.4, 54.1, 'improving')])], 'Operating margin')!;
+    expect(lone.title).toBe('Intel-like’s operating loss narrowed');
+    expect(lone.detail).toBe('to −4.2% in FY2025, +17.8 pp; Beta (32.0%) and Gamma (45.6%) about the same');
+    const group = lineOf([intc, synth('BBB', 'Beta', [margin(62.4, 54.1, 'improving')])], 'Operating margin')!;
     expect(group.title).toBe('Operating margin improved at both');
-    expect(group.detail).toBe('largest at Intel-like Inc, +17.8 pp in FY2025 (operating loss narrowed)');
-    const mixed = lineOf([intc, flat[0]!, synth('DDD', 'Delta Inc', [margin(-6.0, -2.0, 'declining')])], 'Operating margin')!;
-    expect(mixed.title).toBe('Operating margin improved at Intel-like Inc; about the same at Beta Inc; declined at Delta Inc');
-    expect(mixed.detail).toContain('Delta Inc −4.0 pp in FY2025 (operating loss widened)');
+    expect(group.detail).toBe('largest at Intel-like, +17.8 pp in FY2025 (operating loss narrowed)');
+    const mixed = lineOf([intc, flat[0]!, synth('DDD', 'Delta', [margin(-6.0, -2.0, 'declining')])], 'Operating margin')!;
+    expect(mixed.title).toBe('Operating margin improved at Intel-like; about the same at Beta; declined at Delta');
+    expect(mixed.detail).toContain('Delta −4.0 pp in FY2025 (operating loss widened)');
     for (const l of [lone, group, mixed]) expect(`${l.title} ${l.detail}`).not.toMatch(/margin (?:widened|narrowed)|widening|narrowing/);
     // Every loss case, as the dashboard words a net margin.
     const b = (latest: number, prior: number, t: Trend['trajectory']) => parseTrendBasis(margin(latest, prior, t).basis)!;
@@ -270,37 +270,37 @@ describe('Compare bottom line: every rule, on synthetic basis lines', () => {
     expect(operatingLoss(b(-6.0, -2.0, 'declining'))).toBe('operating loss widened');
     expect(operatingLoss(b(-2.0, -2.5, 'stable'))).toBe('operating loss was about the same');
     expect(operatingLoss(b(10.0, 8.0, 'improving'))).toBeNull();
-    const swung = lineOf([synth('AAA', 'Alpha Inc', [margin(5.0, -2.0, 'improving')]), ...flat], 'Operating margin')!;
-    expect(swung.title).toBe('Alpha Inc swung to an operating profit');
+    const swung = lineOf([synth('AAA', 'Alpha', [margin(5.0, -2.0, 'improving')]), ...flat], 'Operating margin')!;
+    expect(swung.title).toBe('Alpha swung to an operating profit');
   });
 
   it('ties: by the builder’s figure, then the order the companies were chosen', () => {
-    const a = synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]);
-    const b = synth('BBB', 'Beta Inc', [rev(10.0, 7.0, 'growing')]);
-    const c = synth('CCC', 'Gamma Inc', [rev(5.0, 4.0, 'growing')]);
-    expect(lineOf([a, b, c], 'Revenue')!.detail).toBe('largest at Alpha Inc, +10.0% in FY2025');
-    expect(lineOf([b, a, c], 'Revenue')!.detail).toBe('largest at Beta Inc, +10.0% in FY2025');
-    expect(lineOf([c, b, a], 'Revenue')!.detail).toBe('largest at Beta Inc, +10.0% in FY2025');
+    const a = synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]);
+    const b = synth('BBB', 'Beta', [rev(10.0, 7.0, 'growing')]);
+    const c = synth('CCC', 'Gamma', [rev(5.0, 4.0, 'growing')]);
+    expect(lineOf([a, b, c], 'Revenue')!.detail).toBe('largest at Alpha, +10.0% in FY2025');
+    expect(lineOf([b, a, c], 'Revenue')!.detail).toBe('largest at Beta, +10.0% in FY2025');
+    expect(lineOf([c, b, a], 'Revenue')!.detail).toBe('largest at Beta, +10.0% in FY2025');
   });
 
   it('not compared, in the table’s own terms: preview, older year, not extracted, limited history, no labelled change', () => {
-    const a = synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]);
-    const b = synth('BBB', 'Beta Inc', [rev(6.0, 5.0, 'growing')]);
-    const stale = synth('OLD', 'Old Inc', [{ ...rev(6.0, 5.0, 'growing'), basis: 'Growth of 6.0% in FY2022, after 5.0% in FY2021 (growing: fixed rule).' }]);
-    const none = synth('NON', 'None Inc', []);
-    const limited = synth('LIM', 'Limited Inc', [], { coverage: { ...BUILT.AAPL.coverage, tier: 'limited_history' } });
-    const unread = synth('UNR', 'Unread Inc', [{ ...rev(6.0, 5.0, 'growing'), trajectory: 'declining' }]);
-    const preview = { ...FIXTURE_PROFILES.get('MSFT')!, ticker: 'PRV', company: 'Preview Inc' };
+    const a = synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]);
+    const b = synth('BBB', 'Beta', [rev(6.0, 5.0, 'growing')]);
+    const stale = synth('OLD', 'Old', [{ ...rev(6.0, 5.0, 'growing'), basis: 'Growth of 6.0% in FY2022, after 5.0% in FY2021 (growing: fixed rule).' }]);
+    const none = synth('NON', 'None', []);
+    const limited = synth('LIM', 'Limited', [], { coverage: { ...BUILT.AAPL.coverage, tier: 'limited_history' } });
+    const unread = synth('UNR', 'Unread', [{ ...rev(6.0, 5.0, 'growing'), trajectory: 'declining' }]);
+    const preview = { ...FIXTURE_PROFILES.get('MSFT')!, ticker: 'PRV', company: 'Preview' };
     const detail = lineOf([a, b, stale, none, limited], 'Revenue')!.detail;
-    expect(detail).toBe('largest at Alpha Inc, +10.0% in FY2025; not compared: Old Inc (latest trend FY2022), None Inc (not extracted), Limited Inc (limited history)');
-    expect(lineOf([a, b, unread, preview], 'Revenue')!.detail).toContain('not compared: Unread Inc (no labelled change), Preview Inc (preview profile)');
+    expect(detail).toBe('largest at Alpha, +10.0% in FY2025; not compared: Old (latest trend FY2022), None (not extracted), Limited (limited history)');
+    expect(lineOf([a, b, unread, preview], 'Revenue')!.detail).toContain('not compared: Unread (no labelled change), Preview (preview profile)');
   });
 
   it('colours: only a line where every company read shares one direction group is coloured', () => {
     const sets = [
-      [synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta Inc', [rev(6.0, 5.0, 'growing')])],
-      [synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta Inc', [rev(-6.0, 5.0, 'declining')])],
-      [synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta Inc', [rev(0.5, 5.0, 'stable')]), synth('CCC', 'Gamma Inc', [rev(1.0, 5.0, 'stable')])],
+      [synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta', [rev(6.0, 5.0, 'growing')])],
+      [synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta', [rev(-6.0, 5.0, 'declining')])],
+      [synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta', [rev(0.5, 5.0, 'stable')]), synth('CCC', 'Gamma', [rev(1.0, 5.0, 'stable')])],
     ];
     expect(sets.map((ps) => lineOf(ps, 'Revenue')!).map((l) => [l.direction, l.neutral])).toEqual([
       ['up', false],
@@ -310,21 +310,21 @@ describe('Compare bottom line: every rule, on synthetic basis lines', () => {
   });
 
   it('the footer and the legend follow the lines', () => {
-    const same = linesOf([synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta Inc', [rev(6.0, 5.0, 'growing')])], true);
+    const same = linesOf([synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta', [rev(6.0, 5.0, 'growing')])], true);
     expect(oppositeNote(same)).toBe('No metric above points in opposite directions across these companies.');
     expect(lineLegend(same)).toEqual({ items: [{ direction: 'up', text: 'increased at every company' }], grey: false });
     const ls = lines(['AAPL', 'MSFT', 'NVDA']);
     const legend = lineLegend(ls);
     expect(legend.items.map((i) => i.direction)).toEqual(['up', 'info']);
     expect(legend.grey).toBe(true);
-    const mixed = lineLegend(linesOf([synth('AAA', 'Alpha Inc', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta Inc', [rev(-6.0, 5.0, 'declining')])], true));
+    const mixed = lineLegend(linesOf([synth('AAA', 'Alpha', [rev(10.0, 8.0, 'growing')]), synth('BBB', 'Beta', [rev(-6.0, 5.0, 'declining')])], true));
     expect(mixed).toEqual({ items: [{ direction: 'mixed', text: 'directions differ' }], grey: false });
   });
 
   it('every synthetic line passes the DD-16 vocabulary check', () => {
     const all = [
-      ...linesOf([synth('INTX', 'Intel-like Inc', [margin(-4.2, -22.0, 'improving'), rev(-0.5, -2.1, 'stable')]), synth('BBB', 'Beta Inc', [margin(32.0, 31.5, 'stable'), rev(20.4, 40.0, 'slowing')])], true),
-      ...linesOf([synth('AAA', 'Alpha Inc', [rev(-4.0, 3.0, 'declining')]), synth('BBB', 'Beta Inc', [rev(-9.0, 4.0, 'declining')])], true),
+      ...linesOf([synth('INTX', 'Intel-like', [margin(-4.2, -22.0, 'improving'), rev(-0.5, -2.1, 'stable')]), synth('BBB', 'Beta', [margin(32.0, 31.5, 'stable'), rev(20.4, 40.0, 'slowing')])], true),
+      ...linesOf([synth('AAA', 'Alpha', [rev(-4.0, 3.0, 'declining')]), synth('BBB', 'Beta', [rev(-9.0, 4.0, 'declining')])], true),
     ];
     for (const l of all) expect(findBannedPhrases(`${l.title} ${l.detail} ${l.chipText}`)).toEqual([]);
   });

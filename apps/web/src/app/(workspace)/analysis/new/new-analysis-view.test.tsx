@@ -1,4 +1,4 @@
-import { render as rtlRender, screen } from '@testing-library/react';
+import { act, render as rtlRender, screen, waitFor } from '@testing-library/react';
 import type * as React from 'react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -119,10 +119,10 @@ describe('Deep Analysis input', () => {
     expect(posts()).toEqual([]);
   });
 
-  it('shows a server error with its request ID', async () => {
+  it('shows a server error with its request ID, and its code only beside the request ID', async () => {
     setRoute('/analysis/new/', 'q=What%20changed%3F');
     respond(async () =>
-      new Response(JSON.stringify({ error: { code: 'ANALYSES_DISABLED', message: 'New analyses are paused right now.', requestId: 'req-123' } }), {
+      new Response(JSON.stringify({ error: { code: 'ENQUEUE_FAILED', message: 'The queue did not accept the analysis.', requestId: 'req-123' } }), {
         status: 503,
         headers: { 'content-type': 'application/json' },
       }),
@@ -135,9 +135,96 @@ describe('Deep Analysis input', () => {
       filters: { filingTypes: ['10-K'] },
     });
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent('New analyses are paused');
-    expect(alert).toHaveTextContent('req-123');
+    expect(alert).toHaveTextContent('The analysis could not be queued');
+    expect(alert).toHaveTextContent(/Request ID\s*req-123.*Error code ENQUEUE_FAILED/);
     expect(nav.push).not.toHaveBeenCalled();
+  });
+
+  // Phase 9 review item 12: one panel, Run disabled while paused, no raw ANALYSES_DISABLED badge.
+  it('paused before Run (health): one notice, Run disabled, no raw code, nothing sent', async () => {
+    health = { ...health, analysesEnabled: false };
+    setRoute('/analysis/new/', 'q=What%20changed%3F');
+    render(<NewAnalysisView />);
+    expect(await screen.findByText('New analyses are paused')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run analysis' })).toBeDisabled();
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(document.body.textContent).not.toContain('ANALYSES_DISABLED');
+    await userEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+    expect(posts()).toEqual([]);
+  });
+
+  it('paused found by Run (the server says ANALYSES_DISABLED): the same single notice, then Run is disabled', async () => {
+    setRoute('/analysis/new/', 'q=What%20changed%3F');
+    respond(async () =>
+      new Response(JSON.stringify({ error: { code: 'ANALYSES_DISABLED', message: 'New analyses are paused right now.', requestId: 'req-123' } }), {
+        status: 503,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    render(<NewAnalysisView />);
+    await userEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+    expect(posts()).toHaveLength(1);
+    expect(await screen.findByText('New analyses are paused')).toBeInTheDocument();
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(document.body.textContent).not.toContain('ANALYSES_DISABLED');
+    expect(screen.getByRole('button', { name: 'Run analysis' })).toBeDisabled();
+    expect(nav.push).not.toHaveBeenCalled();
+  });
+
+  // Code review 2026-10-03: health was read once per mount and a pause found by Run never cleared,
+  // so Run stayed disabled after analyses were re-enabled.
+  it('paused: "Check again" re-reads health and turns Run back on once analyses are enabled, sending nothing', async () => {
+    health = { ...health, analysesEnabled: false };
+    setRoute('/analysis/new/', 'q=What%20changed%3F');
+    render(<NewAnalysisView />);
+    expect(await screen.findByText('New analyses are paused')).toBeInTheDocument();
+    const healthReads = () => fetchMock.mock.calls.filter(([url, init]) => String(url).includes('/api/health') && (init as RequestInit | undefined)?.method !== 'POST').length;
+    const before = healthReads();
+    // Still paused: the check runs, the notice stays, Run stays off.
+    await userEvent.click(screen.getByRole('button', { name: 'Check again' }));
+    await waitFor(() => expect(healthReads()).toBe(before + 1));
+    expect(screen.getByText('New analyses are paused')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run analysis' })).toBeDisabled();
+    // Re-enabled: the notice goes and Run is back.
+    health = { ...health, analysesEnabled: true };
+    await userEvent.click(screen.getByRole('button', { name: 'Check again' }));
+    await waitFor(() => expect(screen.queryByText('New analyses are paused')).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Run analysis' })).toBeEnabled();
+    expect(posts()).toEqual([]);
+  });
+
+  it('paused found by Run: coming back to the tab re-reads health and clears the pause when analyses are enabled', async () => {
+    setRoute('/analysis/new/', 'q=What%20changed%3F');
+    respond(async () =>
+      new Response(JSON.stringify({ error: { code: 'ANALYSES_DISABLED', message: 'New analyses are paused right now.', requestId: 'req-123' } }), {
+        status: 503,
+        headers: { 'content-type': 'application/json' },
+      }),
+    );
+    render(<NewAnalysisView />);
+    await userEvent.click(screen.getByRole('button', { name: 'Run analysis' }));
+    expect(await screen.findByText('New analyses are paused')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run analysis' })).toBeDisabled();
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await waitFor(() => expect(screen.queryByText('New analyses are paused')).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Run analysis' })).toBeEnabled();
+    expect(posts()).toHaveLength(1);
+  });
+
+  // Phase 9 review item 20: plain words first, and the company hint only while no company is chosen.
+  it('names the sources in plain words and hides the empty-companies hint once a company is selected', async () => {
+    setRoute('/analysis/new/');
+    const { unmount } = render(<NewAnalysisView />);
+    expect(screen.getByRole('checkbox', { name: 'Annual reports (10-K)' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Quarterly reports (10-Q)' })).toBeInTheDocument();
+    expect(screen.getByText('Leave empty to let the question decide which companies apply.')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/SEC filing corpus/);
+    unmount();
+    setRoute('/analysis/new/', 'tickers=AAPL');
+    render(<NewAnalysisView />);
+    expect(screen.queryByText('Leave empty to let the question decide which companies apply.')).not.toBeInTheDocument();
   });
 
   it('reports a network failure plainly', async () => {

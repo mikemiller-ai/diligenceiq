@@ -20,28 +20,35 @@ import { describeFailure } from '@/lib/api';
 import { FINDING_STATUS } from '@/lib/labels';
 import { sourceKey, useWorkspace } from '@/lib/workspace-store';
 
+/** The one label for saving, on every screen (Phase 9 review: "Save", "Track" and "Save Finding" were the same action). */
+export const SAVE_FINDING_LABEL = 'Save finding';
+
+/** Theme words that make a brief item a regulatory one: such a finding defaults to Regulatory & Compliance, not Risk factors. */
+const REGULATORY_WORDS = /\b(regulat\w*|litigat\w*|antitrust|lawsuits?|legal proceedings?|compliance)\b/i;
+
+/**
+ * The theme a new finding starts with. The stored source suggests one (a profile item's category
+ * maps to its theme); a brief item has no category, so core suggests Risk factors, and an item
+ * about regulation, litigation or antitrust then starts on Regulatory & Compliance instead.
+ */
+export function defaultFindingTheme(resolved: { defaultTheme: ThemeId; title: string; text: string }): ThemeId {
+  if (resolved.defaultTheme === 'risk-factors' && REGULATORY_WORDS.test(`${resolved.title} ${resolved.text}`)) return 'regulatory-compliance';
+  return resolved.defaultTheme;
+}
+
 /**
  * Save Finding from any source (SPEC §17.1): deterministic, no model call. Only the
  * title, theme, status and note come from the form; the text and cited passages are
  * copied from the stored brief or profile.
  */
-export function SaveFindingButton({
-  source,
-  label = 'Save Finding',
-  variant = 'secondary',
-}: {
-  source: FindingSource;
-  /** "Track" on attention signals (SPEC §11.1). */
-  label?: string;
-  variant?: 'secondary' | 'ghost';
-}) {
+export function SaveFindingButton({ source, variant = 'secondary' }: { source: FindingSource; variant?: 'secondary' | 'ghost' }) {
   const { sourceAnalyses, profiles, savedKeys, saveFinding } = useWorkspace();
   // A preview of what will be saved; the server copies the stored content itself.
   const resolved = React.useMemo(() => resolveSource(source, { analyses: sourceAnalyses, profiles }), [source, sourceAnalyses, profiles]);
   const [saving, setSaving] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [title, setTitle] = React.useState(resolved?.title ?? '');
-  const [theme, setTheme] = React.useState<ThemeId>(resolved?.defaultTheme ?? 'risk-factors');
+  const [theme, setTheme] = React.useState<ThemeId>(resolved ? defaultFindingTheme(resolved) : 'risk-factors');
   const [status, setStatus] = React.useState<FindingStatus>('ACTIVE');
   const [note, setNote] = React.useState('');
   const base = `save-${sourceKey(source).replace(/[^A-Za-z0-9]+/g, '-')}`;
@@ -60,11 +67,23 @@ export function SaveFindingButton({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Start from the stored source each time the dialog opens (it may have loaded after the first render).
+        if (next && !open) {
+          setTitle(resolved.title);
+          setTheme(defaultFindingTheme(resolved));
+          setStatus('ACTIVE');
+          setNote('');
+        }
+        setOpen(next);
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant={variant} size="sm" className="no-print">
           <BookmarkPlus />
-          {label}
+          {SAVE_FINDING_LABEL}
         </Button>
       </DialogTrigger>
       <DialogContent>

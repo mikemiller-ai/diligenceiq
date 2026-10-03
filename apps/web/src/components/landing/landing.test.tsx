@@ -190,12 +190,22 @@ describe('landing page (SPEC §7)', () => {
     expect(main.querySelector('h1')).not.toBeNull();
   });
 
-  it('puts the launch film directly after the hero, placeholder included', async () => {
-    const { container } = await renderLanding(null);
+  it('puts the launch film directly after the hero once the file exists', async () => {
+    const { container } = await renderLanding({ video: LAUNCH_FILM_PATHS.video });
     const sections = container.querySelectorAll('main > section');
     expect(sections[0]).toBe(screen.getByTestId('landing-hero'));
     expect(sections[1]).toHaveAttribute('id', 'film');
-    expect(screen.getByTestId('launch-film-placeholder')).toBeInTheDocument();
+    expect(container.querySelector('#film video')).not.toBeNull();
+  });
+
+  it('without the film file: no film section and no placeholder; the problem section follows the hero (A.4 2026-10-03)', async () => {
+    const { container } = await renderLanding(null);
+    expect(container.querySelector('#film')).toBeNull();
+    expect(screen.queryByTestId('launch-film-placeholder')).toBeNull();
+    expect(screen.queryByText(/Coming soon/)).toBeNull();
+    const sections = container.querySelectorAll('main > section');
+    expect(sections[0]).toBe(screen.getByTestId('landing-hero'));
+    expect(sections[1]).toHaveTextContent('The answers are in the filings');
   });
 
   it('without the film: no "Watch the launch film" and no header "Launch film" link, "How it works" stays', async () => {

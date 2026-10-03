@@ -25,7 +25,7 @@ import { ApiRequestError } from '@/lib/api';
 import { FAILURE_COPY } from '@/lib/labels';
 import { analysisHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
-import { formatDateTime } from '@/lib/format';
+import { formatDateTime, formatLocalDateTime } from '@/lib/format';
 
 const MAX_QUESTION = 1000;
 const COMPANY_OPTIONS = companies().filter((c) => !c.outsideWindow);
@@ -39,7 +39,7 @@ function describeError(err: unknown): SubmitError {
     if (err.code === 'UNAVAILABLE') {
       return {
         title: 'The analysis service is unavailable',
-        message: 'The API did not respond with a valid result. Try again shortly.',
+        message: `The API did not respond with a valid result${err.status ? ` (HTTP ${err.status})` : ''}. Try again shortly.`,
         requestId: err.requestId,
         code: err.status ? `HTTP ${err.status}` : err.code,
       };
@@ -135,6 +135,28 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<SubmitError | null>(null);
+  const { health, recheck, checking } = useHealth();
+  // Paused before the run (health) or found paused by it (the server's ANALYSES_DISABLED): one notice, and Run is off.
+  const [pausedByRun, setPausedByRun] = React.useState(false);
+  const paused = pausedByRun || health?.analysesEnabled === false;
+  // While paused, health is read again on "Check again" and when the tab comes back into view, so Run
+  // turns back on once analyses are re-enabled (a fresh "enabled" also clears a pause the run found).
+  const checkAgain = React.useCallback(async () => {
+    const h = await recheck();
+    if (h?.analysesEnabled) setPausedByRun(false);
+  }, [recheck]);
+  React.useEffect(() => {
+    if (!paused) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void checkAgain();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [paused, checkAgain]);
 
   const toggleType = (t: FilingType) =>
     setFilingTypes((cur) => (cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]));
@@ -181,7 +203,8 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
       const res = await client.createAnalysis(request);
       router.push(analysisHref(res.analysisId));
     } catch (err) {
-      setSubmitError(describeError(err));
+      if (err instanceof ApiRequestError && err.code === 'ANALYSES_DISABLED') setPausedByRun(true);
+      else setSubmitError(describeError(err));
     } finally {
       setSubmitting(false);
     }
@@ -194,10 +217,10 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
       <PageHeader
         eyebrow="Investigate"
         title="Deep Analysis"
-        description="Ask any business question about the companies in the SEC filing corpus. The answer is a cited Diligence Brief. Filters are optional and only narrow the search."
+        description="Ask any business question about the companies whose annual and quarterly reports DiligenceIQ holds. The answer is a cited Diligence Brief. Filters are optional and only narrow the search."
       />
 
-      <ServiceNotice />
+      <ServiceNotice health={health} paused={paused} checking={checking} onCheckAgain={() => void checkAgain()} />
       <form onSubmit={onSubmit} noValidate aria-describedby="one-call-note">
         <Card className="divide-y divide-border">
           {originText && (
@@ -212,7 +235,7 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="companies">Companies</Label>
               <CompanySelect id="companies" options={COMPANY_OPTIONS} value={tickers} onChange={setTickers} />
-              <FieldHint>Leave empty to let the question decide which companies apply.</FieldHint>
+              {tickers.length === 0 && <FieldHint>Leave empty to let the question decide which companies apply.</FieldHint>}
             </div>
           </div>
 
@@ -265,7 +288,7 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
                 {FILING_TYPES.map((t) => (
                   <label key={t} htmlFor={`type-${t}`} className="flex cursor-pointer items-center gap-2 text-base text-foreground">
                     <Checkbox id={`type-${t}`} checked={filingTypes.includes(t)} onCheckedChange={() => toggleType(t)} />
-                    {t} <span className="text-sm text-muted-foreground">{t === '10-K' ? 'Annual' : 'Quarterly'}</span>
+                    {t === '10-K' ? 'Annual reports' : 'Quarterly reports'} <span className="text-sm text-muted-foreground">({t})</span>
                   </label>
                 ))}
               </div>
@@ -316,7 +339,7 @@ function NewAnalysisForm({ params }: { params: { get(name: string): string | nul
               Retrieval searches the filings first; then exactly one model request writes a cited Diligence Brief. Nothing
               runs until you click Run analysis.
             </p>
-            <Button type="submit" size="lg" disabled={submitting} className="sm:w-40">
+            <Button type="submit" size="lg" disabled={submitting || paused} className="sm:w-40" {...(paused ? { 'aria-describedby': 'analyses-paused' } : {})}>
               {submitting ? (
                 <>
                   <Loader2 className="animate-spin" /> Starting…
@@ -361,7 +384,7 @@ function RecentAnalyses() {
               <span className="min-w-0 flex-1 text-sm text-foreground group-hover:text-primary">{a.question}</span>
               <span className="flex shrink-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {a.seeded && <span>Example, run in advance</span>}
-                <span>{formatDateTime(a.createdAt)}</span>
+                <span>{formatLocalDateTime(a.createdAt)}</span>
                 <AnalysisStatusBadge status={a.status} />
               </span>
             </Link>
@@ -372,41 +395,71 @@ function RecentAnalyses() {
   );
 }
 
+type Health = { indexAvailable: boolean; analysesEnabled: boolean };
+
 /**
- * Missing index or paused analyses (SPEC §38.2), from GET /api/health. Read once per visit; it
- * never blocks the form (the server decides), it only explains in advance.
+ * GET /api/health, read once per visit and again on `recheck` (null until it answers, or when it
+ * fails: the server still decides on Run). `recheck` resolves to the new health, or null on failure.
  */
-function ServiceNotice() {
+function useHealth(): { health: Health | null; recheck: () => Promise<Health | null>; checking: boolean } {
   const { client } = useWorkspace();
-  const [health, setHealth] = React.useState<{ indexAvailable: boolean; analysesEnabled: boolean } | null>(null);
+  const [health, setHealth] = React.useState<Health | null>(null);
+  const [checking, setChecking] = React.useState(false);
+  const mounted = React.useRef(true);
   React.useEffect(() => {
-    let cancelled = false;
+    mounted.current = true;
     client
       .health()
-      .then((h) => !cancelled && setHealth(h))
+      .then((h) => mounted.current && setHealth(h))
       .catch(() => undefined);
     return () => {
-      cancelled = true;
+      mounted.current = false;
     };
   }, [client]);
-  if (!health) return null;
-  if (!health.indexAvailable) {
+  const recheck = React.useCallback(async () => {
+    setChecking(true);
+    try {
+      const h = await client.health();
+      if (mounted.current) setHealth(h);
+      return h;
+    } catch {
+      return null;
+    } finally {
+      if (mounted.current) setChecking(false);
+    }
+  }, [client]);
+  return { health, recheck, checking };
+}
+
+/**
+ * Missing index or paused analyses (SPEC §38.2). Paused is one notice, whether health said so
+ * before the run or the run found out (Run is disabled while it shows); it carries no raw code.
+ * "Check again" reads health again, and Run turns back on when analyses are enabled.
+ */
+function ServiceNotice({ health, paused, checking, onCheckAgain }: { health: Health | null; paused: boolean; checking: boolean; onCheckAgain: () => void }) {
+  if (paused) {
+    return (
+      <div id="analyses-paused">
+        <ErrorPanel
+          className="mb-4"
+          title="New analyses are paused"
+          message="Running an analysis is switched off at the moment (each one makes a paid model request). Company Intelligence, Compare and saved findings remain available, and you can still prepare a question."
+          action={
+            <Button type="button" variant="secondary" size="sm" onClick={onCheckAgain} disabled={checking}>
+              {checking ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}
+              Check again
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+  if (health && !health.indexAvailable) {
     return (
       <ErrorPanel
         className="mb-4"
         title="Filing search is unavailable right now"
         message="The filing index could not be reached, so new analyses would fail. Company Intelligence, Compare and saved findings still work."
-        code="INDEX_UNAVAILABLE"
-      />
-    );
-  }
-  if (!health.analysesEnabled) {
-    return (
-      <ErrorPanel
-        className="mb-4"
-        title="New analyses are paused"
-        message="Running an analysis is switched off at the moment (each one makes a paid model request). Company Intelligence, Compare and saved findings remain available, and you can still prepare a question."
-        code="ANALYSES_DISABLED"
       />
     );
   }

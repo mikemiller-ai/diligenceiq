@@ -4,7 +4,7 @@ import { join } from 'node:path';
 /*
  * The launch film (SPEC §7). Build-time only: the landing is a server component in a static
  * export, so this runs during `next build` and never in the browser. Drop the files into
- * apps/web/public/media/ and rebuild; until the video exists the landing shows a placeholder.
+ * apps/web/public/media/ and rebuild; until the video exists the landing renders no film section.
  * Each optional file (poster, captions) is linked only when present, so nothing 404s.
  */
 export const LAUNCH_FILM_PATHS = {

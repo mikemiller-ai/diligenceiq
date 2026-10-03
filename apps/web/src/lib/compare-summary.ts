@@ -1,5 +1,6 @@
 import { isFixtureProfile, type CompanyIntelligenceProfile, type CompareResult, type SignalCategory, type Trajectory, type TrendBasis } from '@diligenceiq/core';
 import { DIRECTION_WORD, isCurrent, latestAmount, level, money, readTrend, rowChange, type Direction, type ReadTrend, type RowChange } from '@/components/intelligence/signals';
+import { shortCompanyName } from '@/lib/company-name';
 
 /*
  * The refined Compare (DD-21 h): a bottom line, the side-by-side cells and the risk-area grid,
@@ -167,12 +168,12 @@ function notCompared(metric: string, result: CompareResult, profiles: ReadonlyMa
     .map((c) => {
       const profile = profiles.get(c.ticker);
       const v = row?.values.find((x) => x.ticker === c.ticker);
-      if (profile && isFixtureProfile(profile)) return `${c.company} (preview profile)`;
+      if (profile && isFixtureProfile(profile)) return `${shortCompanyName(c.company)} (preview profile)`;
       const r = v ? trendRead(profile, metric, v.trajectory) : { kind: 'plain' as const };
-      if (r.kind === 'stale') return `${c.company} (latest trend ${r.period})`;
-      if (v?.trajectory === 'not_extracted') return `${c.company} (not extracted)`;
-      if (v?.trajectory === 'limited_history') return `${c.company} (limited history)`;
-      return `${c.company} (no labelled change)`;
+      if (r.kind === 'stale') return `${shortCompanyName(c.company)} (latest trend ${r.period})`;
+      if (v?.trajectory === 'not_extracted') return `${shortCompanyName(c.company)} (not extracted)`;
+      if (v?.trajectory === 'limited_history') return `${shortCompanyName(c.company)} (limited history)`;
+      return `${shortCompanyName(c.company)} (no labelled change)`;
     });
 }
 
@@ -185,7 +186,7 @@ function metricLine(metric: (typeof BOTTOM_LINE_METRICS)[number], result: Compar
     const read = trendRead(profile, metric, v.trajectory);
     const klass = KLASS[v.trajectory];
     if (read.kind !== 'chip' || !klass) return [];
-    return [{ ticker: v.ticker, name: profile.company, klass, read, loss: operatingLoss(read.trend.basis) }];
+    return [{ ticker: v.ticker, name: shortCompanyName(profile.company), klass, read, loss: operatingLoss(read.trend.basis) }];
   });
   if (entries.length < 2) return null;
 
@@ -366,7 +367,7 @@ export function compareBottomLine(result: CompareResult, profiles: ReadonlyMap<s
     const distinctive = result.distinctive;
     if (distinctive.length) {
       const holders = [...new Set(distinctive.map((t) => t.tickers[0]!))];
-      const nameOf = (t: string) => result.companies.find((c) => c.ticker === t)?.company ?? t;
+      const nameOf = (t: string) => shortCompanyName(result.companies.find((c) => c.ticker === t)?.company ?? t);
       const one = holders.length === 1;
       out.push({
         key: 'distinctive',
@@ -441,7 +442,7 @@ export function riskGrid(result: CompareResult, profiles: ReadonlyMap<string, Co
       if (!p || !r.tickers.includes(c.ticker)) return null;
       const headings = p.currentRisks.filter((x) => x.category === r.category).map((x) => ({ heading: x.heading, rank: x.rank, citationIds: x.citationIds }));
       const signals = p.signals.filter((s) => s.category === r.category).map((s) => ({ headline: s.headline, citationIds: s.citationIds }));
-      return { ticker: c.ticker, company: c.company, headings, signals, citationIds: [...new Set([...headings.flatMap((h) => h.citationIds), ...signals.flatMap((s) => s.citationIds)])] };
+      return { ticker: c.ticker, company: shortCompanyName(c.company), headings, signals, citationIds: [...new Set([...headings.flatMap((h) => h.citationIds), ...signals.flatMap((s) => s.citationIds)])] };
     }),
   }));
 }

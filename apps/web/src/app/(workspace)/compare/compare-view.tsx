@@ -11,7 +11,7 @@ import {
   type CompareResult,
   type Trajectory,
 } from '@diligenceiq/core';
-import { ArrowUpRight, ChevronDown, Columns3 } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ChevronDown, Columns3 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
@@ -37,6 +37,7 @@ import { compareBottomLine, latestValue, lineLegend, oppositeNote, priorGrowth, 
 import { formatDate, pluralize } from '@/lib/format';
 import { TRAJECTORY_LABEL } from '@/lib/labels';
 import { compareHref, newAnalysisHref } from '@/lib/links';
+import { shortCompanyName } from '@/lib/company-name';
 import { useWorkspace } from '@/lib/workspace-store';
 
 const OPTIONS = companies().filter((c) => !c.outsideWindow);
@@ -192,48 +193,52 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
           Side by side
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">Direction, latest value and change for each company, with the trend over the years the filings support.</p>
-        <div className="mt-3 overflow-x-auto rounded-lg border border-border bg-card">
-          <Table>
-            <caption className="sr-only">Companies side by side</caption>
-            <THead>
-              <tr>
-                <TH className="normal-case tracking-normal">Measure</TH>
-                {result.companies.map((c) => (
-                  <TH key={c.ticker} className="h-auto py-2.5 align-top normal-case tracking-normal">
-                    <span className="flex items-center gap-2">
-                      <TickerBadge ticker={c.ticker} />
-                      <span className="text-[13px] font-semibold text-foreground">{c.company}</span>
-                    </span>
-                    <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
-                      {TIER_COPY[c.tier].label} · FY ends {formatDate(c.fiscalYearEnd)}
-                    </span>
-                  </TH>
-                ))}
-                <TH className="w-px normal-case tracking-normal">
-                  <span className="sr-only">Actions</span>
-                </TH>
-              </tr>
-            </THead>
-            <TBody>
-              {result.trajectories.map((t) => (
-                <TR key={t.metric} data-metric={t.metric} className="hover:bg-transparent">
-                  <TH scope="row" className="h-auto min-w-36 whitespace-normal py-3 align-top text-sm font-medium normal-case tracking-normal text-foreground">
-                    <Term>{t.metric}</Term>
-                    {METRIC_NOTE[t.metric] && <span className="block text-xs font-normal text-muted-foreground">{METRIC_NOTE[t.metric]}</span>}
-                  </TH>
-                  {t.values.map((v) => (
-                    <TD key={`${t.metric}-${v.ticker}`} className="py-3 align-top">
-                      <TrendCell profile={profiles.get(v.ticker)} company={result.companies.find((c) => c.ticker === v.ticker)?.company ?? v.ticker} metric={t.metric} trajectory={v.trajectory} preview={isPreview(v.ticker)} />
-                    </TD>
+        <ScrollHint />
+        <div className="relative mt-3">
+          <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <Table>
+              <caption className="sr-only">Companies side by side</caption>
+              <THead>
+                <tr>
+                  <TH className="normal-case tracking-normal">Measure</TH>
+                  {result.companies.map((c) => (
+                    <TH key={c.ticker} className="h-auto py-2.5 align-top normal-case tracking-normal">
+                      <span className="flex items-center gap-2">
+                        <TickerBadge ticker={c.ticker} />
+                        <span className="text-[13px] font-semibold text-foreground">{shortCompanyName(c.company)}</span>
+                      </span>
+                      <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                        {TIER_COPY[c.tier].label} · FY ends {formatDate(c.fiscalYearEnd)}
+                      </span>
+                    </TH>
                   ))}
-                  <TD className="text-right align-top">
-                    <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.trajectory(t.metric) }} variant="ghost" label="Save" />
-                  </TD>
-                </TR>
-              ))}
-              <Row label="Major attention area" cells={tickers.map((t) => (preview ? 'Placeholder' : majorArea(t)))} muted={preview} />
-            </TBody>
-          </Table>
+                  <TH className="w-px normal-case tracking-normal">
+                    <span className="sr-only">Actions</span>
+                  </TH>
+                </tr>
+              </THead>
+              <TBody>
+                {result.trajectories.map((t) => (
+                  <TR key={t.metric} data-metric={t.metric} className="hover:bg-transparent">
+                    <TH scope="row" className="h-auto min-w-36 whitespace-normal py-3 align-top text-sm font-medium normal-case tracking-normal text-foreground">
+                      <Term>{t.metric}</Term>
+                      {METRIC_NOTE[t.metric] && <span className="block text-xs font-normal text-muted-foreground">{METRIC_NOTE[t.metric]}</span>}
+                    </TH>
+                    {t.values.map((v) => (
+                      <TD key={`${t.metric}-${v.ticker}`} className="py-3 align-top">
+                        <TrendCell profile={profiles.get(v.ticker)} company={shortCompanyName(result.companies.find((c) => c.ticker === v.ticker)?.company ?? v.ticker)} metric={t.metric} trajectory={v.trajectory} preview={isPreview(v.ticker)} />
+                      </TD>
+                    ))}
+                    <TD className="text-right align-top">
+                      <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.trajectory(t.metric) }} variant="ghost" />
+                    </TD>
+                  </TR>
+                ))}
+                <Row label="Major attention area" cells={tickers.map((t) => (preview ? 'Placeholder' : majorArea(t)))} muted={preview} sameNote={ALL_WORD[tickers.length]} />
+              </TBody>
+            </Table>
+          </div>
+        <EdgeFade />
         </div>
         {!preview && <TrendLegend />}
         {!showDiverging && lines.length === 0 && <p className="mt-2 text-xs text-muted-foreground">No metric points in opposite directions across these companies.</p>}
@@ -263,14 +268,14 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
                             // Not read back, or about an older year than the latest annual report: no colour, and the year is named.
                             return (
                               <span key={t} className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-border px-2 py-0.5 text-[12px] font-medium text-foreground/80">
-                                {companyName(t)}: {word}
+                                {shortCompanyName(companyName(t))}: {word}
                                 {read?.kind === 'stale' && <span data-allow-figures className="font-normal text-muted-foreground">(latest trend {read.period})</span>}
                               </span>
                             );
                           }
                           return (
                             <SignalChip key={t} direction={read.change.direction} neutral={read.change.neutral}>
-                              {companyName(t)}: {word}
+                              {shortCompanyName(companyName(t))}: {word}
                               {read.change.neutral && <span className="sr-only">, neither direction is better</span>}
                             </SignalChip>
                           );
@@ -313,7 +318,7 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
                 <li key={m.ticker} className="rounded-card border border-border bg-card px-4 py-3 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
                     <TickerBadge ticker={m.ticker} />
-                    <span className="font-semibold text-foreground">{companyName(m.ticker)}</span>
+                    <span className="font-semibold text-foreground">{shortCompanyName(companyName(m.ticker))}</span>
                     {m.source === 'model' && <span className="ml-auto text-xs text-muted-foreground">Model-written</span>}
                   </div>
                   {m.summary === null ? (
@@ -419,13 +424,26 @@ function CompareBottomLine({ lines }: { lines: CompareLine[] }) {
   );
 }
 
-function Row({ label, cells, muted = false, action }: { label: string; cells: string[]; muted?: boolean; action?: React.ReactNode }) {
+/** "both", "all three" … for a value every company shares. */
+const ALL_WORD = ['', '', 'both', 'all three', 'all four', 'all five'];
+
+/**
+ * A plain row of the side-by-side table. When every company has the same value (and `sameNote` is
+ * given), it is stated once across the columns ("Regulatory, at all three") instead of repeated.
+ */
+function Row({ label, cells, muted = false, action, sameNote }: { label: string; cells: string[]; muted?: boolean; action?: React.ReactNode; sameNote?: string }) {
+  const same = sameNote !== undefined && cells.length > 1 && cells.every((c) => c === cells[0]) && !/^(Placeholder|—)$/.test(cells[0]!);
   return (
     <TR className="hover:bg-transparent">
       <TH scope="row" className="h-auto py-2.5 text-sm font-medium normal-case tracking-normal text-foreground">
         {label}
       </TH>
-      {cells.map((c, i) => (
+      {same ? (
+        <TD colSpan={cells.length} className="text-foreground" data-same-value>
+          {cells[0]}, at {sameNote}
+        </TD>
+      ) : null}
+      {(same ? [] : cells).map((c, i) => (
         <TD key={`${label}-${i}`} className={muted && /Not extracted|Limited history|Placeholder/.test(c) ? 'italic text-muted-foreground' : 'text-foreground'}>
           {c === 'Placeholder' ? <PlaceholderBadge /> : c}
         </TD>
@@ -457,72 +475,76 @@ function RiskGrid({ rows, result, tickers, citations }: { rows: GridRow[]; resul
   if (rows.length === 0) return <p className="mt-3 rounded-card border border-border bg-card px-4 py-3 text-sm text-muted-foreground">No risk area is classified for these companies.</p>;
   return (
     <>
-      <div className="mt-3 overflow-x-auto rounded-lg border border-border bg-card">
-        <Table>
-          <caption className="sr-only">Risk areas by company</caption>
-          <THead>
-            <tr>
-              <TH className="normal-case tracking-normal">Risk area</TH>
-              {result.companies.map((c) => (
-                <TH key={c.ticker} className="normal-case tracking-normal">
-                  <TickerBadge ticker={c.ticker} />
-                  <span className="sr-only"> {c.company}</span>
-                </TH>
-              ))}
-              <TH className="w-px normal-case tracking-normal">
-                <span className="sr-only">Actions</span>
-              </TH>
-            </tr>
-          </THead>
-          <TBody id={bodyId} ref={bodyRef}>
-            {rows.map((r, i) => (
-              <TR key={r.category} data-area={r.label} className="hover:bg-transparent" hidden={folded > 0 && i >= initial && !open} tabIndex={i === initial ? -1 : undefined}>
-                <TH scope="row" className="h-auto min-w-44 py-2 text-sm font-medium normal-case tracking-normal text-foreground">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="w-5 font-mono text-xs text-muted-foreground">
-                      <span aria-hidden>{String(r.rank).padStart(2, '0')}</span>
-                      <span className="sr-only">Rank {r.rank}</span>
-                    </span>
-                    <span className="font-semibold">{r.label}</span>
-                    <span className="rounded-md bg-accent px-1.5 py-px text-xs font-medium text-primary">{r.share}</span>
-                  </span>
-                </TH>
-                {r.cells.map((cell, ci) => (
-                  <TD key={result.companies[ci]!.ticker} className="px-2 py-1.5">
-                    {cell ? (
-                      <GridCellButton cell={cell} area={r.label} citations={citations} />
-                    ) : (
-                      <span className="px-2 text-xs text-muted-foreground">
-                        <span aria-hidden>—</span>
-                        <span className="sr-only">Not in this company’s areas</span>
-                      </span>
-                    )}
-                  </TD>
+      <ScrollHint />
+      <div className="relative mt-3">
+        <div className="overflow-x-auto rounded-lg border border-border bg-card">
+          <Table>
+            <caption className="sr-only">Risk areas by company</caption>
+            <THead>
+              <tr>
+                <TH className="normal-case tracking-normal">Risk area</TH>
+                {result.companies.map((c) => (
+                  <TH key={c.ticker} className="normal-case tracking-normal">
+                    <TickerBadge ticker={c.ticker} />
+                    <span className="sr-only"> {shortCompanyName(c.company)}</span>
+                  </TH>
                 ))}
-                <TD className="text-right">
-                  <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.theme(r.category) }} variant="ghost" label="Save" />
-                </TD>
-              </TR>
-            ))}
-          </TBody>
-        </Table>
-        {folded > 0 && (
-          <div className="px-4 pb-3 pt-1">
-            <button
-              type="button"
-              aria-expanded={open}
-              aria-controls={bodyId}
-              onClick={() => {
-                reveal.current = !open;
-                setOpen((o) => !o);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-md px-1 text-sm font-medium text-primary hover:underline"
-            >
-              <ChevronDown aria-hidden className={open ? 'size-4 rotate-180 transition-transform' : 'size-4 transition-transform'} />
-              {open ? 'Show fewer areas' : `Show all ${rows.length} areas`}
-            </button>
-          </div>
-        )}
+                <TH className="w-px normal-case tracking-normal">
+                  <span className="sr-only">Actions</span>
+                </TH>
+              </tr>
+            </THead>
+            <TBody id={bodyId} ref={bodyRef}>
+              {rows.map((r, i) => (
+                <TR key={r.category} data-area={r.label} className="hover:bg-transparent" hidden={folded > 0 && i >= initial && !open} tabIndex={i === initial ? -1 : undefined}>
+                  <TH scope="row" className="h-auto min-w-44 py-2 text-sm font-medium normal-case tracking-normal text-foreground">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="w-5 font-mono text-xs text-muted-foreground">
+                        <span aria-hidden>{String(r.rank).padStart(2, '0')}</span>
+                        <span className="sr-only">Rank {r.rank}</span>
+                      </span>
+                      <span className="font-semibold">{r.label}</span>
+                      <span className="rounded-md bg-accent px-1.5 py-px text-xs font-medium text-primary">{r.share}</span>
+                    </span>
+                  </TH>
+                  {r.cells.map((cell, ci) => (
+                    <TD key={result.companies[ci]!.ticker} className="px-2 py-1.5">
+                      {cell ? (
+                        <GridCellButton cell={cell} area={r.label} citations={citations} />
+                      ) : (
+                        <span className="px-2 text-xs text-muted-foreground">
+                          <span aria-hidden>—</span>
+                          <span className="sr-only">Not in this company’s areas</span>
+                        </span>
+                      )}
+                    </TD>
+                  ))}
+                  <TD className="text-right">
+                    <SaveFindingButton source={{ kind: 'compareRow', tickers, ref: compareRowRef.theme(r.category) }} variant="ghost" />
+                  </TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+          {folded > 0 && (
+            <div className="px-4 pb-3 pt-1">
+              <button
+                type="button"
+                aria-expanded={open}
+                aria-controls={bodyId}
+                onClick={() => {
+                  reveal.current = !open;
+                  setOpen((o) => !o);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-md px-1 text-sm font-medium text-primary hover:underline"
+              >
+                <ChevronDown aria-hidden className={open ? 'size-4 rotate-180 transition-transform' : 'size-4 transition-transform'} />
+                {open ? 'Show fewer areas' : `Show all ${rows.length} areas`}
+              </button>
+            </div>
+          )}
+        </div>
+      <EdgeFade />
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
         Darker cells have more risk headings in the latest annual report; each cell opens its headings, signals and passages. {RANK_RULE} It is an order for investigation, not a rating.
@@ -635,6 +657,22 @@ function TrendCell({
       {prior && <span className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">{prior}</span>}
     </span>
   );
+}
+
+/**
+ * On a phone the company columns scroll sideways inside their box (the page never does): a hint
+ * says so, and a fade on the right edge shows there is more (Phase 9 review item 15).
+ */
+function ScrollHint() {
+  return (
+    <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground md:hidden" data-testid="scroll-hint">
+      Scroll sideways to see every company <ArrowRight aria-hidden className="size-3" />
+    </p>
+  );
+}
+
+function EdgeFade() {
+  return <div aria-hidden className="pointer-events-none absolute inset-y-px right-px w-8 rounded-r-lg bg-gradient-to-l from-card to-transparent md:hidden" />;
 }
 
 const TREND_LEGEND = LEGEND.filter((l) => l.direction === 'up' || l.direction === 'down' || l.direction === 'slowing' || l.direction === 'flat');

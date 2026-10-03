@@ -17,11 +17,12 @@ export function SheetContent({
   className,
   children,
   hideClose = false,
+  overlayClassName,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> & { side?: 'left' | 'right'; hideClose?: boolean }) {
+}: React.ComponentProps<typeof SheetPrimitive.Content> & { side?: 'left' | 'right'; hideClose?: boolean; overlayClassName?: string }) {
   return (
     <SheetPrimitive.Portal>
-      <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-navy/30" />
+      <SheetPrimitive.Overlay data-testid="sheet-scrim" className={cn('fixed inset-0 z-50 bg-navy/30', overlayClassName)} />
       <SheetPrimitive.Content
         className={cn(
           'fixed inset-y-0 z-50 flex w-full flex-col bg-card shadow-sm',

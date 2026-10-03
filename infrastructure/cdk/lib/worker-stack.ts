@@ -19,7 +19,7 @@ export interface WorkerStackProps extends StackProps {
   table: dynamodb.ITable;
   dataBucket: s3.IBucket;
   killSwitch: ssm.IStringParameter;
-  /** Where both alarms notify (Phase 8). */
+  /** Where the alarms notify (Phase 8). */
   alertTopic: sns.ITopic;
 }
 
@@ -32,7 +32,44 @@ export const WORKER_METRICS = {
   estimatedCostUsd: 'AnalysisEstimatedCostUsd',
   citationsRemoved: 'CitationsRemovedByValidation',
   failedByCode: 'AnalysisFailed',
+  /** Dimensionless: every failed analysis except the expected outcomes below; the alarm's metric. */
+  failedFault: 'AnalysisFailedFault',
 } as const;
+
+/**
+ * Failure codes that are expected outcomes, not faults, so they never page (2026-10-03):
+ * - NO_RELEVANT_EVIDENCE: the question is outside the corpus; no generation call, nothing spent,
+ *   and the user sees an honest answer.
+ * - ANALYSES_DISABLED: an operator turned the kill switch off while a job was queued (the api
+ *   already refuses new runs with 503); the operator caused it.
+ * RATE_LIMITED never reaches a summary line: the api refuses the request before any record exists.
+ * Every other code (MALFORMED_OUTPUT, GENERATION_FAILED, GENERATION_TIMEOUT, PIPELINE_TIMEOUT,
+ * QUEUE_TIMEOUT, INDEX_UNAVAILABLE, WORKER_FAILED, ENQUEUE_FAILED) is a fault worth an email.
+ */
+export const EXPECTED_FAILURE_CODES = ['NO_RELEVANT_EVIDENCE', 'ANALYSES_DISABLED'] as const;
+
+/**
+ * The failed summary line of a fault (architecture §12): `analysis_summary`, status failed, and a
+ * code outside EXPECTED_FAILURE_CODES. Used on the worker, dlq-handler and api log groups, the
+ * three places that write a failed summary line.
+ */
+export const failedFaultPattern = (): logs.IFilterPattern =>
+  logs.FilterPattern.all(
+    logs.FilterPattern.stringValue('$.event', '=', 'analysis_summary'),
+    logs.FilterPattern.stringValue('$.status', '=', 'failed'),
+    ...EXPECTED_FAILURE_CODES.map((code) => logs.FilterPattern.stringValue('$.code', '!=', code)),
+  );
+
+/** A dimensionless 1 per faulty failed analysis, for the AnalysisFailedAlarm. */
+export function failedFaultFilter(scope: Construct, id: string, logGroup: logs.ILogGroup): logs.MetricFilter {
+  return new logs.MetricFilter(scope, id, {
+    logGroup,
+    filterPattern: failedFaultPattern(),
+    metricNamespace: METRIC_NAMESPACE,
+    metricName: WORKER_METRICS.failedFault,
+    metricValue: '1',
+  });
+}
 
 /**
  * The async analysis plane (architecture §4.1, §4.3, §5; DD-03, DD-04, DD-14): the analysis
@@ -204,6 +241,25 @@ export class WorkerStack extends Stack {
       metricValue: '1',
       dimensions: { Code: '$.code' },
     });
+    // The alarm on failed analyses (2026-10-03: a MALFORMED_OUTPUT failure in production fired no
+    // alarm). AnalysisFailed carries a Code dimension, and an alarm needs one series; a SEARCH
+    // expression alarm would work but is harder to read and test. Instead a dimensionless companion
+    // filter on the same failed lines (worker and dlq-handler here, the api's poll-expiry lines in
+    // ApiStack) publishes AnalysisFailedFault, which skips the expected outcomes
+    // (EXPECTED_FAILURE_CODES). A dead-lettered analysis also fires DlqHandlerInvokedAlarm: two
+    // emails for the rarest failure, accepted for one complete failure count. About $0.10 a month.
+    failedFaultFilter(this, 'AnalysisFailedFaultFilter', workerLogs);
+    failedFaultFilter(this, 'AnalysisFailedFaultDlqFilter', dlqLogs);
+    const failedAlarm = new cloudwatch.Alarm(this, 'AnalysisFailedAlarm', {
+      metric: new cloudwatch.Metric({ namespace: METRIC_NAMESPACE, metricName: WORKER_METRICS.failedFault, statistic: 'Sum', period: Duration.minutes(5) }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      alarmDescription:
+        'An analysis failed with a fault code (not NO_RELEVANT_EVIDENCE or ANALYSES_DISABLED). The AnalysisFailed metric by Code says which; the record keeps failureDetail (architecture §12).',
+    });
+
     // The dlq-handler drains the DLQ within seconds, so the queue's depth would almost never be
     // seen at 1; the handler's invocations are the signal instead: each one is at least one
     // analysis message the worker gave up on (the handler marks it failed). Lambda metrics are
@@ -217,7 +273,7 @@ export class WorkerStack extends Stack {
       alarmDescription: 'An analysis message reached the dead-letter queue and the dlq-handler ran (architecture §12).',
     });
 
-    for (const alarm of [overOneAlarm, dlqAlarm]) alarm.addAlarmAction(new cloudwatchActions.SnsAction(props.alertTopic));
+    for (const alarm of [overOneAlarm, dlqAlarm, failedAlarm]) alarm.addAlarmAction(new cloudwatchActions.SnsAction(props.alertTopic));
 
     new CfnOutput(this, 'AnalysisQueueUrl', { value: this.queue.queueUrl });
     new CfnOutput(this, 'WorkerFunctionName', { value: this.workerFunction.functionName });

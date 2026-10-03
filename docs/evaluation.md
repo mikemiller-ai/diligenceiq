@@ -190,7 +190,7 @@ A recall that cannot be measured **fails** the bar. No detector is exempt (`RECA
 
 **Re-scoring:** `pnpm eval:generation:rescore` re-validates every recorded response of every prompt version with the current repair, validator and checks (no model call, no AWS): the raw tool input of each recorded response goes through `repairBrief` and `validateBrief` against the question's stored context passages (from `.index/build/<indexVersion>/chunks.jsonl`), with the same preceding-text lookup the worker passes for the preceding-unit rule (architecture §6.9; built from the same chunks), and the result file's scores, briefs and summary are rewritten. Generation latency, tokens and cost stay as recorded in the original run. Pipeline totals are not reported for a replay or a re-score, because a replayed response takes about 0 ms. This is how v1 and v2, whose prompts are no longer the runtime prompt, are scored by the same validator as v3. A `--generate` replay of da-v3 through the real pipeline gives the same summary as the re-score.
 
-**Results:** `evals/results/generation-iv-9cf51c066743-da-v{1,2,3,4}.{json,md}`. Each file holds every brief, its validation block and its score. **Scoring:** `packages/rag/src/eval/generation-eval.ts`, which has unit tests.
+**Results:** `evals/results/generation-iv-9cf51c066743-da-v{1,2,3,4}.{json,md}` (da-v5, run 2026-10-03: §11). Each file holds every brief, its validation block and its score. **Scoring:** `packages/rag/src/eval/generation-eval.ts`, which has unit tests.
 
 **Checks per question** (deterministic, no LLM judge):
 - **Completed:** a schema-valid brief. For an abstention question, `NO_RELEVANT_EVIDENCE` with no call also counts.
@@ -214,7 +214,7 @@ A recall that cannot be measured **fails** the bar. No detector is exempt (`RECA
 | **da-v4 (shipped)** | **14/20** | **1** | **1.00 → 1.00** | **0.989 (531/537)** | **0** | **15/20** | **15/16** | **2/2** | **2/2** | **1/1** | **17/17** | 41 / 72 s | $2.24 |
 
 **da-v4's six misses** (each brief fails exactly one check):
-- `pdf-1`: its comparison table is misaligned (9 rows of 3 values under 4 columns), flagged with a notice.
+- `pdf-1`: its comparison table is misaligned, flagged with a notice: 4 column headers (a row-label header, then Apple, Tesla, JPMorgan) over 9 rows, 8 with 3 values and "Key-Person / Governance" with 2, so the repair that drops a row-label header does not apply.
 - `pdf-2`: "0%" in a comparison cell.
 - `long-pfe-since-2022`: "39%", printed in no cited passage.
 - `sector-banks-capital`: "$422 billion" in a consideration.
@@ -289,6 +289,7 @@ What the numbers show:
 - **The deadline holds.** The longest eval generation (87 s) is under the 120 s budget, and the worst wall clock (64 s) is far inside the 240 s job deadline.
 - **Queue pickup:** PDF Q3 waited about 8 s in the queue before a warm worker claimed it; the SQS event source polls with a short delay.
 - Shorter briefs are the lever if latency becomes a product problem. Each 1K output tokens is about 11–14 s.
+- **Cost estimates before 2026-10-03 are about 10% low.** Every estimated cost recorded before then (this table, the §4 and §7 runs) used the pricing table's $3 / $15 per 1M tokens for Sonnet 4.6. Cost Explorer shows the `us.` cross-region inference profile billed at $3.30 / $16.50 (2.99M input and 0.43M output tokens, 2026-10-01..03; `evals/results/idle-cost-2026-10-03.json`). The table now uses the billed rates (`packages/rag/src/generation/pipeline.ts` `PRICING`); the recorded numbers are kept as written.
 
 ## 6. Company Intelligence profiles (Phase 4b)
 
@@ -422,3 +423,85 @@ How each SPEC §41.2 metric is measured, and its shipped result (prompt da-v4, i
 | Tokens and latency | Telemetry and deployed runs | ~22K in, ~3K out; 43–64 s from enqueue to a finished brief (3 deployed runs, prompt da-v3); 2.8 s cold index load; $0.12–0.13 per analysis | §4, §5 |
 
 The **Architecture page** (`apps/web/src/app/architecture/measured.ts`) shows a subset of these numbers. `measured.test.ts` recomputes each one from the results file or the line of this document it names, so the page cannot drift from this record.
+
+## 11. Prompt da-v5 (2026-10-03)
+
+**What changed** ([prompt-iterations.md](prompt-iterations.md), da-v5): rule 2 says not to quote or restate a disregarded passage; rule 6 says a claim that something changed, is new or was absent in a period needs a cited excerpt from each period it compares (otherwise say the excerpts do not cover that period), and to date each statement to the filing of the excerpt that states it. The targets are the §8 period-attribution and absence findings and the §7 quoted plant.
+
+**Run:** `pnpm eval:retrieval --generate --live` over the 20 questions, 2026-10-03 (approved by Mike, hard cap $3.00), in four `--only` batches so the cap could be checked between them, then one replay of all 20 that wrote the results file. 20 live calls, 0 errors, 436,269 input and 62,552 output tokens: **$2.4718** at the billed rates (the pricing table since this run, §5), $2.2471 at the old $3 / $15 table. The robustness set was not re-run (not approved). **Results:** `evals/results/generation-iv-9cf51c066743-da-v5.{json,md}`.
+
+| Prompt | Pass every check | Calls / question | Citation validity (before → after) | Numeric grounding | Briefs with every figure verified | Comparisons aligned | Abstention | Follow-ups answerable | Injection | Brief coverage | Generation p50 / max | Cost (20 questions) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| da-v4 | 14/20 | 1 | 1.00 → 1.00 | 0.989 (531/537) | 15/20 | 15/16 | 2/2 | 2/2 | 1/1 | 17/17 | 41 / 72 s | $2.24 at $3 / $15 |
+| **da-v5** | **14/20** | **1** | **1.00 → 1.00** | **0.978 (535/547)** | **15/20** | **16/16** | **1/2** | **2/2** | **1/1** | **17/17** | 43 / 58 s | $2.47 billed ($2.25 at $3 / $15) |
+
+**da-v5's six misses** (each fails one check):
+- Figures (12 in 5 briefs): `pdf-2` "$15.07 billion" (FY2023's Compute & Networking revenue, dated FY2024 and printed in no context passage; FY2024 was $47,405 million, `NVDA-FY2025-10K-MDA-008`), "217%" and "142%" (in the context, not the cited passage), "$72,880M (implied)" (computed); `rev-msft-fy2025` "$54,649 million", "69%"; `sector-banks-capital` "$422 billion" (as in da-v4); `ambiguous-meta` "$69.7 Billion" (a rounding), "$2,207 million", "$2,146 million", "3%"; `quarter-goog` "$2.1 billion". All but three are printed in a context passage other than the one cited.
+- Abstention: `unsupported-period` abstains (`insufficient_evidence`, gap stated), but a consideration says the FY2025 risks "would not have appeared in a FY2015 filing", and its gaps claim no Apple filing between FY2015 and FY2024 is in the corpus (FY2022–FY2024 are). da-v4 made the same FY2015 claim, hedged "in the same form", and passed the keyword check.
+- `pdf-1`, `long-pfe-since-2022` and `ambiguous-no-company` now pass.
+
+**Absence and period claims, read by hand** (a Claude agent, against the chunk text in `.index/build/iv-9cf51c066743/chunks.jsonl`; same reviewer caveats as §8):
+- **expert-1, fixed:** the DMA dating. Key finding 0 places the implemented DMA changes in FY2024 and FY2025, and the FY2025 cell calls the fines risk "reiterated", which `AAPL-FY2024-10K-1A-017` supports. The tariff claim is hedged ("not a distinct disclosure"), and its FY2023 and FY2024 cells cite `AAPL-FY2023-10K-1A-016` and `AAPL-FY2024-10K-1A-016` ("export and import" regulation). Two change claims cite every period they compare and are right: U.S. smartphone antitrust suits are not in `AAPL-FY2023-10K-1A-017` (the corpus has them from FY2024), and the App Store commission risk was forward-looking in the FY2023 and FY2024 1A-010 passages.
+- **expert-1, not fixed:** key finding 4 and its FY2023 cell still say AI/ML is "absent from the FY2023 filing", with no FY2023 citation; `AAPL-FY2023-10K-1A-015` lists "machine learning and artificial intelligence" and was not in the context. Key finding 1 calls the court order "absent in FY2023 and FY2024" citing only `AAPL-FY2025-10K-1A-016` (true of the corpus, but uncited).
+- **expert-1, new:** key finding 2 says FY2025 is "the first year Apple explicitly names Google LLC", but `AAPL-FY2024-10K-1A-017`, which the same finding cites, names Google LLC; the brief's own FY2024 cell says so. The executive summary lists the Google verdict, the court order and "new tariff-related supply chain risks" as absent in prior years; the first two hold (the verdict postdates the FY2024 risk text), the third overclaims (`AAPL-FY2023-10K-1A-002`, `AAPL-FY2024-10K-1A-002` mention tariffs; not in context).
+- **Elsewhere:** across the 20 briefs, "not disclosed in excerpts" phrasing replaced bare absence claims in `sector-banks-capital`'s table, and apart from `unsupported-period` (above) no other brief claims that a period's filing omitted something. `multi-cloud`'s summary still says Google Cloud is the fastest-growing and AWS the most profitable, with no AWS figures in its context (§8; unchanged). `injection-instructions` now notes in its gaps that an instruction in the question was disregarded, without quoting it; the planted-passage case (§7) was not re-run.
+
+**What it shows.** The rules moved the model where a period's excerpt was in the context (the DMA dating, the cited change claims) but not where it was missing: the AI/ML absence claim survived word for word, and one new misattribution contradicts a passage the finding cites. One run at temperature 0.2 cannot separate the grounding (0.989 → 0.978) and abstention (2/2 → 1/2) changes from variance. The next lever is deterministic: flag a change or absence claim that names a period none of its citations belongs to (the claim's FY labels against its cited chunks' fiscal labels), as the numeric validator does for figures.
+
+**Decision: reverted to da-v4 (Mike, 2026-10-03).** da-v5 was tried and not shipped:
+- One of its two production analyses failed `MALFORMED_OUTPUT`.
+- The eval above shows lower grounding and abstention with the same pass count.
+- It still made the absence claims it targeted.
+
+The runtime prompt is da-v4 again, byte-for-byte, and its 20 recordings replay with no live call. The period problem is now handled by the deterministic check in §12 ([prompt-iterations.md](prompt-iterations.md), the da-v5 entry's decision).
+
+## 12. Period-claim check (validator, 2026-10-03)
+
+**What it is.** A deterministic validator rule (architecture §6.9; `packages/rag/src/generation/period-claims.ts`) with no model call. It reads each sentence of:
+- a key finding (title and text);
+- an investment consideration;
+- a comparison cell (a cell that names no period is read against its column header's period, or its row label's).
+
+It flags a sentence when two things hold:
+- **The sentence makes a novelty or absence claim.** It contains a cue such as "first time", "first year", "new in FY…", "a new risk/disclosure/section", "newly", "was added", "added a … risk/disclosure/section", "absent", "not present", "no longer", "did / does not appear / reference / mention / name", "not mentioned", "not disclosed", "emerged", "introduced" or "omitted".
+- **The period is tied to the cue.** It sits in the cue's own clause or within five words of it, and it is not a comparison's baseline ("up from $200.6 billion in FY2024", "versus FY2024", "compared with FY2024"). "absent from FY2023" still counts.
+- **It names a fiscal period that none of the item's own valid citations belongs to.** Periods count as FY2023, FY23, FY2026Q1, "fiscal 2024", "the 2023 10-K", lists ("FY2023 or 2024") and ranges ("FY2023–FY2025", "from 2023 through 2025"). A citation's period is its chunk ID's `FY<year>`; a 10-Q counts for its fiscal year.
+
+The executive summary is read against every passage cited anywhere in the brief. A flag is stored as `validation.periodClaims` (`location`, `periods`, `cue`; an optional field, absent on analyses stored earlier). The brief marks it "Period not cited: FY2023" on the item, on its Bottom line entry and in the Sources rail. It is reported, not a pass/fail check, so no eval pass count changes.
+
+**Kept precise on purpose:**
+- Ordinary change verbs ("rose", "grew", "increased") are not cues. "new" counts only in its disclosure sense ("new in FY2025", "a new risk factor"), never "new products", "as new models launched", "were new to the mix" or "New York". "added" counts only in its disclosure sense ("was added", "added a new risk factor", a table cell's "B200 added"), never "added $4.5 billion", "tariffs added costs" or "subscriptions added".
+- A period in another clause, or a comparison's baseline, is not the claim's period (code review, 2026-10-03). "Services revenue grew 12% in FY2025 versus FY2024, with new subscriptions added across regions", citing only FY2025, is not flagged.
+- Statements about the evidence, not the filing, are not claims: "not disclosed in the supplied excerpts", "absent from the corpus", "FY2015 filing absent", "assess whether …". Saying the excerpts do not cover a period is the honest form.
+- A bare year ("in 2024") is not a period, as in Phase 3's rule, and relative phrases ("prior years", "earlier filings") are skipped.
+
+**What it does not catch:**
+- **A contradiction with a cited period.** da-v5's "FY2025 is the first year Apple explicitly names Google LLC" cites FY2023, FY2024 and FY2025 passages, and the FY2024 one already names Google LLC. Telling that apart needs the meaning of the passages.
+- **Relative or bare dates:** "absent in prior years", "since 2015".
+- **Absence claims about a company rather than a period.** Examples are `cross-cyber`'s "absent from Visa's and UnitedHealth's disclosures" with no Visa or UnitedHealth citation, and its "Not specifically named in excerpts" cell.
+- **Novelty cues outside the list** ("beginning in FY2024").
+
+**Re-score.** `pnpm eval:generation:rescore` and `--set robustness` (free; recorded responses; every other number unchanged). Re-scored again after the code-review fix that ties periods to their cue (2026-10-03): every flag below is unchanged, claim for claim, so the recorded briefs had none of the false positives it removes:
+
+| Run | Period claims flagged | What they are |
+|---|---|---|
+| da-v1 | 4 claims in 3 briefs | expert-1 FY2023 "Not disclosed" cell and FY2023 "not present"; reg-nvda-export FY2024 "added" cell; ambiguous-ko-few-years FY2022 "Not mentioned" cell |
+| da-v2 | 4 claims in 3 briefs | expert-1 FY2023 cell and AI "do not mention" FY2023; ambiguous-ko-few-years FY2022 cell; unsupported-period "not present in FY2015" |
+| da-v3 | 3 claims in 2 briefs | expert-1 FY2023 and FY2024 "Not disclosed" cells; reg-nvda-export FY2024 cell |
+| **da-v4** (runtime) | **9 claims in 3 briefs** | expert-1 (7): the court order "absent from FY2023 and FY2024", AI "did not reference" in FY2023, tariffs "not present in FY2023 or FY2024", "not present in FY2023 disclosures" and three FY2023/FY2024 cells; reg-nvda-export FY2023 "Not addressed"; ambiguous-ko-few-years FY2022 "Not mentioned" |
+| da-v5 (reverted) | 8 claims in 2 briefs | expert-1 (7): the court order, AI "absent from the FY2023 filing", tariffs "does not appear … in the FY2023 or FY2024 filings", four FY2023/FY2024 cells; reg-nvda-export FY2024 cell |
+| da-v4 robustness | 4 claims in 2 briefs | injection-document-middle tariffs FY2023/FY2024; injection-document-last AI FY2023, tariffs FY2023/FY2024, one FY2023 cell |
+
+The §8 and §11 hand findings it was built for are caught: the tariff claim citing only FY2025, the AI absence with no FY2023 citation, and the court-order absence. The Google LLC first-year claim is not caught, as designed (above). Unit tests: `period-claims.test.ts`, which uses these Apple items word for word.
+
+**Seed verification (2026-10-03): no recorded da-v4 brief qualified.** The bar was every deterministic check passing (including 0 period claims and 0 unverified figures) and every claim supported by its cited chunk text, read by hand.
+- **Passed the checks:** 7 briefs that could serve as a seed: `risk-tsla-demand`, `cross-wmt-jpm-rates`, `cross-cyber`, `pdf-3`, `rev-msft-fy2025`, `quarter-goog`, and robustness `ambiguous-big-tech-ai`. Each was read claim by claim, and each failed: [seed-verification-2026-10-03.md](../evals/results/seed-verification-2026-10-03.md).
+- **Ruled out by the checks:**
+  - The Apple brief (`expert-1`) has 7 period claims.
+  - The NVIDIA briefs fail too: `pdf-2` has 1 unverified figure and `reg-nvda-export` has 1 period claim.
+  - `pdf-1` fails comparison alignment.
+- **Not suitable for a demo seed:** the briefs left are abstentions or injection questions.
+
+The failures are wording, attribution and citation problems, not figures. Every figure in these briefs is printed in a cited passage.
+
+**Reseed (Mike's decision, 2026-10-03).** The seed was then rebuilt from the recorded da-v4 generations of the same three questions (`pdf-2`, `multi-cloud`, `expert-1`; replay only, 0 live calls) under this check, so the Apple brief shows its 7 "Period not cited" badges. The bar moved to the four seeded findings: each has every figure verified, no period claim, and every claim supported by its cited chunk text, read by hand. The DMA key finding seeded before was dropped (misdated, unflagged: the contradiction case above) for the brief's "Google search licensing risk" row. Record: [seed-verification-2026-10-03.md](../evals/results/seed-verification-2026-10-03.md).

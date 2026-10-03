@@ -6,7 +6,7 @@
 #   2. POST /api/analyses        queues the analysis (application/json)
 #   3. GET  /api/analyses/<id>   polls until COMPLETE or FAILED, printing each status change
 #
-# Each run against production makes ONE paid Bedrock generation call (estimated $0.09–0.13) and
+# Each run against production makes ONE paid Bedrock generation call (estimated $0.10–0.14) and
 # creates one demo workspace (it expires after 30 days).
 #
 # Usage:
@@ -125,7 +125,7 @@ echo "DiligenceIQ example request"
 echo "  Base URL:  $BASE_URL"
 echo "  Question:  $QUESTION"
 echo "  Tickers:   ${TICKERS:-(none: the question decides the scope)}"
-echo "  Note: against production, each run makes one paid Bedrock generation call (estimated \$0.09–0.13)"
+echo "  Note: against production, each run makes one paid Bedrock generation call (estimated \$0.10–0.14)"
 echo "        and creates one demo workspace."
 echo
 

@@ -20,10 +20,11 @@ import { FINDING_ORIGIN, FINDING_STATUS } from '@/lib/labels';
 import { cn } from '@/lib/utils';
 import { useWorkspace } from '@/lib/workspace-store';
 
-type View = GroupBy | 'board';
+/** List (grouped) or Board (by status): a view switch of its own, apart from the list's Group by. */
+type Layout = 'list' | 'board';
 
-const VIEW_LABEL: Record<View, string> = { theme: 'Theme', company: 'Company', status: 'Status', origin: 'Origin', board: 'Board' };
-const VIEWS: readonly View[] = ['theme', 'company', 'status', 'origin', 'board'];
+const GROUP_LABEL: Record<GroupBy, string> = { theme: 'Theme', company: 'Company', status: 'Status', origin: 'Origin' };
+const GROUPS: readonly GroupBy[] = ['theme', 'company', 'status', 'origin'];
 
 /** The status tiles' dots (the Badge tones, tokens only). */
 const STATUS_DOT: Record<FindingStatus, string> = { NEEDS_FOLLOW_UP: 'bg-risk-med', ACTIVE: 'bg-primary', RESOLVED: 'bg-ok' };
@@ -38,7 +39,8 @@ export function FindingsView() {
     theme: isThemeId(initialTheme) ? initialTheme : 'all',
     analysisId: initialAnalysis,
   });
-  const [view, setView] = React.useState<View>('theme');
+  const [layout, setLayout] = React.useState<Layout>('list');
+  const [groupBy, setGroupBy] = React.useState<GroupBy>('theme');
   // The filters a link set (theme, analysis) open "More filters" so the active one is visible.
   const [more, setMore] = React.useState(isThemeId(initialTheme) || Boolean(initialAnalysis));
   const set = <K extends keyof FindingFilters>(k: K, v: FindingFilters[K]) => setFilters((f) => ({ ...f, [k]: v }));
@@ -49,7 +51,7 @@ export function FindingsView() {
   // Theme counts reflect every other active filter, so the options never promise results that aren't there.
   const countBase = filterFindings(findings, { ...filters, theme: 'all' }, undefined, companyName);
   const visible = filterFindings(findings, filters, undefined, companyName);
-  const groups = view === 'board' ? [] : groupFindings(visible, view, (t) => `${companyName(t)} (${t})`);
+  const groups = layout === 'board' ? [] : groupFindings(visible, groupBy, (t) => `${companyName(t)} (${t})`);
   const active = activeFilterCount(filters);
   const summary = summarizeFindings(findings);
   const moreActive = Number(filters.theme !== 'all') + Number(Boolean(filters.analysisId)) + Number(Boolean(filters.from)) + Number(Boolean(filters.to));
@@ -214,7 +216,18 @@ export function FindingsView() {
               Clear filters
             </Button>
           )}
-          <Segmented<View> label="Group by" value={view} onValueChange={setView} options={VIEWS.map((v) => ({ value: v, label: VIEW_LABEL[v] }))} />
+          {layout === 'list' && (
+            <Segmented<GroupBy> label="Group by" value={groupBy} onValueChange={setGroupBy} options={GROUPS.map((v) => ({ value: v, label: GROUP_LABEL[v] }))} />
+          )}
+          <Segmented<Layout>
+            label="View"
+            value={layout}
+            onValueChange={setLayout}
+            options={[
+              { value: 'list', label: 'List' },
+              { value: 'board', label: 'Board' },
+            ]}
+          />
         </div>
       </div>
 
@@ -241,7 +254,7 @@ export function FindingsView() {
             </Button>
           }
         />
-      ) : view === 'board' ? (
+      ) : layout === 'board' ? (
         <div className="grid gap-3 lg:grid-cols-3">
           {boardColumns(visible).map((col) => (
             <section key={col.status} aria-labelledby={`board-${col.status}`} className="flex flex-col gap-2 rounded-card border border-border bg-secondary/60 p-2.5">

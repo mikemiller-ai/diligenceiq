@@ -234,6 +234,20 @@ describe('GET /api/analyses/:id (the poll)', () => {
     for (const k of ['claimToken', 'ttl', 'workspaceId', 'PK', 'SK']) expect(res).not.toHaveProperty(k);
   });
 
+  it('never returns the internal failureDetail: the public error stays {code, message, requestId}', async () => {
+    const now = { t: new Date('2026-10-02T12:00:00Z') };
+    const { app, cookie, id, analyses, workspaceId } = await queued(now);
+    await analyses.claim(workspaceId, id, 'tok', now.t);
+    await analyses.fail(workspaceId, id, 'tok', { code: 'MALFORMED_OUTPUT', message: "The answer couldn't be validated.", requestId: 'w-1' }, now.t, { failureDetail: 'stop reason end_turn; keyFindings: Invalid input' });
+    expect((await analyses.get(workspaceId, id))?.failureDetail).toBe('stop reason end_turn; keyFindings: Invalid input');
+    const res = await app(authed(cookie, 'GET', `/api/analyses/${id}`));
+    expect(body<AnalysisDetail>(res).error).toEqual({ code: 'MALFORMED_OUTPUT', message: "The answer couldn't be validated.", requestId: 'w-1' });
+    expect(res.body).not.toContain('failureDetail');
+    expect(res.body).not.toContain('keyFindings: Invalid input');
+    const list = await app(authed(cookie, 'GET', '/api/analyses'));
+    expect(list.body).not.toContain('keyFindings: Invalid input');
+  });
+
   it('fails a QUEUED job past its deadline lazily (QUEUE_TIMEOUT)', async () => {
     const now = { t: new Date('2026-10-02T12:00:00Z') };
     const { app, cookie, id } = await queued(now);
@@ -668,16 +682,26 @@ describe('Phase 5 fixes: sessions under load, TTL, reset, cookies and JSON bodie
 });
 
 describe('Phase 5 fixes: findings carry figure checks and provenance; the cap is a COUNT', () => {
-  const pdf2 = SEED.analyses.find((a) => a.validation.numeric.figures.some((f) => !f.verified && f.location.startsWith('comparison.rows[1].')))!;
+  // A seeded comparison row with an unverified figure, found rather than hard-coded, so a reseed keeps the test meaningful.
+  const unverified = (() => {
+    for (const a of SEED.analyses) {
+      const f = a.validation.numeric.figures.find((x) => !x.verified && /^comparison\.rows\[\d+\]\./.test(x.location));
+      if (f) {
+        const index = Number(/^comparison\.rows\[(\d+)\]/.exec(f.location)![1]);
+        return { analysisId: a.analysisId, index, prefix: `comparison.rows[${index}].` };
+      }
+    }
+    throw new Error('the seed has no comparison row with an unverified figure');
+  })();
 
   it('M2: a saved brief item keeps its numeric-grounding checks (unverified figure markers)', async () => {
     const { app } = testApp();
     const { cookie } = await newSession(app);
-    const res = await app(authed(cookie, 'POST', '/api/findings', { body: { source: { kind: 'comparisonRow', analysisId: pdf2.analysisId, index: 1 } } }));
+    const res = await app(authed(cookie, 'POST', '/api/findings', { body: { source: { kind: 'comparisonRow', analysisId: unverified.analysisId, index: unverified.index } } }));
     expect(res.statusCode, res.body).toBe(201);
     const f = body<Finding>(res);
     expect(f.figures?.length).toBeGreaterThan(0);
-    expect(f.figures!.every((x) => x.location.startsWith('comparison.rows[1].'))).toBe(true);
+    expect(f.figures!.every((x) => x.location.startsWith(unverified.prefix))).toBe(true);
     expect(f.figures!.some((x) => !x.verified)).toBe(true);
     expect(f.seeded).toBeUndefined();
   });
@@ -698,7 +722,7 @@ describe('Phase 5 fixes: findings carry figure checks and provenance; the cap is
     const { cookie } = await newSession(app);
     const list = vi.spyOn(workspace, 'listFindings');
     const count = vi.spyOn(workspace, 'countFindings');
-    expect((await app(authed(cookie, 'POST', '/api/findings', { body: { source: { kind: 'comparisonRow', analysisId: pdf2.analysisId, index: 1 } } }))).statusCode).toBe(201);
+    expect((await app(authed(cookie, 'POST', '/api/findings', { body: { source: { kind: 'comparisonRow', analysisId: unverified.analysisId, index: unverified.index } } }))).statusCode).toBe(201);
     expect(count).toHaveBeenCalledTimes(1);
     expect(list).not.toHaveBeenCalled();
   });

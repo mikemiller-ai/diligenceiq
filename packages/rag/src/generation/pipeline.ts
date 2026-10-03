@@ -23,9 +23,18 @@ export const GENERATION_BUDGET_MS = 120_000;
 /** Time kept back after generation for validation and the final write. */
 export const FINISH_MARGIN_MS = 10_000;
 
-/** USD per 1M tokens (on-demand list price, us-east-1; an estimate, SPEC §30.1). Unknown models cost 0 and are flagged. */
+/**
+ * USD per 1M tokens (an estimate, SPEC §30.1, §35.10). Unknown models cost 0 and are flagged.
+ *
+ * Sonnet 4.6 through the `us.` cross-region inference profile is at the BILLED rate, $3.30 in /
+ * $16.50 out: Cost Explorer, 2026-10-01..03, 2.99M input and 0.43M output tokens billed as
+ * "Claude Sonnet 4.6 (Amazon Bedrock Edition)" (`evals/results/idle-cost-2026-10-03.json`,
+ * `prices.bedrock_sonnet_4_6_billed_effective`). Until 2026-10-03 this table used the $3 / $15
+ * list price, so cost recorded before then (eval results, telemetry) is about 10% low; those
+ * records are kept as written. The in-region model ID was never billed here and keeps the list price.
+ */
 export const PRICING: Record<string, { input: number; output: number }> = {
-  'us.anthropic.claude-sonnet-4-6': { input: 3, output: 15 },
+  'us.anthropic.claude-sonnet-4-6': { input: 3.3, output: 16.5 },
   'anthropic.claude-sonnet-4-6': { input: 3, output: 15 },
   'amazon.titan-embed-text-v2:0': { input: 0.02, output: 0 },
 };

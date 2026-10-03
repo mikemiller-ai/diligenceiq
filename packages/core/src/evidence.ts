@@ -21,6 +21,14 @@ export const DOCUMENT_ID_PATTERN = /^([A-Z]{1,5})_10[KQ]_(?:\d{4}Q[1-4]_)?\d{4}-
 export function tickerOfChunkId(chunkId: string): string | null {
   return CHUNK_ID_PATTERN.exec(chunkId)?.[1] ?? null;
 }
+/**
+ * The fiscal year of the filing a chunk ID belongs to (`AAPL-FY2024-10K-1A-017` → 2024,
+ * `NVDA-FY2026Q3-10Q-MDA-012` → 2026); null when the ID is not well formed (a planted test passage).
+ */
+export function fiscalYearOfChunkId(chunkId: string): number | null {
+  if (!CHUNK_ID_PATTERN.test(chunkId)) return null;
+  return Number(/-FY(\d{4})/.exec(chunkId)![1]);
+}
 export function tickerOfDocumentId(documentId: string): string | null {
   return DOCUMENT_ID_PATTERN.exec(documentId)?.[1] ?? null;
 }

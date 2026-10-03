@@ -3,67 +3,35 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`main` at `2aeaec5` (Phase 7), fast-forwarded from `phase-7`, plus this deploy record. There is no remote yet.
+`main`, pushed to the **public** repo https://github.com/mikemiller-ai/diligenceiq (public by Mike's choice for the panel; make it private again after: `gh repo edit mikemiller-ai/diligenceiq --visibility private`). Phase 8 is `d60b539` (+ `adf7db2`); Phase 9 is gated and deployed, awaiting Mike's go-ahead to commit and push.
 
 ## Current phase
-**Phase 7 (evaluation, security, reliability, observability; plan row 7) is complete: gated, committed (`2aeaec5`) and deployed (2026-10-03).** Handoff: `docs/handoffs/phase-07.md`. Phase 6r (steps 1–4) is complete and deployed.
-- Production: active profile set `iv-9cf51c066743/llm-v3`, **kill switch `true` since 2026-10-03 12:30 local** (Mike turned it on to test; whether to leave it on is pending with Mike, and there is no Budget alert yet). Instant fallback: `iv-9cf51c066743/det-v2`. Deployed: WorkerStack and ApiStack (2026-10-03 16:19 / 16:21 UTC), Amplify job 12.
-- **Phase 7 adds:**
-  - **CSP** (assumptions D10, Mike's choice): after `next build`, `apps/web/src/build/csp.ts` writes each page's own `<meta>` CSP with `script-src 'self'` plus that page's inline-script hashes. Header CSP keeps `frame-ancestors`. The one residual allowance is `style-src 'unsafe-inline'` (sonner's runtime `<style>`). Zod runs `jitless` (`packages/core/src/zod-config.ts`, core's first import) so its `new Function` probe raises no violation.
-  - **Validator: the caption rule** (Mike's decision). A bare currency caption ("(MILLIONS)") counts only as the first cell of a table header row, and states the unit of that table only (rule `caption_unit`). Any other scale caption in the passage disqualifies it, and it never overrides a preceding unit. `PROFILE_VALIDATOR_VERSION` is 3; the stored manifests keep 2, because a re-score changed nothing. da-v4 numeric grounding went from 0.911 to 0.989 (531/537).
-  - **Observability:** the api writes one `api_request` line per request (route template, status, duration, code). Logs are raw JSON lines on stdout (tidiness only: the production check showed CloudWatch JSON filters also match Lambda's prefixed `console.log` lines). `apiRequestId` now travels in the queue message and is non-fatal. Every fail path writes an `analysis_summary` line with status `failed`.
-  - **Metrics and alarms:** metric filters for generation latency, estimated cost, citations removed, `AnalysisFailed` by code (worker, dlq-handler and api) and `Api5xx`. Alarms: `GenerationCallsOverOne` and `DlqHandlerInvokedAlarm`.
-  - **IAM:** each Lambda has its own role (`infrastructure/cdk/lib/lambda-role.ts`) that writes only to its own log group. No managed policies, enforced by the cost guard rule `iam-managed-policy`.
-  - **Evals:** `evals/robustness.yaml` (6 questions; 5/6 pass; $0.6515 live, approved). It includes three planted-document injections; the realistic "last" one fails by the check's letter, because the brief quoted the planted text to reject it. The manual review is `evals/results/manual-review-iv-9cf51c066743-da-v4.md`: a Claude agent, 8 briefs, 62.5% of claims supported and 96.3% supported or partly. Web perf: `evals/results/web-perf.*`. `docs/evaluation.md` §7–§10 are new.
-  - **Architecture page:** measured numbers only (`apps/web/src/app/architecture/measured.ts`), each recomputed from its record by `measured.test.ts`. Statuses are updated (everything through 6r is deployed; the Budget alert is Phase 8).
-  - `engines` is `node >=22.18`, because the web build runs `node src/build/csp.ts` with native type stripping.
+**Phase 9 (interview polish; plan row 9) is complete apart from the commit: gated, deployed (2026-10-03, WorkerStack and ApiStack by Mike, Amplify job 14), production-checked.** Handoff: `docs/handoffs/phase-09.md`. Phases 1–8 are complete; Phase 8b (P1: Thesis, Watchlist, IC Brief) is not built and is described in `docs/future-state.md`, never claimed.
+- Production: profile set `iv-9cf51c066743/llm-v3` (fallback `det-v2`); **Deep Analysis prompt da-v4** (da-v5 tried and reverted); the deterministic period-claim check ("Period not cited") is live; seed rebuilt from da-v4 recordings; **kill switch `true`** (Mike: on through the panel prep and the panel, then off).
+- Alerts: SNS `diligenceiq-alerts` (email confirmed) from three alarms: `GenerationCallsOverOne`, `DlqHandlerInvokedAlarm`, `AnalysisFailedAlarm` (any failed analysis except `NO_RELEVANT_EVIDENCE` and `ANALYSES_DISABLED`; pattern tested with `test-metric-filter`). Budget: the account's "Product - DiligenceIQ - Monthly" ($25).
+- Deliverables for Eliza: `docs/deliverables.md` (linked from the README top). Demo: `docs/demo-script.md`; future state: `docs/future-state.md`.
 
 ## Gate
-`pnpm gate` on 2026-10-03 against the Phase 7 working tree: **exit 0**.
-- check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 79, cdk 46, corpus 102, rag 453, web 464, api 154 (**1,298**).
-- `cdk:synth` and `build` succeeded; the CSP step covered 11 pages and 77 hashes.
-- **e2e: 100 passed, 4 skipped** (the `DARK_SCREENSHOTS`-only tests).
-
-Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with tests; CLAUDE.md's Node line left to the main session) → `/code-review` medium (2 findings, both fixed: an apiRequestId regex that dropped base64 `+` and `/`, and perf bytes that omit lazy chunks, now documented as first-load) → `pnpm gate` green.
+`pnpm gate` on 2026-10-03 against the final Phase 9 tree: **exit 0**. Unit tests: core 79, cdk 49, corpus 102, rag 476, web 526, api 175 (**1,407**); cdk:synth and build (CSP: 11 pages, 79 hashes); **e2e 112 passed, 4 skipped**. `pnpm e2e:prod` 19/19 after the deploy.
 
 ## In flight
-- **Phase 8 (gated, handoff written, uncommitted; 2026-10-03).** Built: the SNS alert topic `diligenceiq-alerts` (both alarms notify it; email from the SSM String `/diligenceiq/alert-email`, created with Mike's approval), the D12 viewer-hop key, the real 404 rule (`404-200`), `pnpm e2e:prod` (`tests/e2e/prod/`, read-only), `examples/` and the README rewrite. No CDK Budget: the account's own "Product - DiligenceIQ - Monthly" ($25, Product cost category) is the alert; whether production Bedrock spend lands in it is unverified until billing data for 2026-10-03 arrives (October's offline spend is "Unattributed").
-  - **Deployed early (Mike's choice):** `pnpm deploy:infra` after a green gate (alerts, D12 diagnostic log, 404 rule); Mike confirmed the email subscription. Not yet deployed: the viewer-hop key itself.
-  - **Production checks after that deploy:** unknown pages answer 404; both alarms OK with the topic as action; `pnpm e2e:prod` 19/19 (53 profiles from `iv-9cf51c066743/llm-v3`; GE Capital 404 `PROFILE_MISSING` per G2); `examples/analysis-request.sh` reached COMPLETE (analysis `0musnut8nOjvY7SCANb`, 1 call, $0.1171, 53/53 citations valid; recorded in `examples/sample-output.txt`). Its summary repeats the known da-v5 absence claim (tariffs and AI "absent in FY2023").
-  - **D12 measured:** through Amplify `sourceIp` is a changing proxy address; `X-Forwarded-For` is viewer, edge, proxy. Mike chose keying on the viewer hop (assumptions D12).
-  - **Adversary (2 high, 6 medium, 6 low) → fresh fixer:** all fixed with tests. H1: a direct execute-api caller could forge hops; the viewer hop is now trusted only when `sourceIp` is a CloudFront address (`services/api/src/session/cloudfront-ranges.ts`, `pnpm fixtures:cloudfront`, syncToken 1791020226), walking past CloudFront hops (M1), IPv6 keyed on its /64 (M2), the log keys the last 5 hops plus `forwardedForHops` and `viaCloudFront` (M3). H2: Mike amended SPEC §8/§49 (A.4): GE Capital has no profile; the exit criterion is 53 companies. Alarm delivery proven: a manual `set-alarm-state ALARM` (Mike approved) executed the SNS action.
-  - **After the next api deploy, check:** a workspace created through Amplify over IPv4 logs `viaCloudFront: true`, `clientKeySource: viewer_hop` **and a `clientKey` equal to the same machine's direct execute-api key** (`/code-review` finding: if the middle edge hop is outside the CloudFront list, the edge hop would become every visitor's shared key). `viaCloudFront: false` means the fail-safe fallback to `sourceIp` (the old shared-proxy behaviour, not a bypass).
-  - **`/code-review` medium:** 1 plausible finding (edge hop outside the CloudFront list would become a shared key), covered by the post-deploy check above. **`pnpm gate` exit 0:** core 79, cdk 48, corpus 102, rag 453, web 464, api 171 (1,317); e2e 100 passed, 4 skipped. Handoff: `docs/handoffs/phase-08.md`.
-  - **Deployed (Mike, `pnpm deploy:infra`, after the gate): the CloudFront-gated key.** Post-deploy check (one workspace via Amplify over IPv4): `viaCloudFront: false`, `clientKeySource: source_ip`, `clientKey` = the proxy key (`ee99…`, the same proxy key seen earlier over IPv6). The viewer hop (`87e9…`) still equals this machine's direct key. **So Amplify's proxy address is not in the CloudFront ranges, and production keys on the proxy, as before Phase 8** (fail-safe: no forgeable hop is trusted). The proxy pool looks small (2 keys in 4 requests), so visitors share about 100 creations a day per proxy. **Mike accepted this as is (2026-10-03):** no cap change, no wider trusted range.
-  - **Next:** the Budget attribution check once billing data for 2026-10-03 arrives.
-- **Done 2026-10-03 (Mike approved):** the commit, the fast-forward, `pnpm deploy:infra` and `pnpm deploy:web` (both run by Mike). The headless production check passed:
-  - **CSP:** 7 P0 pages × light and dark × 1280 and 390 px (28 loads). Each has one CSP `<meta>`, zero `securitypolicyviolation` events and no sideways scroll.
-  - **Script control:** an injected inline script is blocked. The theme toggle sets Dark, and the stored Dark applies on reload with every `/_next/static` bundle blocked, so the hash works in production.
-  - **Requests:** only reads plus `POST /api/session` (`/api/analyses`, `/api/companies`, `/api/companies/<t>/intelligence`, `/api/findings`, `/api/health`, `/api/sources/<doc>`, `/api/session`).
-  - **Headers:** HSTS, nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy, and the header CSP `frame-ancestors 'none'; base-uri 'self'; object-src 'none'`. The api adds nosniff and `x-request-id`.
-  - **Read-only log checks (Mike pre-approved):** all 8 deployed metric filters were tested with `aws logs test-metric-filter`, and each matches its sample line and rejects the counter-example.
-    - **They also match a line carrying Lambda's Text `console.log` prefix.** The adversary's H3 premise was wrong, and the Phase 4 one-call filter could always match. The docs are corrected.
-    - `filter-log-events`: 126 production `api_request` lines arrived as raw JSON, all with route templates (no IDs or queries) and status 200, apart from one `HEAD` probe (404, `unmatched`).
-  - **Worker filters seen in production (2026-10-03, after Mike turned the kill switch on):** two analyses completed, `0muslyw17JMsxAilaPv` and `0musm0ynvRQuu5G3z2r`.
-    - Each made 1 generation call: 27–30 s of generation, estimated $0.090 and $0.125, 0 citations removed.
-    - Each `apiRequestId` links to the api's `POST /api/analyses` line.
-    - CloudWatch published `GenerationDurationMs` and `AnalysisEstimatedCostUsd` datapoints for both, so the worker metric filters match real lines. Both alarms (`GenerationCallsOverOne`, `DlqHandlerInvokedAlarm`) are OK.
-    - A local `aws logs test-metric-filter` replay of those lines showed 0 matches, probably from shell quoting; the published datapoints are the evidence.
-  - **Still not seen in production:** either alarm firing (they have no notification target until Phase 8).
-- **Known limits recorded, not fixed:**
-  - The seeded expert-question brief misdates the Apple DMA fines to FY2025 (they are in FY2024's 1A-017) and claims AI and tariffs were absent from FY2023/FY2024 (evaluation.md §8). Mike: document now, fix in a da-v5 prompt later (a live eval run and a reseed, ask first).
-  - The JS is heavy (about 390 KB gzipped first load on workspace pages; Zod and the core schemas).
-  - M3 profile citations carry no subsection.
-- **Next:** Phase 8 (production hardening, alarm notification targets, Budget alert, prod smoke, README and `examples/`). Do not build the Deep Analysis or brief mockups without asking.
+- **Commit and push Phase 9** (Mike's go-ahead).
+- **Budget attribution check** once billing data for 2026-10-03 arrives: does production Bedrock spend land in the `DiligenceIQ` cost category? (October's offline spend, about $17 + $2.47 da-v5 eval, is "Unattributed".)
+- **Rehearsal** of the three PDF example questions before the panel (about $0.12 each, ask first; docs/demo-script.md).
+- **Known limits, recorded, not fixed:**
+  - No recorded da-v4 brief survived a strict claim-by-claim reading (7 of 7 rejected for overreach or attribution; every figure was correct; `evals/results/seed-verification-2026-10-03.md`). The seeded Apple brief shows 7 "Period not cited" marks and still misdates the DMA fines (a contradiction the check cannot see).
+  - PDF example 1's recorded da-v4 comparison was ragged (8 rows of 3 values and 1 of 2 under 4 columns), flagged with a notice; PDF example 3 (pharma) misses mitigation passages (gold recall 7/18). Both are framed honestly in the demo script.
+  - One production analysis failed `MALFORMED_OUTPUT` (2026-10-03, da-v5: `keyFindings` returned as an invalid JSON string). A deterministic repair (escape raw control characters) and a content-free `failureDetail` on the record now exist; the root cause was not captured.
+  - The per-client workspace cap keys on Amplify's proxy (D12, accepted). The JS is heavy (about 390 KB gzipped first load). M3 profile citations carry no subsection. "What's changed" is thin because the NEW/EXPANDED/REDUCED detectors are suppressed.
+  - The assessment PDF says "Timebox: ~4 hours"; the demo script has a talking point.
 
 ## Decisions pending with Mike
-- **Kill switch:** `/diligenceiq/analyses-enabled` is `true` since 2026-10-03 12:30 local. Mike wants it on through the panel-interview prep and the panel (a few days away), then off. The global daily cap (200 analyses, about $25 a day at most) bounds it; the Budget alert arrives in Phase 8.
+- **Kill switch off after the panel**, and the repo back to private.
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
-- **da-v5 prompt** (from the manual review and robustness): a change claim needs a cited passage from each period it compares; do not quote disregarded passages. Needs a live eval run (about $2.25) and a reseed.
-- Settled this session: the Pfizer "(MILLIONS)" caption rule (yes, narrowed by the adversary) and the CSP strategy (per-page meta hashes).
+- **M3 profile citation subsections.**
+- **Profile detector wording** ("crossing the threshold…") in model-written llm-v3 text: hidden behind "How this was measured" in the UI; a source fix needs a new `profilePromptVersion` (about $7).
 
 ## Known traps
 - **Compare's bottom line and core's Diverging section use different rules on purpose.** The bottom line (`compare-summary.ts`) counts "slowing" as still rising, and its footer follows the lines. Core's `diverging` (Diverging trends section) counts only rising against declining. Only lines where every company shares a direction are coloured (DD-21 h). An operating margin at or below zero gets loss wording, never "widened".
@@ -102,7 +70,7 @@ Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with
 - **Finding IDs are derived from the source** (`fd-` + sha256 of the source key, scoped by `profileSetId` for profile sources), not ULIDs: one finding per stored item; repeat saves are 409 `ALREADY_SAVED`.
 - **Reset keeps META and `RATE#` counters.** Deleting META would strand a concurrent request; deleting `RATE#` would let reset bypass the hourly cap.
 - **Regenerate, never hand-edit:**
-  - `seed/demo-workspace.json`: `pnpm seed:build` (replay of eval questions pdf-2, multi-cloud, expert-1 under da-v4). A prompt or context change means those recordings no longer match, and the build fails until a live run is approved.
+  - `seed/demo-workspace.json`: `pnpm seed:build` (replay of eval questions pdf-2, multi-cloud, expert-1 under the runtime prompt, da-v4. Reseeded 2026-10-03 (Mike's decision) from the da-v4 recordings, so the Apple brief shows its 7 "Period not cited" badges; the four seeded findings were each read against their chunks (evals/results/seed-verification-2026-10-03.md). They are chosen by their text in `build-seed.ts`, and the build fails if one no longer matches exactly one item, has an unverified figure or carries a period claim. After a reseed, `pnpm fixtures:evidence` (adjacency subset) and `pnpm evidence:check`). A prompt or context change means those recordings no longer match, and the build fails until a live run is approved.
   - `tests/fixtures/profile-sets/`: `pnpm profiles:export-fixture`.
   - `packages/core/src/generated/catalog.json`: `node scripts/fixtures/build-catalog.mjs`.
 
@@ -117,6 +85,7 @@ Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with
   - A failed live call is recorded too, so replay never spends again.
   - Any prompt or context change is a new key.
 - **`--generate` writes only the generation results.** Only the full default three-mode `pnpm eval:retrieval` run may rewrite `evals/results/retrieval-<iv>.*`; a Phase 4 run once overwrote it. `pnpm eval:generation:rescore` re-validates stored briefs after a validator change (free).
+- **The period-claim check is reported, not a pass/fail check** (architecture §6.9; evaluation.md §12). `validation.periodClaims` is optional: analyses and seeds stored earlier have none, and the UI shows no badge for them. A cue or period-pattern change in `period-claims.ts` changes the flagged counts: re-score all versions (`pnpm eval:generation:rescore`, plus `--set robustness`) and update evaluation.md §12 and the Architecture page's `periodClaims` metric (its test reads §12). Only periods tied to the cue count (its clause or five words away, never a comparison baseline such as "up from $X in FY2024"); the 2026-10-03 code-review fix changed no recorded flag.
 - **Numeric grounding is strict on purpose** (architecture §6.9).
   - A scaled figure needs the same scale word, an exactly equal amount, or a passage that states its unit.
   - Digits in a table cell whose unit header sits in another chunk are a `unit_unstated` near match: reported, never verified.

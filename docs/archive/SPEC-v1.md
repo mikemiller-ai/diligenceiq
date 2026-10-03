@@ -496,7 +496,7 @@ A saved finding should contain:
 Suggested statuses:
 
 - Active
-- Needs Follow-Up
+- Needs follow-up
 - Resolved
 
 Do not use an LLM call to save a finding.

@@ -31,6 +31,14 @@ const A11Y_PAGES = [
 ];
 
 for (const path of A11Y_PAGES) {
+  // Phase 9 review item 7 (and every other page): a 390 px phone never scrolls the page sideways.
+  test(`on a 390 px phone, ${path} has no sideways page scroll`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(path);
+    await settle(page);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
+
   test(`axe: ${path} has no WCAG 2.1 A/AA violations`, async ({ page }) => {
     await page.goto(path);
     await settle(page);
@@ -60,8 +68,7 @@ test.describe('keyboard', () => {
     await expect(chip).toBeFocused();
   });
 
-  test('Deep Analysis can be filled and run from the keyboard alone', async ({ page, request }) => {
-    await setKillSwitch(request, false);
+  test('Deep Analysis can be filled and run from the keyboard alone', async ({ page }) => {
     const requests = recordRequests(page);
     await page.goto('/analysis/new/');
     await settle(page);
@@ -74,7 +81,7 @@ test.describe('keyboard', () => {
     }
     await expect(page.getByRole('button', { name: 'Run analysis' })).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page.getByRole('alert').filter({ hasText: 'New analyses are paused' }).last()).toBeVisible();
+    await expect(page).toHaveURL(/\/analysis\/\?id=/);
     expect(requests.filter(isAnalysisPost)).toHaveLength(1);
   });
 });
@@ -124,15 +131,32 @@ test.describe('error and degraded states (architecture §9.1)', () => {
 
   test('analyses paused: Deep Analysis says so before you run; dashboards keep working', async ({ page, request }) => {
     await setKillSwitch(request, false);
+    const requests = recordRequests(page);
     await page.goto('/analysis/new/');
     await expect(page.getByText('New analyses are paused')).toBeVisible();
+    // Phase 9 review item 12: one panel, Run disabled while paused, no raw code.
+    // One notice (Next's route announcer is also an alert, so count the paused ones).
+    await expect(page.getByRole('alert').filter({ hasText: /paused/ })).toHaveCount(1);
+    await expect(page.getByText('ANALYSES_DISABLED')).toHaveCount(0);
+    await page.getByRole('textbox', { name: 'Question', exact: true }).fill('Which risks does Apple describe?');
+    await expect(page.getByRole('button', { name: 'Run analysis' })).toBeDisabled();
+    expect(requests.filter(isAnalysisPost)).toHaveLength(0);
+    // Still paused: "Check again" keeps Run off. Re-enabled: it turns Run back on (code review 2026-10-03), and nothing runs by itself.
+    await page.getByRole('button', { name: 'Check again' }).click();
+    await expect(page.getByText('New analyses are paused')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Run analysis' })).toBeDisabled();
+    await setKillSwitch(request, true);
+    await page.getByRole('button', { name: 'Check again' }).click();
+    await expect(page.getByText('New analyses are paused')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Run analysis' })).toBeEnabled();
+    expect(requests.filter(isAnalysisPost)).toHaveLength(0);
     await page.goto('/intelligence/?ticker=AAPL');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Apple Inc');
   });
 
   test('PROFILE_MISSING: a company without a profile offers Deep Analysis for it, and Compare lists it as missing', async ({ page }) => {
     await page.goto('/intelligence/?ticker=TSLA');
-    await expect(page.getByText('Intelligence for Tesla Inc isn’t built for this index version')).toBeVisible();
+    await expect(page.getByText('Company Intelligence for Tesla Inc isn’t ready yet')).toBeVisible();
     await page.getByRole('link', { name: /Ask about Tesla/ }).click();
     await expect(page.getByRole('list', { name: 'Selected companies' })).toContainText('TSLA');
 
@@ -180,7 +204,7 @@ test('Findings: the seeded board, save from Company Intelligence, filter, group,
 
   await page.getByRole('radiogroup', { name: 'Group by' }).getByRole('radio', { name: 'Status' }).click();
   await expect(page.getByRole('heading', { name: 'Active · 1' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Needs Follow-Up · 1' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Needs follow-up · 1' })).toBeVisible();
   await page.getByRole('radiogroup', { name: 'Group by' }).getByRole('radio', { name: 'Company' }).click();
   await expect(page.getByRole('heading', { name: 'Microsoft Corporation (MSFT) · 2' })).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters' }).first().click();

@@ -173,7 +173,7 @@ for (const name of files) {
     scores.push(score);
     records.push({ ...rec, score, brief, validation });
     const failed = score.checks.filter((c) => !c.pass);
-    console.log(`  ${score.pass ? 'PASS' : 'FAIL'} ${rec.id}: figures ${score.figures.verified}/${score.figures.total}${score.figures.unitUnstated ? ` (${score.figures.unitUnstated} near)` : ''}${failed.length ? ` — ${failed.map((c) => c.name).join(', ')}` : ''}`);
+    console.log(`  ${score.pass ? 'PASS' : 'FAIL'} ${rec.id}: figures ${score.figures.verified}/${score.figures.total}${score.figures.unitUnstated ? ` (${score.figures.unitUnstated} near)` : ''}${score.periodClaims ? `; ${score.periodClaims} period claim(s): ${(validation.periodClaims ?? []).map((c) => `${c.location} ${c.periods.join('/')} "${c.cue}"`).join(', ')}` : ''}${failed.length ? ` — ${failed.map((c) => c.name).join(', ')}` : ''}`);
   }
 
   const summary = summarizeGeneration(scores, { totalsMeasured: (stored.summary as { latencyMs?: { totalP50?: number | null } }).latencyMs?.totalP50 != null });
@@ -192,6 +192,6 @@ for (const name of files) {
   });
   writeFileSync(join(outDir, name.replace(/\.json$/, '.md')), md);
   console.log(
-    `${name}: ${summary.passed}/${summary.questions} pass; numeric grounding ${summary.numericGrounding} (${summary.figuresVerified}/${summary.figuresTotal}, ${summary.figuresUnitUnstated} near matches); every figure verified in ${summary.briefsFullyGrounded}/${summary.completed}; comparisons aligned ${summary.comparisonAligned.passed}/${summary.comparisonAligned.total}; abstention ${summary.abstention.passed}/${summary.abstention.total}; follow-ups answerable ${summary.followUpsAnswerable.passed}/${summary.followUpsAnswerable.total}; injection ${summary.injection.passed}/${summary.injection.total}; coverage ${summary.briefCoverage.passed}/${summary.briefCoverage.total}; citation validity ${summary.citationValidityPre} → ${summary.citationValidityPost}`,
+    `${name}: ${summary.passed}/${summary.questions} pass; numeric grounding ${summary.numericGrounding} (${summary.figuresVerified}/${summary.figuresTotal}, ${summary.figuresUnitUnstated} near matches); every figure verified in ${summary.briefsFullyGrounded}/${summary.completed}; period claims ${summary.periodClaims.claims} in ${summary.periodClaims.briefs} briefs; comparisons aligned ${summary.comparisonAligned.passed}/${summary.comparisonAligned.total}; abstention ${summary.abstention.passed}/${summary.abstention.total}; follow-ups answerable ${summary.followUpsAnswerable.passed}/${summary.followUpsAnswerable.total}; injection ${summary.injection.passed}/${summary.injection.total}; coverage ${summary.briefCoverage.passed}/${summary.briefCoverage.total}; citation validity ${summary.citationValidityPre} → ${summary.citationValidityPost}`,
   );
 }

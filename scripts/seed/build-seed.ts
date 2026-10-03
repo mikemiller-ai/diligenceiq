@@ -89,6 +89,41 @@ embedder.close();
 if (stats.liveCalls !== 0) fail('a live call was made; the seed must be replay-only');
 
 const byQuestion = (id: string) => analyses[SEED_QUESTIONS.indexOf(id)]!;
+
+/**
+ * The seeded findings, each chosen by its text rather than a bare index, so a reseed under a new
+ * prompt version fails loudly instead of quietly saving whatever item now sits at that index.
+ * Each must be a substantive claim (UX review item 5: a "Reporting period" row of fiscal-year end
+ * dates was once seeded) with every figure in it verified against its cited passage and no period
+ * claim flagged on it (`validation.periodClaims`, evaluation.md §12). Each was also read against its
+ * cited chunk text by hand: evals/results/seed-verification-2026-10-03.md.
+ */
+type SeedItemKind = 'keyFinding' | 'comparisonRow';
+const SEED_FINDINGS: Array<{ question: string; kind: SeedItemKind; match: RegExp; theme: string; status: string }> = [
+  // da-v4: the DMA key finding is not seeded: it dates the DMA fines and "many risks will remain" to FY2025,
+  // but AAPL-FY2024-10K-1A-017 already states both (evaluation.md §8). The Google row cites every period it describes.
+  { question: 'expert-1', kind: 'comparisonRow', match: /\bGoogle\b/, theme: 'regulatory-compliance', status: 'NEEDS_FOLLOW_UP' },
+  { question: 'expert-1', kind: 'keyFinding', match: /antitrust .*smartphone|smartphone .*antitrust/i, theme: 'regulatory-compliance', status: 'ACTIVE' },
+  { question: 'multi-cloud', kind: 'comparisonRow', match: /revenue growth/i, theme: 'growth-outlook', status: 'ACTIVE' },
+  { question: 'pdf-2', kind: 'keyFinding', match: /gross margin/i, theme: 'financial-performance', status: 'ACTIVE' },
+];
+
+type SeedBrief = { keyFindings: Array<{ title: string; finding: string }>; comparison?: { rows: Array<{ label: string }> } };
+type SeedValidation = { numeric: { figures: Array<{ location: string; verified: boolean }> }; periodClaims?: Array<{ location: string; periods: string[] }> };
+function seedItem(spec: (typeof SEED_FINDINGS)[number]): { kind: SeedItemKind; analysisId: string; index: number } {
+  const a = byQuestion(spec.question) as unknown as { analysisId: string; brief: SeedBrief; validation: SeedValidation };
+  const texts = spec.kind === 'keyFinding' ? a.brief.keyFindings.map((k) => `${k.title} ${k.finding}`) : (a.brief.comparison?.rows ?? []).map((r) => r.label);
+  const hits = texts.flatMap((t, i) => (spec.match.test(t) ? [i] : []));
+  if (hits.length !== 1) fail(`${spec.question}: ${hits.length} ${spec.kind} items match ${spec.match} (need exactly one): ${texts.map((t) => t.slice(0, 60)).join(' | ')}`);
+  const index = hits[0]!;
+  const prefix = spec.kind === 'keyFinding' ? `keyFindings[${index}].` : `comparison.rows[${index}].`;
+  const unverified = a.validation.numeric.figures.filter((f) => f.location.startsWith(prefix) && !f.verified);
+  if (unverified.length) fail(`${spec.question} ${prefix}: ${unverified.length} unverified figure(s); a seeded finding must have every figure verified`);
+  const periodClaims = (a.validation.periodClaims ?? []).filter((p) => p.location.startsWith(prefix));
+  if (periodClaims.length) fail(`${spec.question} ${prefix}: ${periodClaims.length} period claim(s) not cited (${periodClaims.map((p) => p.periods.join('/')).join(', ')}); a seeded finding must have none`);
+  return { kind: spec.kind, analysisId: a.analysisId, index };
+}
+
 const seed = {
   seedVersion: SEED_VERSION,
   provenance: `Real Deep Analysis output: eval questions ${SEED_QUESTIONS.join(', ')} under prompt ${DEEP_ANALYSIS_PROMPT_VERSION} and model ${client.modelId}, each recorded from one live generation call and replayed through the pipeline and validator over index ${indexVersion}. Run times are the recording times. A replay measures no durations: they are 0 and the telemetry is marked replayed; the UI shows none.`,
@@ -96,12 +131,7 @@ const seed = {
   indexVersion,
   promptVersion: DEEP_ANALYSIS_PROMPT_VERSION,
   analyses,
-  findings: [
-    { source: { kind: 'keyFinding', analysisId: byQuestion('expert-1').analysisId, index: 0 }, theme: 'regulatory-compliance', status: 'NEEDS_FOLLOW_UP' },
-    { source: { kind: 'keyFinding', analysisId: byQuestion('expert-1').analysisId, index: 1 }, theme: 'regulatory-compliance', status: 'ACTIVE' },
-    { source: { kind: 'comparisonRow', analysisId: byQuestion('multi-cloud').analysisId, index: 0 }, theme: 'growth-outlook', status: 'ACTIVE' },
-    { source: { kind: 'keyFinding', analysisId: byQuestion('pdf-2').analysisId, index: 0 }, theme: 'financial-performance', status: 'ACTIVE' },
-  ],
+  findings: SEED_FINDINGS.map((f) => ({ source: seedItem(f), theme: f.theme, status: f.status })),
 };
 const out = join(ROOT, 'seed/demo-workspace.json');
 writeFileSync(out, `${JSON.stringify(seed)}\n`);

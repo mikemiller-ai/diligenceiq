@@ -56,7 +56,8 @@ export function Sidebar({
   onNavigate,
 }: {
   collapsed: boolean;
-  onToggle: () => void;
+  /** The desktop rail's Collapse; omitted in the phone drawer, which has no collapsed state. */
+  onToggle?: () => void;
   /** Called when a link is followed (the mobile drawer closes itself). */
   onNavigate?: () => void;
 }) {
@@ -94,6 +95,7 @@ export function Sidebar({
             <span className={cn('truncate', collapsed && 'sr-only')}>Reset workspace</span>
           </button>
         </ResetWorkspaceDialog>
+        {onToggle && (
         <button
           type="button"
           onClick={onToggle}
@@ -104,6 +106,7 @@ export function Sidebar({
           {collapsed ? <ChevronsRight aria-hidden className="size-4" /> : <ChevronsLeft aria-hidden className="size-4" />}
           {!collapsed && <span>Collapse</span>}
         </button>
+        )}
       </div>
     </div>
   );

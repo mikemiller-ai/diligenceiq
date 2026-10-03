@@ -14,6 +14,13 @@ import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { ErrorPanel } from '@/components/diligence/states';
 import { NoticeBar } from '@/components/diligence/states';
 import { useProfile, useWorkspace } from '@/lib/workspace-store';
+import { corpusStats } from '@/lib/corpus-stats';
+
+/** The fiscal years DiligenceIQ covers, from the filing rows ("2022–2026"). */
+export function coveredYears(): string {
+  const { firstPeriod, lastPeriod } = corpusStats();
+  return `${firstPeriod.slice(0, 4)}–${lastPeriod.slice(0, 4)}`;
+}
 import * as React from 'react';
 
 export function IntelligenceView() {
@@ -39,7 +46,7 @@ function CompanyIntelligence({ ticker }: { ticker: string }) {
         <EmptyState
           icon={FileQuestion}
           title="Company not found"
-          description={`“${ticker}” is not one of the companies in the SEC filing corpus.`}
+          description={`“${ticker}” is not one of the companies whose filings DiligenceIQ holds.`}
           action={
             <Button asChild variant="secondary">
               <Link href={intelligenceHref()}>Choose a company</Link>
@@ -55,17 +62,18 @@ function CompanyIntelligence({ ticker }: { ticker: string }) {
     // window. It has no profile and Deep Analysis does not take it as a company filter, so
     // this page offers neither; the filing itself stays readable.
     const filing = FILINGS.find((f) => f.ticker === company.ticker);
+    const year = company.latestAnnualPeriodEnd.slice(0, 4);
     return (
       <PageContainer>
         {back}
         <EmptyState
           icon={CalendarX}
-          title={`${company.company}, ${fiscalYearLabel(company.latestAnnualPeriodEnd)}: outside the review window`}
-          description="Its only filing in the corpus predates the review window, so it has no Company Intelligence profile and is not offered as a company filter in Deep Analysis. It is not current coverage of the company."
+          title={`${company.company}: only a ${year} annual report`}
+          description={`DiligenceIQ only has its annual report for ${fiscalYearLabel(company.latestAnnualPeriodEnd)}, older than the ${coveredYears()} period it covers. So there is no Company Intelligence profile for it, and Deep Analysis doesn’t offer it as a company. You can still read that report.`}
           action={
             filing ? (
               <Button asChild variant="secondary">
-                <Link href={filingHref(filing.documentId)}>Open the filing</Link>
+                <Link href={filingHref(filing.documentId)}>Read the {year} report</Link>
               </Button>
             ) : undefined
           }
@@ -112,8 +120,8 @@ function CompanyIntelligence({ ticker }: { ticker: string }) {
         {back}
         <EmptyState
           icon={Building2}
-          title={`Intelligence for ${company.company} isn’t built for this index version`}
-          description="You can still ask any question about this company in Deep Analysis; answers are drawn from its filings."
+          title={`Company Intelligence for ${company.company} isn’t ready yet`}
+          description="Its summary hasn’t been built from the current filings yet. You can still ask any question about this company in Deep Analysis; answers come from its filings."
           action={
             <Button asChild>
               <Link href={newAnalysisHref({ tickers: [company.ticker] })}>Ask about {company.company}</Link>

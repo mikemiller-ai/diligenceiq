@@ -19,6 +19,16 @@ export function formatDateTime(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : dateTimeFmt.format(d);
 }
 
+/**
+ * Date and time in the reader's own time zone, without a zone label ("Oct 3, 2:24 PM"). Only for
+ * views rendered after the workspace loads in the browser (never in the static HTML), so server and
+ * client renders cannot disagree.
+ */
+export function formatLocalDateTime(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(d);
+}
+
 export function formatCount(n: number): string {
   return new Intl.NumberFormat('en-US').format(n);
 }

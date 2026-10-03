@@ -300,6 +300,17 @@ export const FigureCheckSchema = z.object({
 });
 export type FigureCheck = z.infer<typeof FigureCheckSchema>;
 
+/** One period claim the validator flagged (`BriefValidation.periodClaims`). */
+export const PeriodClaimSchema = z.object({
+  /** `keyFindings[0].finding`, `investmentConsiderations[2].text`, `comparison.rows[1].values[0]`, `executiveSummary`. */
+  location: z.string(),
+  /** The fiscal years the claim names that no citation of the item belongs to, as `FY2023`. */
+  periods: z.array(z.string()).min(1),
+  /** The novelty or absence wording that makes it a period claim ("first year", "absent", "not present"). */
+  cue: z.string(),
+});
+export type PeriodClaim = z.infer<typeof PeriodClaimSchema>;
+
 /** Deterministic validation of one brief (SPEC §31; architecture §6.9). Never a second model call. */
 export const BriefValidationSchema = z.object({
   /** Deterministic repairs applied before the schema parse (empty when none were needed). */
@@ -324,6 +335,14 @@ export const BriefValidationSchema = z.object({
   }),
   /** Comparison rows whose number of values differs from the number of columns (after repair). */
   comparisonMisaligned: z.array(z.string()).default([]),
+  /**
+   * Period claims (architecture §6.9, 2026-10-03): a sentence that says something is new, a first,
+   * added or absent in a fiscal period, where none of the item's own valid citations is from a
+   * filing of that fiscal year (the executive summary: none of the brief's cited passages).
+   * `periods` are the uncited fiscal years ("FY2023"); `cue` is the novelty or absence wording.
+   * Optional: analyses and seeds stored before this check have none.
+   */
+  periodClaims: z.array(PeriodClaimSchema).optional(),
   /** Plain-language notices for the brief ("1 citation removed: not in the supplied evidence"). */
   notices: z.array(z.string()),
 });

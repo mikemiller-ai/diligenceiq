@@ -4,7 +4,7 @@ import { CONFIG, PRODUCTION_URL } from '../lib/config';
 import { findCostViolations, formatViolations, grantedActions, type GuardTemplate } from '../lib/cost-guard';
 import { SECURITY_HEADERS } from '../lib/web-stack';
 import { API_5XX } from '../lib/api-stack';
-import { GENERATION_CALLS_OVER_ONE, METRIC_NAMESPACE, WORKER_METRICS } from '../lib/worker-stack';
+import { EXPECTED_FAILURE_CODES, GENERATION_CALLS_OVER_ONE, METRIC_NAMESPACE, WORKER_METRICS } from '../lib/worker-stack';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { synthAll } from './synth';
@@ -333,7 +333,7 @@ describe('WorkerStack (architecture §4.3, §5; DD-04)', () => {
     templates.worker.hasResourceProperties('AWS::CloudWatch::Alarm', { MetricName: GENERATION_CALLS_OVER_ONE, Threshold: 1, TreatMissingData: 'notBreaching' });
   });
 
-  it('Phase 8: both alarms notify exactly the core alert topic (a weak Fn::GetStackOutput reference to its Ref output)', () => {
+  it('Phase 8: all three alarms notify exactly the core alert topic (a weak Fn::GetStackOutput reference to its Ref output)', () => {
     const topicIds = Object.keys(templates.core.findResources('AWS::SNS::Topic', { Properties: { TopicName: 'diligenceiq-alerts' } }));
     expect(topicIds).toHaveLength(1);
     const outputs = templates.core.toJSON().Outputs as Record<string, { Value: unknown }>;
@@ -341,7 +341,7 @@ describe('WorkerStack (architecture §4.3, §5; DD-04)', () => {
     expect(outputNames).toHaveLength(1);
     const expected = [{ 'Fn::GetStackOutput': { StackName: stacks.core.stackName, Region: stacks.core.region, OutputName: outputNames[0] } }];
     const alarms = resourcesOf(templates.worker, 'AWS::CloudWatch::Alarm');
-    expect(alarms).toHaveLength(2);
+    expect(alarms).toHaveLength(3);
     for (const alarm of alarms) expect(propsOf(alarm).AlarmActions).toEqual(expected);
   });
 
@@ -397,12 +397,44 @@ describe('WorkerStack (architecture §4.3, §5; DD-04)', () => {
       Object.values(tpl.findResources('AWS::Logs::MetricFilter')).filter((f) => (f as { Properties: { MetricTransformations: Array<{ MetricName: string }> } }).Properties.MetricTransformations[0]!.MetricName === WORKER_METRICS.failedByCode);
     expect(failedFilters(t)).toHaveLength(2);
     expect(failedFilters(templates.api)).toHaveLength(1);
-    // Two alarms in all (about $0.20 a month); everything else is a free metric filter.
-    expect(Object.keys(t.findResources('AWS::CloudWatch::Alarm'))).toHaveLength(2);
+    // Three alarms in all (about $0.30 a month); everything else is a free metric filter.
+    expect(Object.keys(t.findResources('AWS::CloudWatch::Alarm'))).toHaveLength(3);
     templates.api.hasResourceProperties('AWS::Logs::MetricFilter', {
       FilterPattern: '{ ($.event = "api_request") && ($.status >= 500) }',
       MetricTransformations: [Match.objectLike({ MetricName: API_5XX, MetricValue: '1', MetricNamespace: METRIC_NAMESPACE })],
     });
+  });
+
+  it('2026-10-03: a failed analysis with a fault code alarms (Sum ≥ 1 in 5 min); expected outcomes do not', () => {
+    const pattern =
+      '{ ($.event = "analysis_summary") && ($.status = "failed") && ($.code != "NO_RELEVANT_EVIDENCE") && ($.code != "ANALYSES_DISABLED") }';
+    const faultFilters = (tpl: Template) =>
+      resourcesOf(tpl, 'AWS::Logs::MetricFilter').filter((f) => (propsOf(f).MetricTransformations as Array<{ MetricName: string }>)[0]!.MetricName === WORKER_METRICS.failedFault);
+    // Worker and dlq-handler (WorkerStack) and the api's poll-expiry lines (ApiStack): every failed summary line.
+    expect(faultFilters(templates.worker)).toHaveLength(2);
+    expect(faultFilters(templates.api)).toHaveLength(1);
+    for (const f of [...faultFilters(templates.worker), ...faultFilters(templates.api)]) {
+      expect(propsOf(f).FilterPattern).toBe(pattern);
+      // Dimensionless, so one alarm sees every code.
+      expect(propsOf(f).MetricTransformations).toEqual([{ MetricName: WORKER_METRICS.failedFault, MetricNamespace: METRIC_NAMESPACE, MetricValue: '1' }]);
+    }
+    const logGroups = (tpl: Template) => faultFilters(tpl).map((f) => (propsOf(f).LogGroupName as { Ref: string }).Ref);
+    expect(new Set(logGroups(templates.worker)).size).toBe(2);
+    expect(logGroups(templates.worker).every((id) => /^(WorkerFunctionLogs|DlqFunctionLogs)/.test(id))).toBe(true);
+    expect(logGroups(templates.api).every((id) => id.startsWith('ApiFunctionLogs'))).toBe(true);
+    templates.worker.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      MetricName: WORKER_METRICS.failedFault,
+      Namespace: METRIC_NAMESPACE,
+      Statistic: 'Sum',
+      Period: 300,
+      EvaluationPeriods: 1,
+      Threshold: 1,
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold',
+      TreatMissingData: 'notBreaching',
+      Dimensions: Match.absent(),
+    });
+    // Only the two expected outcomes are excluded; every other analysis failure code pages.
+    expect([...EXPECTED_FAILURE_CODES].sort()).toEqual(['ANALYSES_DISABLED', 'NO_RELEVANT_EVIDENCE']);
   });
 
   it('bundles: the worker carries the Deep Analysis prompt; no bundle carries the offline profile builder or its prompt', () => {

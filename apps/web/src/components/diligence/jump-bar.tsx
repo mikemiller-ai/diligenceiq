@@ -16,7 +16,13 @@ export interface JumpLink {
   id: string;
   label: string;
   count?: number;
+  /** What the count counts (singular, plural): read by screen readers and the phone menu, so "28" is never a bare number. */
+  unit?: [string, string];
+  /** Also show the unit on the chip (where two counts on one page could be confused, e.g. risk headings vs risk areas). */
+  showUnit?: boolean;
 }
+
+const unitOf = (l: JumpLink) => (l.unit && l.count !== undefined ? l.unit[l.count === 1 ? 0 : 1] : '');
 
 export function JumpBar({ links, className }: { links: JumpLink[]; className?: string }) {
   const { active, pin } = useActiveSection(links.map((l) => l.id));
@@ -64,6 +70,7 @@ export function JumpBar({ links, className }: { links: JumpLink[]; className?: s
             {l.count !== undefined && (
               <span data-allow-figures className={cn('rounded px-1 text-[11px] tabular-nums', active === l.id ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-secondary text-foreground/70')}>
                 {l.count}
+                {unitOf(l) && (l.showUnit ? ` ${unitOf(l)}` : <span className="sr-only"> {unitOf(l)}</span>)}
               </span>
             )}
           </a>
@@ -84,7 +91,7 @@ export function JumpBar({ links, className }: { links: JumpLink[]; className?: s
           {links.map((l) => (
             <option key={l.id} value={l.id}>
               {l.label}
-              {l.count !== undefined ? ` (${l.count})` : ''}
+              {l.count !== undefined ? ` (${l.count}${unitOf(l) ? ` ${unitOf(l)}` : ''})` : ''}
             </option>
           ))}
         </select>

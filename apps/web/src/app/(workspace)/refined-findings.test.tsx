@@ -69,11 +69,11 @@ describe('Findings: summary strip and filters', () => {
     render();
     const summary = screen.getByRole('region', { name: 'Summary' });
     // The name holds the visible sub-line too (the newest finding that needs follow-up).
-    const tile = within(summary).getByRole('button', { name: 'Needs Follow-Up: 1. Finding a' });
+    const tile = within(summary).getByRole('button', { name: 'Needs follow-up: 1. Finding a' });
     expect(within(summary).getByRole('button', { name: 'Active: 1. Show only these' })).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(tile);
     expect(tile).toHaveAttribute('aria-pressed', 'true');
-    expect(within(summary).getByRole('button', { name: /^Needs Follow-Up: 1\./ })).toBe(tile);
+    expect(within(summary).getByRole('button', { name: /^Needs follow-up: 1\./ })).toBe(tile);
     expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Finding a']);
     fireEvent.click(tile);
     expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(3);
@@ -107,13 +107,28 @@ describe('Findings: summary strip and filters', () => {
   });
 });
 
+describe('Findings: List/Board is its own view switch (Phase 9 review item 22)', () => {
+  it('Board is not a Group by option; Group by shows only in the List view; card metadata has no separator dots', () => {
+    render();
+    const groupBy = screen.getByRole('radiogroup', { name: 'Group by' });
+    expect(within(groupBy).queryByRole('radio', { name: 'Board' })).not.toBeInTheDocument();
+    const view = screen.getByRole('radiogroup', { name: 'View' });
+    expect(within(view).getByRole('radio', { name: 'List' })).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(within(view).getByRole('radio', { name: 'Board' }));
+    expect(screen.queryByRole('radiogroup', { name: 'Group by' })).not.toBeInTheDocument();
+    fireEvent.click(within(view).getByRole('radio', { name: 'List' }));
+    expect(screen.getByRole('radiogroup', { name: 'Group by' })).toBeInTheDocument();
+    for (const meta of screen.getAllByTestId('finding-meta')) expect([...meta.children].map((c) => c.textContent?.trim())).not.toContain('·');
+  });
+});
+
 describe('Findings: every control one click away (list and Board)', () => {
   for (const view of ['list', 'board'] as const) {
     it(`${view}: status, theme, note, Ask follow-up, delete and sources on every card`, async () => {
       render();
       if (view === 'board') {
         fireEvent.click(screen.getByRole('radio', { name: 'Board' }));
-        for (const col of ['Needs Follow-Up · 1', 'Active · 1', 'Resolved · 1']) expect(screen.getByRole('heading', { level: 2, name: col })).toBeInTheDocument();
+        for (const col of ['Needs follow-up · 1', 'Active · 1', 'Resolved · 1']) expect(screen.getByRole('heading', { level: 2, name: col })).toBeInTheDocument();
       }
       for (const f of FINDINGS) {
         const c = card(f.title);

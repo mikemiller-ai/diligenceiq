@@ -10,7 +10,7 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip } from '@/components/ui/tooltip';
-import { chipLabel } from '@/lib/citations';
+import { plainChipLabel } from '@/lib/citations';
 import { formatDate } from '@/lib/format';
 import { filingHref } from '@/lib/links';
 import { cn } from '@/lib/utils';
@@ -537,6 +537,7 @@ export function CitationChip({
   className,
   claim,
   figureChecks,
+  short,
 }: {
   id: string;
   citation?: Citation;
@@ -547,6 +548,8 @@ export function CitationChip({
   claim?: string;
   /** The brief's figure checks for the statement; the drawer bolds the ones verified in this passage. */
   figureChecks?: readonly FigureCheck[];
+  /** Shown in place of the label: a further passage with the same label as the chip before it ("2", "3"). */
+  short?: string;
 }) {
   const show = useEvidence();
   const chip = (
@@ -570,9 +573,10 @@ export function CitationChip({
         className,
       )}
     >
-      {citation ? chipLabel(citation) : id}
+      {citation ? (short ?? plainChipLabel(citation)) : id}
     </button>
   );
+  // Primary screens show plain section names; the tooltip (and the drawer) keep the filing's own section title.
   return citation ? <Tooltip content={`${citation.company} · ${citationLabel(citation)}`}>{chip}</Tooltip> : chip;
 }
 
@@ -592,11 +596,33 @@ export function CitationList({
   figureChecks?: readonly FigureCheck[];
 }) {
   if (ids.length === 0) return null;
+  // A run of passages with the same plain label ("AAPL FY2025 · Risk factors" three times in a row)
+  // shows the label once, then a numbered chip per further passage: each passage stays one click
+  // away, nothing repeats. Only adjacent repeats are numbered, so a "2" always sits right after its
+  // own label and the model's citation order is kept; AAPL, MSFT, AAPL shows three full labels.
+  const labels = ids.map((id) => {
+    const citation = context.get(id);
+    return citation ? plainChipLabel(citation) : null;
+  });
+  const runIndex = labels.reduce<number[]>((acc, label, i) => [...acc, label !== null && label === labels[i - 1] ? acc[i - 1]! + 1 : 1], []);
   return (
     <span className="inline-flex flex-wrap gap-y-1">
-      {ids.map((id) => (
-        <CitationChip key={id} id={id} citation={context.get(id)} provenance={provenance} onNavy={onNavy} claim={claim} figureChecks={figureChecks} />
-      ))}
+      {ids.map((id, i) => {
+        const citation = context.get(id);
+        const n = runIndex[i]!;
+        return (
+          <CitationChip
+            key={id}
+            id={id}
+            citation={citation}
+            provenance={provenance}
+            onNavy={onNavy}
+            claim={claim}
+            figureChecks={figureChecks}
+            {...(n > 1 ? { short: String(n), className: 'ml-0.5' } : {})}
+          />
+        );
+      })}
     </span>
   );
 }

@@ -62,6 +62,13 @@ export interface AnalysisRecord {
   citations?: Citation[];
   validation?: BriefValidation;
   telemetry?: AnalysisTelemetry;
+  /**
+   * Internal and content-free: why the pipeline failed (e.g. the Zod issue paths of a
+   * MALFORMED_OUTPUT brief), bounded by `boundedFailureDetail`. Never returned by the api
+   * (`toDetail` and the list projection name their fields), so the public error stays
+   * {code, message, requestId}. Absent on records written before 2026-10-03.
+   */
+  failureDetail?: string;
   ttl: number;
 }
 
@@ -77,6 +84,20 @@ export interface CompleteResult {
 export interface FailureExtra {
   interpretation?: AnalysisInterpretation;
   telemetry?: AnalysisTelemetry;
+  /** The pipeline's content-free `detail`; stored as `failureDetail`, bounded. */
+  failureDetail?: string;
+}
+
+/** The longest `failureDetail` stored on a record (characters). */
+export const FAILURE_DETAIL_MAX_CHARS = 300;
+
+/**
+ * The stored form of a failure detail: control characters become spaces, and anything past
+ * FAILURE_DETAIL_MAX_CHARS is cut with an ellipsis. Both stores apply it, so they store the same value.
+ */
+export function boundedFailureDetail(detail: string): string {
+  const flat = detail.replace(/\p{Cc}+/gu, ' ').trim();
+  return flat.length <= FAILURE_DETAIL_MAX_CHARS ? flat : `${flat.slice(0, FAILURE_DETAIL_MAX_CHARS - 1)}…`;
 }
 
 /** The worker no longer holds the claim (deadline passed and a poll failed it, or another writer won). */
@@ -251,6 +272,10 @@ export class DynamoAnalysisStore implements AnalysisStore {
       sets.push('telemetry = :telemetry');
       values[':telemetry'] = extra.telemetry;
     }
+    if (extra.failureDetail) {
+      sets.push('failureDetail = :failureDetail');
+      values[':failureDetail'] = boundedFailureDetail(extra.failureDetail);
+    }
     return this.conditional(this.mine(workspaceId, analysisId, claimToken, `SET ${sets.join(', ')}`, values, { '#error': 'error' }));
   }
 
@@ -353,7 +378,8 @@ export class MemoryAnalysisStore implements AnalysisStore {
   async fail(w: string, a: string, token: string, error: AnalysisError, now: Date, extra: FailureExtra = {}): Promise<boolean> {
     const r = this.mine(w, a, token);
     if (!r) return false;
-    Object.assign(r, structuredClone(extra), { status: 'FAILED', stage: 'failed', completedAt: now.toISOString(), error });
+    const { failureDetail, ...rest } = extra;
+    Object.assign(r, structuredClone(rest), failureDetail ? { failureDetail: boundedFailureDetail(failureDetail) } : {}, { status: 'FAILED', stage: 'failed', completedAt: now.toISOString(), error });
     this.writes.push(`fail ${error.code}`);
     return true;
   }

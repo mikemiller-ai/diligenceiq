@@ -56,6 +56,8 @@ export interface GenerationScore {
   /** returned / valid / removed: the model's IDs before validation; inBrief / inBriefInContext: the IDs left in the brief after it. */
   citations: { returned: number; valid: number; removed: number; preValidationRate: number; inBrief: number; inBriefInContext: number };
   figures: { total: number; verified: number; unitUnstated: number };
+  /** Period claims the validator flagged (architecture §6.9): reported, not a pass/fail check. Absent on scores recorded before 2026-10-03. */
+  periodClaims?: number;
   uncitedFindings: number;
   citedCompanies: string[];
   answerType: string | null;
@@ -193,6 +195,7 @@ export function scoreGeneration(q: EvalQuestion & { expect: EvalQuestion['expect
     checks,
     citations: { returned: v.citations.returned, valid: v.citations.valid, removed: v.citations.removed.length, preValidationRate: v.citations.preValidationRate, inBrief: briefIds.length, inBriefInContext },
     figures: { total: v.numeric.total, verified: v.numeric.verified, unitUnstated: v.numeric.unitUnstated },
+    periodClaims: v.periodClaims?.length ?? 0,
     uncitedFindings,
     citedCompanies,
     answerType: b.answerType,
@@ -214,6 +217,8 @@ export interface GenerationSummary {
   numericGrounding: number | null;
   /** Completed briefs with every figure verified. */
   briefsFullyGrounded: number;
+  /** Period claims flagged (a claim that something is new or absent in a fiscal period none of its citations is from), and the briefs with any. Reported only; no check fails on it. */
+  periodClaims: { claims: number; briefs: number };
   comparisonAligned: { passed: number; total: number };
   abstention: { passed: number; total: number };
   followUpsAnswerable: { passed: number; total: number };
@@ -257,6 +262,7 @@ export function summarizeGeneration(scores: readonly GenerationScore[], options:
     figuresUnitUnstated: done.reduce((n, s) => n + s.figures.unitUnstated, 0),
     numericGrounding: figuresTotal ? Number((figuresVerified / figuresTotal).toFixed(4)) : null,
     briefsFullyGrounded: done.filter((s) => s.figures.verified === s.figures.total).length,
+    periodClaims: { claims: done.reduce((n, s) => n + (s.periodClaims ?? 0), 0), briefs: done.filter((s) => (s.periodClaims ?? 0) > 0).length },
     comparisonAligned: checkTally('comparison aligned'),
     abstention: checkTally('abstains'),
     followUpsAnswerable: checkTally('follow-ups answerable'),

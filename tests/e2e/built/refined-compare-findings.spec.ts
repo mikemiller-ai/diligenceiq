@@ -26,13 +26,13 @@ for (const scheme of ['light', 'dark'] as const) {
     const bottom = page.getByRole('region', { name: 'Bottom line' });
     await expect(bottom.getByRole('link')).toHaveText([
       'Revenue grew at all three',
-      'NVIDIA Corporation’s operating margin widened 8.3 pp',
-      'Apple Inc’s operating cash flow fell 5.7%',
+      'NVIDIA’s operating margin widened 8.3 pp',
+      'Apple’s operating cash flow fell 5.7%',
       /^\d+ risk areas shared by all three$/,
-      /^\d+ areas only at NVIDIA Corporation$/,
+      /^\d+ areas only at NVIDIA$/,
     ]);
     // The footer agrees with the lines: Apple's cash flow fell while the others still grew (more slowly).
-    await expect(bottom).toContainText('Opposite directions: Operating cash flow (rising at Microsoft Corporation and NVIDIA Corporation, falling at Apple Inc).');
+    await expect(bottom).toContainText('Opposite directions: Operating cash flow (rising at Microsoft and NVIDIA, falling at Apple).');
     await expect(bottom.getByRole('list', { name: 'Legend' })).toContainText('no colour: one company differs');
 
     const table = page.getByRole('region', { name: 'Side by side' }).getByRole('table');
@@ -40,16 +40,16 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(revenue).toContainText('$416.2B · +6.4% in FY2025');
     await expect(revenue).toContainText('$130.5B · +114.2% in FY2025');
     await expect(revenue).toContainText('after +125.9% in FY2024');
-    await expect(revenue.getByRole('img', { name: /^Revenue, NVIDIA Corporation, FY\d{4} to FY2025$/ })).toBeVisible();
+    await expect(revenue.getByRole('img', { name: /^Revenue, NVIDIA, FY\d{4} to FY2025$/ })).toBeVisible();
     // The former Coverage and Fiscal year rows are in the column headers.
-    await expect(table.getByRole('columnheader', { name: /Apple Inc/ })).toContainText('FY ends Sep 27, 2025');
+    await expect(table.getByRole('columnheader', { name: /Apple/ })).toContainText('FY ends Sep 27, 2025');
     await expectNoAxeViolations(page);
 
     // The grid: a cell opens that company's headings, signals and passages.
     const grid = page.getByRole('region', { name: 'Risk areas' });
     await expect(grid.locator('tr[data-area]:visible')).toHaveCount(5);
-    await grid.getByRole('button', { name: /^Apple Inc, Regulatory: 4 headings/ }).click();
-    const popover = page.getByRole('dialog', { name: 'Apple Inc · Regulatory' });
+    await grid.getByRole('button', { name: /^Apple, Regulatory: 4 headings/ }).click();
+    const popover = page.getByRole('dialog', { name: 'Apple · Regulatory' });
     await expect(popover).toBeVisible();
     await expect(popover).toContainText('Latest risk headings');
     await expectNoAxeViolations(page);
@@ -75,7 +75,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
     // A status tile filters, and toggles back.
     // The tile's name holds its visible sub-line too.
-    const followUp = summary.getByRole('button', { name: /^Needs Follow-Up: \d+\. / });
+    const followUp = summary.getByRole('button', { name: /^Needs follow-up: \d+\. / });
     const n = Number(/: (\d+)\./.exec((await followUp.getAttribute('aria-label'))!)![1]);
     await followUp.click();
     await expect(followUp).toHaveAttribute('aria-pressed', 'true');
@@ -107,7 +107,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
     // Board: three status columns holding the same cards.
     await page.getByRole('radio', { name: 'Board' }).click();
-    for (const col of ['Needs Follow-Up', 'Active', 'Resolved']) await expect(page.getByRole('heading', { name: new RegExp(`^${col} · \\d+$`) })).toBeVisible();
+    for (const col of ['Needs follow-up', 'Active', 'Resolved']) await expect(page.getByRole('heading', { name: new RegExp(`^${col} · \\d+$`) })).toBeVisible();
     await expect(cards).toHaveCount(total);
     await expectNoAxeViolations(page);
 
@@ -163,7 +163,7 @@ test('Ask follow-up only prefills Deep Analysis with the finding origin; nothing
 test('Compare with a stale period (PFE): the line names it as not compared; the cell names its year', async ({ page }) => {
   await page.goto('/compare/?tickers=AAPL,MSFT,PFE');
   await settle(page);
-  await expect(page.getByRole('region', { name: 'Bottom line' })).toContainText('Pfizer Inc (latest trend FY2022)');
+  await expect(page.getByRole('region', { name: 'Bottom line' })).toContainText('Pfizer (latest trend FY2022)');
   const ocf = page.getByRole('region', { name: 'Side by side' }).locator('tr[data-metric="Operating cash flow"]');
   await expect(ocf).toContainText('latest trend FY2022');
 });
@@ -175,6 +175,8 @@ for (const path of ['/compare/?tickers=AAPL,MSFT,NVDA', '/findings/']) {
     await settle(page);
     await expandAll(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    // Phase 9 review item 15: the company columns scroll inside their box, and the page says so.
+    if (path.startsWith('/compare/')) await expect(page.getByTestId('scroll-hint').first()).toBeVisible();
     if (path === '/findings/') {
       await page.getByRole('radio', { name: 'Board' }).click();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

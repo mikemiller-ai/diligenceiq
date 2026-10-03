@@ -40,13 +40,19 @@ describe('Company Intelligence', () => {
     expect(within(featured).getAllByRole('link')[0]).toHaveTextContent('Apple Inc');
     expect(within(featured).getAllByRole('link')).toHaveLength(12);
     expect(screen.getByText('All companies · 54')).toBeInTheDocument();
-    await userEvent.type(screen.getByLabelText('Search companies'), 'general elec');
+    // Two boxes share one query: above the cards on a phone, beside "All companies" from `sm` (CSS shows one).
+    const boxes = screen.getAllByLabelText('Search companies');
+    expect(boxes).toHaveLength(2);
+    await userEvent.type(boxes[0]!, 'general elec');
+    expect(boxes[1]).toHaveValue('general elec');
     const all = screen.getByRole('heading', { name: /All companies/ }).closest('section')!;
     expect(within(all).getAllByRole('link')).toHaveLength(1);
-    expect(within(all).getByRole('link')).toHaveTextContent('Outside review window');
     // Assumptions G2: labeled as GE Capital's FY2014 report, not as General Electric (regression, finding 13).
     expect(within(all).getByRole('link')).toHaveTextContent('General Electric Capital Corp (GE Capital)');
-    expect(within(all).getByRole('link')).toHaveTextContent('FY2014 · Outside review window');
+    expect(within(all).getByRole('link')).toHaveTextContent('FY2014 report only');
+    expect(within(all).getByRole('link')).not.toHaveTextContent(/review window/);
+    // While searching, the featured cards step aside on a phone so the results sit under the box.
+    expect(screen.getByRole('heading', { name: 'Deep coverage' }).closest('section')).toHaveClass('max-sm:hidden');
   });
 
   it('GE (outside the review window) offers no profile and no Deep Analysis filter it would silently drop', () => {
@@ -54,24 +60,28 @@ describe('Company Intelligence', () => {
     // and Deep Analysis then dropped GE from the filter.
     setRoute('/intelligence/', 'ticker=GE');
     renderInWorkspace(<IntelligenceView />);
-    expect(screen.getByText(/General Electric Capital Corp \(GE Capital\), FY2014: outside the review window/)).toBeInTheDocument();
+    expect(screen.getByText('General Electric Capital Corp (GE Capital): only a 2014 annual report')).toBeInTheDocument();
+    // Plain language (Phase 9 review item 21): no "corpus" or "review window".
+    expect(screen.getByText(/only has its annual report for FY2014, older than the 2022–\d{4} period it covers/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/corpus|review window/);
     expect(screen.queryByRole('link', { name: /Ask about/ })).not.toBeInTheDocument();
     expect(screen.queryAllByRole('link').some((l) => (l.getAttribute('href') ?? '').includes('/analysis/new'))).toBe(false);
-    expect(screen.getByRole('link', { name: 'Open the filing' }).getAttribute('href')).toMatch(/id=GE_10K_2015-02-27/);
+    expect(screen.getByRole('link', { name: 'Read the 2014 report' }).getAttribute('href')).toMatch(/id=GE_10K_2015-02-27/);
   });
 
   it('renders the dashboard sections in order, with placeholders labeled and risks cited', () => {
     setRoute('/intelligence/', 'ticker=AAPL');
     renderInWorkspace(<IntelligenceView />);
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
+    // SPEC §8.3 (A.4 2026-10-03): what changed, what deserves attention and what to investigate come before the numbers and the risk list.
     expect(headings).toEqual([
       '30-second view',
-      'Performance',
-      'What is driving performance',
-      'Current risks',
       'What’s changed',
       'Attention signals',
       'Recommended diligence',
+      'Performance',
+      'What is driving performance',
+      'Current risks',
       'Coverage',
     ]);
     expect(screen.getAllByText('Placeholder, not filing data').length).toBeGreaterThan(3);
@@ -110,8 +120,10 @@ describe('Company Intelligence', () => {
     setRoute('/intelligence/', 'ticker=AAPL');
     const { container } = renderInWorkspace(<IntelligenceView />);
     const risks = screen.getByRole('heading', { name: 'Current risks' }).closest('section')!;
+    const aapl = FIXTURE_PROFILES.get('AAPL')!;
+    const areas = new Set(aapl.currentRisks.map((r) => r.category)).size;
     expect(risks).toHaveTextContent(
-      'Risk headings extracted from the latest annual report, grouped by area. A preview: the extraction rule can miss some headings and can include a sentence that is not a heading.',
+      `${aapl.currentRisks.length} risk headings in ${areas} areas, extracted from the latest annual report. A preview: the extraction rule can miss some headings and can include a sentence that is not a heading.`,
     );
     expect(container).toHaveTextContent('Preview profile. It lists the risk headings extracted from the latest annual report by a deterministic rule');
     expect(container).toHaveTextContent('the rule can miss some headings and can include a sentence that is not a heading.');
@@ -317,7 +329,8 @@ describe('Company Intelligence', () => {
   it('offers Deep Analysis when a company has no profile, and handles unknown tickers', () => {
     setRoute('/intelligence/', 'ticker=TSLA');
     const { unmount } = renderInWorkspace(<IntelligenceView />);
-    expect(screen.getByText(/Intelligence for Tesla Inc isn’t built for this index version/)).toBeInTheDocument();
+    expect(screen.getByText('Company Intelligence for Tesla Inc isn’t ready yet')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/index version|corpus/);
     expect(hrefParams(screen.getByRole('link', { name: /Ask about Tesla/ })).get('tickers')).toBe('TSLA');
     unmount();
     setRoute('/intelligence/', 'ticker=ZZZZ');
@@ -325,7 +338,7 @@ describe('Company Intelligence', () => {
     expect(screen.getByText('Company not found')).toBeInTheDocument();
   });
 
-  it('signals: Investigate prefills, View evidence shows each period, Track saves a finding', async () => {
+  it('signals: Investigate prefills, View evidence shows each period, Save finding saves it', async () => {
     const profile = profileWithSignal();
     setRoute('/intelligence/', 'ticker=AAPL');
     renderInWorkspace(
@@ -348,7 +361,9 @@ describe('Company Intelligence', () => {
     expect(within(drawer).getByRole('region', { name: 'FY2025' })).toHaveTextContent('outsourcing partners');
     await userEvent.keyboard('{Escape}');
 
-    await userEvent.click(within(card).getByRole('button', { name: 'Track' }));
+    // One label for saving everywhere (Phase 9 review item 10): never "Track" or a bare "Save".
+    expect(within(card).queryByRole('button', { name: 'Track' })).not.toBeInTheDocument();
+    await userEvent.click(within(card).getByRole('button', { name: 'Save finding' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByLabelText('Theme')).toHaveValue('risk-factors');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
@@ -366,7 +381,7 @@ describe('Company Intelligence', () => {
     );
     const cyber = screen.getByRole('region', { name: 'Cybersecurity' });
     const risk = firstRisk('MSFT', 'cybersecurity');
-    await userEvent.click(within(cyber).getAllByRole('button', { name: 'Save Finding' })[0]!);
+    await userEvent.click(within(cyber).getAllByRole('button', { name: 'Save finding' })[0]!);
     const dialog = await screen.findByRole('dialog');
     await userEvent.selectOptions(within(dialog).getByLabelText('Status'), 'NEEDS_FOLLOW_UP');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
@@ -411,7 +426,7 @@ describe('Compare', () => {
     // No Save on any row: nothing here is a citable comparative fact yet.
     expect(screen.queryByRole('button', { name: /^Save/ })).not.toBeInTheDocument();
     // Factual rows stay: coverage tier and fiscal-year end, with the different-month note.
-    expect(screen.getByRole('columnheader', { name: /Apple Inc/ })).toHaveTextContent('FY ends Sep 27, 2025');
+    expect(screen.getByRole('columnheader', { name: /Apple/ })).toHaveTextContent('FY ends Sep 27, 2025');
     expect(screen.getByText(/Fiscal years end in different months/)).toBeInTheDocument();
     // One templated question that does not depend on which headings the profiles hold.
     const links = within(screen.getByRole('heading', { name: 'Ask next' }).closest('section')!).getAllByRole('link');
@@ -444,7 +459,7 @@ describe('Compare', () => {
     const link = within(screen.getByRole('heading', { name: 'Ask next' }).closest('section')!).getAllByRole('link')[0]!;
     expect(hrefParams(link).get('origin')).toBe('compare:AAPL,MSFT:common-regulatory');
 
-    await userEvent.click(within(supply).getByRole('button', { name: 'Save' }));
+    await userEvent.click(within(supply).getByRole('button', { name: 'Save finding' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByLabelText('Title')).toHaveValue('Supply chain: distinctive to Apple Inc');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
@@ -507,11 +522,11 @@ describe('Diligence Brief', () => {
       </>,
       withSamples,
     );
-    await userEvent.click(screen.getAllByRole('button', { name: 'Save Finding' })[0]!);
+    await userEvent.click(screen.getAllByRole('button', { name: 'Save finding' })[0]!);
     let dialog = await screen.findByRole('dialog');
     await userEvent.type(within(dialog).getByLabelText('Analyst note (optional)'), 'Size it');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
-    await userEvent.click(within(screen.getByRole('table')).getAllByRole('button', { name: 'Save' })[0]!);
+    await userEvent.click(within(screen.getByRole('table')).getAllByRole('button', { name: 'Save finding' })[0]!);
     dialog = await screen.findByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
     expect(screen.getByText('2 findings')).toBeInTheDocument();
@@ -523,7 +538,7 @@ describe('Diligence Brief', () => {
     setRoute('/analysis/', 'id=an-04');
     renderInWorkspace(<AnalysisView />, withSamples);
     const alert = screen.getByRole('alert');
-    expect(alert).toHaveTextContent('The filings don’t cover this');
+    expect(alert).toHaveTextContent('No passages matched this question');
     expect(alert).toHaveTextContent('fixture-7f3c2a');
     expect(within(alert).getByRole('link', { name: 'Edit and run again' }).getAttribute('href')).toMatch(/^\/analysis\/new\/?\?/);
   });

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { renderInWorkspace } from '@/test/render';
 import { TEST_PASSAGES } from '@/test/sample-analyses';
-import { CitedText } from './evidence';
+import { CitationList, CitedText } from './evidence';
 
 const ctx = new Map(TEST_PASSAGES.map((p) => [p.chunkId, p]));
 
@@ -14,8 +14,9 @@ describe('CitedText and the evidence drawer', () => {
     expect(document.body.textContent).toContain('Apple relies on partners');
     expect(document.body.textContent).toContain('. Next.');
     expect(document.body.textContent).not.toContain('[AAPL');
-    // The chip shows the short Evidence label; the full ID stays in the accessible name.
-    expect(screen.getByRole('button', { name: 'View evidence AAPL-FY2025-10K-1A-F01' })).toHaveTextContent('§ AAPL FY2025 · 1A');
+    // The chip shows a plain label (no SEC item code on primary screens); the full ID stays in the accessible name.
+    expect(screen.getByRole('button', { name: 'View evidence AAPL-FY2025-10K-1A-F01' })).toHaveTextContent('AAPL FY2025 · Risk factors');
+    expect(screen.getByRole('button', { name: 'View evidence AAPL-FY2025-10K-1A-F01' })).not.toHaveTextContent(/§|1A/);
   });
 
   it('opens the drawer with the real passage and a deep link to the filing', async () => {
@@ -42,5 +43,26 @@ describe('CitedText and the evidence drawer', () => {
     const dialog = await screen.findByRole('dialog');
     expect(dialog).toHaveTextContent('Unsupported — flagged');
     expect(screen.queryByRole('link', { name: /open filing/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('CitationList on primary screens (Phase 9 review item 9)', () => {
+  it('shows a repeated plain label once, then a numbered chip per further passage, each opening its own passage', async () => {
+    const base = TEST_PASSAGES.find((p) => p.chunkId === 'AAPL-FY2025-10K-1A-F01')!;
+    const twins = [base, { ...base, chunkId: 'AAPL-FY2025-10K-1A-F98' }, { ...base, chunkId: 'AAPL-FY2025-10K-1A-F99' }];
+    renderInWorkspace(<CitationList ids={twins.map((t) => t.chunkId)} context={new Map(twins.map((t) => [t.chunkId, t]))} provenance="profile" />);
+    const chips = twins.map((t) => screen.getByRole('button', { name: `View evidence ${t.chunkId}` }));
+    expect(chips.map((c) => c.textContent)).toEqual(['AAPL FY2025 · Risk factors', '2', '3']);
+    await userEvent.click(chips[2]!);
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Item 1A — Risk Factors');
+  });
+  // Code review 2026-10-03: the counter numbered non-adjacent repeats, so a "2" sat next to MSFT's chip.
+  it('numbers only adjacent repeats, so a number always follows its own label and the model\'s order is kept', () => {
+    const base = TEST_PASSAGES.find((p) => p.chunkId === 'AAPL-FY2025-10K-1A-F01')!;
+    const msft = { ...base, chunkId: 'MSFT-FY2025-10K-1A-F01', ticker: 'MSFT', company: 'Microsoft Corp' };
+    const list = [base, msft, { ...base, chunkId: 'AAPL-FY2025-10K-1A-F98' }, { ...base, chunkId: 'AAPL-FY2025-10K-1A-F99' }, { ...msft, chunkId: 'MSFT-FY2025-10K-1A-F02' }];
+    renderInWorkspace(<CitationList ids={list.map((t) => t.chunkId)} context={new Map(list.map((t) => [t.chunkId, t]))} provenance="profile" />);
+    const chips = list.map((t) => screen.getByRole('button', { name: `View evidence ${t.chunkId}` }));
+    expect(chips.map((c) => c.textContent)).toEqual(['AAPL FY2025 · Risk factors', 'MSFT FY2025 · Risk factors', 'AAPL FY2025 · Risk factors', '2', 'MSFT FY2025 · Risk factors']);
   });
 });

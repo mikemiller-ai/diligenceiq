@@ -3,7 +3,7 @@ import type { BriefValidation, DiligenceBrief } from '@diligenceiq/core';
 /*
  * The brief's bottom line (DD-21 g; step 3 as built). A fixed rule over what the brief already
  * stores: each key finding's validated title, its basis and companies, and what the server-side
- * validator recorded for it (its figure checks and whether a valid citation is left). Nothing is
+ * validator recorded for it (its figure checks, its period claims, and whether a valid citation is left). Nothing is
  * inferred from the model's wording: a brief stores no direction for a finding, so its chips state
  * evidence, never up or down. No model call and no new stored text.
  */
@@ -28,6 +28,18 @@ export interface BriefHeadline {
   figures: FigureTally;
   /** False when the validator left the finding with no valid citation. */
   cited: boolean;
+  /** Fiscal periods the finding says something is new or absent in, with no citation from that period (architecture §6.9). */
+  uncitedPeriods: string[];
+}
+
+/**
+ * The fiscal periods the validator flagged under one location prefix (`keyFindings[2].`,
+ * `executiveSummary`), in order, de-duplicated. Empty for analyses stored before the check.
+ */
+export function uncitedPeriodsAt(validation: BriefValidation | undefined, prefix: string): string[] {
+  const out: string[] = [];
+  for (const c of validation?.periodClaims ?? []) if (c.location === prefix || c.location.startsWith(prefix)) for (const p of c.periods) if (!out.includes(p)) out.push(p);
+  return out;
 }
 
 /** The figures the validator checked under one location prefix, tallied by outcome. */
@@ -51,6 +63,7 @@ export function briefHeadlines(brief: Pick<DiligenceBrief, 'keyFindings'>, valid
     tickers: k.tickers,
     figures: tallyFigures(validation, `keyFindings[${i}].`),
     cited: k.citationIds.length > 0 && !uncited.has(`keyFindings[${i}]`),
+    uncitedPeriods: uncitedPeriodsAt(validation, `keyFindings[${i}].`),
   }));
 }
 

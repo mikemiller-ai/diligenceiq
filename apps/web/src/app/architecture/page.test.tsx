@@ -43,8 +43,29 @@ describe('Architecture and business value page', () => {
       expect(screen.getByRole('heading', { name }).closest('li')).toHaveTextContent('Built');
     }
     expect(text).toContain('OFFLINE · BUILT, PHASE 4B');
-    // The one item still ahead names its phase.
-    expect(screen.getAllByText('Designed · Phase 8')).toHaveLength(1);
+    // Phase 8 built the alarm emails (SNS) and the Budget alert: nothing on the page is still "to come in Phase 8".
+    expect(text).not.toMatch(/Designed · Phase 8|to come in Phase 8/);
+    expect(screen.getByText(/Alarm notifications by email \(SNS\) and the AWS Budget alert/).closest('li')).toHaveTextContent('Built');
+  });
+
+  it('has a main landmark, keeps the business story, and draws the live monitoring pipeline marked not built (Phase 9 review item 23)', () => {
+    const { container } = render(<ArchitecturePage />);
+    const main = container.querySelector('main#main')!;
+    expect(main).not.toBeNull();
+    expect(main).toHaveTextContent('How this creates value for a private-equity deal team.');
+    const pipeline = screen.getByRole('list', { name: 'Live monitoring pipeline, not built' });
+    expect([...pipeline.querySelectorAll('li p:first-child')].map((p) => p.textContent)).toEqual([
+      'EventBridge schedule',
+      'SEC new-filing check',
+      'Ingestion',
+      'Index update',
+      'Change detection',
+      'Watch match',
+      'Intelligence events',
+      'SNS / email',
+    ]);
+    expect(screen.getByTestId('live-monitoring')).toHaveTextContent('Not built · future state');
+    expect(screen.getByTestId('live-monitoring')).toHaveTextContent('Nothing here runs in this deployment.');
   });
 
   it('every figure on the page is a measured one (SPEC §18; traced by measured.test.ts)', () => {

@@ -1,0 +1,1786 @@
+{
+  "generatedAt": "2026-10-03",
+  "region": "us-east-1",
+  "account": "961406434831 (Mike's account; shared with other products)",
+  "status": "ESTIMATE from AWS list prices x measured quantities (SPEC 35.10). Not billing truth.",
+  "method": "Read-only AWS CLI inventory and CloudWatch metrics, AWS Price List API (aws pricing get-products --region us-east-1), Cost Explorer (4 requests at $0.01 each). No writes, no Bedrock calls.",
+  "hoursPerMonth": 730,
+  "gbIs": "GiB (2^30 bytes), as AWS bills storage",
+  "prices": {
+    "s3_standard_storage": {
+      "serviceCode": "AmazonS3",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "TimedStorage-ByteHrs"
+      },
+      "sku": "WP9ANXZGBYYSGJEA",
+      "usagetype": "TimedStorage-ByteHrs",
+      "description": "$0.023 per GB - first 50 TB / month of storage used",
+      "usd": 0.023,
+      "unit": "GB-Mo",
+      "tier": [
+        "0",
+        "51200"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "s3_get_requests": {
+      "serviceCode": "AmazonS3",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "Requests-Tier2"
+      },
+      "sku": "ZWQ6Q48CRJXX4FXE",
+      "usagetype": "Requests-Tier2",
+      "description": "$0.004 per 10,000 GET and all other requests",
+      "usd": 4e-07,
+      "unit": "Requests",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "s3_put_requests": {
+      "serviceCode": "AmazonS3",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "Requests-Tier1"
+      },
+      "sku": "E9YHNFENF4XQBZR6",
+      "usagetype": "Requests-Tier1",
+      "description": "$0.005 per 1,000 PUT, COPY, POST, or LIST requests",
+      "usd": 5e-06,
+      "unit": "Requests",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "dynamodb_storage": {
+      "serviceCode": "AmazonDynamoDB",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "TimedStorage-ByteHrs"
+      },
+      "sku": "F3E2EDSYC6ZNW7XP",
+      "usagetype": "TimedStorage-ByteHrs",
+      "description": "$0.25 per GB-Month of storage used beyond first 25 free GB-Months",
+      "usd": 0.25,
+      "unit": "GB-Mo",
+      "tier": [
+        "25",
+        "Inf"
+      ],
+      "effectiveDate": "2026-08-01T00:00:00Z"
+    },
+    "dynamodb_read_request_units": {
+      "serviceCode": "AmazonDynamoDB",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "ReadRequestUnits"
+      },
+      "sku": "4W4ZMC46EHE8XTTZ",
+      "usagetype": "ReadRequestUnits",
+      "description": "$0.125 per million read request units (N. Virginia)",
+      "usd": 1.25e-07,
+      "unit": "ReadRequestUnits",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-08-01T00:00:00Z"
+    },
+    "dynamodb_write_request_units": {
+      "serviceCode": "AmazonDynamoDB",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "WriteRequestUnits"
+      },
+      "sku": "FGXVD96DKJMUASY3",
+      "usagetype": "WriteRequestUnits",
+      "description": "$0.625 per million write request units (N. Virginia)",
+      "usd": 6.25e-07,
+      "unit": "WriteRequestUnits",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-08-01T00:00:00Z"
+    },
+    "cloudwatch_logs_storage": {
+      "serviceCode": "AmazonCloudWatch",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "TimedStorage-ByteHrs"
+      },
+      "sku": "JRHJQ2UMPUB5K73A",
+      "usagetype": "TimedStorage-ByteHrs",
+      "description": "$0.03 per GB-mo of log storage - US East (Northern Virginia)",
+      "usd": 0.03,
+      "unit": "GB-Mo",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "cloudwatch_logs_ingestion_standard": {
+      "serviceCode": "AmazonCloudWatch",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "DataProcessing-Bytes"
+      },
+      "sku": "96K55R2PV3ZZZ3AM",
+      "usagetype": "DataProcessing-Bytes",
+      "description": "$0.50 per GB custom log data ingested in Standard log class - US East (Northern Virginia)",
+      "usd": 0.5,
+      "unit": "GB",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "cloudwatch_alarm_standard": {
+      "serviceCode": "AmazonCloudWatch",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "CW:AlarmMonitorUsage"
+      },
+      "sku": "EVETVUGEN3MUTMXM",
+      "usagetype": "CW:AlarmMonitorUsage",
+      "description": "$0.10 per alarm metric month (standard resolution) - US East (Northern Virginia)",
+      "usd": 0.1,
+      "unit": "Alarms",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "cloudwatch_custom_metric": {
+      "serviceCode": "AmazonCloudWatch",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "CW:MetricMonitorUsage"
+      },
+      "sku": "KG586CTNGQ4VRZKZ",
+      "usagetype": "CW:MetricMonitorUsage",
+      "description": "$0.30 per metric-month for the first 10,000 metrics - US East (Northern Virginia)",
+      "usd": 0.3,
+      "unit": "Metrics",
+      "tier": [
+        "0",
+        "10000"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "sqs_standard_requests": {
+      "serviceCode": "AWSQueueService",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "Requests-RBP"
+      },
+      "sku": "8RN6B8U4MERHRXP3",
+      "usagetype": "Requests-RBP",
+      "description": "$0.40 per million Amazon SQS standard requests in Tier1 in US East (N Virginia)",
+      "usd": 4e-07,
+      "unit": "Requests",
+      "tier": [
+        "0",
+        "100000000000"
+      ],
+      "effectiveDate": "2025-08-01T00:00:00Z"
+    },
+    "lambda_arm_gb_second": {
+      "serviceCode": "AWSLambda",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "Lambda-GB-Second-ARM"
+      },
+      "sku": "72SBSFWPMDTH8S3J",
+      "usagetype": "Lambda-GB-Second-ARM",
+      "description": "AWS Lambda - Total Compute for ARM - US East (Northern Virginia)-Tier-1",
+      "usd": 1.33334e-05,
+      "unit": "Lambda-GB-Second",
+      "tier": [
+        "0",
+        "7500000000"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "lambda_arm_requests": {
+      "serviceCode": "AWSLambda",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "Request-ARM"
+      },
+      "sku": "K7BX6567RJ67A2KE",
+      "usagetype": "Request-ARM",
+      "description": "AWS Lambda - Total Requests for ARM - US East (Northern Virginia)",
+      "usd": 2e-07,
+      "unit": "Requests",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-09-01T00:00:00Z"
+    },
+    "apigateway_http_requests": {
+      "serviceCode": "AmazonApiGateway",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "USE1-ApiGatewayHttpRequest"
+      },
+      "sku": "FC2TWT2UEPTBKVBX",
+      "usagetype": "USE1-ApiGatewayHttpRequest",
+      "description": "$1/million requests - API Gateway HTTP API (first 300 million)",
+      "usd": 1e-06,
+      "unit": "Requests",
+      "tier": [
+        "0",
+        "300000000"
+      ],
+      "effectiveDate": "2025-11-01T00:00:00Z"
+    },
+    "amplify_artifact_storage": {
+      "serviceCode": "AWSAmplify",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "USE1-DataStorage"
+      },
+      "sku": "QRT9FFDUCFJTWSS6",
+      "usagetype": "USE1-DataStorage",
+      "description": "$0.023 per GB build artifacts stored",
+      "usd": 0.023,
+      "unit": "GigaBytes",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2025-05-01T00:00:00Z"
+    },
+    "amplify_data_transfer_out": {
+      "serviceCode": "AWSAmplify",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "USE1-DataTransferOut"
+      },
+      "sku": "QPQD3RGPJYEKWHWU",
+      "usagetype": "USE1-DataTransferOut",
+      "description": "$0.15 per GB served (data transfer out)",
+      "usd": 0.15,
+      "unit": "GigaBytes",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2025-05-01T00:00:00Z"
+    },
+    "sns_email_notifications": {
+      "serviceCode": "AmazonSNS",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "DeliveryAttempts-SMTP"
+      },
+      "sku": "BZ4UZ2ERDQACBPJ4",
+      "usagetype": "DeliveryAttempts-SMTP",
+      "description": "$2.00 per 100,000 Amazon SNS Email/Email-JSON Notifications thereafter",
+      "usd": 2e-05,
+      "unit": "Notifications",
+      "tier": [
+        "1000",
+        "Inf"
+      ],
+      "effectiveDate": "2026-02-01T00:00:00Z"
+    },
+    "sns_api_requests": {
+      "serviceCode": "AmazonSNS",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "Requests-Tier1"
+      },
+      "sku": "QDX8G2WMY9NPXXPG",
+      "usagetype": "Requests-Tier1",
+      "description": "$0.50 per 1,000,000 Amazon SNS API Requests per month thereafter",
+      "usd": 5e-07,
+      "unit": "Requests",
+      "tier": [
+        "1000000",
+        "Inf"
+      ],
+      "effectiveDate": "2026-02-01T00:00:00Z"
+    },
+    "route53_hosted_zone": {
+      "serviceCode": "AmazonRoute53",
+      "filters": {
+        "usagetype": "HostedZone"
+      },
+      "sku": "KVPGEJE88UW8S779",
+      "usagetype": "HostedZone",
+      "description": "$0.50 per Hosted Zone for the first 25 Hosted Zones",
+      "usd": 0.5,
+      "unit": "HostedZone",
+      "tier": [
+        "0",
+        "25"
+      ],
+      "effectiveDate": "2026-08-01T00:00:00Z"
+    },
+    "bedrock_titan_embed_v2_input": {
+      "serviceCode": "AmazonBedrock",
+      "filters": {
+        "usagetype": "USE1-TitanEmbeddingV2-Text-input-tokens"
+      },
+      "sku": "EDNQYEHQ3XQ8N7EY",
+      "usagetype": "USE1-TitanEmbeddingV2-Text-input-tokens",
+      "description": "$0.00002 per 1K tokens for TitanEmbeddingsV2-Text-input-tokens in US East",
+      "usd": 2e-05,
+      "unit": "1K tokens",
+      "tier": [
+        "0",
+        "Inf"
+      ],
+      "effectiveDate": "2026-10-01T00:00:00Z"
+    },
+    "dynamodb_storage_free_first_25gb": {
+      "serviceCode": "AmazonDynamoDB",
+      "filters": {
+        "regionCode": "us-east-1",
+        "usagetype": "TimedStorage-ByteHrs"
+      },
+      "sku": "F3E2EDSYC6ZNW7XP",
+      "usagetype": "TimedStorage-ByteHrs",
+      "description": "$0.00 per GB-Month of storage for first 25 free GB-Months",
+      "usd": 0.0,
+      "unit": "GB-Mo",
+      "tier": [
+        "0",
+        "25"
+      ],
+      "effectiveDate": "2026-08-01T00:00:00Z"
+    },
+    "bedrock_sonnet_4_6_billed_effective": {
+      "source": "Cost Explorer (not in the AWS Price List API: billed as the Marketplace product \"Claude Sonnet 4.6 (Amazon Bedrock Edition)\")",
+      "command": "aws ce get-cost-and-usage --region us-east-1 --time-period Start=2026-09-25,End=2026-10-04 --granularity MONTHLY --metrics UnblendedCost UsageQuantity --filter SERVICE in [Claude Sonnet 4.6 (Amazon Bedrock Edition), Amazon Bedrock] --group-by SERVICE USAGE_TYPE",
+      "usageTypes": {
+        "USE1-TitanEmbeddingV2-Text-input-tokens": {
+          "service": "Amazon Bedrock",
+          "costUsd": 0.4422,
+          "quantity": 22109.416,
+          "unit": "1K tokens",
+          "effectiveUsdPerUnit": 0.0,
+          "period": {
+            "Start": "2026-10-01",
+            "End": "2026-10-04"
+          }
+        },
+        "USE1-MP:USE1_InputTokenCount-Units": {
+          "service": "Claude Sonnet 4.6 (Amazon Bedrock Edition)",
+          "costUsd": 9.8728,
+          "quantity": 2.991752,
+          "unit": "1M tokens",
+          "effectiveUsdPerUnit": 3.3,
+          "period": {
+            "Start": "2026-10-01",
+            "End": "2026-10-04"
+          }
+        },
+        "USE1-MP:USE1_OutputTokenCount-Units": {
+          "service": "Claude Sonnet 4.6 (Amazon Bedrock Edition)",
+          "costUsd": 7.0502,
+          "quantity": 0.427285,
+          "unit": "1M tokens",
+          "effectiveUsdPerUnit": 16.5,
+          "period": {
+            "Start": "2026-10-01",
+            "End": "2026-10-04"
+          }
+        }
+      },
+      "inputUsdPerMillion": 3.3,
+      "outputUsdPerMillion": 16.5,
+      "note": "Cost / quantity over 2026-10-01..03 (billing lag: 10-03 incomplete). Invoked through the us. cross-region inference profile."
+    },
+    "bedrock_sonnet_4_6_code_table": {
+      "source": "packages/rag/src/generation/pipeline.ts PRICING",
+      "inputUsdPerMillion": 3,
+      "outputUsdPerMillion": 15
+    },
+    "bedrock_titan_embed_v2_code_table": {
+      "source": "packages/rag/src/generation/pipeline.ts PRICING; scripts/indexing/embed.ts PRICE_PER_1K_TOKENS",
+      "inputUsdPerMillion": 0.02
+    }
+  },
+  "inventory": {
+    "s3DataBucket": {
+      "name": "diligenceiq-core-databuckete3889a50-cto74g4tj9kn",
+      "objects": 536,
+      "bytes": 321149753,
+      "byPrefix": {
+        "index": {
+          "objects": 60,
+          "bytes": 236146708
+        },
+        "intelligence": {
+          "objects": 230,
+          "bytes": 13832946
+        },
+        "processed": {
+          "objects": 246,
+          "bytes": 71170099
+        }
+      },
+      "storageClass": "STANDARD",
+      "versioning": "never enabled",
+      "incompleteMultipartUploads": 0,
+      "command": "aws s3api list-objects-v2 --region us-east-1 --bucket <data bucket>"
+    },
+    "dynamodb": {
+      "table": "DiligenceIQ-Core-TableCD117FA1-BG3TT7B9E9VK",
+      "billingMode": "PAY_PER_REQUEST",
+      "tableSizeBytes": 9535586,
+      "itemCount": 205,
+      "ttl": "ENABLED (ttl)",
+      "pitr": "DISABLED",
+      "gsis": 0
+    },
+    "logGroups": [
+      {
+        "name": "DiligenceIQ-Api-ApiFunctionLogs0D7A2434-6m1PF2ACicIp",
+        "storedBytes": 65937,
+        "retentionDays": 14,
+        "class": "STANDARD"
+      },
+      {
+        "name": "DiligenceIQ-Worker-DlqFunctionLogs5789E6E2-tCGwKNEbIsau",
+        "storedBytes": 0,
+        "retentionDays": 14,
+        "class": "STANDARD"
+      },
+      {
+        "name": "DiligenceIQ-Worker-WorkerFunctionLogsD5BC4729-mCt9IR48IcJX",
+        "storedBytes": 4654,
+        "retentionDays": 14,
+        "class": "STANDARD"
+      }
+    ],
+    "metricFilters": 8,
+    "customMetricsPublishedSoFar": [
+      "GenerationCallsOverOne",
+      "CitationsRemovedByValidation",
+      "AnalysisEstimatedCostUsd",
+      "GenerationDurationMs"
+    ],
+    "alarms": [
+      {
+        "name": "DiligenceIQ-Worker-DlqHandlerInvokedAlarm8F45F72C-bTsgJMAyfG4U",
+        "periodS": 300,
+        "state": "OK"
+      },
+      {
+        "name": "DiligenceIQ-Worker-GenerationCallsOverOneAlarm11C4E18E-bBEajsq9zHJn",
+        "periodS": 300,
+        "state": "OK"
+      }
+    ],
+    "alarmsInAccount": 12,
+    "lambda": {
+      "DiligenceIQ-Api-ApiFunctionCE271BD4-lT5uM1brKTIY": {
+        "memoryMb": 256,
+        "timeoutS": 10,
+        "arch": "arm64",
+        "codeBytes": 681241,
+        "provisionedConcurrency": "none",
+        "reservedConcurrency": "none"
+      },
+      "DiligenceIQ-Worker-DlqFunction3AFEC298-qmXVc8sOP4c5": {
+        "memoryMb": 256,
+        "timeoutS": 30,
+        "arch": "arm64",
+        "codeBytes": 863730,
+        "provisionedConcurrency": "none",
+        "reservedConcurrency": "none"
+      },
+      "DiligenceIQ-Worker-WorkerFunctionACE6A4B0-H8gliYWro5Er": {
+        "memoryMb": 3008,
+        "timeoutS": 180,
+        "arch": "arm64",
+        "codeBytes": 1223699,
+        "provisionedConcurrency": "none",
+        "reservedConcurrency": "none"
+      }
+    },
+    "eventSourceMappings": [
+      {
+        "queue": "DiligenceIQ-Worker-AnalysisDlqF1946B7D-I2SHPU9Qp6Nr",
+        "batchSize": 10,
+        "scaling": null,
+        "state": "Enabled"
+      },
+      {
+        "queue": "DiligenceIQ-Worker-AnalysisQueue251119DF-EdMQVEhW6FzJ",
+        "batchSize": 1,
+        "scaling": {
+          "MaximumConcurrency": 2
+        },
+        "state": "Enabled"
+      }
+    ],
+    "sqsIdlePolling": {
+      "metric": "AWS/SQS NumberOfEmptyReceives, hourly Sum",
+      "queuePerHour_2026_10_02T11_to_10_03T09_EDT": [
+        359.0,
+        23
+      ],
+      "dlqPerHour_2026_10_02T11_to_10_03T09_EDT": [
+        899.8,
+        23
+      ],
+      "queuePerHour_2026_10_03T11_to_13_EDT": [
+        355.3,
+        3
+      ],
+      "dlqPerHour_2026_10_03T11_to_13_EDT": [
+        540.0,
+        3
+      ],
+      "monthlyRequestsRange": [
+        653569,
+        918924
+      ],
+      "note": "[mean, hours]. The DLQ poller rate fell from 900/h to 540/h at 10:00 EDT on 2026-10-03; both rates are reported."
+    },
+    "ssmParameters": [
+      {
+        "name": "/diligenceiq/active-profile-set",
+        "type": "String",
+        "tier": "Standard"
+      },
+      {
+        "name": "/diligenceiq/alert-email",
+        "type": "String",
+        "tier": "Standard"
+      },
+      {
+        "name": "/diligenceiq/analyses-enabled",
+        "type": "String",
+        "tier": "Standard"
+      },
+      {
+        "name": "/diligenceiq/session-secret",
+        "type": "SecureString",
+        "tier": "Standard"
+      }
+    ],
+    "snsTopic": "diligenceiq-alerts (1 email subscription)",
+    "amplify": {
+      "appId": "d1jxmy4ao911ax",
+      "deployments": 12,
+      "webOutBytes": 3461120,
+      "domain": "diligenceiq.mikemiller.ai (AMPLIFY_MANAGED certificate)"
+    },
+    "route53": {
+      "zone": "mikemiller.ai",
+      "records": 28,
+      "shared": true
+    },
+    "cdkBootstrap": {
+      "bucketObjects": 417,
+      "bucketBytes": 1550682581,
+      "ecrImages": 0,
+      "shared": true
+    },
+    "commands": [
+      "aws cloudformation list-stack-resources --region us-east-1 --stack-name DiligenceIQ-{Core,Api,Worker,Web}",
+      "aws s3api list-objects-v2 / get-bucket-versioning / get-bucket-lifecycle-configuration / list-multipart-uploads / get-bucket-encryption --region us-east-1",
+      "aws dynamodb describe-table / describe-continuous-backups / describe-time-to-live --region us-east-1",
+      "aws logs describe-log-groups / describe-metric-filters --region us-east-1",
+      "aws cloudwatch describe-alarms / list-metrics --namespace DiligenceIQ --region us-east-1",
+      "aws cloudwatch get-metric-statistics --region us-east-1 --namespace AWS/SQS --metric-name NumberOfEmptyReceives --period 3600 --statistics Sum (both queues, 2026-10-02..03)",
+      "aws cloudwatch get-metric-statistics --region us-east-1 AWS/Lambda Duration+Invocations, AWS/DynamoDB Consumed{Read,Write}CapacityUnits, AWS/ApiGateway Count (2026-10-01T00Z..10-04T00Z, one period)",
+      "aws lambda get-function-configuration / list-provisioned-concurrency-configs / get-function-concurrency / list-event-source-mappings --region us-east-1",
+      "aws ssm describe-parameters --parameter-filters Key=Name,Option=BeginsWith,Values=/diligenceiq --region us-east-1",
+      "aws amplify list-jobs / get-domain-association --region us-east-1; aws route53 list-hosted-zones",
+      "aws s3 ls s3://cdk-hnb659fds-assets-<account>-us-east-1 --recursive --summarize; aws ecr describe-images (bootstrap repo)",
+      "du -sk apps/web/out"
+    ]
+  },
+  "idleMonthly": {
+    "items": [
+      {
+        "item": "S3 data bucket storage (Standard)",
+        "quantity": 0.2991,
+        "unit": "GB-month",
+        "priceRef": "s3_standard_storage",
+        "usdPerUnit": 0.023,
+        "monthlyUsd": 0.00688,
+        "monthlyUsdWithFreeTier": 0.00688,
+        "note": "index/ + processed/ + intelligence/; no raw corpus, no versioning. S3 has no always-free storage (5 GB only in a 12-month free tier)."
+      },
+      {
+        "item": "DynamoDB storage",
+        "quantity": 0.00888,
+        "unit": "GB-month",
+        "priceRef": "dynamodb_storage",
+        "usdPerUnit": 0.25,
+        "monthlyUsd": 0.00222,
+        "monthlyUsdWithFreeTier": 0.0,
+        "note": "TableSizeBytes (refreshed about every 6 h); TTL removes demo workspaces. First 25 GB are always free."
+      },
+      {
+        "item": "CloudWatch alarms (standard)",
+        "quantity": 2,
+        "unit": "alarm-month",
+        "priceRef": "cloudwatch_alarm_standard",
+        "usdPerUnit": 0.1,
+        "monthlyUsd": 0.2,
+        "monthlyUsdWithFreeTier": 0.0,
+        "note": "GenerationCallsOverOne + DlqHandlerInvoked. Free tier is 10 alarms per account; the account has 12 alarms across products, so it is likely used up."
+      },
+      {
+        "item": "SQS requests from idle long polling (current rate)",
+        "quantity": 653569,
+        "unit": "requests",
+        "priceRef": "sqs_standard_requests",
+        "usdPerUnit": 4e-07,
+        "monthlyUsd": 0.26143,
+        "monthlyUsdWithFreeTier": 0.0,
+        "note": "Measured NumberOfEmptyReceives: queue 355.3/h + DLQ 540.0/h (2026-10-03 11:00-13:00 EDT). The two Lambda event source mappings poll even when nothing is queued. Free tier is 1M requests per account per month, shared with 3 other products' SQS pollers."
+      },
+      {
+        "item": "CloudWatch Logs storage",
+        "quantity": 6.57e-05,
+        "unit": "GB-month",
+        "priceRef": "cloudwatch_logs_storage",
+        "usdPerUnit": 0.03,
+        "monthlyUsd": 0.0,
+        "monthlyUsdWithFreeTier": 0.0,
+        "note": "storedBytes of the 3 log groups (14-day retention). Idle ingestion is 0: no Lambda runs."
+      },
+      {
+        "item": "Amplify build-artifact storage (upper bound)",
+        "quantity": 0.0387,
+        "unit": "GB",
+        "priceRef": "amplify_artifact_storage",
+        "usdPerUnit": 0.023,
+        "monthlyUsd": 0.00089,
+        "monthlyUsdWithFreeTier": 0.00089,
+        "note": "12 deployments x 3461120 bytes (apps/web/out), assuming every deployment is retained."
+      }
+    ],
+    "zeroCostItems": [
+      {
+        "item": "Lambda (3 functions, arm64)",
+        "monthlyUsd": 0,
+        "note": "No provisioned or reserved concurrency (list-provisioned-concurrency-configs and get-function-concurrency empty). Code storage is not billed per GB."
+      },
+      {
+        "item": "API Gateway HTTP API",
+        "monthlyUsd": 0,
+        "note": "Per request only."
+      },
+      {
+        "item": "Bedrock",
+        "monthlyUsd": 0,
+        "note": "Per token only; the api Lambda has no Bedrock permission and nothing is scheduled."
+      },
+      {
+        "item": "CloudWatch custom metrics (4 published so far, from 8 metric filters)",
+        "monthlyUsd": 0,
+        "note": "Metric filters publish only when a matching line arrives; custom metrics are prorated by the hour and metered only when data is sent. GenerationCallsOverOne has defaultValue 0, which also publishes only when worker lines arrive."
+      },
+      {
+        "item": "SNS topic + email subscription",
+        "monthlyUsd": 0,
+        "note": "Charged per publish/delivery; first 1,000 email deliveries a month free."
+      },
+      {
+        "item": "SSM Parameter Store",
+        "monthlyUsd": 0,
+        "note": "4 Standard-tier parameters (incl. one SecureString with the AWS-managed key); standard tier and throughput are free."
+      },
+      {
+        "item": "S3 / DynamoDB encryption",
+        "monthlyUsd": 0,
+        "note": "SSE-S3 (AES256) and the DynamoDB default key: no KMS charge."
+      },
+      {
+        "item": "DynamoDB point-in-time recovery",
+        "monthlyUsd": 0,
+        "note": "Disabled."
+      }
+    ],
+    "sharedNotAttributed": [
+      {
+        "item": "Route 53 hosted zone mikemiller.ai",
+        "monthlyUsd": 0.5,
+        "note": "Shared by all of Mike's products (28 records) and existed before DiligenceIQ; not attributed. DNS queries to the Amplify records are pennies at demo traffic."
+      },
+      {
+        "item": "CDK bootstrap bucket (CDKToolkit)",
+        "monthlyUsd": 0.0332,
+        "note": "Whole shared bucket: 417 objects, 1,550,682,581 bytes across every product; DiligenceIQ's share is a few MB per deploy. The bootstrap ECR repository holds 0 images."
+      }
+    ],
+    "totalUsdNoFreeTier": 0.47,
+    "totalUsdNoFreeTierHighSqsRate": 0.58,
+    "totalUsdWithAlwaysFreeTier": 0.01,
+    "freeTierNote": "Free tiers are per account and shared with Mike's other products (CareerOps, ResolveIQ, TrustResponse). The account already has 12 alarms (free tier 10) and 3 other SQS pollers, so the no-free-tier total is the realistic one.",
+    "addendum": {
+      "date": "2026-10-03",
+      "change": "A third standard alarm, AnalysisFailedAlarm (AnalysisFailedFault Sum >= 1 in 5 min), added after a MALFORMED_OUTPUT production failure fired no alarm, with 3 more free metric filters (11 in all). Not yet deployed when added.",
+      "measuredValuesAbove": "Unchanged: the inventory, quantities and totals above are the 2026-10-03 measurement of the two-alarm deployment.",
+      "extraMonthlyUsd": 0.1,
+      "priceRef": "cloudwatch_alarm_standard",
+      "alarms": 3,
+      "metricFilters": 11,
+      "totalUsdNoFreeTier": 0.57,
+      "totalUsdNoFreeTierHighSqsRate": 0.68,
+      "totalUsdWithAlwaysFreeTier": 0.01,
+      "note": "The AnalysisFailedFault custom metric publishes only in hours with a faulty failed analysis, so it adds no idle cost."
+    }
+  },
+  "perAnalysis": {
+    "bedrockGeneration": {
+      "measuredTokens": {
+        "source": "evals/results/generation-iv-9cf51c066743-da-v4.json (20 live da-v4 runs)",
+        "inputMean": 21647,
+        "outputMean": 3141,
+        "inputMax": 29885,
+        "outputMax": 4170,
+        "codeEstimateUsd": {
+          "min": 0.066042,
+          "mean": 0.1121,
+          "max": 0.141555
+        },
+        "robustnessMean": {
+          "inputMean": 21349,
+          "outputMean": 2969
+        }
+      },
+      "productionCodeEstimatesUsd": {
+        "source": "STATE.md (worker analysis_summary estimatedCostUsd, 2026-10-03)",
+        "values": [
+          0.09,
+          0.125,
+          0.1171
+        ]
+      },
+      "meanUsdAtCodeTable": 0.1121,
+      "meanUsdAtBilledRate": 0.1233,
+      "billedToCodeTableRatio": 1.1,
+      "maxRecordUsdAtBilledRate": 0.1557,
+      "productionAtBilledRateUsd": [
+        0.099,
+        0.1375,
+        0.1288
+      ],
+      "finding": "Billed Sonnet 4.6 rates through the us. inference profile are $3.3/M input and $16.5/M output, 10% above the code table ($3/$15), so estimatedCostUsd understates billed generation cost by about 10%."
+    },
+    "queryEmbedding": {
+      "usd": 1e-06,
+      "note": "one short query, ~50 tokens (assumed) at Titan v2 price"
+    },
+    "workerLambda": {
+      "source": "AWS/Lambda Duration 2026-10-01..03",
+      "invocations": 7.0,
+      "meanMs": 45935,
+      "maxMs": 62211.64,
+      "memoryGb": 2.9375,
+      "meanUsd": 0.0018,
+      "maxObservedUsd": 0.00244,
+      "atTimeoutUsd": 0.00705
+    },
+    "sqs": {
+      "requests": 3,
+      "usd": 1.2e-06,
+      "note": "send + receive + delete"
+    },
+    "servingUpperBound": {
+      "note": "All DynamoDB, API Gateway and api-Lambda usage over 2026-10-01..03 (every page view, workspace seed and poll, not just analyses), divided by the worker invocations: an upper bound per analysis.",
+      "readRequestUnits": 12935.5,
+      "writeRequestUnits": 19369.0,
+      "apiRequests": 1388.0,
+      "apiLambdaMsTotal": 207519.16999989998,
+      "workerInvocations": 7.0,
+      "totalUsd3Days": 0.0161,
+      "perAnalysisUpperBoundUsd": 0.0023
+    },
+    "typicalTotalUsd": 0.127
+  },
+  "oneTimeOffline": {
+    "corpusEmbedding": {
+      "source": ".index/build/iv-9cf51c066743/manifest.json + Cost Explorer USE1-TitanEmbeddingV2-Text-input-tokens",
+      "indexInputTokens": 19735730,
+      "embeddedTexts": 25388,
+      "usdAtListPrice": 0.3947,
+      "billedTokensAllRuns": 22109416,
+      "billedUsdAllRuns": 0.4422,
+      "note": "Billed figure covers the interrupted c1 run, its resume and the c2 re-embed (docs/handoffs/phase-02.md: 22.1M tokens, about $0.44)."
+    },
+    "profileBuildLlmV3": {
+      "source": ".index/intelligence/iv-9cf51c066743/llm-v3/manifest.json totals",
+      "companies": 53,
+      "llm": 42,
+      "deterministic": 11,
+      "generationCalls": 53,
+      "inputTokens": 1057397,
+      "outputTokens": 130645,
+      "deepTierFallbackRate": 0.25,
+      "usdAtCodeTable": 5.1319,
+      "usdAtBilledRate": 5.6451,
+      "perCallUsdAtBilledRate": 0.1065
+    },
+    "profileBuildAllPromptVersions": {
+      "source": "docs/handoffs/phase-04b.md",
+      "calls": 59,
+      "approxUsd": 6.0,
+      "note": "v1 trial 3 + v2 trial 3 + v3 trial 3 + v3 on 50; the det-v2 set made 0 calls."
+    },
+    "sonnetBilledOct1to3": {
+      "inputTokens": 2991752,
+      "outputTokens": 427285,
+      "usd": 16.923,
+      "note": "All Sonnet 4.6 use in the account 2026-10-01..03 (profile builds, generation evals, production analyses); 10-03 incomplete in billing."
+    }
+  },
+  "worstCaseDay": {
+    "globalDailyAnalysesCap": 200,
+    "source": "infrastructure/cdk/lib/config.ts caps.globalDailyAnalyses; GENERATION_SETTINGS.maxTokens 8192 (packages/rag/src/generation/prompt.ts)",
+    "typicalDayUsd": 25.02,
+    "ceilingDayUsd": 48.24,
+    "ceilingAssumptions": "each analysis 30,000 input tokens (observed max 29,885; context budget ~24K) and the full 8,192-token output cap at billed rates, worker running to its 180 s timeout. One generation call per analysis (conditional claim), so redeliveries add no Bedrock cost.",
+    "apiFloodDayUsd": {
+      "requests": 864000,
+      "note": "HTTP API stage throttle 10 req/s sustained all day; API Gateway + api Lambda (mean 150 ms at 256 MB) only; DynamoDB reads per request and log ingestion not included",
+      "usd": 1.47
+    },
+    "notCapped": "Amplify data transfer out ($0.15/GB served) is not bounded by any cap."
+  },
+  "costExplorerCrossCheck": {
+    "commands": [
+      "aws ce get-cost-and-usage --granularity DAILY 2026-09-25..10-04 --group-by COST_CATEGORY Product",
+      "aws ce get-cost-and-usage --granularity DAILY 2026-09-30..10-04 --group-by TAG project, SERVICE",
+      "aws ce get-cost-and-usage --granularity MONTHLY --filter SERVICE Bedrock/Sonnet --group-by SERVICE, USAGE_TYPE"
+    ],
+    "findings": [
+      "No cost has landed in Product=DiligenceIQ yet: through 2026-10-02 every DiligenceIQ charge is in Unattributed (10-02: $17.02, of which $16.92 is Sonnet 4.6) or Shared. 2026-10-03 has no data yet (billing lag).",
+      "The project cost-allocation tag was (re)activated 2026-10-03 11:21 UTC; no project=diligenceiq cost appears yet, so no quiet day can be attributed. The idle figure therefore rests on pricing x inventory, not on a billed quiet day."
+    ],
+    "raw": {
+      "byProduct": [
+        {
+          "TimePeriod": {
+            "Start": "2026-09-25",
+            "End": "2026-09-26"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$ArchIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000483401",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "82.3719381443",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.6869925496",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "104868.6432511542",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$GenAIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.000140042",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "106.0055573925",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Portfolio"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000975345",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "157.0076314902",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$ResolveIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0133348545",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1.3233079257",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0020027414",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1204.0488274066",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$TrustResponse"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "0.0013888889",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.1919605985",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "10614.8885311512",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": false
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-09-26",
+            "End": "2026-09-27"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$ArchIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000455401",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "78.5869621463",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.2259448516",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "69197.2758369233",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$GenAIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.000000042",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "0.0055573925",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Portfolio"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000983345",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "159.0074267007",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$ResolveIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0133348545",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1.3565579268",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0012119414",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "851.0488274066",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$TrustResponse"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "0.0013888889",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0671210094",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "11951.6932398083",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": false
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-09-27",
+            "End": "2026-09-28"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$ArchIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000201401",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "16.0055468386",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.2154798534",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "33808.8341150391",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$GenAIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.000207142",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "218.7415573929",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Portfolio"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0001351345",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "251.0134870822",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$ResolveIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0133414545",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "6.3503079257",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0053327414",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "2304.0488274066",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$TrustResponse"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000008",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "2.0013888889",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.8756201632",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "12626.7598345165",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": false
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-09-28",
+            "End": "2026-09-29"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$ArchIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000205401",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "17.0088164553",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.7688730579",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "101011.3917118125",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$GenAIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0012525934",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "878.0055574803",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Portfolio"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0001019345",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "168.0076797244",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$ResolveIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0133348545",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1.3550579267",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0021166919",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1299.0814698563",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$TrustResponse"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000288",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "89.9723888889",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.229708618",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "10856.8144908302",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": false
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-09-29",
+            "End": "2026-09-30"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$ArchIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000305401",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "42.0291287198",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.6888302232",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "135555.9754664602",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$GenAIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000297934",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "21.0055574921",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Portfolio"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000895345",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "137.0076279009",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$ResolveIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0133348545",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1.3503079258",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0013954821",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "1249.0499552607",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$TrustResponse"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "4.6973888889",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0675123768",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "10433.1986263757",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": false
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-09-30",
+            "End": "2026-10-01"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$ArchIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000315401",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "44.2930896825",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.7534452971",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "121673.3506131264",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$GenAIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000372434",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "32.0055574921",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Portfolio"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0001107345",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "190.011854634",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$ResolveIQ"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0133364545",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "5.3425579225",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0012818821",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "853.0499552607",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$TrustResponse"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0000008",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "6.3523888889",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0675206909",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "10558.1944868037",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": false
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-10-01",
+            "End": "2026-10-02"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.6912645864",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "144429.4951487528",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "1.890984",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "6488",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.433981182",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "35494.3548275292",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": true
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-10-02",
+            "End": "2026-10-03"
+          },
+          "Total": {},
+          "Groups": [
+            {
+              "Keys": [
+                "Product$CareerOps"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.6072662369",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "131106.4853658894",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Shared"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "0.0002972",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "2074",
+                  "Unit": "N/A"
+                }
+              }
+            },
+            {
+              "Keys": [
+                "Product$Unattributed"
+              ],
+              "Metrics": {
+                "UnblendedCost": {
+                  "Amount": "17.020291075",
+                  "Unit": "USD"
+                },
+                "UsageQuantity": {
+                  "Amount": "42456.61408997",
+                  "Unit": "N/A"
+                }
+              }
+            }
+          ],
+          "Estimated": true
+        },
+        {
+          "TimePeriod": {
+            "Start": "2026-10-03",
+            "End": "2026-10-04"
+          },
+          "Total": {
+            "UnblendedCost": {
+              "Amount": "0",
+              "Unit": "USD"
+            },
+            "UsageQuantity": {
+              "Amount": "0",
+              "Unit": "N/A"
+            }
+          },
+          "Groups": [],
+          "Estimated": true
+        }
+      ]
+    }
+  }
+}

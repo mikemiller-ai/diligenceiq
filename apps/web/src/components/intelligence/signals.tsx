@@ -409,12 +409,22 @@ const CASH_TITLE: Partial<Record<Trajectory, string>> = {
 const growthDetail = (b: Extract<TrendBasis, { kind: 'growth' }>) =>
   `${signedPct(b.pct)} in ${b.period}${b.priorPct !== null && b.priorPeriod ? `, after ${signedPct(b.priorPct)} in ${b.priorPeriod}` : ''}`;
 
-/** The net-margin title: profit wording, or loss wording when either year's net margin is zero or below. */
-export function profitTitle(b: Extract<TrendBasis, { kind: 'margin' }>): string {
-  if (b.prior <= 0 && b.latest > 0) return 'Swung to a profit';
-  if (b.prior > 0 && b.latest <= 0) return 'Swung to a loss';
-  if (b.prior <= 0 && b.latest <= 0) return b.trajectory === 'improving' ? 'Net loss narrowed' : b.trajectory === 'declining' ? 'Net loss widened' : 'Net loss about the same';
-  return b.trajectory === 'improving' ? 'Keeps more of each sale as profit' : b.trajectory === 'declining' ? 'Keeps less of each sale as profit' : 'Profit per sale about the same';
+/**
+ * The profit line's title: profit wording, or loss wording when either year's margin is zero or
+ * below. `operating` words it for the operating margin (the fallback when net margin has no
+ * current trend): "operating profit", "operating loss".
+ */
+export function profitTitle(b: Extract<TrendBasis, { kind: 'margin' }>, operating = false): string {
+  const op = operating ? 'operating ' : '';
+  const Op = operating ? 'Operating' : 'Net';
+  if (b.prior <= 0 && b.latest > 0) return `Swung to ${operating ? 'an operating' : 'a'} profit`;
+  if (b.prior > 0 && b.latest <= 0) return `Swung to ${operating ? 'an operating' : 'a'} loss`;
+  if (b.prior <= 0 && b.latest <= 0) return b.trajectory === 'improving' ? `${Op} loss narrowed` : b.trajectory === 'declining' ? `${Op} loss widened` : `${Op} loss about the same`;
+  return b.trajectory === 'improving'
+    ? `Keeps more of each sale as ${op}profit`
+    : b.trajectory === 'declining'
+      ? `Keeps less of each sale as ${op}profit`
+      : `${operating ? 'Operating profit' : 'Profit'} per sale about the same`;
 }
 
 /** The latest dollar amount behind a growth trend, from the trend's own row, when the profile holds it. */
@@ -437,15 +447,18 @@ export function bottomLine(profile: CompanyIntelligenceProfile): BottomLineItem[
     out.push({ key: 'revenue', direction: trajectoryDirection(rev.trajectory), neutral: false, title: REVENUE_TITLE[rev.trajectory]!, detail: growthDetail(rev.basis), anchor: 'performance' });
   }
 
-  const net = readTrend(profile, 'Net margin');
-  if (net && net.basis.kind === 'margin' && current(net.basis.period)) {
-    const b = net.basis;
+  // Profit per sale: the net margin's trend, or, when the builder has no current net-margin trend
+  // (CAT: net income not extracted), the operating margin's. Either way the builder's own label and basis.
+  const profit = profitTrend(profile);
+  if (profit) {
+    const { trend, operating } = profit;
+    const b = trend.basis as Extract<TrendBasis, { kind: 'margin' }>;
     out.push({
       key: 'profit',
-      direction: trajectoryDirection(net.trajectory),
+      direction: trajectoryDirection(trend.trajectory),
       neutral: false,
-      title: profitTitle(b),
-      detail: `net margin ${level(b.prior)} in ${b.priorPeriod} → ${level(b.latest)} in ${b.period}`,
+      title: profitTitle(b, operating),
+      detail: `${operating ? 'operating' : 'net'} margin ${level(b.prior)} in ${b.priorPeriod} → ${level(b.latest)} in ${b.period}`,
       anchor: 'performance',
     });
   }
@@ -485,6 +498,18 @@ export function bottomLine(profile: CompanyIntelligenceProfile): BottomLineItem[
     }
   }
   return out.slice(0, 5);
+}
+
+/** The margin trend behind the profit line: Net margin when it reads back and is current, else Operating margin under the same rule, else none. */
+export function profitTrend(profile: CompanyIntelligenceProfile): { trend: ReadTrend; operating: boolean } | null {
+  for (const [metric, operating] of [
+    ['Net margin', false],
+    ['Operating margin', true],
+  ] as const) {
+    const t = readTrend(profile, metric);
+    if (t && t.basis.kind === 'margin' && isCurrent(profile, t.basis.period)) return { trend: t, operating };
+  }
+  return null;
 }
 
 /** The revenue-lines line: the largest line that fell by more than 2%, or "all grew" when every line grew by more than 2%. */

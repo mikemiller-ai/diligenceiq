@@ -2,7 +2,9 @@
 
 **Investment intelligence over SEC filings.** Know what changed. Know what matters. Know what to investigate next.
 
-Production: <https://diligenceiq.mikemiller.ai> (AWS us-east-1). Current status and open decisions: [STATE.md](STATE.md).
+Production: <https://diligenceiq.mikemiller.ai> (AWS us-east-1). Repository: <https://github.com/mikemiller-ai/diligenceiq>.
+
+**Reviewing the assessment?** [docs/deliverables.md](docs/deliverables.md) maps every deliverable in the Eliza FDE assessment to where it lives here and how to check it. Current status and open decisions: [STATE.md](STATE.md).
 
 ## What it is
 An investment-intelligence product for a private-equity team, built over 246 SEC 10-K and 10-Q filings from 54 companies.
@@ -11,7 +13,7 @@ An investment-intelligence product for a private-equity team, built over 246 SEC
 - **Deep Analysis.** Ask any question. Retrieval-augmented generation over the filings answers it with **exactly one generative LLM request**, grounded in retrieved filing passages. Every citation is checked server-side against the passages the model was given, and every figure against its cited passage.
 - **Findings.** Save a finding with its evidence, set its status and add notes.
 
-**Business value.** An analyst gets a first read on a company in seconds instead of hours of reading filings, and every statement links to the filing passage it rests on, so it can be checked before it reaches an investment memo. Runtime cost is close to zero when nobody uses it and about $0.09–0.13 per question when someone does. The [Architecture and business value page](https://diligenceiq.mikemiller.ai/architecture/) shows the measured numbers.
+**Business value.** An analyst gets a first read on a company in seconds instead of hours of reading filings, and every statement links to the filing passage it rests on, so it can be checked before it reaches an investment memo. Runtime cost is close to zero when nobody uses it (about $0.57 a month, architecture §13.1) and about $0.10–0.14 per question when someone does, at the rate the account is billed (the four production analyses: $0.099–0.138; the recorded example, $0.1316). The [Architecture and business value page](https://diligenceiq.mikemiller.ai/architecture/) shows the measured numbers; its $0.12–0.13 is the three Phase 4 deployed runs at the list price then in the code, which the account is billed 10% above.
 
 ## Repository layout
 | Path | What it holds |
