@@ -28,9 +28,9 @@ Where each item the Eliza assessment asks for lives in this repository, and how 
 
 | The assessment asks for | Where it is |
 |---|---|
-| A working demo, run live as a client meeting | [`docs/demo-script.md`](demo-script.md): the 20-step flow, timings, sample questions, fallbacks and likely panel questions. |
+| A working demo, run live as a client meeting | The live app at https://diligenceiq.mikemiller.ai, walked through as a client meeting: Company Intelligence, Deep Analysis on the panel's own question, evidence, Compare, Findings, then architecture, value and future state. |
 | The panel enters a business question into the input field | Deep Analysis (`/analysis/new`): any typed question; a prefilled question never runs without an explicit Run. |
-| Information on how this creates value for the business | The Architecture and business-value page (`/architecture` in the app) and the business story in [`docs/demo-script.md`](demo-script.md). |
+| Information on how this creates value for the business | The Architecture and business-value page (`/architecture` in the app), which tells the business story (what DiligenceIQ does before a question is asked, and why it matters to a PE team). |
 | Design decisions to walk through | [`docs/architecture.md`](architecture.md), [`docs/design-decisions.md`](design-decisions.md), including the cost and scaling strategy (§13: about $0.57 a month idle, about $0.10–0.14 per analysis). |
 | Future state, if the client is sold | [`docs/future-state.md`](future-state.md) and the future-state section of the Architecture page. Nothing there is presented as built. |
 

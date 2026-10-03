@@ -128,8 +128,8 @@ const required = {
     '**Build ledger:**', // M1
     'LLM-to-deterministic fallback rate', // M9
   ],
-  // Phase 9: the demo script (SPEC §44) and the future-state document (SPEC §45).
-  'docs/demo-script.md': ['## 2. The flow', '## 5. Fallbacks for live failures'],
+  // Phase 9: the future-state document (SPEC §45). The demo script (SPEC §44) is the presenter's
+  // private run sheet, kept out of the repository (SPEC A.4, 2026-10-03), so it is not checked here.
   'docs/future-state.md': ['## 4. Stage 2: Live monitoring (designed, not built)', '## 9. Documented, not built (P2)'],
   'docs/implementation-plan.md': [
     '## Requirement-preservation checklist',

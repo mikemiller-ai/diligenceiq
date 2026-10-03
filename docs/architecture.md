@@ -101,7 +101,7 @@ evals/                 questions.yaml + recorded eval results
 tests/e2e/             Playwright (local workflow + prod smoke)
 tests/fixtures/        Trimmed real filings used by unit/integration tests
 docs/                  architecture, assumptions, design-decisions, design-tokens, implementation-plan, testing-strategy,
-                       evaluation, prompt-iterations, demo-script, future-state, handoffs/
+                       evaluation, prompt-iterations, demo-script (local only, git-ignored), future-state, handoffs/
 ```
 
 Unit and integration tests are colocated (`*.test.ts`) inside each package and service. See [testing-strategy.md](testing-strategy.md).
