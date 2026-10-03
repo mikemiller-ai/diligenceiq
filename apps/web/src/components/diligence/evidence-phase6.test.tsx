@@ -1,8 +1,9 @@
 import type { AdjacentEvidenceResponse, AnalysisDetail, Citation, SourceDocumentResponse } from '@diligenceiq/core';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FilingView, readHash, readingSections } from '@/app/(workspace)/sources/filing/filing-view';
+import { FilingView, readHash, readableSections, readingSections } from '@/app/(workspace)/sources/filing/filing-view';
+import { shownText } from '@/lib/readable/layout';
 import { recordPageView, resetPageViews } from '@/lib/in-app-history';
 import { createMemoryClient } from '@/test/memory-client';
 import { setRoute } from '@/test/navigation-mock';
@@ -125,11 +126,12 @@ describe('adjacent-period comparison in the evidence drawer', () => {
     await userEvent.keyboard('{ArrowRight}');
     expect(tabs[1]).toHaveFocus();
     expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
-    expect(within(dialog).getByText('FY2025Q3 passage.')).toBeInTheDocument();
+    // (The passage also shows in the sentence diff below the columns, so look in its column.)
+    expect(within(within(dialog).getByRole('region', { name: 'Following quarter' })).getByText('FY2025Q3 passage.')).toBeInTheDocument();
     expect(within(dialog).getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[1]!.id);
     await userEvent.keyboard('{End}');
     expect(tabs[2]).toHaveFocus();
-    expect(within(dialog).getByText('FY2024Q2 passage.')).toBeInTheDocument();
+    expect(within(within(dialog).getByRole('region', { name: 'Same quarter, prior year' })).getByText('FY2024Q2 passage.')).toBeInTheDocument();
     await userEvent.keyboard('{ArrowRight}');
     expect(tabs[0]).toHaveFocus();
     await userEvent.keyboard('{ArrowLeft}');
@@ -239,6 +241,13 @@ describe('coverage matrix linked to evidence', () => {
   });
 });
 
+/** Section titles plus each section's shown text (the display layer's own output). */
+function expectedArticle(source: SourceDocumentResponse): string {
+  const sections = readingSections(source.sections, source.text.length);
+  const laid = readableSections(source, sections);
+  return sections.map((sec, i) => sec.title + shownText(source.text, laid[i]!)).join('');
+}
+
 describe('readable source view', () => {
   const COVER = 'UNITED STATES SECURITIES AND EXCHANGE COMMISSION\n';
   const RF = 'Item 1A. Risk Factors\nThe Company depends on single-source partners. Supply could be disrupted.\n';
@@ -268,16 +277,28 @@ describe('readable source view', () => {
     window.location.hash = `#chunk-${target.chunkId}`;
     const memory = createMemoryClient({ sources: { 'AAPL_10K_2025-10-31': SOURCE } });
     renderInWorkspace(<FilingView />, { memory });
-    const mark = await screen.findByText('The Company depends on single-source partners.');
+    const mark = await waitFor(() => {
+      const el = document.getElementById(`chunk-${target.chunkId}`);
+      if (!el) throw new Error('not highlighted yet');
+      return el;
+    });
     expect(mark.tagName).toBe('MARK');
-    expect(mark.id).toBe(`chunk-${target.chunkId}`);
-    expect(TEXT.slice(target.charStart, target.charEnd)).toBe(mark.textContent);
+    // The cited sentence is a risk heading here, laid out as one; the highlight is still exactly its characters.
+    expect(mark.closest('h3')).not.toBeNull();
+    // Every target piece together is the cited span; its trailing space is layout after the heading.
+    const pieces = [...document.querySelectorAll('mark[data-mark="target"]')].map((m) => m.textContent).join('');
+    expect(pieces).toBe(TEXT.slice(target.charStart, target.charEnd).trimEnd());
     expect(screen.getByTestId('highlight-notice')).toHaveTextContent(target.chunkId);
     const nav = screen.getByRole('navigation', { name: 'Sections' });
     expect(within(nav).getAllByRole('link').map((l) => l.textContent?.replace(/[\d,]+$/, ''))).toEqual(['Other', 'Item 1A — Risk Factors', 'Item 7 — MD&A']);
     expect(within(nav).getByRole('link', { current: 'location' })).toHaveTextContent('Item 1A — Risk Factors');
-    // Every character of the filing is on the page exactly once.
-    expect(screen.getByRole('article').textContent).toBe(['Other', COVER, 'Item 1A — Risk Factors', RF, 'Item 7 — MD&A', MDA].join(''));
+    // Every character of the filing is on the page exactly once, minus layout (line breaks, the space
+    // between a heading and its text) and page furniture (none here).
+    expect(screen.getByRole('article').textContent).toBe(expectedArticle(SOURCE));
+    expect(screen.getByRole('article').textContent).toBe(
+      ['Other', COVER, 'Item 1A — Risk Factors', RF, 'Item 7 — MD&A', MDA].join('').replace(/\n/g, '').replace('partners. Supply', 'partners.Supply'),
+    );
+    expect(screen.getByRole('heading', { name: 'Item 1A. Risk Factors' })).toBeInTheDocument();
     // The citation's index version goes with the request.
     expect(memory.calls.filter((c) => c.method === 'source').map((c) => c.args)).toEqual([['AAPL_10K_2025-10-31', IV]]);
   });
@@ -330,7 +351,8 @@ describe('readable source view', () => {
     setRoute('/sources/filing/', 'id=AAPL_10K_2025-10-31');
     renderInWorkspace(<FilingView />, { memory: createMemoryClient({ sources: { 'AAPL_10K_2025-10-31': overlapping } }) });
     const article = await screen.findByRole('article');
-    expect(article.textContent).toBe(['Other', COVER, 'Item 1A — Risk Factors', TEXT.slice(rfStart, mdaStart + 10), 'Item 7 — MD&A', TEXT.slice(mdaStart + 10)].join(''));
+    expect(article.textContent).toBe(expectedArticle(overlapping));
+    expect(article.textContent?.replace(/Other|Item 1A — Risk Factors|Item 7 — MD&A/g, '')).toBe(shownText(TEXT, readableSections(overlapping, read).flat()));
   });
 
   it('a missing filing goes back where the citation was opened, but only into the app', async () => {

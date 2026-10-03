@@ -1,26 +1,35 @@
 # STATE
 
-_Last updated: 2026-10-02 (local)_
+_Last updated: 2026-10-03 (local)_
 
 ## Branch
-`main` (no remote yet). Last code commit: `c4a4797` (Phase 6r step 1; plan `6cee6eb`). Phase 6: `bdd817e`.
+`phase-6r-step2` (from `main` at `f39bd32`; no remote yet), **uncommitted**: Phase 6r step 2 awaits Mike's go-ahead to commit. Last code commit on `main`: `c4a4797` (Phase 6r step 1; plan `6cee6eb`). Phase 6: `bdd817e`.
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 1 of 3 is gated, committed (`c4a4797`) and deployed (2026-10-02): the readable Company Intelligence dashboard plus dark mode.** Handoff: `docs/handoffs/phase-06r-step1.md`.
-- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: pointer to `iv-9cf51c066743/det-v2`.
-- Mike's decisions 2026-10-02: keep the current dashboard depth plus signals (BLUF, chips, sparklines, condensed sections, jump bar), not the plain-language redesign; gate and deploy after the dashboard step; ship dark mode (System / Light / Dark) with it.
+**Phase 6r (readability, DD-21), step 2 of 3 is gated, not committed and not deployed: readable evidence.** Handoff: `docs/handoffs/phase-06r-step2.md`. Step 1 (readable dashboard plus dark mode) is committed (`c4a4797`) and deployed (2026-10-02; handoff `docs/handoffs/phase-06r-step1.md`).
+- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point it at `iv-9cf51c066743/det-v2`.
+- **Step 2 adds:**
+  - an offset-preserving display layer for the source view and the drawer: paragraphs, headings including risk headings, lists, column-aligned tables, and page furniture hidden;
+  - a drawer that leads with the closest sentences to the statement and bolds only exact, verified figures, with section › subsection titles;
+  - a Compare periods sentence diff.
 
 ## Gate
-`pnpm gate` on 2026-10-02 against the Phase 6r step 1 working tree: **exit 0**.
+`pnpm gate` on 2026-10-03 against the Phase 6r step 2 working tree: **exit 0**.
 - check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 275, api 135 (**1,046**).
-- `cdk:synth` and `build` succeeded; **e2e 64 passed** (main suite on `fixture-v2`, the `built-profiles` project on committed real AAPL/TSLA/JPM profiles, the dark-mode axe suite).
+- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 340, api 135 (**1,111**).
+- `cdk:synth` and `build` succeeded. **e2e: 69 passed, 4 skipped.** The skipped ones are the `DARK_SCREENSHOTS`-only screenshot tests.
 
-Gate record: adversary (2 blockers, 7 high, 9 medium) → fresh fixer (all fixed with tests) → dark mode merged from its worktree → `/code-review` medium (no findings) → `pnpm gate` green.
+Gate record: adversary (0 blockers, 6 high, 4 medium) → fresh fixer (all fixed with tests, except M3, a known limit) → `/code-review` medium (2 low, fixed with tests) → `pnpm gate` green.
 
 ## In flight
-- **Done 2026-10-02 (Mike approved):** commit `c4a4797`, fast-forward `main`, `pnpm deploy:web` (Amplify job 7), production check (headless, 1280×800, system light and dark): AAPL, TSLA and JPM dashboards show the bottom line ("Revenue grew +6.4% in FY2025…", "Revenue fell −2.9%…", "Revenue growth slowed +2.8%…"), the jump bar (9–10 links) moves to Attention signals and marks it, every Show all opens, axe WCAG 2.1 A/AA clean on all six pages, body ground #F3F4F8 light / #0B1020 dark, and no API request other than reads and `POST /api/session`. The dark-mode worktree was removed (its changes are in `c4a4797`).
-- Next: Phase 6r step 2 (readable filing text and evidence, DD-21 e–f), step 3 (brief and Compare), then Phase 7.
+- **Waiting on Mike:** commit `phase-6r-step2`, merge to `main`, then `pnpm deploy:web`. It is web only: no api, CDK, profile or S3 change.
+- **Production check after deploy:**
+  - the AAPL 10-K source view: tables and no footers;
+  - a dashboard citation: its closest sentences and Show full passage;
+  - the Compare periods diff, in light and dark mode;
+  - only reads, plus `POST /api/session`.
+- **Known limit (M3):** profile citations carry no subsection, so their drawer titles show only the section. A fix needs a profile-builder or api change and a new profile-set version.
+- **Next:** Phase 6r step 3 (the brief and Compare, DD-21 g), then Phase 7.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
@@ -30,6 +39,16 @@ Gate record: adversary (2 blockers, 7 high, 9 medium) → fresh fixer (all fixed
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
 
 ## Known traps
+- **The readable view is a display layer, never stored text (DD-21 e).**
+  - `apps/web/src/lib/readable/` partitions offsets into shown and hidden runs. Only furniture and layout (pipes, whitespace) may be hidden; `readable-corpus.test.ts` enforces this over all 246 filings.
+  - Any new hiding rule must keep the furniture oracle at **zero** visible footers and back-links. It must also never hide content: table-of-contents rows and reference numbers ("Note 12") stay.
+  - Weak furniture shapes need the whole filing's `furnitureCounts`. A drawer passage hides only strong shapes.
+- **`@diligenceiq/corpus` is now a runtime web dependency**, through the browser-safe subpath exports `/segments` and `/risks` (`transpilePackages` in `next.config.ts`).
+  - A change to `segments.ts` or `risks.ts` changes the web's layout too. Never import the package root (`.`) in web runtime code: `load.ts` uses Node `fs`.
+- **Index chunks overlap their neighbours.** A test that marks every chunk at once must render the chunks in layers of disjoint spans (as `evidence-readable.test.tsx` does). The source view only ever marks one target.
+- **The target id is placed by text offset, not render order.** Its home is `FilingSections` in `filing-view.tsx`. A table re-renders after measuring its overflow, so render-order placement lost or duplicated the id.
+- **Drawer statements come from the opener.** Each chip passes `claim`; a brief passes its validator-verified `figures`, empty when none, so nothing is bolded. A metric value passes `metricStatement`. Never pass raw rows or `measurement` (detector jargon) as the statement.
+- **Do not run Prettier with its defaults.** The repo has no Prettier config, and the defaults switch the code to double quotes. The house style is single quotes and lines of about 160 characters.
 - **The dashboard derives nothing on its own (DD-21).** Every bottom-line line, chip colour and title comes from the builder's `trends[].trajectory` and its `basis` line (core `parseTrendBasis`) or a signal's type/measurement; facts only supply numbers from the trend's own source row. Changing the builder's basis wording breaks `parseTrendBasis` (contract tests in `packages/rag` `profile.test.ts` fail first), and a basis that no longer reads back hides that metric's line, chip and sparkline.
 - **Folded items stay in the DOM.** `ShowMore` sets `hidden` on folded items (Tailwind preflight enforces it). Tests that need every item must open "Show all" first (`expandAll` in `workflow.test.tsx`); the fixture-figure rule still scans hidden items.
 - **Dark mode is tokens only.** Every colour is a `light-dark()` token in `globals.css`; never a hex or `text-white` on a primary fill in className (use `text-primary-foreground`). On navy use `--sapphire` / `text-on-navy-ink`, never `primary` (which lightens in dark). The pre-paint `THEME_SCRIPT` must be allowed by hash in the Phase 7 CSP.

@@ -270,7 +270,7 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
                 Executive summary
               </h2>
               <p className="mt-2 max-w-[880px] text-[15.5px] leading-7 text-white/90">
-                <CitedText text={analysis.brief.executiveSummary} context={context} onNavy />
+                <CitedText text={analysis.brief.executiveSummary} context={context} onNavy figureChecks={figuresAt(analysis.validation, 'executiveSummary')} />
               </p>
               <FigureBadges figures={figuresAt(analysis.validation, 'executiveSummary')} />
             </section>
@@ -344,7 +344,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                     </div>
                     <h3 className="mt-1.5 text-base font-semibold text-foreground">{k.title}</h3>
                     <p className="mt-1 text-[15px] leading-6 text-foreground/80">
-                      {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" />
+                      {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" claim={k.finding} figureChecks={figuresAt(v, `keyFindings[${i}].`)} />
                       <FigureBadges figures={figuresAt(v, `keyFindings[${i}].`)} />
                     </p>
                   </div>
@@ -389,7 +389,13 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                         </TD>
                       ))}
                       <TD className="align-top">
-                        <CitationList ids={r.citationIds} context={context} provenance="brief" />
+                        <CitationList
+                          ids={r.citationIds}
+                          context={context}
+                          provenance="brief"
+                          claim={[r.label, ...r.values].join(' · ')}
+                          figureChecks={figuresAt(v, `comparison.rows[${rowIndex}].`)}
+                        />
                       </TD>
                       <TD className="no-print align-top">
                         <SaveFindingButton source={{ kind: 'comparisonRow', analysisId: analysis.analysisId, index: rowIndex }} label="Save" variant="ghost" />
@@ -408,7 +414,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
             {brief.investmentConsiderations.map((c, i) => (
               <li key={`${i}-${c.text}`} className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-3.5 sm:flex-row sm:items-start">
                 <p className="flex-1 text-[15px] leading-6 text-foreground/80">
-                  {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" />
+                  {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" claim={c.text} figureChecks={figuresAt(v, `investmentConsiderations[${i}].`)} />
                   <FigureBadges figures={figuresAt(v, `investmentConsiderations[${i}].`)} />
                 </p>
                 <SaveFindingButton source={{ kind: 'consideration', analysisId: analysis.analysisId, index: i }} />

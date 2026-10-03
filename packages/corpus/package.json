@@ -7,7 +7,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./chunker": "./src/chunker.ts",
-    "./citation": "./src/citation.ts"
+    "./citation": "./src/citation.ts",
+    "./segments": "./src/segments.ts",
+    "./risks": "./src/risks.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

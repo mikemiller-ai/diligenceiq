@@ -558,7 +558,7 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
 - The E2E suite proves the page-view rule (no POST except the session, and the worker receives nothing) against the real api.
 
 ## DD-21 · Readability: bottom line first, visual signals, progressive disclosure, readable evidence
-**Status:** Accepted for step 1, the Company Intelligence dashboard (gated 2026-10-02); steps 2 and 3 proposed. Planned 2026-10-02. Direction chosen by Mike on 2026-10-02 from the `readability-prototype` branch and the Claude Design file "Company Intelligence - current" (with its "refined" jump bar).
+**Status:** Accepted for step 1, the Company Intelligence dashboard (gated 2026-10-02), and step 2, readable evidence (built 2026-10-02 on `phase-6r-step2`); step 3 proposed. Planned 2026-10-02. Direction chosen by Mike on 2026-10-02 from the `readability-prototype` branch and the Claude Design file "Company Intelligence - current" (with its "refined" jump bar).
 
 **Context**
 - After Phase 6, the dashboard, the evidence drawer and the source view are complete but hard to consume. The Apple dashboard is a long scroll: Attention signals (10 cards), Current risks (28 headings), Recommended diligence (6) and long paragraphs everywhere. It is hard to demo.
@@ -585,10 +585,56 @@ The rest of the cost addendum still wins on cost. SPEC v2 carries this override 
   - page furniture hidden.
 
   The stored text, chunk offsets and citations never change. A test proves that the rendered characters equal the source minus the hidden furniture, for all 246 filings.
-- **(f) Evidence answers "why does this support the claim".** The drawer first shows the one to three sentences of the passage that best match the claim. They are picked by term and figure overlap, deterministically, and highlighted in place, with the full passage one click away. Figures the validator matched are bold. The passage title is its section and subsection, not its chunk ID. Compare periods adds a sentence-level diff: new this period, removed, and unchanged (collapsed).
+- **(f) Evidence leads with what is closest to the claim.** The drawer first shows the one to three sentences of the passage closest to the claim. They are picked by word and figure overlap, deterministically, labelled as overlap (not proof), and highlighted in place, with the full passage one click away. Only figures printed exactly are bold (for a brief, only the ones its validator verified in that passage). The passage title is its section and subsection, not its chunk ID. Compare periods adds a sentence-level diff: new this period, removed, and unchanged (collapsed).
 - **(g) Same treatment for the brief and Compare.** A bottom line and jump bar on the brief, and condensed sections and chips on Compare, with the same rules.
 
 **Consequences**
 - Web-only change: no api, CDK, profile-set or S3 change, no spend. The deploy is `pnpm deploy:web`.
 - Driver change and share are read from the builder's deterministic `changeBasis` text. A contract test pins that format to the parser. A structured field would need a new profile-set version (a later option).
 - The existing web tests that expect every heading and recommendation in the DOM are updated to expand first.
+
+**Step 2 as built (e–f)** (fixes after the adversary review folded in, 2026-10-03)
+- **Display layer** (`apps/web/src/lib/readable/`). `layoutBlocks` partitions a range into headings, paragraphs, lists and tables. Every offset is in exactly one run, and a run is either shown or hidden. Only two kinds are hidden: `furniture`, and `layout` (table pipes, empty cells, line breaks and whitespace at a block's edges). It reuses the corpus's own `paragraphSpans`, `sentenceSpans`, `headingPrefix` and `isTableRow`, and the risk headings from `riskHeadingSpans`. These are browser-safe subpath exports (`@diligenceiq/corpus/segments`, `/risks`). `extractRiskHeadings` now delegates to `riskHeadingSpans`, with identical output; the corpus tests are unchanged and pass.
+- **Furniture** (`furniture.ts`) comes in two strengths.
+  - Strong shapes are hidden anywhere, whatever follows them:
+    - a footer with "Form 10-K/10-Q" and a page number, with pipes ("Apple Inc. | 2025 Form 10-K | 21", also before a lowercase word, "| 15iPad") or without ("MASTERCARD 2025 FORM 10-K 17", or with no registrant, "2025 FORM 10-K 1"; a registrant is upper-case words only, so "…the Internal 2025 FORM 10-K…" keeps "Internal");
+    - a page-number line;
+    - a page number glued to a back-link ("22Table of Contents", "6Table of Contentsreasons", "41Table of Contents$480 million"; JNJ's singular "Table of Content" too). After five or more digits ("202355Table of Contents") only the phrase is hidden, so no digit of the year is lost;
+    - a back-link opening a line, and the page number ending the prose line before it ("…jobsite 3" / "Table of Contentsinformation…"; never a table row's last cell).
+  - Weak shapes ("PART II" alone, "Item 7", "| BUSINESS | Table of Contents") are hidden only when the same line, digits masked, repeats at least 3 times in the filing. An item number beside a table-of-contents row ("Item 1 |" next to "Business | 1", within one line before or three after) is content and stays.
+  - Table-of-contents rows ("Item 16. | Form 10-K Summary | 74") and prose stay visible. A hidden run must match `FURNITURE_TEXT` (a footer or back-link phrase, a page number, or a bare running header with nothing else) and be at most 140 characters.
+  - A drawer passage has no whole filing to count repeats in, so only strong shapes are hidden there.
+  - Over the corpus, 0.35% of characters are hidden as furniture; no filing above 5% (TGT, the most, 3.6%).
+- **Tables** (`tableGrid`). Every value sits in the column of its raw `|` index; empty cells stay empty cells, never left-padded away (BA's "345 |  |  | 58" stays under 2025 and 2024). Flattened filings disagree about a lone "$" cell: in some it is a column and rows without one keep an empty cell (TSLA), in others rows without one have a cell fewer (AAPL). Each table takes the reading that puts its values in the fewest distinct columns; under the second, a value's column is its raw index less the lone "$" cells before it. A "$" joins the amount after it, and a "%", ")" or footnote letter ("(g)") the one before, without moving any column. Leading rows with no figure (years aside) are the header, rendered as `<thead>` with `<th scope="col">`; a header row with exactly as many labels as the body has value columns puts them over those columns in order. Columns empty in every row are dropped. A condensed drawer view keeps the header rows. A table box takes focus (and gets a role and name) only when it actually scrolls sideways, measured with a `ResizeObserver`, so a page has no tab stop per table that fits.
+- **A citation is never invisible.** A few indexed chunks are only a page number or "17Table of Contents" (the corpus test bounds them below 1% of chunks). When such a chunk is the cited span, the source view shows that furniture. A cited span with any other text keeps its furniture hidden. The target id goes on the first shown character of the span, fixed by offset (not render order), in the first section that shows any of it, so it is on the page exactly once and survives a table re-rendering after it measures its overflow.
+- **Proof:** `readable-corpus.test.ts` covers all 246 filings and every chunk. It checks that:
+  - the runs partition each filing;
+  - layout runs are only pipes and whitespace, and furniture runs match the furniture shapes and length bound;
+  - the shown text is the source minus the hidden runs;
+  - each chunk's highlight is exactly its own shown characters.
+
+  It also runs oracles that do not reuse the layout's rules:
+  - the shown text of every filing contains no page number glued to a back-link and no "Form 10-K | 21" or "FORM 10-K 7" footer (zero allowed);
+  - every table value of every filing is the raw `|` split cell at its index, in the column its currency reading gives, in source order (over 15,000 tables).
+
+  `evidence-readable.test.tsx` renders four real filings, one per footer style (AAPL, MSFT, GS, TGT), and compares every chunk's `<mark>` text in the DOM. It also renders sampled cited chunks of AAPL, GS, NKE, DE and BA through the source view's `FilingSections`: the id is on the first target piece, and the joined pieces equal the chunk's characters outside a hand-written per-filing furniture oracle. BA's statement of operations is checked in the DOM (345 under 2025, 58 under 2024).
+- **Closest sentences** (`support.ts`).
+  - Units are the sentences of paragraphs (the corpus splitter), list items, headings and table rows.
+  - A unit scores 1 per content word shared with the statement and 3 per figure of the statement it prints exactly (below).
+  - Words are lightly stemmed and passed through a fixed finance lexicon (sales↔revenue, grew↔increased, fell↔declined, income↔profit). Only unambiguous forms are mapped: "contract", "notes" and "gain" keep their own meaning. "net" and "cost" are not content words. Nothing is learned.
+  - A unit qualifies only with a matched figure, or with at least 3 shared content words of which at least one is specific (not a lexicon stem or a generic finance word such as "margin", "due", "primarily"). Up to three qualifying units are kept, each at least 75% of the best score, in passage order.
+  - The label says "Closest sentences to the statement"; the legend says it is word and figure overlap, not proof. When nothing qualifies, the drawer says so and shows the whole passage.
+  - The statement is threaded from the chip that opened the drawer: a brief's inline chip uses its sentence (the corpus sentence splitter, so "U.S. Revenue…" stays whole), a signal its "what changed" (never its measurement), a metric value a readable "Metric, FY2025: $416.2B" (never its raw source row), other items their own text. A passage opened from a list has no statement and is shown whole.
+- **Bold figures.** Display only, never counted as verification, and as strict as the numeric validator (`matchFigure`, architecture §6.9), never by rounding under one scale word:
+  - a percentage matches the same percentage; a scaled amount the same amount and scale word, or the exactly equal amount in another ("$1.2 billion" = "1,200 million"), or in a passage that states its unit a cell equal to it in that unit or (coarser unit, at least 3 significant digits) rounding to it ("$416.2 billion" for 416,161 in millions); with no unit stated, a table cell with the identical digits (at least 3 significant); an unscaled amount the same value as a "$" amount or table cell;
+  - so "$4 billion" never bolds "$3.5 billion" or "4.3 times", "$1 billion" never "$854 million", "16%" never 15.6% or 16.2%; a number after a product or model name ("Microsoft 365", "Windows 11") is not a figure.
+  - A brief citation bolds only the figures the validator verified in that chunk (`FigureCheck.chunkId`), and nothing when it verified none there. A metric value bolds only its own printed cell, inside its source row. The legend says which.
+- **Passage title:** the drawer title is the citation's `section` (section › subsection when the citation carries one), with the company in the eyebrow. Lists that mix periods keep `citationLabel` (period · section). The chunk ID stays only in the details list.
+  - *Known limit:* profile citations carry no subsection today, so a profile passage is titled by its section alone. Adding subsections needs a profile and api change (a new profile-set version), out of scope for this web-only step.
+- **Sentence diff** (`diff.ts`) compares this passage with the side's most similar passage only (the first: the adjacency contract orders a side most similar first), never with the other matched passages, using the same units normalized for case, quotes, dashes and whitespace.
+  - The two passages are chunks cut at different places, so each side is compared only inside its shared stretch: between its first and last unit the other side has (exactly, or with only the numbers changed). Outside it nothing is called new or removed; the count of uncompared sentences is shown.
+  - "New in FY2025 10-K, in the shared stretch" lists later units the earlier passage lacks. A new unit that differs from an earlier one only in its numbers is shown with "Was: …" and that earlier unit is not listed as removed. "Removed since …, in the shared stretch" lists earlier units the later passage lacks. With no unit in common, nothing is compared and the panel says so.
+  - The Following tab reads the later filing against this passage; every other tab reads this passage against the earlier filing.
+  - The diff leads the Compare periods tab panel, and unchanged units are collapsed.
+- **Tokens:** `--key-highlight`, `--diff-added` and `--diff-removed` (`light-dark()`; design-tokens.md). Tables scroll sideways inside their own box, never the page.
+- **Still web only.** The api bundle includes the corpus package, but the chunker and risk extraction behave identically (unit tests), so no api deploy is needed.

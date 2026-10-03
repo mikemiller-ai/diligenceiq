@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   output: 'export',
   trailingSlash: true,
   images: { unoptimized: true },
-  transpilePackages: ['@diligenceiq/core'],
+  transpilePackages: ['@diligenceiq/core', '@diligenceiq/corpus'],
   poweredByHeader: false,
   reactStrictMode: true,
 };

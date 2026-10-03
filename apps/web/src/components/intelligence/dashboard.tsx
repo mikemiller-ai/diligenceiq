@@ -8,6 +8,7 @@ import {
   profileRef,
   type Citation,
   type CompanyIntelligenceProfile,
+  type ProfileFact,
   type ProfileSignal,
   type SignalCategory,
 } from '@diligenceiq/core';
@@ -154,7 +155,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
                     dimension={e.dimension}
                     label={e.label}
                     summaryText={e.summary}
-                    citations={<CitationList ids={e.citationIds} context={citations} provenance="profile" />}
+                    citations={<CitationList ids={e.citationIds} context={citations} provenance="profile" claim={e.summary} />}
                   >
                     {e.summary}
                   </ViewCardBody>
@@ -183,7 +184,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
                 <li key={d.label} className="flex flex-col gap-3 rounded-card border border-border bg-card px-5 py-4 sm:flex-row sm:items-start">
                   <div className="min-w-0 flex-1">
                     <DriverHeader label={d.label} changeBasis={d.changeBasis} maxShare={maxShare(profile)} fixture={fixture} />
-                    <Clamp text={d.explanation} className="mt-2 text-sm text-foreground/80" after={<CitationList ids={d.citationIds} context={citations} provenance="profile" />}>
+                    <Clamp text={d.explanation} className="mt-2 text-sm text-foreground/80" after={<CitationList ids={d.citationIds} context={citations} provenance="profile" claim={d.explanation} />}>
                       {d.explanation}
                     </Clamp>
                   </div>
@@ -201,7 +202,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
             <ModelWrittenBadge />
             <p className="mt-2 text-sm text-foreground/80">
               {profile.managementOutlook.summary}{' '}
-              <CitationList ids={profile.managementOutlook.citationIds} context={citations} provenance="profile" />
+              <CitationList ids={profile.managementOutlook.citationIds} context={citations} provenance="profile" claim={profile.managementOutlook.summary} />
             </p>
           </div>
         </Section>
@@ -253,7 +254,7 @@ export function IntelligenceDashboard({ profile }: { profile: CompanyIntelligenc
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-medium text-foreground">{r.question}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Why suggested: {r.why} <CitationList ids={r.citationIds} context={citations} provenance="profile" />
+                  Why suggested: {r.why} <CitationList ids={r.citationIds} context={citations} provenance="profile" claim={r.why} />
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
@@ -388,7 +389,7 @@ function PerformanceTable({ profile, fixture }: { profile: CompanyIntelligencePr
                         data-chunk-id={latest.chunkId}
                         data-raw-row={latest.rawRow}
                         title={`Source row: ${latest.rawRow}`}
-                        onClick={() => source && show({ kind: 'citation', citation: source, provenance: 'profile' })}
+                        onClick={() => source && show({ kind: 'citation', citation: source, provenance: 'profile', ...metricStatement(metric, latest) })}
                         className="tabular-nums text-foreground hover:text-primary hover:underline"
                       >
                         {formatFact(latest.value, latest.unit, latest.scale)} · {latest.period}
@@ -412,6 +413,20 @@ function PerformanceTable({ profile, fixture }: { profile: CompanyIntelligencePr
       </div>
     </div>
   );
+}
+
+/**
+ * The drawer's statement for a metric value: readable (metric, period, formatted value), never the raw
+ * source row. Only the value's own printed cell in that row is bolded (DD-21 f).
+ */
+export function metricStatement(metric: string, fact: Pick<ProfileFact, 'value' | 'unit' | 'scale' | 'period' | 'rawRow'>): { claim: string; figures: string[]; row: string } {
+  const claim = `${metric}, ${fact.period}: ${formatFact(fact.value, fact.unit, fact.scale)}`;
+  // The cell that prints the value, as printed ("17,576" for 17576; "(1,991)" reads as 1,991).
+  const printed = fact.rawRow
+    .split('|')
+    .map((c) => c.trim().replace(/^\$\s*/, '').replace(/^\((.*)\)$/, '$1'))
+    .find((c) => /^[\d,]+(?:\.\d+)?$/.test(c) && Number(c.replace(/,/g, '')) === Math.abs(fact.value));
+  return { claim, figures: printed ? [printed] : [], row: fact.rawRow };
 }
 
 function formatFact(value: number, unit: string, scale: number): string {
@@ -458,7 +473,7 @@ function CurrentRisks({ profile, citations }: { profile: CompanyIntelligenceProf
             {(r) => (
               <li key={r.rank}>
                 <blockquote className="border-l-2 border-primary/40 pl-3 text-[15px] leading-6 text-foreground">
-                  <span data-allow-figures>{r.heading}</span> <CitationList ids={r.citationIds} context={citations} provenance="profile" />
+                  <span data-allow-figures>{r.heading}</span> <CitationList ids={r.citationIds} context={citations} provenance="profile" claim={r.heading} />
                 </blockquote>
                 <div className="mt-2 flex flex-wrap gap-2 pl-3">
                   <Button asChild size="sm" variant="secondary">
@@ -513,7 +528,7 @@ function WhatsChanged({ profile, citations }: { profile: CompanyIntelligenceProf
       </div>
       <p className="mt-2 text-[15px] font-semibold text-foreground">{s.headline}</p>
       <p className="mt-1 text-sm text-foreground/80">
-        {s.whatChanged} <CitationList ids={s.citationIds} context={citations} provenance="profile" />
+        {s.whatChanged} <CitationList ids={s.citationIds} context={citations} provenance="profile" claim={s.whatChanged} />
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
         Measured: <span data-allow-figures>{s.measurement}</span>
@@ -570,7 +585,7 @@ function SignalCard({
         <SignalChip {...signalDirection(s, profile)}>{SIGNAL_TYPE_LABEL[s.type]}</SignalChip>
       </div>
       <h3 className="mt-2 text-base font-semibold text-foreground">{s.headline}</h3>
-      <Clamp text={s.whatChanged} className="mt-1 text-sm text-foreground/80" after={<CitationList ids={s.citationIds} context={citations} provenance="profile" />}>
+      <Clamp text={s.whatChanged} className="mt-1 text-sm text-foreground/80" after={<CitationList ids={s.citationIds} context={citations} provenance="profile" claim={s.whatChanged} />}>
         {s.whatChanged}
       </Clamp>
       <div className="mt-3 rounded-md bg-secondary px-3 py-2.5">
@@ -588,7 +603,7 @@ function SignalCard({
             Investigate <ArrowUpRight />
           </Link>
         </Button>
-        <Button size="sm" variant="secondary" onClick={() => show({ kind: 'periods', title: s.headline, periods })}>
+        <Button size="sm" variant="secondary" onClick={() => show({ kind: 'periods', title: s.headline, periods, claim: s.whatChanged })}>
           <ScrollText /> View evidence
         </Button>
         <SaveFindingButton source={{ kind: 'signal', ticker: profile.ticker, ref: profileRef.signal(s) }} label="Track" variant="ghost" />

@@ -266,7 +266,7 @@ function CompareBody({ result, profiles }: { result: CompareResult; profiles: Re
                     <>
                       {m.source === 'model' && <p className="mt-1 text-xs text-muted-foreground">Model-written</p>}
                       <p className="mt-1 text-foreground/80">
-                        {m.summary} <CitationList ids={m.citationIds} context={citations} provenance="profile" />
+                        {m.summary} <CitationList ids={m.citationIds} context={citations} provenance="profile" claim={m.summary} />
                       </p>
                     </>
                   )}
@@ -403,7 +403,7 @@ function ThemeList({
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                From the latest risk headings: <CitationList ids={t.citationIds} context={citations} provenance="profile" />
+                From the latest risk headings: <CitationList ids={t.citationIds} context={citations} provenance="profile" claim={t.label} />
               </p>
             </li>
           ))}

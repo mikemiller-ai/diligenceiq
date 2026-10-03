@@ -84,6 +84,12 @@
   --ok-ink: light-dark(#1f7a4f, #6fdba5);
   --risk-med-ink: light-dark(#8a5a00, #f0c46a);
   --destructive-ink: light-dark(#b91c26, #ff9ea2);
+  /* Readable evidence (DD-21 f): grounds behind --foreground text, never a text colour. The key
+     sentences of a passage, and the sentence diff's new and removed rows (each also carries a word
+     and a + / − sign, so colour is never the only cue). */
+  --key-highlight: light-dark(#fbefc4, #3b3212);
+  --diff-added: light-dark(#e3f5ec, #12301f);
+  --diff-removed: light-dark(#fcebeb, #3a1a1d);
 
   /* Gradients. Sapphire → logo blue is the family's only all-blue brand gradient. */
   --gradient-brand: linear-gradient(135deg, #2b48ca 0%, #1e58f7 100%);
@@ -141,6 +147,9 @@
   --color-ok-ink: var(--ok-ink);
   --color-risk-med-ink: var(--risk-med-ink);
   --color-destructive-ink: var(--destructive-ink);
+  --color-key-highlight: var(--key-highlight);
+  --color-diff-added: var(--diff-added);
+  --color-diff-removed: var(--diff-removed);
 
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;

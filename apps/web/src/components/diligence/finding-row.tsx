@@ -26,7 +26,7 @@ import { analysisHref, compareHref, intelligenceHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
 import { FindingStatusBadge, TickerBadge } from './badges';
 import { FigureBadges } from './brief-panels';
-import { useEvidence } from './evidence';
+import { useEvidence, verifiedFigures } from './evidence';
 
 /** Where to go back to for the item a finding was saved from. */
 function sourceHref(source: FindingSource): string | null {
@@ -78,7 +78,7 @@ export function FindingRow({ finding, compact = false }: { finding: Finding; com
                 <li key={c.chunkId}>
                   <button
                     type="button"
-                    onClick={() => show({ kind: 'citation', citation: c, provenance: 'finding' })}
+                    onClick={() => show({ kind: 'citation', citation: c, provenance: 'finding', claim: finding.text, figures: verifiedFigures(finding.figures, c.chunkId) })}
                     className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-secondary px-2 py-0.5 text-xs text-foreground/80 hover:border-primary hover:text-primary"
                   >
                     <FileText aria-hidden className="size-3" />

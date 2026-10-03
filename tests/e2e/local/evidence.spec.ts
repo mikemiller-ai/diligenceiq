@@ -54,7 +54,11 @@ test('the cited passage itself opens in its filing at the exact span', async ({ 
   await page.getByRole('dialog').getByRole('link', { name: 'Open filing' }).click();
   const mark = page.locator(`mark[id="chunk-${CITED}"]`);
   await expect(mark).toBeVisible();
-  expect(await mark.textContent()).toBe(citation.text);
+  // The span may cross paragraphs and table rows (DD-21 e): its pieces together are the passage's
+  // characters, minus layout (line breaks, table pipes, edge whitespace). This passage has no page furniture.
+  const pieces = (await page.locator('mark[data-mark="target"]').allTextContents()).join('');
+  const layoutFree = (t: string) => t.replace(/[\s|]/g, '');
+  expect(layoutFree(pieces)).toBe(layoutFree(citation.text));
 });
 
 test('a coverage cell opens the passages supplied for that company and period', async ({ page }) => {
@@ -65,14 +69,15 @@ test('a coverage cell opens the passages supplied for that company and period', 
   await page.getByRole('button', { name: new RegExp(`^${cell.period} ${cell.contextChunks} · ${cell.citedChunks} cited \\(view .* for ${cell.ticker}\\)$`) }).click();
   const drawer = page.getByRole('dialog');
   await expect(drawer).toContainText('Evidence coverage');
-  await expect(drawer.getByRole('region', { name: 'Cited in the brief' }).locator('blockquote')).toHaveCount(cell.citedChunks);
-  await expect(drawer.getByRole('region', { name: 'Supplied, not cited' }).locator('blockquote')).toHaveCount(cell.contextChunks - cell.citedChunks);
+  await expect(drawer.getByRole('region', { name: 'Cited in the brief' }).getByTestId('period-passage')).toHaveCount(cell.citedChunks);
+  await expect(drawer.getByRole('region', { name: 'Supplied, not cited' }).getByTestId('period-passage')).toHaveCount(cell.contextChunks - cell.citedChunks);
 });
 
 test('axe: the source view with a highlighted passage', async ({ page }) => {
   await page.goto(`/sources/filing/?id=${PREVIOUS.documentId}#chunk-${PREVIOUS.matches[0]!.chunkId}`);
   await settle(page);
-  await expect(page.locator('mark')).toBeVisible();
+  // A span across table rows is many <mark> pieces; the first carries the passage's id.
+  await expect(page.locator(`mark[id="chunk-${PREVIOUS.matches[0]!.chunkId}"]`)).toBeVisible();
   await expectNoAxeViolations(page);
 });
 

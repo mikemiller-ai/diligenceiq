@@ -1,7 +1,8 @@
 'use client';
 
-import type { AdjacentEvidenceResponse, AdjacentSide, Citation } from '@diligenceiq/core';
+import type { AdjacentEvidenceResponse, AdjacentSide, Citation, FigureCheck } from '@diligenceiq/core';
 import { INLINE_CITATION, citationLabel } from '@diligenceiq/core';
+import { sentenceSpans } from '@diligenceiq/corpus/segments';
 import { AlertTriangle, ArrowLeft, Columns2, ExternalLink, FileText, Loader2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -16,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { type EvidenceUnavailable, isUnavailable } from '@/lib/workspace-client';
 import { useWorkspace } from '@/lib/workspace-store';
 import { MicroLabel } from '@/components/evidence/section';
+import { PlainPassage, SentenceDiffView, SupportedPassage } from '@/components/evidence/passage';
 
 /**
  * Where a citation comes from, so the drawer never claims more than is true (SPEC §8.6, §16):
@@ -45,8 +47,14 @@ const INVALID_COPY: Record<EvidenceProvenance, string> = {
   adjacent: 'is not in this index.',
 };
 
-/** A cited passage as opened: what it is, and where its provenance claim comes from. */
-type Opened = { citation: Citation; provenance: EvidenceProvenance };
+/**
+ * A cited passage as opened: what it is, and where its provenance claim comes from. `claim`: the
+ * statement the citation supports, so the drawer can lead with the sentences closest to it;
+ * `figures`: the only figures to bold, for a brief the ones its validator verified in this passage
+ * (architecture §6.9; empty bolds nothing), for a metric value its printed cell; `row`: the source row
+ * a metric value was read from, the only place its figure is bolded.
+ */
+type Opened = { citation: Citation; provenance: EvidenceProvenance; claim?: string; figures?: string[]; row?: string };
 
 export type EvidenceTarget =
   /** `from`: the comparison an adjacent passage was opened from, so "Back to comparison" returns there. */
@@ -64,9 +72,25 @@ export type EvidenceTarget =
       eyebrow?: string;
       empty?: string;
       provenance?: EvidenceProvenance;
+      /** The statement the passages support (a signal's "what changed"), passed on when one is opened. */
+      claim?: string;
     }
   /** A citation beside the same section of the adjacent comparable filings (SPEC §16.2; `GET /api/evidence/adjacent`). */
-  | { kind: 'adjacent'; citation: Citation; provenance: EvidenceProvenance };
+  | ({ kind: 'adjacent' } & Opened);
+
+/**
+ * A passage's title: the citation's section, with its subsection when the citation has one ("Item 1A —
+ * Risk Factors › Supply chain"), never its chunk ID. Profile citations carry no subsection yet (DD-21
+ * known limit), so theirs is the section alone.
+ */
+export function passageTitle(c: Pick<Citation, 'section'>): string {
+  return c.section;
+}
+
+/** The figures the validator verified in this passage, from a brief item's checks; empty when none was (nothing is bolded). */
+export function verifiedFigures(checks: readonly FigureCheck[] | undefined, chunkId: string): string[] {
+  return (checks ?? []).filter((f) => f.verified && f.chunkId === chunkId).map((f) => f.figure);
+}
 
 /** Comparison views need room for two columns. */
 const WIDE: ReadonlySet<EvidenceTarget['kind']> = new Set(['periods', 'adjacent']);
@@ -122,8 +146,8 @@ export function useEvidence() {
 export { filingHref };
 
 function EvidencePanel({ target }: { target: EvidenceTarget }) {
-  if (target.kind === 'periods') return <PeriodsPanel title={target.title} periods={target.periods} description={target.description} eyebrow={target.eyebrow} empty={target.empty} provenance={target.provenance ?? 'profile'} />;
-  if (target.kind === 'adjacent') return <AdjacentPanel key={target.citation.chunkId} citation={target.citation} provenance={target.provenance} />;
+  if (target.kind === 'periods') return <PeriodsPanel title={target.title} periods={target.periods} description={target.description} eyebrow={target.eyebrow} empty={target.empty} provenance={target.provenance ?? 'profile'} claim={target.claim} />;
+  if (target.kind === 'adjacent') return <AdjacentPanel key={target.citation.chunkId} opened={target} />;
   if (target.kind === 'invalid') {
     return (
       <div className="flex flex-col gap-3 p-6 pr-12">
@@ -141,21 +165,21 @@ function EvidencePanel({ target }: { target: EvidenceTarget }) {
       </div>
     );
   }
-  const c = target.citation;
   const verified = target.provenance === 'brief';
-  return <CitationPanel citation={c} provenance={target.provenance} verified={verified} from={target.from} />;
+  return <CitationPanel key={target.citation.chunkId} opened={target} verified={verified} from={target.from} />;
 }
 
-function CitationPanel({ citation: c, provenance, verified, from }: { citation: Citation; provenance: EvidenceProvenance; verified: boolean; from?: Opened }) {
+function CitationPanel({ opened, verified, from }: { opened: Opened; verified: boolean; from?: Opened }) {
+  const { citation: c, provenance } = opened;
   const show = useEvidence();
   return (
     <>
       <div className="relative overflow-hidden bg-navy px-6 pb-5 pt-5 pr-12 text-white">
         <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-sapphire/40 blur-3xl" />
-        <p className="relative font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-on-navy-accent">Evidence</p>
-        <SheetTitle className="relative mt-1.5 text-xl font-semibold tracking-tight text-white">{c.company}</SheetTitle>
+        <p className="relative font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-on-navy-accent">Evidence · {c.company}</p>
+        <SheetTitle className="relative mt-1.5 text-lg font-semibold leading-snug tracking-tight text-white">{passageTitle(c)}</SheetTitle>
         <SheetDescription id="evidence-description" className="relative mt-1 font-mono text-[12px] text-white/70">
-          {c.ticker} · {c.fiscalLabel} {c.filingType} · {c.section}
+          {c.ticker} · {c.fiscalLabel} {c.filingType} · filed {formatDate(c.filingDate)}
         </SheetDescription>
         <p
           data-testid="evidence-provenance"
@@ -167,10 +191,14 @@ function CitationPanel({ citation: c, provenance, verified, from }: { citation: 
       </div>
       {/* Index passages are long, so this region scrolls; it is focusable so keyboard users can scroll it (WCAG 2.1.1). */}
       <div tabIndex={0} role="region" aria-label="Source passage and details" className="flex-1 overflow-y-auto px-6 py-5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
-        <MicroLabel>Source passage</MicroLabel>
-        <blockquote className="mt-2 rounded-lg border border-border bg-secondary/60 p-4 text-[15px] leading-7 text-foreground">
-          {c.text}
-        </blockquote>
+        <SupportedPassage
+          text={c.text}
+          claim={opened.claim}
+          figures={opened.figures}
+          row={opened.row}
+          verified={provenance === 'brief'}
+          passageId={`passage-${c.chunkId}`}
+        />
         <dl className="mt-6 grid grid-cols-[110px_1fr] gap-x-3 gap-y-2.5 text-sm">
           <dt className="text-muted-foreground">Document</dt>
           <dd className="break-all font-mono text-xs leading-5 text-foreground/80">{c.documentId}</dd>
@@ -192,13 +220,13 @@ function CitationPanel({ citation: c, provenance, verified, from }: { citation: 
         {/* An adjacent passage is itself comparison text: it goes back to its comparison, not into another one. */}
         {provenance === 'adjacent' ? (
           from && (
-            <Button variant="secondary" size="sm" onClick={() => show({ kind: 'adjacent', citation: from.citation, provenance: from.provenance })}>
+            <Button variant="secondary" size="sm" onClick={() => show({ ...from, kind: 'adjacent' })}>
               <ArrowLeft />
               Back to comparison
             </Button>
           )
         ) : (
-          <Button variant="secondary" size="sm" onClick={() => show({ kind: 'adjacent', citation: c, provenance })}>
+          <Button variant="secondary" size="sm" onClick={() => show({ ...opened, kind: 'adjacent' })}>
             <Columns2 />
             Compare periods
           </Button>
@@ -246,7 +274,8 @@ const PANEL_ID = 'adjacent-tabpanel';
  * (text similarity within the section, computed at index build); no model is involved, and the
  * similarity is never shown as a score or as certainty.
  */
-function AdjacentPanel({ citation: c, provenance }: { citation: Citation; provenance: EvidenceProvenance }) {
+function AdjacentPanel({ opened }: { opened: Opened }) {
+  const { citation: c, provenance } = opened;
   const { client } = useWorkspace();
   const show = useEvidence();
   const [state, setState] = React.useState<{ status: 'loading' } | { status: 'error' } | { status: 'unavailable'; reason: EvidenceUnavailable['unavailable'] } | { status: 'ready'; data: AdjacentEvidenceResponse }>({ status: 'loading' });
@@ -277,7 +306,13 @@ function AdjacentPanel({ citation: c, provenance }: { citation: Citation; proven
     setSelected(key);
     tabRefs.current.get(key)?.focus();
   };
-  const fromHere: Opened = { citation: c, provenance };
+  const fromHere: Opened = { citation: c, provenance, claim: opened.claim, figures: opened.figures, row: opened.row };
+  // The diff compares this passage with the side's most similar passage (the first: the adjacency
+  // contract orders a side most similar first), later against earlier: "Following …" is later than
+  // this passage, every other side earlier.
+  const closest = side?.passages[0]?.text ?? null;
+  const thisLabel = `${c.fiscalLabel} ${c.filingType}`;
+  const sideLabel = side ? `${side.filing.fiscalLabel} ${side.filing.filingType}` : '';
   return (
     <>
       <div className="relative overflow-hidden bg-navy px-6 pb-5 pt-5 pr-12 text-white">
@@ -326,20 +361,32 @@ function AdjacentPanel({ citation: c, provenance }: { citation: Citation; proven
                 );
               })}
             </div>
-            <div role="tabpanel" id={PANEL_ID} aria-labelledby={TAB_ID(active)} className="mt-5 grid gap-6 md:grid-cols-2">
-              <section aria-label="This passage">
-                <MicroLabel>
-                  This passage · {c.fiscalLabel} {c.filingType}
-                </MicroLabel>
-                <blockquote className="mt-2 rounded-lg border border-primary/30 bg-accent p-4 text-[14px] leading-6 text-foreground">{c.text}</blockquote>
-                <p className="mt-1.5 font-mono text-[11px] text-muted-foreground">{citationLabel(c)}</p>
-              </section>
-              <AdjacentColumn
-                side={side}
-                empty={side ? noMatchingSection(side.filing) : tab.empty}
-                label={tab.label}
-                onView={(p) => show({ kind: 'citation', citation: p, provenance: 'adjacent', from: fromHere })}
-              />
+            <div role="tabpanel" id={PANEL_ID} aria-labelledby={TAB_ID(active)} className="mt-5">
+              {/* What changed leads; the passages follow side by side. */}
+              {side && closest !== null && (
+                <SentenceDiffView
+                  key={active}
+                  later={active === 'next' ? closest : c.text}
+                  earlier={active === 'next' ? c.text : closest}
+                  laterLabel={active === 'next' ? sideLabel : thisLabel}
+                  earlierLabel={active === 'next' ? thisLabel : sideLabel}
+                />
+              )}
+              <div className="mt-6 grid gap-6 md:grid-cols-2">
+                <section aria-label="This passage">
+                  <MicroLabel>
+                    This passage · {c.fiscalLabel} {c.filingType}
+                  </MicroLabel>
+                  <PlainPassage text={c.text} className="mt-2 rounded-lg border border-primary/30 bg-accent p-4 text-[14px] leading-6" />
+                  <p className="mt-1.5 text-[12px] text-muted-foreground">{passageTitle(c)}</p>
+                </section>
+                <AdjacentColumn
+                  side={side}
+                  empty={side ? noMatchingSection(side.filing) : tab.empty}
+                  label={tab.label}
+                  onView={(p) => show({ kind: 'citation', citation: p, provenance: 'adjacent', from: fromHere })}
+                />
+              </div>
             </div>
             <p className="mt-6 text-xs text-muted-foreground">
               Matched by text similarity within the same section when the index was built. These passages are shown for comparison; nothing cites them.
@@ -348,7 +395,7 @@ function AdjacentPanel({ citation: c, provenance }: { citation: Citation; proven
         )}
       </div>
       <div className="flex items-center gap-2 border-t border-border px-6 py-3">
-        <Button variant="secondary" size="sm" onClick={() => show({ kind: 'citation', citation: c, provenance })}>
+        <Button variant="secondary" size="sm" onClick={() => show({ ...opened, kind: 'citation' })}>
           <ArrowLeft />
           Back to passage
         </Button>
@@ -371,9 +418,9 @@ function AdjacentColumn({ side, empty, label, onView }: { side: AdjacentSide | n
   const f = side.filing;
   const passage = (p: Citation) => (
     <div key={p.chunkId}>
-      <blockquote className="rounded-lg border border-border bg-secondary/60 p-4 text-[14px] leading-6 text-foreground">{p.text}</blockquote>
+      <PlainPassage text={p.text} className="rounded-lg border border-border bg-secondary/60 p-4 text-[14px] leading-6" />
       <div className="mt-1.5 flex flex-wrap items-center gap-3">
-        <button type="button" onClick={() => onView(p)} className="font-mono text-[11px] text-primary hover:underline">
+        <button type="button" onClick={() => onView(p)} className="text-[12px] text-primary hover:underline">
           {citationLabel(p)}
         </button>
         <Link href={filingHref(p.documentId, p.chunkId, p.indexVersion)} className="inline-flex items-center gap-1 text-[12px] text-primary hover:underline">
@@ -409,7 +456,9 @@ function PeriodsPanel({
   eyebrow = 'Evidence by period',
   empty = 'No passage for this period.',
   provenance,
+  claim,
 }: {
+  claim?: string;
   title: string;
   periods: Array<{ period: string; citations: Citation[]; provenance?: EvidenceProvenance }>;
   description?: string;
@@ -444,12 +493,12 @@ function PeriodsPanel({
               <p className="mt-2 text-sm text-muted-foreground">{empty}</p>
             ) : (
               p.citations.map((c) => (
-                <div key={c.chunkId} className="mt-2">
-                  <blockquote className="rounded-lg border border-border bg-secondary/60 p-4 text-[15px] leading-7 text-foreground">{c.text}</blockquote>
+                <div key={c.chunkId} data-testid="period-passage" className="mt-2">
+                  <PlainPassage text={c.text} className="rounded-lg border border-border bg-secondary/60 p-4 text-[14px] leading-6" />
                   <button
                     type="button"
-                    onClick={() => show({ kind: 'citation', citation: c, provenance: p.provenance ?? provenance })}
-                    className="mt-1.5 font-mono text-[11px] text-primary hover:underline"
+                    onClick={() => show({ kind: 'citation', citation: c, provenance: p.provenance ?? provenance, claim })}
+                    className="mt-1.5 text-[12px] text-primary hover:underline"
                   >
                     {citationLabel(c)}
                   </button>
@@ -470,18 +519,30 @@ export function CitationChip({
   provenance,
   onNavy = false,
   className,
+  claim,
+  figureChecks,
 }: {
   id: string;
   citation?: Citation;
   provenance: EvidenceProvenance;
   onNavy?: boolean;
   className?: string;
+  /** The statement this citation supports (the drawer leads with its best-supporting sentences). */
+  claim?: string;
+  /** The brief's figure checks for the statement; the drawer bolds the ones verified in this passage. */
+  figureChecks?: readonly FigureCheck[];
 }) {
   const show = useEvidence();
   const chip = (
     <button
       type="button"
-      onClick={() => show(citation ? { kind: 'citation', citation, provenance } : { kind: 'invalid', chunkId: id, provenance })}
+      onClick={() =>
+        show(
+          citation
+            ? { kind: 'citation', citation, provenance, claim, ...(provenance === 'brief' ? { figures: verifiedFigures(figureChecks, citation.chunkId) } : {}) }
+            : { kind: 'invalid', chunkId: id, provenance },
+        )
+      }
       aria-label={citation ? `View evidence ${id}` : `Unverified citation ${id}`}
       className={cn(
         'ml-1 inline-flex translate-y-[-1px] items-center whitespace-nowrap rounded-md border px-1.5 align-baseline font-mono text-[11px] font-medium leading-[18px] transition-colors',
@@ -504,24 +565,39 @@ export function CitationList({
   context,
   provenance,
   onNavy = false,
+  claim,
+  figureChecks,
 }: {
   ids: string[];
   context: Map<string, Citation>;
   provenance: EvidenceProvenance;
   onNavy?: boolean;
+  claim?: string;
+  figureChecks?: readonly FigureCheck[];
 }) {
   if (ids.length === 0) return null;
   return (
     <span className="inline-flex flex-wrap gap-y-1">
       {ids.map((id) => (
-        <CitationChip key={id} id={id} citation={context.get(id)} provenance={provenance} onNavy={onNavy} />
+        <CitationChip key={id} id={id} citation={context.get(id)} provenance={provenance} onNavy={onNavy} claim={claim} figureChecks={figureChecks} />
       ))}
     </span>
   );
 }
 
+/**
+ * The statement an inline chip supports: the sentence the chip closes, i.e. the last sentence before
+ * the chip (the corpus sentence splitter, which keeps "U.S. Revenue…" whole), with any other inline
+ * markers removed.
+ */
+export function claimBefore(text: string, at: number): string {
+  const before = text.slice(0, at).replace(INLINE_CITATION, '').trimEnd();
+  const sentences = sentenceSpans(before, { start: 0, end: before.length });
+  return before.slice(sentences.at(-1)?.start ?? 0).trim();
+}
+
 /** Renders a brief's text with inline [CHUNK-ID] markers replaced by citation chips (provenance `brief`). */
-export function CitedText({ text, context, onNavy = false }: { text: string; context: Map<string, Citation>; onNavy?: boolean }) {
+export function CitedText({ text, context, onNavy = false, figureChecks }: { text: string; context: Map<string, Citation>; onNavy?: boolean; figureChecks?: readonly FigureCheck[] }) {
   const parts: React.ReactNode[] = [];
   let last = 0;
   for (const m of text.matchAll(INLINE_CITATION)) {
@@ -530,7 +606,7 @@ export function CitedText({ text, context, onNavy = false }: { text: string; con
     // Drop the space before a chip (the chip carries its own margin) and between adjacent chips.
     const between = text.slice(last, at).replace(/\s+$/, '');
     if (between) parts.push(between);
-    parts.push(<CitationChip key={`${id}-${at}`} id={id} citation={context.get(id)} provenance="brief" onNavy={onNavy} />);
+    parts.push(<CitationChip key={`${id}-${at}`} id={id} citation={context.get(id)} provenance="brief" onNavy={onNavy} claim={claimBefore(text, at)} figureChecks={figureChecks} />);
     last = at + m[0].length;
   }
   if (last < text.length) parts.push(text.slice(last));

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@diligenceiq/core": "workspace:*",
+    "@diligenceiq/corpus": "workspace:*",
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/geist-mono": "5.3.0",
     "class-variance-authority": "0.7.1",
@@ -25,7 +26,6 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "@diligenceiq/corpus": "workspace:*",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

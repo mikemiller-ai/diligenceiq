@@ -98,9 +98,11 @@ Dark mode follows the CareerOps pattern, as on Mike's other products: a three-st
 | `--risk-high` | `#F58129` | `#F8934A` | dot 7.6 |
 | `--risk-critical` | `#E5484D` | `#F0676B` | ink on a 15% tint 11.8; dot 5.7 |
 | `--navy-edge` | transparent | `#2A3350` | 1.5 against the ground (a hairline) |
+| `--key-highlight` | `#FBEFC4` | `#3B3212` | Ground behind a passage's closest sentences to the statement (DD-21 f). Text stays `--foreground`: 15.8 light / 10.6 dark; muted 5.4 / 5.1 |
+| `--diff-added` / `--diff-removed` | `#E3F5EC` / `#FCEBEB` | `#12301F` / `#3A1A1D` | Grounds of the sentence diff's new and removed rows, each also marked by a + / − sign and a screen-reader word. Foreground ≥ 11.9, muted ≥ 5.4 in both modes |
 | `--navy`, `--rail`, `--on-navy-*`, `--sapphire`, `--logo-blue` | unchanged | unchanged | `--on-navy-ink` on a 30% sapphire tint over navy is 10.8 |
 
-`src/lib/tokens.test.ts` asserts these pairs against both halves of every `light-dark()` pair. The Playwright spec `tests/e2e/local/dark-mode.spec.ts` runs axe (WCAG 2.1 A/AA) in dark mode, reached both through the OS setting and through `data-theme=dark` over a light OS. It covers the landing, `/intelligence/?ticker=AAPL`, a seeded brief, the source view with a highlighted passage, and the evidence drawer with its period comparison. `DARK_SCREENSHOTS=1 pnpm exec playwright test tests/e2e/local/dark-mode.spec.ts` writes screenshots of both modes to `test-results/dark-mode/`.
+`src/lib/tokens.test.ts` asserts these pairs against both halves of every `light-dark()` pair. The Playwright spec `tests/e2e/local/dark-mode.spec.ts` runs axe (WCAG 2.1 A/AA) in dark mode, reached both through the OS setting and through `data-theme=dark` over a light OS. It covers the landing, `/intelligence/?ticker=AAPL`, a seeded brief, the source view with a highlighted passage, the evidence drawer with its period comparison and sentence diff (unchanged list open), and a passage's closest sentences, condensed and full (Phase 6r step 2). `DARK_SCREENSHOTS=1 pnpm exec playwright test tests/e2e/local/dark-mode.spec.ts` writes screenshots of both modes to `test-results/dark-mode/`.
 
 ## Typography
 - **Geist** (sans) and **Geist Mono**, self-hosted via `@fontsource-variable/*`, with no network fetch at build time. These are the product voice in the kit.

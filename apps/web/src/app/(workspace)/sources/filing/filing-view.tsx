@@ -1,6 +1,8 @@
 'use client';
 
 import { type SourceDocumentResponse, isCatalogTicker, tickerOfDocumentId } from '@diligenceiq/core';
+import { riskHeadingSpans } from '@diligenceiq/corpus/risks';
+import type { Span } from '@diligenceiq/corpus/segments';
 import { ArrowLeft, FileQuestion, Highlighter } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -9,18 +11,23 @@ import { FilingTypeBadge, TickerBadge } from '@/components/diligence/badges';
 import { ExternalSourceLink } from '@/components/diligence/evidence';
 import { PageContainer, SectionHeading } from '@/components/diligence/page';
 import { PageSkeleton } from '@/components/diligence/page-skeleton';
+import { ReadableText } from '@/components/evidence/readable-text';
 import { EmptyState, ErrorPanel, NoticeBar, RetryButton } from '@/components/diligence/states';
 import { Button } from '@/components/ui/button';
 import { formatCount, formatDate } from '@/lib/format';
 import { hasInAppHistory } from '@/lib/in-app-history';
+import { furnitureCounts } from '@/lib/readable/furniture';
+import { type Block, layoutBlocks, shownText } from '@/lib/readable/layout';
 import { intelligenceHref } from '@/lib/links';
 import { cn } from '@/lib/utils';
 import { type EvidenceUnavailable, isUnavailable } from '@/lib/workspace-client';
 import { useWorkspace } from '@/lib/workspace-store';
 
 /*
- * The readable source view (SPEC §16.2; Phase 6): a filing's processed text, exactly as the index
- * chunked it, with section navigation and the cited passage highlighted (`#chunk-<id>`). Every
+ * The readable source view (SPEC §16.2; Phase 6, DD-21 e): a filing's processed text, exactly as the
+ * index chunked it, laid out for reading (paragraphs, headings, lists, tables; page furniture hidden;
+ * lib/readable/layout.ts) without changing a character, with section navigation and the cited
+ * passage highlighted (`#chunk-<id>`). Every
  * citation's "Open filing" lands here, with the citation's index version (`&iv=`): chunk IDs and
  * offsets only mean something within one version, so a citation from another version opens the
  * current text with a notice and nothing highlighted. The text comes from
@@ -134,24 +141,6 @@ export function FilingView() {
   return <FilingDocument source={state.source} staleVersion={state.staleVersion} />;
 }
 
-interface Segment {
-  start: number;
-  end: number;
-  highlight: boolean;
-}
-
-/** A section's text split around the highlighted passage (chunks never cross a section boundary). */
-function segments(start: number, end: number, target: { charStart: number; charEnd: number } | null): Segment[] {
-  if (!target || target.charEnd <= start || target.charStart >= end) return [{ start, end, highlight: false }];
-  const out: Segment[] = [];
-  const a = Math.max(start, target.charStart);
-  const b = Math.min(end, target.charEnd);
-  if (a > start) out.push({ start, end: a, highlight: false });
-  out.push({ start: a, end: b, highlight: true });
-  if (b < end) out.push({ start: b, end, highlight: false });
-  return out;
-}
-
 type ReadingSection = SourceDocumentResponse['sections'][number];
 
 /**
@@ -180,6 +169,8 @@ function FilingDocument({ source, staleVersion }: { source: SourceDocumentRespon
   // A citation from another index version is never located in this text: same ID, possibly different words.
   const target = React.useMemo(() => (targetId && !staleVersion ? (source.chunks.find((c) => c.chunkId === targetId) ?? null) : null), [source.chunks, targetId, staleVersion]);
   const sections = React.useMemo(() => readingSections(source.sections, text.length), [source.sections, text.length]);
+  // The display layer: computed once per filing, never stored (DD-21 e).
+  const layout = React.useMemo(() => readableSections(source, sections), [source, sections]);
   const targetSection = target ? sections.findIndex((s) => target.charStart >= s.charStart && target.charStart < s.charEnd) : -1;
 
   React.useEffect(() => {
@@ -284,31 +275,70 @@ function FilingDocument({ source, staleVersion }: { source: SourceDocumentRespon
           </ul>
         </nav>
         <article aria-label={`${filing.company} ${filing.fiscalLabel} ${filing.filingType}`} className="flex min-w-0 flex-col gap-8">
-          {sections.map((s, i) => (
-            <section key={`${s.code}-${s.charStart}`} id={sectionAnchor(i)} aria-labelledby={`${sectionAnchor(i)}-title`} className="scroll-mt-20">
-              <h2 id={`${sectionAnchor(i)}-title`} className="text-lg font-semibold tracking-tight text-foreground">
-                {s.title}
-              </h2>
-              <div className="mt-3 whitespace-pre-wrap break-words text-[15px] leading-7 text-foreground/90">
-                {segments(s.charStart, s.charEnd, target).map((seg) =>
-                  seg.highlight && target ? (
-                    <mark
-                      key={seg.start}
-                      id={`${CHUNK_PREFIX}${target.chunkId}`}
-                      tabIndex={-1}
-                      className="passage-target scroll-mt-24 rounded-[3px] bg-primary/15 px-0.5 text-foreground outline-none [box-decoration-break:clone]"
-                    >
-                      {text.slice(seg.start, seg.end)}
-                    </mark>
-                  ) : (
-                    <React.Fragment key={seg.start}>{text.slice(seg.start, seg.end)}</React.Fragment>
-                  ),
-                )}
-              </div>
-            </section>
-          ))}
+          <FilingSections
+            text={text}
+            sections={sections}
+            laid={layout}
+            target={target ? { start: target.charStart, end: target.charEnd } : null}
+            targetId={target ? `${CHUNK_PREFIX}${target.chunkId}` : undefined}
+          />
         </article>
       </div>
     </PageContainer>
   );
+}
+
+/**
+ * The filing's reading sections, laid out, with the cited span highlighted. The target id (and focus
+ * target) goes to the first section that shows any of the span, so it is on the page exactly once even
+ * when a span crosses a section edge.
+ */
+export function FilingSections({
+  text,
+  sections,
+  laid,
+  target,
+  targetId,
+}: {
+  text: string;
+  sections: readonly ReadingSection[];
+  laid: readonly Block[][];
+  target: Span | null;
+  targetId?: string;
+}) {
+  const crosses = (s: ReadingSection) => target !== null && target.start < s.charEnd && target.end > s.charStart;
+  const first = target ? sections.findIndex((s, i) => crosses(s) && shownText(text, laid[i]!, target).length > 0) : -1;
+  // A span that is only furniture shows nowhere until revealed: it goes to the section where it starts.
+  const idAt = first >= 0 ? first : sections.findIndex(crosses);
+  return (
+    <>
+      {sections.map((s, i) => (
+        <section key={`${s.code}-${s.charStart}`} id={sectionAnchor(i)} aria-labelledby={`${sectionAnchor(i)}-title`} className="scroll-mt-20">
+          <h2 id={`${sectionAnchor(i)}-title`} className="text-lg font-semibold tracking-tight text-foreground">
+            {s.title}
+          </h2>
+          <ReadableText
+            className="mt-3"
+            text={text}
+            blocks={laid[i]!}
+            marks={target && crosses(s) ? [{ ...target, tone: 'target' }] : []}
+            targetId={i === idAt ? targetId : undefined}
+          />
+        </section>
+      ))}
+    </>
+  );
+}
+
+/**
+ * Each reading section laid out for display: furniture is judged against the whole filing (a
+ * running footer repeats), and a 10-K's Risk Factors use the risk headings the profiles were built
+ * from (corpus `riskHeadingSpans`).
+ */
+export function readableSections(source: Pick<SourceDocumentResponse, 'text' | 'filing' | 'sections'>, sections: readonly ReadingSection[]): Block[][] {
+  const { text } = source;
+  const counts = furnitureCounts(text);
+  const riskSection = source.filing.filingType === '10-K' ? source.sections.find((s) => s.code === '1A') : undefined;
+  const riskHeadings = riskSection ? riskHeadingSpans(text, { start: riskSection.charStart, end: riskSection.charEnd }).map((h) => ({ start: h.start, end: h.end })) : [];
+  return sections.map((s) => layoutBlocks(text, s.charStart, s.charEnd, { furnitureCounts: counts, riskHeadings }));
 }

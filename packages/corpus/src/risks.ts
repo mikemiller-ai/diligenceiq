@@ -150,7 +150,19 @@ export function extractRiskHeadings(filing: ProcessedFiling, chunks: readonly Ch
   if (filing.meta.filingType !== '10-K') return [];
   const section = filing.sections.find((s) => s.kind === 'risk_factors');
   if (!section) return [];
-  const { text } = filing;
+  return riskHeadingSpans(filing.text, section).map((h, i) => ({
+    ...h,
+    rank: i + 1,
+    chunkIds: chunks.filter((c) => c.documentId === filing.meta.documentId && c.text.includes(h.heading)).map((c) => c.chunkId),
+  }));
+}
+
+/**
+ * The risk headings of one 10-K Risk Factors section, in filing order, without ranks or chunk IDs.
+ * Browser-safe (no Node imports): the web's readable source view uses it to show the same headings
+ * the profiles were built from (DD-21 e).
+ */
+export function riskHeadingSpans(text: string, section: { start: number; end: number }): Array<Omit<RiskHeading, 'rank' | 'chunkIds'>> {
   const bs = blocks(text, section.start, section.end);
 
   // Style A: the heading is its own paragraph ("…stock price.The Company depends on…").
@@ -226,13 +238,7 @@ export function extractRiskHeadings(filing: ProcessedFiling, chunks: readonly Ch
     });
   }
 
-  return [...found.values()]
-    .sort((x, y) => x.start - y.start)
-    .map((h, i) => ({
-      ...h,
-      rank: i + 1,
-      chunkIds: chunks.filter((c) => c.documentId === filing.meta.documentId && c.text.includes(h.heading)).map((c) => c.chunkId),
-    }));
+  return [...found.values()].sort((x, y) => x.start - y.start);
 }
 
 const TAIL_MAX = 200;

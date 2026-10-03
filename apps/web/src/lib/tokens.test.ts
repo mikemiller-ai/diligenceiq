@@ -138,6 +138,17 @@ describe('dark palette contrast (WCAG 2.1)', () => {
     },
   );
 
+  it('readable-evidence grounds (key sentence, diff added and removed) keep body text at 4.5:1 in both modes, and stand apart from the card', () => {
+    for (const g of ['key-highlight', 'diff-added', 'diff-removed']) {
+      for (const mode of ['light', 'dark'] as const) {
+        expect(contrast(valueIn('foreground', mode), valueIn(g, mode))).toBeGreaterThanOrEqual(4.5);
+        // Muted text sits on these rows too ("was: …", "Unchanged").
+        expect(contrast(valueIn('muted-foreground', mode), valueIn(g, mode))).toBeGreaterThanOrEqual(4.5);
+        expect(deltaE(valueIn(g, mode), valueIn('card', mode))).toBeGreaterThanOrEqual(5);
+      }
+    }
+  });
+
   it('secondary body text (foreground at 80%) reaches 4.5:1 in dark', () => {
     for (const bg of grounds) expect(contrast(over(dark('foreground'), 0.8, dark(bg)), dark(bg))).toBeGreaterThanOrEqual(4.5);
   });

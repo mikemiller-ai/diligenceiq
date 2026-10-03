@@ -73,8 +73,23 @@ test.describe('dark via the OS setting (System)', () => {
     await shot(page, 'evidence-drawer-dark');
     await drawer.getByRole('button', { name: 'Compare periods' }).click();
     await expect(drawer.getByRole('tab', { name: /Prior quarter/ })).toHaveAttribute('aria-selected', 'true');
+    // The sentence diff (DD-21 f), its unchanged list opened, is part of the scan.
+    await expect(drawer.getByTestId('sentence-diff')).toBeVisible();
+    await drawer.getByTestId('diff-unchanged').locator('summary').click();
     await expectNoAxeViolations(page);
     await shot(page, 'evidence-compare-dark');
+  });
+
+  test('axe: key sentences highlighted in the drawer, condensed and full, in dark (DD-21 f)', async ({ page }) => {
+    await page.goto('/intelligence/?ticker=AAPL');
+    await settle(page);
+    await page.getByRole('region', { name: 'Current risks' }).locator('blockquote').first().getByRole('button', { name: /^View evidence / }).first().click();
+    const drawer = page.getByRole('dialog');
+    await expect(drawer.getByTestId('evidence-passage').locator('mark[data-mark="key"]').first()).toBeVisible();
+    await expectNoAxeViolations(page);
+    await drawer.getByRole('button', { name: 'Show full passage' }).click();
+    await expectNoAxeViolations(page);
+    await shot(page, 'evidence-key-sentences-dark');
   });
 });
 
