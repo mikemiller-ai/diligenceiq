@@ -14,8 +14,10 @@ export const SECURITY_HEADERS: ReadonlyArray<readonly [string, string]> = [
   ['Referrer-Policy', 'strict-origin-when-cross-origin'],
   ['X-Frame-Options', 'DENY'],
   ['Permissions-Policy', 'camera=(), microphone=(), geolocation=()'],
-  // Script-neutral on purpose: the static export's inline scripts need a hash or nonce
-  // strategy, which is decided in Phase 7 (assumptions D10).
+  // Script-neutral on purpose (assumptions D10, decided in Phase 7): script-src and the other
+  // fetch directives are in each page's own <meta> CSP, written after `next build` with that
+  // page's inline-script hashes (apps/web/src/build/csp.ts), so a web deploy never needs a CDK
+  // deploy. This header carries what a <meta> CSP cannot (frame-ancestors). Both apply.
   ['Content-Security-Policy', "frame-ancestors 'none'; base-uri 'self'; object-src 'none'"],
 ];
 

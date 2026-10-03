@@ -72,11 +72,36 @@ export const EvalQuestionSchema = z
         generation: GenerationExpectSchema.optional(),
       })
       .strict(),
+    /**
+     * Phase 7, robustness set only: a synthetic passage carrying an instruction, appended to the
+     * real context before generation (eval/plant.ts). It borrows the filing metadata of the first
+     * context chunk of `ticker`.
+     */
+    plant: z
+      .object({
+        ticker: z.string().regex(/^[A-Z]{1,5}$/),
+        text: z.string().min(1).max(2000),
+        /** A realistic chunk ID the index does not have; default `PLANTED-<ticker>-001`. */
+        id: z.string().regex(/^[A-Z]{1,5}-FY\d{4}(?:Q[1-4])?-10[KQ]-[A-Z0-9]+-\d{3}$/).optional(),
+        /** Borrow the metadata of the first context chunk of this fiscal label (default: the ticker's first). */
+        period: z.string().regex(/^FY\d{4}(?:Q[1-4])?$/).optional(),
+        position: z.enum(['last', 'middle']).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 export type EvalQuestion = z.infer<typeof EvalQuestionSchema>;
 
-export const EvalFileSchema = z.object({ version: z.literal(1), questions: z.array(EvalQuestionSchema).min(15).max(20) }).strict();
+export const EvalFileSchema = z
+  .object({ version: z.literal(1), questions: z.array(EvalQuestionSchema.refine((q) => !q.plant, 'plant is for the robustness set only')).min(15).max(20) })
+  .strict();
+/**
+ * The Phase 7 robustness set (evals/robustness.yaml): extra adversarial, unsupported and
+ * ambiguous questions beyond the 15–20 of SPEC §41.1, scored by the same checks, with their own
+ * results file so the main set's record is untouched.
+ */
+export const RobustnessFileSchema = z.object({ version: z.literal(1), set: z.literal('robustness'), questions: z.array(EvalQuestionSchema).min(1).max(10) }).strict();
 export type EvalFile = z.infer<typeof EvalFileSchema>;
 
 /** The assessment PDF questions and the SPEC §51.3 expert question, which must appear verbatim. */

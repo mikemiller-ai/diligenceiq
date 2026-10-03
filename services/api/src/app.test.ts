@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_CAPS, MAX_BODY_BYTES } from './app';
 import type { HttpResponse } from './http';
 import { SESSION_COOKIE, SESSION_COOKIE_SECURE, encodeSessionValue } from './session/session';
+import { fileURLToPath } from 'node:url';
+import { createProfileProvider, dirSetReader } from './profiles/provider';
 import { SEED, authed, body, makeEvent, newSession, testApp } from './test-helpers';
 import { MAX_FINDINGS_PER_WORKSPACE } from './workspace/store';
 
@@ -156,7 +158,8 @@ describe('POST /api/analyses (architecture §4.1)', () => {
     expect(res.statusCode).toBe(202);
     const { analysisId, status, pollAfterMs } = body<{ analysisId: string; status: string; pollAfterMs: number }>(res);
     expect({ status, pollAfterMs }).toEqual({ status: 'QUEUED', pollAfterMs: 1500 });
-    expect(sent).toEqual([{ workspaceId, analysisId }]);
+    // The api request ID rides along so the worker's lines link back to this POST (architecture §12).
+    expect(sent).toEqual([{ workspaceId, analysisId, apiRequestId: 'req-123' }]);
     const record = await analyses.get(workspaceId, analysisId);
     expect(record).toMatchObject({ status: 'QUEUED', question: QUESTION, origin, filters: { tickers: ['AAPL'] }, generationCallCount: 0, deadlineAt: '2026-10-02T12:04:00.000Z' });
   });
@@ -177,6 +180,8 @@ describe('POST /api/analyses (architecture §4.1)', () => {
     ];
     for (const b of bad) expectApiError(await app(authed(cookie, 'POST', '/api/analyses', { body: b })), 400, 'VALIDATION_ERROR');
     expect(sent).toEqual([]);
+    // The SPEC §39 limit itself is allowed: exactly 1,000 characters queues.
+    expect((await app(authed(cookie, 'POST', '/api/analyses', { body: { question: 'x'.repeat(1000) } }))).statusCode).toBe(202);
   });
 
   it('the kill switch off → 503 ANALYSES_DISABLED, before any counter or record', async () => {
@@ -333,6 +338,7 @@ describe('findings (SPEC §17; architecture §9)', () => {
     expectApiError(await app(authed(cookie, 'PATCH', `/api/findings/${f.findingId}`, { body: { text: 'rewritten' } })), 400, 'VALIDATION_ERROR');
     expectApiError(await app(authed(cookie, 'PATCH', `/api/findings/${f.findingId}`, { body: {} })), 400, 'VALIDATION_ERROR');
     expectApiError(await app(authed(cookie, 'PATCH', `/api/findings/${f.findingId}`, { body: { note: 'x'.repeat(2001) } })), 400, 'VALIDATION_ERROR');
+    expect((await app(authed(cookie, 'PATCH', `/api/findings/${f.findingId}`, { body: { note: 'x'.repeat(2000) } }))).statusCode).toBe(200);
     expectApiError(await app(authed(cookie, 'PATCH', '/api/findings/fd-nope', { body: { status: 'ACTIVE' } })), 404, 'NOT_FOUND');
     const del = await app(authed(cookie, 'DELETE', `/api/findings/${f.findingId}`));
     expect(del.statusCode).toBe(204);
@@ -397,6 +403,21 @@ describe('Company Intelligence and Compare (read-only, from the active profile s
     expect(expectApiError(await app(authed(cookie, 'GET', '/api/compare', { query: { tickers: 'AAPL,KO' } })), 404, 'PROFILE_MISSING').error.details).toEqual({ missing: ['KO'] });
     expectApiError(await app(authed(cookie, 'GET', '/api/compare', { query: { tickers: 'AAPL' } })), 400, 'VALIDATION_ERROR');
     expectApiError(await app(authed(cookie, 'GET', '/api/compare', { query: { tickers: 'AAPL,ZZZZ' } })), 400, 'VALIDATION_ERROR');
+    // SPEC §39 boundaries (Phase 7 audit): at most five companies, and a repeated ticker is one company.
+    expectApiError(await app(authed(cookie, 'GET', '/api/compare', { query: { tickers: 'AAPL,MSFT,NVDA,JPM,TSLA,PFE' } })), 400, 'VALIDATION_ERROR');
+    expectApiError(await app(authed(cookie, 'GET', '/api/compare', { query: { tickers: 'AAPL,AAPL' } })), 400, 'VALIDATION_ERROR');
+  });
+
+  it('five companies (the SPEC §39 maximum) compose a full Compare', async () => {
+    // The committed built test set (six real llm-v3 profiles; tests/fixtures/built-profile-sets) has five to compare.
+    const profiles = createProfileProvider({ pointer: async () => 'iv-9cf51c066743/llm-v3', read: dirSetReader(fileURLToPath(new URL('../../../tests/fixtures/built-profile-sets/', import.meta.url))) });
+    const { app } = testApp({ deps: { profiles } });
+    const { cookie } = await newSession(app);
+    const res = await app(authed(cookie, 'GET', '/api/compare', { query: { tickers: 'AAPL,MSFT,NVDA,JPM,TSLA' } }));
+    expect(res.statusCode, res.body).toBe(200);
+    const ok = body<{ companies: Array<{ ticker: string }>; missing: string[] }>(res);
+    expect(ok.companies.map((c) => c.ticker)).toEqual(['AAPL', 'MSFT', 'NVDA', 'JPM', 'TSLA']);
+    expect(ok.missing).toEqual([]);
   });
 });
 

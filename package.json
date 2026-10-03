@@ -5,7 +5,7 @@
   "description": "DiligenceIQ — investment intelligence over SEC filings: Company Intelligence, Compare, and one-call Deep Analysis (RAG)",
   "packageManager": "pnpm@9.15.9",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "scripts": {
     "check:docs": "node scripts/check-docs.mjs",
@@ -42,7 +42,8 @@
     "profiles:export-fixture": "tsx scripts/intelligence/export-fixture-set.ts",
     "profiles:upload-set": "tsx scripts/intelligence/upload-set.ts",
     "intelligence:build": "tsx scripts/intelligence/build-profiles.ts",
-    "eval:profiles": "tsx scripts/evaluation/profile-eval.ts"
+    "eval:profiles": "tsx scripts/evaluation/profile-eval.ts",
+    "eval:web-perf": "tsx scripts/evaluation/web-perf.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "3.1144.0",

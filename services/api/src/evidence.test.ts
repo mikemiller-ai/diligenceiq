@@ -17,6 +17,7 @@ import { EVIDENCE_CACHE_CONTROL } from './app';
 import { createEvidenceStore, type EvidenceReader, s3EvidenceReader } from './evidence/store';
 import type { HttpResponse } from './http';
 import { s3SetReader } from './profiles/provider';
+import { spyOnLog } from './test-log';
 import { HAVE_CORPUS, PROFILE_SET_ROOT, SEED, TEST_INDEX_VERSION, authed, body, corpusEvidence, newSession, testApp } from './test-helpers';
 
 /**
@@ -132,7 +133,7 @@ describe('GET /api/sources/:documentId (synthetic filing)', () => {
     const missing = await app(authed(cookie, 'GET', '/api/sources/AAPL_10K_2001-01-01'));
     expect(expectError(missing, 404, 'SOURCE_MISSING').message).toBe('This filing isn’t available.');
     expect(missing.headers['cache-control']).toBe('no-store');
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const log = spyOnLog();
     expectError(await app(authed(cookie, 'GET', '/api/sources/AAPL_10K_2096-11-01')), 404, 'SOURCE_MISSING');
     expect(log.mock.calls.some(([l]) => String(l).includes('processed filing unreadable'))).toBe(true);
     log.mockRestore();
@@ -160,7 +161,7 @@ describe('GET /api/sources/:documentId (synthetic filing)', () => {
 });
 
 describe('index manifest guard: the bundled chunker must be the one that built the index', () => {
-  const quiet = () => vi.spyOn(console, 'log').mockImplementation(() => undefined);
+  const quiet = () => spyOnLog();
 
   it('a manifest from another chunker version answers both routes index_unavailable, logged as an error, and the verdict is cached', async () => {
     const { app, reader } = syntheticApp({ [`index/${IV}/manifest.json`]: MANIFEST('c1') });
@@ -214,7 +215,7 @@ describe('S3 readers: a missing key under a role without s3:ListBucket is a 403,
   const s3 = (err: unknown) => ({ send: vi.fn(async () => Promise.reject(err)) });
 
   it('the evidence reader returns null on AccessDenied and on NoSuchKey, logging the denied key as a warning', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const log = spyOnLog();
     expect(await s3EvidenceReader(s3(denied), 'b')(`processed/${IV}/AAPL_10K_2001-01-01.json`)).toBeNull();
     expect(await s3EvidenceReader(s3({ name: 'Forbidden', $metadata: { httpStatusCode: 403 } }), 'b')('k')).toBeNull();
     expect(await s3EvidenceReader(s3(Object.assign(new Error('nope'), { name: 'NoSuchKey' })), 'b')('k')).toBeNull();
@@ -224,7 +225,7 @@ describe('S3 readers: a missing key under a role without s3:ListBucket is a 403,
   });
 
   it('the profile-set reader returns null on AccessDenied, with the full key', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const log = spyOnLog();
     expect(await s3SetReader(s3(denied), 'b')(`${IV}/llm-v3/ZZZ.json`)).toBeNull();
     const warned = log.mock.calls.map(([l]) => JSON.parse(String(l)) as { level: string; key?: string });
     log.mockRestore();
@@ -242,7 +243,7 @@ describe('GET /api/evidence/adjacent (synthetic filing)', () => {
   it('returns the adjacent passages as citations, skipping a chunk the chunker does not produce', async () => {
     const { app } = syntheticApp();
     const { cookie } = await newSession(app);
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const log = spyOnLog();
     const res = await app(authed(cookie, 'GET', '/api/evidence/adjacent', { query: { chunkId: 'AAPL-FY2098-10K-1A-001' } }));
     const logged = log.mock.calls.map(([l]) => String(l));
     log.mockRestore();

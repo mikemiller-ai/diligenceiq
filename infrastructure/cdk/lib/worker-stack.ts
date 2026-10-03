@@ -11,6 +11,7 @@ import * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as ssm from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
 import { CONFIG, PATHS } from './config';
+import { lambdaRole } from './lambda-role';
 
 export interface WorkerStackProps extends StackProps {
   table: dynamodb.ITable;
@@ -21,6 +22,13 @@ export interface WorkerStackProps extends StackProps {
 /** Metric namespace for the single-call alarm (SPEC §30.1). */
 export const METRIC_NAMESPACE = 'DiligenceIQ';
 export const GENERATION_CALLS_OVER_ONE = 'GenerationCallsOverOne';
+/** Phase 7 metrics from the worker's `analysis_summary` line (architecture §12). */
+export const WORKER_METRICS = {
+  generationDurationMs: 'GenerationDurationMs',
+  estimatedCostUsd: 'AnalysisEstimatedCostUsd',
+  citationsRemoved: 'CitationsRemovedByValidation',
+  failedByCode: 'AnalysisFailed',
+} as const;
 
 /**
  * The async analysis plane (architecture §4.1, §4.3, §5; DD-03, DD-04, DD-14): the analysis
@@ -73,6 +81,7 @@ export class WorkerStack extends Stack {
         runtime: lambda.Runtime.NODEJS_22_X,
         architecture: lambda.Architecture.ARM_64,
         logGroup,
+        role: lambdaRole(this, `${name}Role`, logGroup),
         bundling,
         ...extra,
       });
@@ -142,6 +151,66 @@ export class WorkerStack extends Stack {
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
       alarmDescription: 'An analysis made more than one generation call (SPEC §30.1). This must never happen.',
+    });
+
+    // Phase 7 (architecture §12). Metric filters cost nothing to define and publish only when a
+    // matching line arrives, so an idle app publishes nothing. All read the one summary line.
+    const summaryOf = (status?: string) =>
+      status
+        ? logs.FilterPattern.all(logs.FilterPattern.stringValue('$.event', '=', 'analysis_summary'), logs.FilterPattern.stringValue('$.status', '=', status))
+        : logs.FilterPattern.stringValue('$.event', '=', 'analysis_summary');
+    new logs.MetricFilter(this, 'GenerationDurationFilter', {
+      logGroup: workerLogs,
+      filterPattern: summaryOf('complete'),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: WORKER_METRICS.generationDurationMs,
+      metricValue: '$.generationDurationMs',
+      unit: cloudwatch.Unit.MILLISECONDS,
+    });
+    // Every status: a failed or timed-out generation is still billed (a lower bound when costIncomplete).
+    new logs.MetricFilter(this, 'EstimatedCostFilter', {
+      logGroup: workerLogs,
+      filterPattern: summaryOf(),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: WORKER_METRICS.estimatedCostUsd,
+      metricValue: '$.estimatedCostUsd',
+    });
+    new logs.MetricFilter(this, 'CitationsRemovedFilter', {
+      logGroup: workerLogs,
+      filterPattern: summaryOf('complete'),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: WORKER_METRICS.citationsRemoved,
+      metricValue: '$.citationsRemoved',
+    });
+    // Malformed outputs, generation timeouts and other failures, one series per error code.
+    new logs.MetricFilter(this, 'AnalysisFailedFilter', {
+      logGroup: workerLogs,
+      filterPattern: summaryOf('failed'),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: WORKER_METRICS.failedByCode,
+      metricValue: '1',
+      dimensions: { Code: '$.code' },
+    });
+    // The dlq-handler's failed lines (the worker gave up on the message) feed the same series.
+    new logs.MetricFilter(this, 'AnalysisFailedDlqFilter', {
+      logGroup: dlqLogs,
+      filterPattern: summaryOf('failed'),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: WORKER_METRICS.failedByCode,
+      metricValue: '1',
+      dimensions: { Code: '$.code' },
+    });
+    // The dlq-handler drains the DLQ within seconds, so the queue's depth would almost never be
+    // seen at 1; the handler's invocations are the signal instead: each one is at least one
+    // analysis message the worker gave up on (the handler marks it failed). Lambda metrics are
+    // free; the alarm is about $0.10 a month. Notification target: Phase 8.
+    new cloudwatch.Alarm(this, 'DlqHandlerInvokedAlarm', {
+      metric: this.dlqFunction.metricInvocations({ statistic: 'Sum', period: Duration.minutes(5) }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      alarmDescription: 'An analysis message reached the dead-letter queue and the dlq-handler ran (architecture §12).',
     });
 
     new CfnOutput(this, 'AnalysisQueueUrl', { value: this.queue.queueUrl });

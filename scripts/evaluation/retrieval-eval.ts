@@ -17,6 +17,12 @@
  *   pnpm eval:retrieval --generate --only pdf-1,pdf-2   # generation for these questions only
  *   pnpm eval:retrieval --generate --live   # calls Bedrock for questions with no recorded
  *                                       # response (~$0.10 each, Sonnet 4.6; ask first)
+ *   pnpm eval:retrieval --set robustness [--generate]   # Phase 7: evals/robustness.yaml, the
+ *                                       # extra adversarial, unsupported and ambiguous questions
+ *                                       # (SPEC §41.1 keeps the main set at 15–20). Writes only
+ *                                       # evals/results/generation-<iv>-<pv>-robustness.*; a question
+ *                                       # with `plant` gets a synthetic passage appended to its real
+ *                                       # context (packages/rag eval/plant.ts; document injection).
  *
  * Generation (SPEC §41.2): each question runs through the real pipeline (`runDeepAnalysis`:
  * hybrid retrieval with the cached query embedding, the prompt, ONE gateway call, validation)
@@ -41,6 +47,10 @@ import { parse } from 'yaml';
 import {
   DEEP_ANALYSIS_PROMPT_VERSION,
   EvalFileSchema,
+  RobustnessFileSchema,
+  type Retriever,
+  plantPassage,
+  plantedChunk,
   GenerationGateway,
   type GenerationScore,
   runDeepAnalysis,
@@ -59,9 +69,18 @@ import { createRecordedGenerationClient, renderGenerationReport } from '../lib/g
 import { TITAN_PRICE_PER_1K, createQueryEmbedder } from '../lib/query-embed';
 import { openIndex } from '../lib/retrieval';
 
-const file = EvalFileSchema.parse(parse(readFileSync(join(ROOT, 'evals', 'questions.yaml'), 'utf8')));
-const issues = evalFileIssues(file);
+const setArg = arg('set');
+if (setArg && setArg !== 'robustness') fail(`--set: unknown set ${setArg} (only "robustness")`);
+const robustness = setArg === 'robustness';
+const main = EvalFileSchema.parse(parse(readFileSync(join(ROOT, 'evals', 'questions.yaml'), 'utf8')));
+const issues = evalFileIssues(main);
 if (issues.length) fail(`evals/questions.yaml: ${issues.join('; ')}`);
+const file = robustness ? RobustnessFileSchema.parse(parse(readFileSync(join(ROOT, 'evals', 'robustness.yaml'), 'utf8'))) : main;
+if (robustness) {
+  const ids = file.questions.map((q) => q.id);
+  const clash = ids.filter((id, i) => ids.indexOf(id) !== i || main.questions.some((q) => q.id === id));
+  if (clash.length) fail(`evals/robustness.yaml: duplicate or main-set ids: ${clash.join(', ')}`);
+}
 
 const ALL_MODES: RetrievalMode[] = ['bm25', 'cosine', 'hybrid'];
 const generate = arg('generate') === 'true';
@@ -69,7 +88,7 @@ const modeArg = arg('mode');
 if (generate && modeArg) fail('--generate runs generation only; drop --mode');
 const modes: RetrievalMode[] = generate ? [] : modeArg && modeArg !== 'true' ? [modeArg as RetrievalMode] : ALL_MODES;
 /** Only the full three-mode retrieval run is the record (evals/results/retrieval-<indexVersion>.*). */
-const writeRetrieval = modes.length === ALL_MODES.length;
+const writeRetrieval = modes.length === ALL_MODES.length && !robustness;
 const verbose = arg('verbose') === 'true';
 const embedder = createQueryEmbedder({ live: arg('embed') === 'true' });
 
@@ -92,6 +111,24 @@ async function vectorFor(text: string): Promise<Float32Array | null> {
     }
   }
   return vectors.get(text)!;
+}
+
+/**
+ * The real retriever with one synthetic passage appended to the context it builds (document
+ * injection, robustness set only). The passage borrows the filing metadata of the first context
+ * chunk of `plant.ticker`; everything else, and the one generation call, is the real pipeline.
+ */
+function planting(plant: NonNullable<(typeof file.questions)[number]['plant']>): Retriever {
+  if (plant.id && retriever.chunk(plant.id)) fail(`plant: ${plant.id} is a real index chunk; choose an unused ID`);
+  return Object.assign(Object.create(retriever) as Retriever, {
+    retrieve: async (...a: Parameters<Retriever['retrieve']>) => {
+      const r = await retriever.retrieve(...a);
+      const first = r.context.snapshot.find((e) => e.ticker === plant.ticker && (!plant.period || e.fiscalLabel === plant.period));
+      const template = first ? retriever.chunk(first.chunkId) : undefined;
+      if (!template) fail(`plant: no ${plant.ticker} ${plant.period ?? ''} chunk in the context to borrow metadata from`);
+      return plantPassage(r, plantedChunk(template, plant.text, plant.id), plant.position);
+    },
+  });
 }
 
 interface Row {
@@ -217,7 +254,12 @@ if (writeRetrieval) {
   ];
   writeFileSync(join(outDir, `retrieval-${indexVersion}.md`), md.join('\n'));
   console.log(`  wrote evals/results/retrieval-${indexVersion}.json and .md`);
-} else if (!generate) console.log(`  --mode ${modes.join(',')}: results printed only; evals/results/retrieval-${indexVersion}.* is written by the full three-mode run`);
+} else if (!generate)
+  console.log(
+    robustness
+      ? '  --set robustness: retrieval results printed only (the retrieval record is the main set); generation writes its own -robustness results'
+      : `  --mode ${modes.join(',')}: results printed only; evals/results/retrieval-${indexVersion}.* is written by the full three-mode run`,
+  );
 
 /* ------------------------------------------------------------- generation */
 if (generate) {
@@ -239,7 +281,7 @@ if (generate) {
     const gateway = new GenerationGateway({ purpose: 'analysis', client, beforeCall: async () => {} });
     const outcome = await runDeepAnalysis(
       { question: q.question, requestId: `eval-${q.id}`, analysisId: q.id },
-      { retriever, indexVersion, embedQuery: async () => v, gateway, onStage: async () => {}, remainingMs: () => Number.MAX_SAFE_INTEGER },
+      { retriever: q.plant ? planting(q.plant) : retriever, indexVersion, embedQuery: async () => v, gateway, onStage: async () => {}, remainingMs: () => Number.MAX_SAFE_INTEGER },
     );
     // An unrecorded request in replay mode surfaces as a client error: not a model failure, so it is not scored.
     if (outcome.status === 'FAILED' && outcome.code === 'GENERATION_FAILED' && outcome.detail?.startsWith('NotRecordedError')) {
@@ -273,7 +315,7 @@ if (generate) {
   if (notRecorded.length) console.log(`  NOT RECORDED: ${notRecorded.join(', ')}`);
   embedder.close();
 
-  const name = `generation-${indexVersion}-${DEEP_ANALYSIS_PROMPT_VERSION}`;
+  const name = `generation-${indexVersion}-${DEEP_ANALYSIS_PROMPT_VERSION}${robustness ? '-robustness' : ''}`;
   writeFileSync(join(outDir, `${name}.json`), `${JSON.stringify({ indexVersion, promptVersion: DEEP_ANALYSIS_PROMPT_VERSION, modelId: client.modelId, ranAt: new Date().toISOString(), summary: sum, notRecorded, records }, null, 1)}\n`);
   const gmd = renderGenerationReport({
     indexVersion,

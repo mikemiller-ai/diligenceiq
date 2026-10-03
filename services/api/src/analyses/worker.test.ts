@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleDeadLetters, requireTableName } from '../dlq-handler';
 import { ANALYSIS_DEADLINE_MS, ClaimLostError, DynamoAnalysisStore, MemoryAnalysisStore } from './store';
 import { type IndexProvider, type WorkerDeps, processAnalysisMessage } from './worker';
+import { spyOnLog } from '../test-log';
 
 /** Purpose guard (SPEC §30.2): every gateway the worker builds, on every path, is recorded here. */
 const constructed = vi.hoisted(() => [] as string[]);
@@ -184,7 +185,7 @@ describe('worker: one generation call on every path (SPEC §30; testing-strategy
   });
 
   it('kill switch unreadable (SSM error): FAILED WORKER_FAILED "could not be started", not "paused"; no claim, no gateway', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    spyOnLog();
     const s = setup(okBrief, { switchUnreadable: true });
     await s.queue();
     expect(await processAnalysisMessage(s.deps, s.body(), s.ctx)).toBe('switch_unreadable');
@@ -244,7 +245,7 @@ describe('worker: one generation call on every path (SPEC §30; testing-strategy
   });
 
   it('generation start write fails (not a lost claim): FAILED WORKER_FAILED, the model is never called', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    spyOnLog();
     const s = setup(okBrief);
     await s.queue();
     s.store.markGenerationStarted = async () => Promise.reject(Object.assign(new Error('Rate exceeded'), { name: 'ProvisionedThroughputExceededException' }));
@@ -254,7 +255,7 @@ describe('worker: one generation call on every path (SPEC §30; testing-strategy
   });
 
   it('generation start write landed but its response was lost: FAILED WORKER_FAILED; the record keeps the start mark, telemetry says no call', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    spyOnLog();
     const s = setup(okBrief);
     await s.queue();
     const mark = s.store.markGenerationStarted.bind(s.store);
@@ -290,7 +291,7 @@ describe('worker: one generation call on every path (SPEC §30; testing-strategy
   });
 
   it('a context snapshot write failure is retried once and never fails a COMPLETE analysis', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const log = spyOnLog();
     const s = setup(citingFirst);
     await s.queue();
     let attempts = 0;

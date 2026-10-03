@@ -78,6 +78,10 @@ pnpm gate
   - `pnpm evidence:check` checks citation integrity over the local index build (every chunk, adjacency reference, and seed, live-brief and profile-set citation resolves); writes `evals/results/evidence-<iv>.json` (no AWS).
   - `pnpm fixtures:test-profiles` copies the real AAPL, TSLA, JPM, MSFT, NVDA and PFE `llm-v3` profiles verbatim into the committed test set `tests/fixtures/built-profile-sets/<iv>/llm-v3/` (a separate root: never upload it), used by the web readability tests and the e2e `built-profiles` project (no AWS; Phase 6r).
   - `pnpm fixtures:evidence` regenerates the committed adjacency subset `tests/fixtures/evidence/<iv>/adjacency/` from `.index/build` (no AWS); the api tests and the e2e server process filings from the corpus themselves.
+- **Phase 7 tools (never in the gate):**
+  - `pnpm eval:retrieval --set robustness [--generate]` runs `evals/robustness.yaml` (replay is free; `--embed` and `--live` spend: ask first) and writes only `generation-<iv>-<pv>-robustness.*`.
+  - `pnpm eval:web-perf` measures bytes and render timings of the built export against the local server (no AWS; run `pnpm build` first).
+  - The web build's post-step `node src/build/csp.ts out` writes each page's CSP `<meta>` (runs inside `pnpm build`; never hand-edit `out/`).
 - **Generation tools (Phase 4, never in the gate):**
   - `pnpm eval:retrieval --generate` replays recorded generations (free). `--live` makes Bedrock generation calls, about $0.11 each, about $2.25 per run: ask first.
   - `pnpm eval:generation:rescore` re-validates stored briefs (no AWS).
@@ -100,7 +104,7 @@ The adversary also asks the SPEC §48.2 product questions:
 - Is it an intelligence product rather than a RAG demo?
 
 ## Conventions
-- Package manager: pnpm 9. Node ≥ 22. TypeScript strict. Zod at every boundary.
+- Package manager: pnpm 9. Node ≥ 22.18 (the web build's CSP step runs a `.ts` file with native type stripping). TypeScript strict. Zod at every boundary.
 - **Prompt changes:** every real change to either prompt (Deep Analysis, Company Intelligence profile) gets an entry in `docs/prompt-iterations.md`. Never fabricate history. `prompts/final-diligence-prompt.md` must match the runtime prompt (`packages/rag/src/generation/prompt.ts`; enforced by a test). Regenerate it with `pnpm prompts:render`, bump `DEEP_ANALYSIS_PROMPT_VERSION`, and keep the superseded file in `prompts/versions/`.
 - **Corpus:** `edgar_corpus/` is gitignored (79 MB, public domain). Ingestion reads `CORPUS_PATH`. Corpus numbers in docs must match `node scripts/ingestion/probe-corpus.mjs`; anomalies are in `docs/assumptions.md` (Known corpus anomalies).
 - `UPDATED_FDE-AI-RAG-Assessment.pdf` is gitignored (Eliza's document).

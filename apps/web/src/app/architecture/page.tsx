@@ -6,21 +6,21 @@ import { BrandMark, Wordmark } from '@/components/shell/brand';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { MEASURED } from './measured';
 
 export const metadata: Metadata = { title: 'Architecture and business value' };
 
 /*
- * Architecture and business value (SPEC §18). Static: it describes the design and shows no
- * metrics. Measured evaluation, latency and cost numbers arrive in Phase 7, each traceable to
- * docs/evaluation.md or telemetry. Every mechanism is stated as what it is: built and deployed,
- * built but not yet deployed (the Phase 5 api), or designed with the phase that builds it.
+ * Architecture and business value (SPEC §18). Static. Its only numbers are the measured ones in
+ * `measured.ts` (Phase 7), each recomputed from its record by `measured.test.ts`. Every mechanism
+ * is stated as what it is: built and deployed, or designed with the phase that builds it.
  */
 
 /** What exists in this build vs what is designed (implementation plan phases). */
-type BuildStatus = 'Built' | 'Built · not yet deployed' | `Designed · Phase ${string}`;
+type BuildStatus = 'Built' | `Designed · Phase ${string}`;
 
 function StatusBadge({ status }: { status: BuildStatus }) {
-  return <Badge tone={status === 'Built' ? 'success' : status === 'Built · not yet deployed' ? 'info' : 'neutral'}>{status}</Badge>;
+  return <Badge tone={status === 'Built' ? 'success' : 'neutral'}>{status}</Badge>;
 }
 
 /** What the product is for. The "This build" section says what exists today. */
@@ -32,7 +32,7 @@ const VALUE = [
   { title: 'Answers any question', text: 'Deep Analysis over every filing, multi-company and multi-year, as a cited Diligence Brief.' },
   { title: 'Proves every conclusion', text: 'Each claim opens its source passage; citations outside the supplied evidence are removed and flagged.' },
   { title: 'Keeps what the team learns', text: 'Findings carry a copy of their cited passages, ready for the Investment Committee.' },
-  { title: 'Compares companies', text: 'Common, distinctive and diverging attention areas across two to five companies, composed without a model call.' },
+  { title: 'Compares companies', text: 'A fixed-rule bottom line and one risk-area grid across two to five companies, composed without a model call.' },
 ];
 
 /** The Deep Analysis worker path (architecture §4.1, §5). Built and deployed in Phases 3–4. */
@@ -50,8 +50,8 @@ const SYSTEM: { icon: typeof Cloud; title: string; status: BuildStatus; lines: s
   {
     icon: Server,
     title: 'HTTP API → api Lambda',
-    status: 'Built · not yet deployed',
-    lines: ['Sessions, findings, stored profiles and Compare; no Bedrock permission', 'Checks the kill switch and the spend caps before it queues an analysis', 'The deployed api is still the earlier build'],
+    status: 'Built',
+    lines: ['Sessions, findings, stored profiles and Compare; no Bedrock permission', 'Checks the kill switch and the spend caps before it queues an analysis', 'One structured log line per request, with its request ID'],
   },
   {
     icon: Database,
@@ -61,20 +61,19 @@ const SYSTEM: { icon: typeof Cloud; title: string; status: BuildStatus; lines: s
   },
 ];
 
-/** What this build does, plainly. "Not yet deployed" is code that is built and tested but not live. */
+/** What this build does, plainly. Built means it runs in this deployment. */
 const TODAY: { item: string; status: BuildStatus }[] = [
-  {
-    item: 'Company Intelligence preview profiles for Apple, Microsoft and NVIDIA: every risk heading the extraction rule found in the latest annual report, each cited to the index; everything else a labeled placeholder',
-    status: 'Built',
-  },
   { item: 'Ingestion, chunking and the hybrid keyword and vector index over every filing', status: 'Built' },
   { item: 'The analysis worker: retrieval, exactly one generation request, deterministic validation of citations and figures', status: 'Built' },
-  { item: 'Kill switch on new analyses, and a CDK test that fails the build if an always-on resource appears', status: 'Built' },
-  { item: 'Deep Analysis form with an editable prefill that never runs by itself; Run queues the analysis for the worker and the page shows its real stages', status: 'Built · not yet deployed' },
-  { item: 'Demo workspaces without an account, seeded with real pre-run briefs; findings saved on the server with their cited passages', status: 'Built · not yet deployed' },
-  { item: 'Spend caps: per workspace per hour, for the whole demo per day, and on new workspaces per network and per day', status: 'Built · not yet deployed' },
-  { item: 'Profiles served from a stored set selected by one parameter; Compare composed from them without a model call', status: 'Built · not yet deployed' },
-  { item: 'Offline profile build: deterministic and model-written sets, build ledger, set switch', status: 'Designed · Phase 4b' },
+  { item: 'Deep Analysis form with an editable prefill that never runs by itself; Run queues the analysis for the worker and the page shows its real stages', status: 'Built' },
+  { item: 'Offline profile build: a deterministic set and a model-written set for 53 companies, a build ledger, and one parameter that switches between them', status: 'Built' },
+  { item: 'Company Intelligence and Compare read from the stored profiles; every passage opens in a readable source view', status: 'Built' },
+  { item: 'Demo workspaces without an account, seeded with real pre-run briefs; findings saved on the server with their cited passages', status: 'Built' },
+  { item: 'A kill switch on new analyses, and spend caps per workspace per hour, for the whole demo per day, and on new workspaces per network and per day', status: 'Built' },
+  { item: 'Security headers, and a per-page Content-Security-Policy under which scripts run only by their hash', status: 'Built' },
+  { item: 'Structured logs with request IDs, 14-day retention, and metrics for generation latency, cost and failures; an alarm if an analysis ever makes a second call', status: 'Built' },
+  { item: 'A CDK test that fails the build if an always-on resource appears', status: 'Built' },
+  { item: 'AWS Budget alert and alarm notifications', status: 'Designed · Phase 8' },
 ];
 
 const FUTURE: { stage: string; scope: string; state: 'In progress' | 'Next' | 'Later' }[] = [
@@ -153,23 +152,22 @@ export default function ArchitecturePage() {
           <EvidenceCard label="LIVE · BUILT, PHASES 3–5" title="One generative call per question">
             Deep Analysis is retrieval, then exactly one generation request, then validation, in a worker that runs only
             when an analysis is queued. Every run, including a re-run after a failure, is a new analysis with its own
-            single call. The api that queues analyses, checks the kill switch and the spend caps, and keeps findings is
-            built and tested but not yet deployed. Compare, Save Finding and the Findings Board are deterministic
-            application logic.
+            single call. The api queues analyses after checking the kill switch and the spend caps. Compare, Save Finding
+            and the Findings Board are deterministic application logic.
           </EvidenceCard>
-          <EvidenceCard label="OFFLINE · DESIGNED, PHASE 4B" title="Profiles computed once per index version">
-            Company Intelligence profiles will be built by an admin-run script after indexing: deterministic figures, risks
-            and change signals, plus at most one model call per company per index and prompt version, enforced by a build
-            ledger and a required call budget. The builder is never deployed and never scheduled, and pages only read the
-            stored result. This build shows preview profiles assembled from filing text with no model call.
+          <EvidenceCard label="OFFLINE · BUILT, PHASE 4B" title="Profiles computed once per index version">
+            Company Intelligence profiles are built by an admin-run script after indexing: deterministic figures, risks and
+            change signals, plus at most one model call per company per index and prompt version, enforced by a build ledger
+            and a required call budget. The builder is never deployed and never scheduled, and pages only read the stored
+            result.
           </EvidenceCard>
         </div>
         <div className="mt-3.5 rounded-card border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-foreground/85">
           <p className="font-semibold text-foreground">The one cost exception, stated plainly</p>
           <p className="mt-1">
             The offline profile build is the only place a model call is not a direct response to a user’s question. It was
-            chosen deliberately, it is bounded as described above, and it can be withdrawn at any time: the design always
-            builds a zero-call deterministic profile set alongside it, and one parameter switches the product to that set
+            chosen deliberately, it is bounded as described above, and it can be withdrawn at any time: a zero-call
+            deterministic profile set is always built alongside it, and one parameter switches the product to that set
             instantly, with no rebuild or deploy.
           </p>
         </div>
@@ -237,9 +235,8 @@ export default function ArchitecturePage() {
             scheduled jobs. A CDK test fails the build if one appears.
           </EvidenceCard>
           <EvidenceCard label="IN USE" title="Proportional to questions asked">
-            By design the single generation request dominates the cost of an analysis. Spend is bounded by a kill switch
-            (built), a global daily cap, per-workspace caps and a cap on new workspaces (built, not yet deployed), and an
-            AWS Budget alert (Phase 8).
+            The single generation request dominates the cost of an analysis. Spend is bounded by a kill switch, a global
+            daily cap, per-workspace caps and a cap on new workspaces, with an AWS Budget alert to come in Phase 8.
           </EvidenceCard>
         </div>
       </Section>
@@ -248,7 +245,7 @@ export default function ArchitecturePage() {
         tight
         eyebrow="This build"
         headline="What exists today, and what is designed."
-        lede="Built means it runs in this deployment. Built, not yet deployed means the code exists and is tested but is not live yet. Designed means a later phase builds it."
+        lede="Built means it runs in this deployment. Designed means a later phase builds it."
       >
         <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-sm">
           {TODAY.map((t) => (
@@ -267,8 +264,29 @@ export default function ArchitecturePage() {
         tight
         eyebrow="Evaluation"
         headline="Measured, not claimed."
-        lede="Retrieval quality, citation validity, latency and cost per analysis are measured by an evaluation harness. Results are published here once they are measured; this page shows no estimated or illustrative numbers."
-      />
+        lede="Every number here was measured by the evaluation harness or in production, and names its record in docs/evaluation.md. There are no estimated or illustrative numbers on this page."
+      >
+        <div className="space-y-6">
+          {MEASURED.map((group) => (
+            <section key={group.title} aria-labelledby={`measured-${group.items[0]!.id}`}>
+              <h3 id={`measured-${group.items[0]!.id}`} className="text-[15px] font-semibold tracking-tight">
+                {group.title}
+              </h3>
+              <p className="mt-1 max-w-3xl text-[13px] leading-snug text-muted-foreground">{group.note}</p>
+              <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {group.items.map((m) => (
+                  <li key={m.id} data-measured={m.id} className="rounded-card border border-border bg-card p-4 shadow-sm">
+                    <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">{m.value}</p>
+                    <p className="mt-0.5 text-[13px] font-medium text-foreground/90">{m.label}</p>
+                    <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">{m.detail}</p>
+                    <p className="mt-2 font-mono text-[10.5px] leading-snug text-muted-foreground">Source: {m.source}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </Section>
 
       <Section
         tight

@@ -7,11 +7,11 @@
  * preference stands ("System", the default).
  *
  * **It is ONE string constant so that exactly one thing is hashed.** `app/layout.tsx`
- * renders it verbatim. DiligenceIQ has no Content-Security-Policy yet; the Phase 7 CSP
- * (assumptions D10) must allow this inline script by its SHA-256 hash
- * (`script-src 'sha256-…'`), computed from this exact string. Any edit to it changes the
- * hash, and a stale hash fails silently: the toggle still writes `localStorage`, but the
- * stored choice stops applying on load. A nonce is not an option: the export is static.
+ * renders it verbatim. The CSP (assumptions D10) allows it by its SHA-256 hash: after
+ * `next build`, `src/build/csp.ts` hashes every inline script of each page into that page's
+ * `<meta>` policy, so an edit here is picked up by the next build. `csp.test.ts` and the e2e
+ * `security.spec.ts` (theme applied with every bundle blocked) guard it. A nonce is not an
+ * option: the export is static.
  *
  * The storage key must match `THEME_STORAGE_KEY` in `components/ui/theme-toggle.tsx`
  * (asserted by `theme.test.tsx`).

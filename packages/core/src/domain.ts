@@ -289,12 +289,13 @@ export const FigureCheckSchema = z.object({
   /**
    * How it matched a cited passage (packages/rag validate.ts matchFigure): `exact` (same value and
    * unit printed), `scaled` (an equal amount under another scale word, or a table that states its
-   * unit), `preceding_unit` (an exactly equal amount in a table cell of a passage that opens with
+   * unit), `caption_unit` (the same as `scaled`, in a table whose first header cell is a bare
+   * currency caption such as "(MILLIONS)"), `preceding_unit` (an exactly equal amount in a table cell of a passage that opens with
    * a table whose unit caption ends the previous chunk of the same filing section), or
    * `unit_unstated`: the digits are a table cell in a passage that states no unit. A
    * `unit_unstated` figure is NOT verified.
    */
-  rule: z.enum(['exact', 'scaled', 'preceding_unit', 'unit_unstated']).nullable(),
+  rule: z.enum(['exact', 'scaled', 'caption_unit', 'preceding_unit', 'unit_unstated']).nullable(),
   chunkId: z.string().nullable(),
 });
 export type FigureCheck = z.infer<typeof FigureCheckSchema>;

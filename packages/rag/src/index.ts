@@ -29,3 +29,4 @@ export * from './generation/bedrock';
 export * from './generation/validate';
 export * from './generation/pipeline';
 export * from './eval/generation-eval';
+export * from './eval/plant';

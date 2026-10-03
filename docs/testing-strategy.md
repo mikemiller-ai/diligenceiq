@@ -58,7 +58,7 @@ Tests that need the full corpus (e.g. header parsing over all 246 files) read `C
 **Profiles and Compare (`packages/rag/src/profile`, `packages/core/src/compare.ts`, DD-16, DD-19)**
 - The profile validator (`packages/rag/src/profile/validate.ts`, `PROFILE_VALIDATOR_VERSION` 2) rejects:
   - citations outside the supplied set, which is exactly the SOURCE_IDs printed in the user message (the deterministic blocks and the `<filing_excerpts>` headers), recomputed from the request, never read from a stored outcome; a test parses the message and compares;
-  - currency or percent figures found neither in the FACTS block nor in a passage that the same item cites **and whose text was in `<filing_excerpts>`** (FACTS ∪ cited excerpt passages); a passage supplied only as an ID grounds nothing. A figure matches only under the verified rules (`exact`, `scaled`, `preceding_unit`); a near match (`unit_unstated`) does not count;
+  - currency or percent figures found neither in the FACTS block nor in a passage that the same item cites **and whose text was in `<filing_excerpts>`** (FACTS ∪ cited excerpt passages); a passage supplied only as an ID grounds nothing. A figure matches only under the verified rules (`exact`, `scaled`, `caption_unit`, `preceding_unit`); a near match (`unit_unstated`) does not count;
   - a change in points ("N pp", "N percentage points") that FACTS does not print as points; points never match a percentage, or the other way round;
   - figures in words: shares and multiples ("two-fifths", "a quarter of revenue", "doubled") and number words with percent or points ("five percentage points"), but not time phrases ("the last two quarters");
   - every phrase in the canonical banned list (DD-16), from `packages/core/src/vocabulary.ts` ("credit rating of" is not a score).
@@ -133,6 +133,7 @@ Synthesize all stacks and assert:
 - **Present:** every log group has explicit 14-day retention; DynamoDB billing mode is PAY_PER_REQUEST with TTL enabled; the worker event source mapping has `batchSize: 1` and `maximumConcurrency: 2`; queue visibility timeout 1080 s and `maxReceiveCount: 3`; the DLQ has its own event source mapping to the dlq-handler.
 - **IAM scoping:** Bedrock actions only on the configured inference profile and its foundation-model ARNs plus the embedding model; S3 read-only on `intelligence/*`, the index manifest, and (Phase 6) `index/<indexVersion>/adjacency/*` and `processed/<indexVersion>/*` (api) and `index/*` (worker); no `*` resources on data-plane actions; only the worker can invoke Bedrock; the api Lambda has no Bedrock permission.
 - **No profile builder deployed:** no Lambda bundle contains `scripts/intelligence`, the profile prompt builder in `packages/rag/src/profile` (a separate entry, `@diligenceiq/rag/profile`, that the main entry does not re-export), or `prompts/company-intelligence-prompt.md` (bundle-content test over the esbuild metafiles).
+- **Phase 7:** no IAM role attaches a managed policy (cost guard rule `iam-managed-policy`, with a negative test), and each Lambda's logs grant is `CreateLogStream`/`PutLogEvents` on its own stack's log group only; the worker metric filters (generation latency, estimated cost, citations removed, failures by code) and the api `Api5xx` filter exist; exactly two alarms (the one-call alarm, and the dlq-handler's `Invocations` Sum ≥ 1 in 5 minutes, which fires for every message that reaches the DLQ).
 - api Lambda IAM (Phase 5): exactly `ssm:GetParameter` (kill switch, active profile set, session secret), `dynamodb:GetItem/PutItem/UpdateItem/DeleteItem/Query/BatchWriteItem`, `sqs:SendMessage`, and `s3:GetObject` on `intelligence/*`, `index/<indexVersion>/manifest.json`, `index/<indexVersion>/adjacency/*` and `processed/<indexVersion>/*` only (exactly four resources; no raw corpus, no other index artifact, no wildcard version); the environment carries the queue URL, the session-secret and active-profile-set parameter names and the global daily cap; CoreStack creates `/diligenceiq/active-profile-set` as `none`; still no Bedrock action.
 
 ## 6. End-to-end (Playwright)
@@ -156,6 +157,7 @@ Synthesize all stacks and assert:
   - **Error and degraded states** (architecture §9.1), driven through the real api and the test controls (hourly cap, kill switch, a failed analysis) or a Playwright-routed request (network failure, a non-JSON 502), plus `PROFILE_MISSING` (a company outside the preview set).
   - **Evidence (Phase 6, `evidence.spec.ts`):** a seeded brief citation → Compare periods → the prior quarter's passage opened in its filing (`&iv=` in the URL and in the source request), highlighted and focused; the cited passage at its exact span; a coverage cell's passages; a missing filing's `SOURCE_MISSING` state; axe on the source view.
   - **Findings Board:** filters.
+  - **CSP (Phase 7, `security.spec.ts`):** nine pages load and hydrate with zero `securitypolicyviolation` events, as does client-side navigation; every page has one CSP `<meta>`; an inline script injected after load is blocked; the theme pre-paint script applies a stored Dark choice with every `/_next/static` bundle blocked, which proves it runs by its hash.
   - **Phase 8b (P1):** thesis link and watchlist toggle.
   - **Reset.**
 - **Prod smoke** (`tests/e2e/smoke`): landing, Company Intelligence for AAPL (profile loads, no model call), compare, a citation opening `/sources/filing` at its passage (the `/sources` explorer is P1, Phase 8b, and is smoke-tested only once built), one real analysis to COMPLETE with valid citations, security headers present. Runs against `https://diligenceiq.mikemiller.ai`.
@@ -186,6 +188,12 @@ A retrieval-only mode (no generation) supports the Phase 3 chunking, embedding, 
 | Coverage-tier correctness, recomputed from the index's 10-K and 10-Q document counts (53 profiles: GE Capital is outside the review window and has none) | 53/53 |
 | Generation calls per profile (from the ledger) | ≤ 1 |
 
+**Robustness set (Phase 7).** `evals/robustness.yaml` (6 questions; `pnpm eval:retrieval --set robustness [--generate]`) extends the main set without changing it (SPEC §41.1 keeps it at 15–20): three document-level injections, where `plant` inserts a synthetic passage with an instruction into the real context (one obvious, two realistic: a real-looking unused chunk ID, filing wording, middle or last; the CLI refuses an ID the index has) (`packages/rag/src/eval/plant.ts`, eval only) and the checks `forbid` and `forbidCite` fail a brief that follows or cites it; a rating request; a market-data question; and an ambiguous cohort question. Its results go to `generation-<iv>-<pv>-robustness.*` only; `pnpm eval:generation:rescore --set robustness` re-validates them (rebuilding the planted passage) with no model call.
+
+**Manual review (Phase 7).** Groundedness and completeness are graded by reading the cited chunks for a sample of briefs (`evals/results/manual-review-*.md`; evaluation.md §8). No model judges another model at runtime or in the automated checks.
+
+**Web performance (Phase 7).** `pnpm eval:web-perf` measures JS and CSS bytes per page from the export and FCP, LCP, CLS and long-task time in headless Chromium with a 4× CPU throttle against the local server (`evals/results/web-perf.*`; evaluation.md §9). Local only, never in the gate.
+
 The SPEC §51.3 expert question ("How have Apple's regulatory disclosures changed from 2023 through 2025, and what actions does management describe?") is added to `evals/questions.yaml`.
 
 ## 8. What runs where
@@ -197,7 +205,9 @@ The SPEC §51.3 expert question ("How have Apple's regulatory disclosures change
 | CDK assertion tests | Yes (`pnpm test` + `pnpm cdk:synth`) | | No |
 | Playwright local (static export, real api in-process, stub worker) | Yes (`pnpm e2e`, after `pnpm build`) | Yes (`pnpm e2e`) | No |
 | Playwright prod smoke | | Yes (`pnpm e2e:smoke`) | Yes (deployed app) |
-| Eval harness | | Yes (`pnpm eval`) | Yes (Bedrock, real index) |
+| Eval harness | | Yes (`pnpm eval:retrieval`, `--generate`, `--set robustness`; replay is free, `--live` and `--embed` spend) | Only for new recordings (Bedrock, real index) |
+| Architecture-page traceability (`measured.test.ts`) | Yes (`pnpm test`) | | No |
+| Web performance | | Yes (`pnpm eval:web-perf`) | No |
 | Profile build + profile evals | | Yes (`pnpm intelligence:build`, `pnpm eval:profiles`) | Yes (Bedrock, real index) |
 | Corpus probe | | Yes (`node scripts/ingestion/probe-corpus.mjs`) | No |
 

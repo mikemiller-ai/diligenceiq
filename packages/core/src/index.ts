@@ -1,3 +1,4 @@
+import './zod-config';
 export * from './themes';
 export * from './domain';
 export * from './errors';

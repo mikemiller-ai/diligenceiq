@@ -24,6 +24,10 @@ export async function handleDeadLetters(store: AnalysisStore, event: SQSEvent, n
     }
     const marked = await store.markWorkerFailed(parsed.workspaceId, parsed.analysisId, now(), record.messageId);
     log('warn', 'dead-lettered analysis', { requestId: record.messageId, ...parsed, marked });
+    // The failed summary line (architecture §12) for the AnalysisFailed metric, once per analysis
+    // this handler marked FAILED. The handler may only update the item (it cannot read it), so the
+    // line carries no generation count or cost; the worker's own lines carry those.
+    if (marked) log('info', 'analysis summary', { event: 'analysis_summary', status: 'failed', code: 'WORKER_FAILED', detail: 'dead_lettered', requestId: record.messageId, ...parsed });
   }
 }
 

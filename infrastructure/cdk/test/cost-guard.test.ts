@@ -74,6 +74,8 @@ describe('cost guard negative tests', () => {
     ['provisioned DynamoDB billing', /^Provisioned/, 'dynamodb-billing'],
     ['an Action: * grant', /^Admin/, 'iam-wildcard-action'],
     ['a Resource: * grant', /^Admin/, 'iam-wildcard-resource'],
+    // CDK's default Lambda role attaches AWSLambdaBasicExecutionRole (logs on every log group).
+    ['an AWS-managed policy on a role', /^ReservedServiceRole/, 'iam-managed-policy'],
   ])('reports %s', (_label, logicalId, rule) => {
     expect(rulesFor(logicalId)).toContain(rule);
   });

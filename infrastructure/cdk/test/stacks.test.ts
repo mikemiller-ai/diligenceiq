@@ -3,7 +3,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { CONFIG, PRODUCTION_URL } from '../lib/config';
 import { findCostViolations, formatViolations, grantedActions, type GuardTemplate } from '../lib/cost-guard';
 import { SECURITY_HEADERS } from '../lib/web-stack';
-import { GENERATION_CALLS_OVER_ONE } from '../lib/worker-stack';
+import { API_5XX } from '../lib/api-stack';
+import { GENERATION_CALLS_OVER_ONE, METRIC_NAMESPACE, WORKER_METRICS } from '../lib/worker-stack';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { synthAll } from './synth';
@@ -133,9 +134,9 @@ describe('ApiStack', () => {
     expect(logGroups[ref.Ref]).toMatchObject({ Properties: { RetentionInDays: 14 } });
   });
 
-  it('grants the api Lambda exactly what its routes use (architecture §11; evidence reads from Phase 6)', () => {
+  it('grants the api Lambda exactly what its routes use (architecture §11; evidence reads from Phase 6; its own log group from Phase 7)', () => {
     expect(grantedActions(templates.api.toJSON()).sort()).toEqual(
-      ['dynamodb:BatchWriteItem', 'dynamodb:DeleteItem', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:UpdateItem', 's3:GetObject', 'sqs:SendMessage', 'ssm:GetParameter'].sort(),
+      ['dynamodb:BatchWriteItem', 'dynamodb:DeleteItem', 'dynamodb:GetItem', 'dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:UpdateItem', 'logs:CreateLogStream', 'logs:PutLogEvents', 's3:GetObject', 'sqs:SendMessage', 'ssm:GetParameter'].sort(),
     );
     const statements = Object.values(templates.api.findResources('AWS::IAM::Policy')).flatMap((p) => (propsOf(p).PolicyDocument as { Statement: Json[] }).Statement);
     const s3 = JSON.stringify(statements.find((s) => s.Action === 's3:GetObject'));
@@ -316,6 +317,66 @@ describe('WorkerStack (architecture §4.3, §5; DD-04)', () => {
       MetricTransformations: [Match.objectLike({ MetricName: GENERATION_CALLS_OVER_ONE, MetricValue: '1' })],
     });
     templates.worker.hasResourceProperties('AWS::CloudWatch::Alarm', { MetricName: GENERATION_CALLS_OVER_ONE, Threshold: 1, TreatMissingData: 'notBreaching' });
+  });
+
+  it('Phase 7 IAM review: no managed policies; each function writes only to its own log group', () => {
+    for (const t of [templates.api, templates.worker]) {
+      const roles = t.findResources('AWS::IAM::Role');
+      expect(Object.keys(roles).length).toBeGreaterThan(0);
+      for (const r of Object.values(roles)) expect((r as { Properties: Record<string, unknown> }).Properties.ManagedPolicyArns).toBeUndefined();
+      const logsActions = grantedActions(t.toJSON()).filter((a) => a.startsWith('logs:'));
+      expect(logsActions).not.toContain('logs:CreateLogGroup');
+      expect(JSON.stringify(t.toJSON())).not.toContain('AWSLambdaBasicExecutionRole');
+    }
+    // Every logs grant names a log group of its own stack (a Fn::GetAtt on an AWS::Logs::LogGroup).
+    for (const t of [templates.api, templates.worker]) {
+      const groups = new Set(Object.keys(t.findResources('AWS::Logs::LogGroup')));
+      for (const p of Object.values(t.findResources('AWS::IAM::Policy')) as Array<{ Properties: { PolicyDocument: { Statement: Array<{ Action: string | string[]; Resource: unknown }> } } }>) {
+        for (const st of p.Properties.PolicyDocument.Statement) {
+          const actions = ([] as string[]).concat(st.Action);
+          if (!actions.some((a) => a.startsWith('logs:'))) continue;
+          const res = ([] as unknown[]).concat(st.Resource) as Array<{ 'Fn::GetAtt'?: [string, string] }>;
+          expect(res.every((r) => r['Fn::GetAtt'] && groups.has(r['Fn::GetAtt'][0]))).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('Phase 7 metrics: generation latency, cost, citations removed and failures by code from the summary line; dlq-handler invocations alarm (architecture §12)', () => {
+    const t = templates.worker;
+    const filter = (name: string, pattern: string, value: string) =>
+      t.hasResourceProperties('AWS::Logs::MetricFilter', { FilterPattern: pattern, MetricTransformations: [Match.objectLike({ MetricName: name, MetricValue: value, MetricNamespace: METRIC_NAMESPACE })] });
+    const complete = '{ ($.event = "analysis_summary") && ($.status = "complete") }';
+    filter(WORKER_METRICS.generationDurationMs, complete, '$.generationDurationMs');
+    filter(WORKER_METRICS.citationsRemoved, complete, '$.citationsRemoved');
+    filter(WORKER_METRICS.estimatedCostUsd, '{ $.event = "analysis_summary" }', '$.estimatedCostUsd');
+    t.hasResourceProperties('AWS::Logs::MetricFilter', {
+      FilterPattern: '{ ($.event = "analysis_summary") && ($.status = "failed") }',
+      MetricTransformations: [Match.objectLike({ MetricName: WORKER_METRICS.failedByCode, MetricValue: '1', Dimensions: [{ Key: 'Code', Value: '$.code' }] })],
+    });
+    // The dlq-handler drains the DLQ in seconds, so the alarm watches its invocations, not the queue depth.
+    t.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      MetricName: 'Invocations',
+      Namespace: 'AWS/Lambda',
+      Statistic: 'Sum',
+      Period: 300,
+      Threshold: 1,
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold',
+      TreatMissingData: 'notBreaching',
+      Dimensions: [{ Name: 'FunctionName', Value: Match.objectLike({ Ref: Match.stringLikeRegexp('^DlqFunction') }) }],
+    });
+    expect(Object.values(t.findResources('AWS::CloudWatch::Alarm')).some((a) => (a as { Properties: { MetricName?: string } }).Properties.MetricName === 'ApproximateNumberOfMessagesVisible')).toBe(false);
+    // The dlq-handler's and the api's failed summary lines feed the same AnalysisFailed series.
+    const failedFilters = (tpl: typeof t) =>
+      Object.values(tpl.findResources('AWS::Logs::MetricFilter')).filter((f) => (f as { Properties: { MetricTransformations: Array<{ MetricName: string }> } }).Properties.MetricTransformations[0]!.MetricName === WORKER_METRICS.failedByCode);
+    expect(failedFilters(t)).toHaveLength(2);
+    expect(failedFilters(templates.api)).toHaveLength(1);
+    // Two alarms in all (about $0.20 a month); everything else is a free metric filter.
+    expect(Object.keys(t.findResources('AWS::CloudWatch::Alarm'))).toHaveLength(2);
+    templates.api.hasResourceProperties('AWS::Logs::MetricFilter', {
+      FilterPattern: '{ ($.event = "api_request") && ($.status >= 500) }',
+      MetricTransformations: [Match.objectLike({ MetricName: API_5XX, MetricValue: '1', MetricNamespace: METRIC_NAMESPACE })],
+    });
   });
 
   it('bundles: the worker carries the Deep Analysis prompt; no bundle carries the offline profile builder or its prompt', () => {

@@ -18,6 +18,7 @@ export function json(
     headers: {
       'content-type': 'application/json',
       'cache-control': extra.cacheControl ?? 'no-store',
+      'x-content-type-options': 'nosniff',
       'x-request-id': requestId,
     },
     body: JSON.stringify(body),
@@ -27,7 +28,7 @@ export function json(
 
 /** 204 with no body (DELETE). */
 export function noContent(requestId: string): HttpResponse {
-  return { statusCode: 204, headers: { 'cache-control': 'no-store', 'x-request-id': requestId }, body: '' };
+  return { statusCode: 204, headers: { 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'x-request-id': requestId }, body: '' };
 }
 
 export function error(
@@ -40,11 +41,17 @@ export function error(
   return json(status, body, requestId);
 }
 
-/** One JSON object per line so CloudWatch Logs Insights can query fields directly. */
+/**
+ * One JSON object per line so CloudWatch Logs Insights can query fields directly and the metric
+ * filters' JSON selectors (`{ $.event = ... }`) match. Written raw to stdout, not through
+ * `console.log`: under Lambda's default Text log format the runtime prefixes every console line
+ * with a timestamp, request ID and level, which makes the line not JSON; stdout lines are
+ * captured verbatim (the way Embedded Metric Format is emitted). Architecture §12.
+ */
 export function log(
   level: 'info' | 'warn' | 'error',
   msg: string,
   fields: Record<string, unknown> = {},
 ): void {
-  console.log(JSON.stringify({ level, msg, ...fields }));
+  process.stdout.write(`${JSON.stringify({ level, msg, ...fields })}\n`);
 }

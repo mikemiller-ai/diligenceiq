@@ -1,6 +1,6 @@
 # Generation eval — iv-9cf51c066743, prompt da-v3
 
-Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.anthropic.claude-sonnet-4-6`, temperature 0.2, forced tool `submit_diligence_brief`, one generation request per question. Re-scored on 2026-10-02 by `pnpm eval:generation:rescore`: the recorded responses went through the current repair, validator and checks (no model call). Latency, tokens and cost are from the original run. Deterministic checks only (no LLM judge).
+Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.anthropic.claude-sonnet-4-6`, temperature 0.2, forced tool `submit_diligence_brief`, one generation request per question. Re-scored on 2026-10-03 by `pnpm eval:generation:rescore`: the recorded responses went through the current repair, validator and checks (no model call). Latency, tokens and cost are from the original run. Deterministic checks only (no LLM judge).
 
 | Metric | Result |
 |---|---|
@@ -9,8 +9,8 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | Generation calls per question | 1 (every question) |
 | Citation validity before validation (model's IDs in the context) | 1 |
 | Citation validity after validation (re-check; validation removes the rest) | 1 |
-| Numeric grounding (figures found in cited passages) | 0.9315 (503/540) |
-| Unverified near matches (digits in a table cell; passage states no unit) | 30 |
+| Numeric grounding (figures found in cited passages) | 0.987 (533/540) |
+| Unverified near matches (digits in a table cell; passage states no unit) | 0 |
 | Briefs with every figure verified | 17/20 |
 | Comparison tables aligned (one value per column in every row) | 16/16 |
 | Abstention | 1/2 |
@@ -33,7 +33,7 @@ Generated on 2026-10-02 (local) by `pnpm eval:retrieval --generate`, model `us.a
 | `rev-msft-fy2025` | pass | trend | 43/43 | 89/89 | 23989 / 3237 | 36443 | — |
 | `risk-tsla-demand` | pass | single_company | 38/38 | 0/0 | 18956 / 2928 | 45763 | — |
 | `multi-cloud` | pass | comparison | 44/44 | 39/39 | 20960 / 3385 | 86709 | — |
-| `long-pfe-since-2022` | fail | trend | 47/47 | 32/64 (30) | 29789 / 3513 | 42143 | figures grounded: 32/64 figures found in cited passages; unverified: $100,330 million (keyFindings[0].finding, digits only: passage states no unit), $58,496 million (keyFindings[1].finding, digits only: passage states no unit), $26,427 million (keyFindings[1].finding, digits only: passage states no unit), $17,506 million (keyFindings[1].finding, digits only: passage states no unit), $63,627 million (keyFindings[2].finding, digits only: passage states no unit), $4,452 million (keyFindings[2].finding, digits only: passage states no unit), $3,223 million (keyFindings[2].finding, digits only: passage states no unit), $5,907 million (keyFindings[2].finding, digits only: passage states no unit), $45,022 million (keyFindings[3].finding, digits only: passage states no unit), $45,864 million (keyFindings[3].finding, digits only: passage states no unit), 39% (keyFindings[4].finding), $1,423 million (keyFindings[5].finding, digits only: passage states no unit), $1,058 million (keyFindings[5].finding, digits only: passage states no unit), $845 million (keyFindings[5].finding, digits only: passage states no unit), $100,330M (comparison.rows[0].values[0], digits only: passage states no unit), $101,175M (comparison.rows[0].values[0], digits only: passage states no unit), $58,496M (comparison.rows[0].values[1], digits only: passage states no unit), $59,553M (comparison.rows[0].values[1], digits only: passage states no unit), $63,627M (comparison.rows[0].values[2], digits only: passage states no unit), $45,022M (comparison.rows[0].values[3], digits only: passage states no unit), $91,793M (comparison.rows[2].values[0], digits only: passage states no unit), $50,914M (comparison.rows[2].values[1], digits only: passage states no unit), $53,816M (comparison.rows[2].values[2], digits only: passage states no unit), $37,168M (comparison.rows[2].values[3], digits only: passage states no unit), $8,537M (comparison.rows[3].values[0], digits only: passage states no unit), $7,582M (comparison.rows[3].values[1], digits only: passage states no unit), $8,388M (comparison.rows[3].values[2], digits only: passage states no unit), $6,684M (comparison.rows[3].values[3], digits only: passage states no unit), $3,223 million (investmentConsiderations[1].text, digits only: passage states no unit), 39% (investmentConsiderations[2].text), $33,888 million (investmentConsiderations[3].text, digits only: passage states no unit), $19,697 million (investmentConsiderations[3].text, digits only: passage states no unit) |
+| `long-pfe-since-2022` | fail | trend | 47/47 | 62/64 | 29789 / 3513 | 42143 | figures grounded: 62/64 figures found in cited passages; unverified: 39% (keyFindings[4].finding), 39% (investmentConsiderations[2].text) |
 | `reg-nvda-export` | pass | trend | 34/34 | 5/5 | 19855 / 3254 | 42310 | — |
 | `cross-wmt-jpm-rates` | pass | comparison | 31/31 | 15/15 | 22237 / 3158 | 44530 | — |
 | `cross-cyber` | pass | comparison | 66/66 | 0/0 | 19096 / 3791 | 51974 | — |

@@ -5,7 +5,7 @@
  "ranAt": "2026-10-02T14:47:15.210Z",
  "summary": {
   "questions": 20,
-  "passed": 11,
+  "passed": 12,
   "completed": 20,
   "callsPerQuestion": [
    1,
@@ -31,11 +31,11 @@
   ],
   "citationValidityPre": 1,
   "citationValidityPost": 1,
-  "figuresVerified": 460,
+  "figuresVerified": 515,
   "figuresTotal": 527,
-  "figuresUnitUnstated": 55,
-  "numericGrounding": 0.8729,
-  "briefsFullyGrounded": 13,
+  "figuresUnitUnstated": 0,
+  "numericGrounding": 0.9772,
+  "briefsFullyGrounded": 14,
   "comparisonAligned": {
    "passed": 15,
    "total": 15
@@ -4179,8 +4179,8 @@
     },
     "figures": {
      "total": 77,
-     "verified": 22,
-     "unitUnstated": 55
+     "verified": 77,
+     "unitUnstated": 0
     },
     "uncitedFindings": 0,
     "citedCompanies": [
@@ -4194,7 +4194,7 @@
     "totalMs": 20,
     "stopReason": "tool_use",
     "costUsd": 0.14247,
-    "pass": false,
+    "pass": true,
     "checks": [
      {
       "name": "completed",
@@ -4218,8 +4218,8 @@
      },
      {
       "name": "figures grounded",
-      "pass": false,
-      "detail": "22/77 figures found in cited passages; unverified: $100,330 million (executiveSummary, digits only: passage states no unit), $58,496 million (executiveSummary, digits only: passage states no unit), $63,627 million (executiveSummary, digits only: passage states no unit), $45,022 million (executiveSummary, digits only: passage states no unit), $45,864 million (executiveSummary, digits only: passage states no unit), $100,330 million (keyFindings[0].finding, digits only: passage states no unit), $41,621 million (keyFindings[1].finding, digits only: passage states no unit), $58,496 million (keyFindings[1].finding, digits only: passage states no unit), $26,427 million (keyFindings[1].finding, digits only: passage states no unit), $17,506 million (keyFindings[1].finding, digits only: passage states no unit), $63,627 Million (keyFindings[2].title, digits only: passage states no unit), $63,627 million (keyFindings[2].finding, digits only: passage states no unit), $4,452 million (keyFindings[2].finding, digits only: passage states no unit), $3,223 million (keyFindings[2].finding, digits only: passage states no unit), $5,907 million (keyFindings[2].finding, digits only: passage states no unit), $45,022 million (keyFindings[3].finding, digits only: passage states no unit), $45,864 million (keyFindings[3].finding, digits only: passage states no unit), $14,653 million (keyFindings[3].finding, digits only: passage states no unit), $13,283 million (keyFindings[3].finding, digits only: passage states no unit), $1,423 million (keyFindings[4].finding, digits only: passage states no unit), $1,058 million (keyFindings[4].finding, digits only: passage states no unit), $845 million (keyFindings[4].finding, digits only: passage states no unit), $50,914 million (keyFindings[4].finding, digits only: passage states no unit), $53,816 million (keyFindings[4].finding, digits only: passage states no unit), $7,582 million (keyFindings[4].finding, digits only: passage states no unit), $8,388 million (keyFindings[4].finding, digits only: passage states no unit), $42,473 million (keyFindings[5].finding, digits only: passage states no unit), $27,088 million (keyFindings[5].finding, digits only: passage states no unit), $38,691 million (keyFindings[5].finding, digits only: passage states no unit), $21,982 million (keyFindings[5].finding, digits only: passage states no unit), $11,650 million (keyFindings[5].finding, digits only: passage states no unit), $100,330 (comparison.rows[0].values[0], digits only: passage states no unit), $58,496 (comparison.rows[0].values[1], digits only: passage states no unit), $63,627 (comparison.rows[0].values[2], digits only: passage states no unit), $45,022 (comparison.rows[0].values[3], digits only: passage states no unit), $91,793 (comparison.rows[1].values[0], digits only: passage states no unit), $50,914 (comparison.rows[1].values[1], digits only: passage states no unit), $53,816 (comparison.rows[1].values[2], digits only: passage states no unit), $37,168 (comparison.rows[1].values[3], digits only: passage states no unit), $8,537 (comparison.rows[2].values[0], digits only: passage states no unit), $7,582 (comparison.rows[2].values[1], digits only: passage states no unit), $8,388 (comparison.rows[2].values[2], digits only: passage states no unit), $6,684 (comparison.rows[2].values[3], digits only: passage states no unit), $845 (comparison.rows[3].values[0], digits only: passage states no unit), $1,058 (comparison.rows[3].values[1], digits only: passage states no unit), $1,423 (comparison.rows[3].values[2], digits only: passage states no unit), $1,170 (comparison.rows[3].values[3], digits only: passage states no unit), $42,473 (comparison.rows[6].values[0], digits only: passage states no unit), $27,088 (comparison.rows[6].values[1], digits only: passage states no unit), $38,691 (comparison.rows[6].values[2], digits only: passage states no unit), $3,223 million (investmentConsiderations[1].text, digits only: passage states no unit), $11,650 million (investmentConsiderations[3].text, digits only: passage states no unit), $21,982 million (investmentConsiderations[3].text, digits only: passage states no unit), $11,996 million (investmentConsiderations[3].text, digits only: passage states no unit), $20,097 million (investmentConsiderations[3].text, digits only: passage states no unit)"
+      "pass": true,
+      "detail": "77/77 figures found in cited passages"
      },
      {
       "name": "comparison aligned",
@@ -4484,15 +4484,15 @@
       {
        "location": "executiveSummary",
        "figure": "$100,330 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2022-10K-FS-004"
       },
       {
        "location": "executiveSummary",
        "figure": "$58,496 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
@@ -4505,8 +4505,8 @@
       {
        "location": "executiveSummary",
        "figure": "$63,627 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
@@ -4519,15 +4519,15 @@
       {
        "location": "executiveSummary",
        "figure": "$45,022 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
        "location": "executiveSummary",
        "figure": "$45,864 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
@@ -4540,8 +4540,8 @@
       {
        "location": "keyFindings[0].finding",
        "figure": "$100,330 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2022-10K-FS-004"
       },
       {
@@ -4568,8 +4568,8 @@
       {
        "location": "keyFindings[1].finding",
        "figure": "$41,621 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-016"
       },
       {
@@ -4582,22 +4582,22 @@
       {
        "location": "keyFindings[1].finding",
        "figure": "$58,496 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
        "location": "keyFindings[1].finding",
        "figure": "$26,427 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-016"
       },
       {
        "location": "keyFindings[1].finding",
        "figure": "$17,506 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-016"
       },
       {
@@ -4617,8 +4617,8 @@
       {
        "location": "keyFindings[2].title",
        "figure": "$63,627 Million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
@@ -4631,43 +4631,43 @@
       {
        "location": "keyFindings[2].finding",
        "figure": "$63,627 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
        "location": "keyFindings[2].finding",
        "figure": "$4,452 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
        "location": "keyFindings[2].finding",
        "figure": "$3,223 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
        "location": "keyFindings[2].finding",
        "figure": "$5,907 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
        "location": "keyFindings[3].finding",
        "figure": "$45,022 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
        "location": "keyFindings[3].finding",
        "figure": "$45,864 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
@@ -4687,211 +4687,211 @@
       {
        "location": "keyFindings[3].finding",
        "figure": "$14,653 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q2-10Q-FS-001"
       },
       {
        "location": "keyFindings[3].finding",
        "figure": "$13,283 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q2-10Q-FS-001"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$1,423 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$1,058 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$845 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$50,914 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$53,816 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$7,582 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[4].finding",
        "figure": "$8,388 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "keyFindings[5].finding",
        "figure": "$42,473 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "keyFindings[5].finding",
        "figure": "$27,088 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "keyFindings[5].finding",
        "figure": "$38,691 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
        "location": "keyFindings[5].finding",
        "figure": "$21,982 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "keyFindings[5].finding",
        "figure": "$11,650 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "comparison.rows[0].values[0]",
        "figure": "$100,330",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2022-10K-FS-004"
       },
       {
        "location": "comparison.rows[0].values[1]",
        "figure": "$58,496",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
        "location": "comparison.rows[0].values[2]",
        "figure": "$63,627",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "comparison.rows[0].values[3]",
        "figure": "$45,022",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
        "location": "comparison.rows[1].values[0]",
        "figure": "$91,793",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
        "location": "comparison.rows[1].values[1]",
        "figure": "$50,914",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
        "location": "comparison.rows[1].values[2]",
        "figure": "$53,816",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "comparison.rows[1].values[3]",
        "figure": "$37,168",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
        "location": "comparison.rows[2].values[0]",
        "figure": "$8,537",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
        "location": "comparison.rows[2].values[1]",
        "figure": "$7,582",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-006"
       },
       {
        "location": "comparison.rows[2].values[2]",
        "figure": "$8,388",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "comparison.rows[2].values[3]",
        "figure": "$6,684",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
        "location": "comparison.rows[3].values[0]",
        "figure": "$845",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "comparison.rows[3].values[1]",
        "figure": "$1,058",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "comparison.rows[3].values[2]",
        "figure": "$1,423",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-FS-006"
       },
       {
        "location": "comparison.rows[3].values[3]",
        "figure": "$1,170",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2025Q3-10Q-FS-001"
       },
       {
@@ -4925,22 +4925,22 @@
       {
        "location": "comparison.rows[6].values[0]",
        "figure": "$42,473",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "comparison.rows[6].values[1]",
        "figure": "$27,088",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "comparison.rows[6].values[2]",
        "figure": "$38,691",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
@@ -4960,8 +4960,8 @@
       {
        "location": "investmentConsiderations[1].text",
        "figure": "$3,223 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2024-10K-MDA-015"
       },
       {
@@ -4995,40 +4995,38 @@
       {
        "location": "investmentConsiderations[3].text",
        "figure": "$11,650 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "investmentConsiderations[3].text",
        "figure": "$21,982 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "investmentConsiderations[3].text",
        "figure": "$11,996 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       },
       {
        "location": "investmentConsiderations[3].text",
        "figure": "$20,097 million",
-       "verified": false,
-       "rule": "unit_unstated",
+       "verified": true,
+       "rule": "caption_unit",
        "chunkId": "PFE-FY2023-10K-FS-118"
       }
      ],
      "total": 77,
-     "verified": 22,
-     "unitUnstated": 55
+     "verified": 77,
+     "unitUnstated": 0
     },
     "comparisonMisaligned": [],
-    "notices": [
-     "55 figures not found in the cited passages (marked \"unverified figure\")."
-    ]
+    "notices": []
    },
    "interpretation": {
     "companies": [
@@ -11078,7 +11076,7 @@
   }
  ],
  "rescore": {
-  "rescoredAt": "2026-10-02T16:40:49.231Z",
+  "rescoredAt": "2026-10-03T15:44:44.979Z",
   "by": "pnpm eval:generation:rescore",
   "note": "Recorded responses re-validated and re-scored with the current validator and checks; no model call. Telemetry (generation latency, tokens, cost) is from the original run."
  }

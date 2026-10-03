@@ -30,6 +30,12 @@ export const AnalysisMessageSchema = z
   .object({
     workspaceId: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
     analysisId: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
+    /**
+     * The api request that queued it (architecture §12): links the worker's lines to the POST.
+     * Optional, so a message queued before Phase 7 still parses, and never fatal: a malformed or
+     * unexpected value is dropped (`catch`), and the analysis still runs. Unknown keys stay invalid.
+     */
+    apiRequestId: z.string().max(256).regex(/^[A-Za-z0-9+/=_-]+$/).optional().catch(undefined),
   })
   .strict();
 export type AnalysisMessage = z.infer<typeof AnalysisMessageSchema>;
@@ -78,8 +84,8 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
     log('warn', 'analysis message invalid; acknowledged without work', { requestId, bytes: body.length });
     return 'invalid';
   }
-  const { workspaceId, analysisId } = message;
-  const ids = { requestId, workspaceId, analysisId };
+  const { workspaceId, analysisId, apiRequestId } = message;
+  const ids = { requestId, workspaceId, analysisId, ...(apiRequestId ? { apiRequestId } : {}) };
 
   const killSwitch = await deps.killSwitch.read(requestId);
   if (killSwitch.source === 'read_failed') {
@@ -88,11 +94,13 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
     // the 240 s deadline, because the 1080 s visibility timeout outlasts it (architecture §4.3).
     const failed = await deps.store.failQueued(workspaceId, analysisId, { code: 'WORKER_FAILED', message: 'The analysis could not be started. Run it again.', requestId }, now());
     log('error', 'kill switch unreadable; analysis not run', { ...ids, failed });
+    if (failed) failedSummary({ ...ids, code: 'WORKER_FAILED', detail: 'kill_switch_unreadable' }, 0);
     return 'switch_unreadable';
   }
   if (!killSwitch.enabled) {
     const failed = await deps.store.failQueued(workspaceId, analysisId, { code: 'ANALYSES_DISABLED', message: 'Analyses are paused right now.', requestId }, now());
     log('info', 'kill switch off; analysis not run', { ...ids, failed });
+    if (failed) failedSummary({ ...ids, code: 'ANALYSES_DISABLED' }, 0);
     return 'disabled';
   }
 
@@ -104,6 +112,8 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
   }
   const fail = (code: Parameters<AnalysisStore['fail']>[3]['code'], message: string, extra?: Parameters<AnalysisStore['fail']>[5]) =>
     deps.store.fail(workspaceId, analysisId, token, { code, message, requestId }, now(), extra);
+  // Outside the try, so the unexpected-failure path below can say whether a request was sent.
+  let gateway: GenerationGateway | null = null;
 
   try {
     // Index (cold start only).
@@ -116,12 +126,12 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
     } catch (err) {
       if (err instanceof ClaimLostError) throw err;
       log('error', 'index load failed', { ...ids, errorName: (err as Error)?.name, errorMessage: (err as Error)?.message });
-      await fail('INDEX_UNAVAILABLE', 'Filing search is unavailable right now.');
+      if (await fail('INDEX_UNAVAILABLE', 'Filing search is unavailable right now.')) failedSummary({ ...ids, code: 'INDEX_UNAVAILABLE' }, 0);
       return 'failed';
     }
 
     const embedder = deps.createEmbedder();
-    const gateway = new GenerationGateway({
+    gateway = new GenerationGateway({
       purpose: 'analysis',
       client: deps.generationClient,
       beforeCall: () => deps.store.markGenerationStarted(workspaceId, analysisId, token, now()),
@@ -176,7 +186,8 @@ export async function processAnalysisMessage(deps: WorkerDeps, body: string, ctx
       return 'claim_lost';
     }
     log('error', 'analysis failed unexpectedly', { ...ids, errorName: (err as Error)?.name, errorMessage: (err as Error)?.message });
-    await fail('WORKER_FAILED', 'The analysis could not be processed. Run it again.').catch(() => false);
+    const written = await fail('WORKER_FAILED', 'The analysis could not be processed. Run it again.').catch(() => false);
+    if (written) failedSummary({ ...ids, code: 'WORKER_FAILED', detail: 'unexpected_error' }, gateway?.sentCount ?? 0);
     return 'failed';
   }
 }
@@ -201,4 +212,14 @@ async function putContextWithRetry(deps: WorkerDeps, workspaceId: string, analys
  */
 function summary(status: string, telemetry: AnalysisTelemetry, fields: Record<string, unknown>) {
   log('info', 'analysis summary', { event: 'analysis_summary', status, ...fields, ...telemetry });
+}
+
+/**
+ * The failed summary line for a path that has no pipeline telemetry (the kill switch, the index
+ * load, an unexpected error): `status` 'failed' and `code` for the AnalysisFailed metric, and the
+ * number of generation requests actually sent. With none sent the estimated cost is 0; after a
+ * sent request it is unknown here, so it is left out (the cost metric then skips the line).
+ */
+export function failedSummary(fields: Record<string, unknown> & { code: string }, generationCallCount: number) {
+  log('info', 'analysis summary', { event: 'analysis_summary', status: 'failed', ...fields, generationCallCount, ...(generationCallCount === 0 ? { estimatedCostUsd: 0 } : { costIncomplete: true }) });
 }

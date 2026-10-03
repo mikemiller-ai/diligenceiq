@@ -119,6 +119,8 @@ interface SessionContext extends RequestContext {
 
 interface Route {
   method: string;
+  /** The path as registered (`/api/analyses/:id`): what the access log records, never the IDs. */
+  template: string;
   pattern: RegExp;
   keys: string[];
   /** Requires a valid session; the handler is scoped to the caller's partition. */
@@ -147,7 +149,7 @@ export function createApp(deps: AppDeps) {
     return meta && meta.ttl > Math.floor(at.getTime() / 1000) ? meta : null;
   };
   const routes: Route[] = [];
-  const add = (method: string, path: string, session: boolean, handler: Route['handler']) => routes.push({ method, ...compile(path), session, handler });
+  const add = (method: string, path: string, session: boolean, handler: Route['handler']) => routes.push({ method, template: path, ...compile(path), session, handler });
 
   const validation = (requestId: string, issues: ReadonlyArray<{ path: PropertyKey[]; code: string; message: string }>, message = 'Request is invalid.') =>
     error('VALIDATION_ERROR', message, requestId, { issues: summarizeIssues(issues) });
@@ -334,10 +336,11 @@ export function createApp(deps: AppDeps) {
     const analysisId = newAnalysisId(at);
     await deps.analyses.createQueued({ workspaceId, analysisId, question: req.data.question, ...(req.data.filters ? { filters: req.data.filters } : {}), origin, now: at });
     try {
-      await deps.queue.send({ workspaceId, analysisId });
+      await deps.queue.send({ workspaceId, analysisId, apiRequestId: requestId });
     } catch (err) {
       log('error', 'enqueue failed', { requestId, workspaceId, analysisId, errorName: err instanceof Error ? err.name : 'Unknown' });
-      await deps.analyses.failQueued(workspaceId, analysisId, { code: 'ENQUEUE_FAILED', message: 'The analysis could not be queued. Run it again.', requestId }, now()).catch(() => false);
+      const failed = await deps.analyses.failQueued(workspaceId, analysisId, { code: 'ENQUEUE_FAILED', message: 'The analysis could not be queued. Run it again.', requestId }, now()).catch(() => false);
+      if (failed) log('info', 'analysis summary', { event: 'analysis_summary', status: 'failed', code: 'ENQUEUE_FAILED', requestId, workspaceId, analysisId, generationCallCount: 0, estimatedCostUsd: 0 });
       return fail('ENQUEUE_FAILED', 'The analysis could not be queued. Run it again in a moment.', requestId, { analysisId });
     }
     log('info', 'analysis queued', { requestId, workspaceId, analysisId, originKind: origin.kind, questionChars: req.data.question.length });
@@ -362,6 +365,9 @@ export function createApp(deps: AppDeps) {
       const code = await deps.analyses.expireIfPastDeadline(workspaceId, id, at, requestId);
       if (code) log('warn', 'analysis expired on poll', { requestId, workspaceId, analysisId: id, code });
       record = (await deps.analyses.get(workspaceId, id)) ?? record;
+      // The failed summary line (architecture §12) for the AnalysisFailed metric, once: only the
+      // poll whose conditional write expired it. The count is the record's (persisted before any call).
+      if (code) log('info', 'analysis summary', { event: 'analysis_summary', status: 'failed', code, requestId, workspaceId, analysisId: id, generationCallCount: record.generationCallCount });
     }
     return json(200, toDetail(record), requestId);
   });
@@ -492,7 +498,36 @@ export function createApp(deps: AppDeps) {
     });
   }
 
+  /**
+   * One access line per request (architecture §12): method, the route template (never the raw
+   * path, its IDs or its query), status, duration, the error code if any. The api-5xx metric
+   * filter reads `status`.
+   */
   return async function handle(event: APIGatewayProxyEventV2): Promise<HttpResponse> {
+    const started = Date.now();
+    const box: { route: string | null } = { route: null };
+    const res = await dispatch(event, box);
+    let code: string | undefined;
+    if (res.statusCode >= 400) {
+      try {
+        code = (JSON.parse(res.body) as { error?: { code?: string } }).error?.code;
+      } catch {
+        code = undefined;
+      }
+    }
+    log(res.statusCode >= 500 ? 'error' : 'info', 'api request', {
+      event: 'api_request',
+      requestId: res.headers['x-request-id'],
+      method: event.requestContext?.http?.method?.toUpperCase() ?? '',
+      route: box.route ?? 'unmatched',
+      status: res.statusCode,
+      durationMs: Date.now() - started,
+      ...(code ? { code } : {}),
+    });
+    return res;
+  };
+
+  async function dispatch(event: APIGatewayProxyEventV2, box: { route: string | null }): Promise<HttpResponse> {
     const requestId = event.requestContext?.requestId ?? 'unknown';
     const method = event.requestContext?.http?.method?.toUpperCase() ?? '';
     const path = normalizePath(event.rawPath ?? '');
@@ -508,7 +543,8 @@ export function createApp(deps: AppDeps) {
     }
     if (!matched) return error('NOT_FOUND', pathMatched ? 'Method not allowed on this route.' : 'Route not found.', requestId);
     const query = Object.fromEntries(Object.entries(event.queryStringParameters ?? {}).filter((e): e is [string, string] => typeof e[1] === 'string'));
-    const routeName = `${method} ${matched.route.pattern.source}`;
+    const routeName = `${method} ${matched.route.template}`;
+    box.route = routeName;
     try {
       let workspaceId = '';
       if (matched.route.session) {
@@ -532,7 +568,7 @@ export function createApp(deps: AppDeps) {
       });
       return error('INTERNAL', 'An unexpected error occurred.', requestId);
     }
-  };
+  }
 }
 
 /** The poll body: the record without internal fields (claim token, TTL, partition). */

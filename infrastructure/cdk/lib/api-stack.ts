@@ -11,6 +11,11 @@ import type * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as ssm from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
 import { CONFIG, PATHS } from './config';
+import { lambdaRole } from './lambda-role';
+import { METRIC_NAMESPACE, WORKER_METRICS } from './worker-stack';
+
+/** Phase 7 (architecture §12): server errors, from the api's one access line per request. */
+export const API_5XX = 'Api5xx';
 
 export interface ApiStackProps extends StackProps {
   table: dynamodb.ITable;
@@ -45,6 +50,7 @@ export class ApiStack extends Stack {
       memorySize: 256,
       timeout: Duration.seconds(10),
       logGroup,
+      role: lambdaRole(this, 'ApiFunctionRole', logGroup),
       environment: {
         KILL_SWITCH_PARAM: props.killSwitch.parameterName,
         ACTIVE_PROFILE_SET_PARAM: props.activeProfileSet.parameterName,
@@ -138,6 +144,24 @@ export class ApiStack extends Stack {
     });
 
     this.apiEndpoint = this.httpApi.apiEndpoint;
+    new logs.MetricFilter(this, 'Api5xxFilter', {
+      logGroup,
+      filterPattern: logs.FilterPattern.all(logs.FilterPattern.stringValue('$.event', '=', 'api_request'), logs.FilterPattern.numberValue('$.status', '>=', 500)),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: API_5XX,
+      metricValue: '1',
+    });
+    // An analysis failed lazily on poll (QUEUE_TIMEOUT, or a run past its deadline) logs the same
+    // failed summary line as the worker; it feeds the worker's AnalysisFailed series by code.
+    new logs.MetricFilter(this, 'AnalysisFailedFilter', {
+      logGroup,
+      filterPattern: logs.FilterPattern.all(logs.FilterPattern.stringValue('$.event', '=', 'analysis_summary'), logs.FilterPattern.stringValue('$.status', '=', 'failed')),
+      metricNamespace: METRIC_NAMESPACE,
+      metricName: WORKER_METRICS.failedByCode,
+      metricValue: '1',
+      dimensions: { Code: '$.code' },
+    });
+
     new CfnOutput(this, 'ApiEndpoint', { value: this.apiEndpoint });
   }
 }

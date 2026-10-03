@@ -25,7 +25,8 @@ export type GuardRule =
   | 'log-retention'
   | 'dynamodb-billing'
   | 'iam-wildcard-action'
-  | 'iam-wildcard-resource';
+  | 'iam-wildcard-resource'
+  | 'iam-managed-policy';
 
 export const REQUIRED_LOG_RETENTION_DAYS = 14;
 
@@ -105,6 +106,13 @@ export function findCostViolations(templates: readonly GuardTemplate[]): Violati
         case 'AWS::Logs::LogGroup':
           if (props.RetentionInDays !== REQUIRED_LOG_RETENTION_DAYS) {
             add(id, 'log-retention', `log group retention must be ${REQUIRED_LOG_RETENTION_DAYS} days`);
+          }
+          break;
+        case 'AWS::IAM::Role':
+          // An AWS-managed policy is outside this guard's view and is often account-wide
+          // (AWSLambdaBasicExecutionRole writes to every log group). Grants must be inline and scoped.
+          if (asArray(props.ManagedPolicyArns).length > 0) {
+            add(id, 'iam-managed-policy', 'roles must not attach managed policies; grant scoped inline statements');
           }
           break;
         case 'AWS::DynamoDB::Table':

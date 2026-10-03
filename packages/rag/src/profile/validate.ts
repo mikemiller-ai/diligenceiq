@@ -23,9 +23,9 @@ import { profileBlocks } from './prompt';
  *     block, or is printed in a passage that the same item cites AND whose text was in
  *     `<filing_excerpts>` (the Deep Analysis rule; SPEC §32.2). A passage the model saw only as
  *     an ID grounds nothing. Only the verified match rules count ('exact', 'scaled',
- *     'preceding_unit'; never 'unit_unstated'). A change in points ("2.9 pp", "2.9 percentage
- *     points") must be printed as points in FACTS, and points never match a percentage or the
- *     other way round. No figure is stated in words ("two-fifths", "a quarter of", "doubled",
+ *     'caption_unit', 'preceding_unit'; never 'unit_unstated'). A change in points ("2.9 pp",
+ *     "2.9 percentage points") must be printed as points in FACTS, and points never match a
+ *     percentage or the other way round. No figure is stated in words ("two-fifths", "a quarter of", "doubled",
  *     "five percentage points");
  *   - labels as given: "accelerating" is said of revenue only when its trajectory label is Accelerating;
  *   - vocabulary: no banned phrase (core vocabulary.ts) in any model-written field.
@@ -33,8 +33,12 @@ import { profileBlocks } from './prompt';
  * here; docs/evaluation.md §6 lists what is not.
  *
  * PROFILE_VALIDATOR_VERSION names these rules in each manifest; bump it when a rule changes.
+ * 3 (Phase 7): a table whose first header cell is a currency caption without "in"
+ * ("(MILLIONS) | …") takes that unit for its own cells (generation/validate.ts `captionTables`,
+ * rule 'caption_unit'). Re-scoring the stored det-v2 and llm-v3 sets under 3 changes nothing
+ * (docs/evaluation.md §6), so their manifests keep 2.
  */
-export const PROFILE_VALIDATOR_VERSION = '2';
+export const PROFILE_VALIDATOR_VERSION = '3';
 
 const Ids = z.array(z.string().min(1)).min(1);
 
@@ -102,7 +106,7 @@ export function modelTexts(o: ProfileToolOutput): Array<{ path: string; text: st
 }
 
 /** Figure match rules that count as grounded (generation/validate.ts FigureRule); 'unit_unstated' is a near match only. */
-const GROUNDED_RULES: ReadonlySet<FigureRule> = new Set(['exact', 'scaled', 'preceding_unit']);
+const GROUNDED_RULES: ReadonlySet<FigureRule> = new Set(['exact', 'scaled', 'caption_unit', 'preceding_unit']);
 
 /** "2.9 pp", "2.9 percentage points": a change in points. Read separately from percentages. */
 const POINTS = /(?<![\d.,])(\d+(?:\.\d+)?)\s?(?:pp\b|percentage[- ]points?\b)/gi;

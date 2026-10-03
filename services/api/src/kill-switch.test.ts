@@ -1,6 +1,7 @@
 import { GetParameterCommand } from '@aws-sdk/client-ssm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createKillSwitch, KILL_SWITCH_CACHE_MS, type SsmLike } from './kill-switch';
+import { spyOnLog } from './test-log';
 
 function stubSsm(impl: () => Promise<unknown>) {
   const send = vi.fn((_cmd: unknown) => impl());
@@ -53,7 +54,7 @@ describe('kill switch', () => {
   });
 
   it('fails closed with a warning when SSM errors, and retries next time', async () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const log = spyOnLog();
     let fail = true;
     const { ssm, send } = stubSsm(async () => {
       if (fail) throw Object.assign(new Error('boom'), { name: 'ThrottlingException' });
@@ -71,7 +72,7 @@ describe('kill switch', () => {
   });
 
   it('fails closed when the parameter is missing or the name is unset', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    spyOnLog();
     const { ssm } = stubSsm(async () => ({}));
     expect(await createKillSwitch({ ssm, parameterName: PARAM }).analysesEnabled('r')).toBe(false);
 
@@ -87,7 +88,7 @@ describe('kill switch read state (the worker tells "off" from "unreadable")', ()
   afterEach(() => vi.restoreAllMocks());
 
   it('reports where the answer came from', async () => {
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    spyOnLog();
     const on = createKillSwitch({ ssm: stubSsm(async () => ({ Parameter: { Value: 'true' } })).ssm, parameterName: PARAM });
     expect(await on.read('r')).toEqual({ enabled: true, source: 'parameter' });
 

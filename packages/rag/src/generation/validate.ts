@@ -223,6 +223,8 @@ export interface PassageNumber {
   cell: boolean;
   /** Never a candidate: a year ("Fiscal 2024"), a day after a month ("December 31"), or a reference number ("Item 5", "Note 7"). */
   excluded: 'year' | 'date' | 'reference' | null;
+  /** Character offset in the passage. */
+  at: number;
 }
 
 export interface PassageNumbers {
@@ -234,9 +236,15 @@ export interface PassageNumbers {
   /**
    * Set only by `withPrecedingUnit`: the passage states no unit, opens with a table, and the line
    * right before it in the filing (the end of the previous chunk) is that table's unit caption.
-   * `table` is the numbers of that leading table; `rest` is the numbers after it.
+   * `table` is the numbers of that leading table; `rest` is the numbers after it; `end` is where it ends.
    */
-  preceding?: { unit: Scale; table: PassageNumber[]; rest: PassageNumber[] };
+  preceding?: { unit: Scale; table: PassageNumber[]; rest: PassageNumber[]; end: number };
+  /**
+   * Set only when the passage states no unit: the tables whose first header cell is a bare
+   * currency caption ("(MILLIONS) | …"; `captionTables`), each with its own unit. Empty when the
+   * passage has none, or prints any other scale caption (the rule is then disqualified).
+   */
+  captions?: CaptionTable[];
 }
 
 /**
@@ -263,13 +271,56 @@ export function passageNumbers(text: string): PassageNumbers {
     if (REFERENCE_BEFORE.test(before)) excluded = 'reference';
     else if (MONTH_BEFORE.test(before) && /^\d{1,2}$/.test(printed) && value >= 1 && value <= 31) excluded = 'date';
     else if (!dollar && !suffix && /^(?:19|20)\d{2}$/.test(printed)) excluded = 'year';
-    numbers.push({ digits: digitsOf(printed), value, percent, scale, dollar, cell: /\|\s*\(?$/.test(before) || /^\)?\s*\|/.test(after), excluded });
+    numbers.push({ digits: digitsOf(printed), value, percent, scale, dollar, cell: /\|\s*\(?$/.test(before) || /^\)?\s*\|/.test(after), excluded, at: m.index });
   }
-  let unit: Scale | null = null;
-  if (/\bin\s+billions\b/i.test(text)) unit = 'billion';
-  else if (/\bin\s+millions\b/i.test(text)) unit = 'million';
-  else if (/\bin\s+thousands\b/i.test(text)) unit = 'thousand';
-  return { numbers, unit, dollarSign: text.includes('$') };
+  const unit: Scale | null = /\bin\s+billions\b/i.test(text) ? 'billion' : /\bin\s+millions\b/i.test(text) ? 'million' : /\bin\s+thousands\b/i.test(text) ? 'thousand' : null;
+  return { numbers, unit, dollarSign: text.includes('$'), ...(unit ? {} : { captions: captionTables(text) }) };
+}
+
+/**
+ * The same-passage caption rule (architecture §6.9, Phase 7): a currency unit caption printed
+ * without "in" as the FIRST cell of a table header row, as Pfizer prints "(MILLIONS) |  | Worldwide"
+ * and "(MILLIONS, EXCEPT PER SHARE DATA) | 2024", and as others print "(millions of dollars)",
+ * "(Millions)" or "($ millions)". It states the unit of that table only: the caption row and the
+ * contiguous table rows after it (the chunker's `isTableRow`), never the rest of the passage.
+ * Only a caption whose whole content is a scale word (optionally "of dollars", optionally followed
+ * by ", except …" / ", unless …") counts. Any other parenthesized scale caption anywhere in the
+ * passage ("(millions of shares)", "(thousands of barrels daily)", a row label such as
+ * "Shares outstanding (millions)", or a caption that is not a row's first cell) disqualifies the
+ * rule for the whole passage: such a passage mixes units the rule cannot tell apart. Used only
+ * when the passage has no "in millions" wording. `from`/`to` are character offsets in the passage.
+ */
+const SCALE_CAPTION = /\(\s*(?:\$\s*)?(?:millions|thousands|billions)\b[^()\n]*\)/gi;
+const CAPTION_CELL = /^\(\s*(?:\$\s*)?(millions|thousands|billions)(?:\s+of\s+dollars)?(?:\s*,\s*(?:except|unless)\b[^()|\n]{0,80})?\s*\)$/i;
+export interface CaptionTable {
+  unit: Scale;
+  from: number;
+  to: number;
+}
+export function captionTables(text: string): CaptionTable[] {
+  const lines = text.split('\n');
+  const starts: number[] = [];
+  let offset = 0;
+  for (const line of lines) {
+    starts.push(offset);
+    offset += line.length + 1;
+  }
+  const tables: CaptionTable[] = [];
+  const captionAt = new Set<number>();
+  const captionOf = (line: string) => (isTableRow(line) ? CAPTION_CELL.exec(line.split('|')[0]!.trim()) : null);
+  for (let i = 0; i < lines.length; i++) {
+    const m = captionOf(lines[i]!);
+    if (!m) continue;
+    captionAt.add(starts[i]! + lines[i]!.indexOf('('));
+    // The table runs to its last contiguous row, or to the next caption row (a new table).
+    let j = i + 1;
+    while (j < lines.length && isTableRow(lines[j]!) && !captionOf(lines[j]!)) j++;
+    tables.push({ unit: SCALE_WORDS[m[1]!.toLowerCase().replace(/s$/, '')]!, from: starts[i]!, to: starts[j - 1]! + lines[j - 1]!.length });
+    i = j - 1;
+  }
+  if (!tables.length) return [];
+  for (const m of text.matchAll(SCALE_CAPTION)) if (!captionAt.has(m.index)) return [];
+  return tables;
 }
 
 /**
@@ -316,14 +367,18 @@ export function withPrecedingUnit(p: PassageNumbers, text: string, precedingText
   if (!unit) return p;
   const lead = leadingTable(text);
   if (!lead) return p;
-  return { ...p, preceding: { unit, table: passageNumbers(lead.table).numbers, rest: passageNumbers(lead.rest).numbers } };
+  const end = lead.table.length;
+  // A bare caption never overrides the preceding unit: a caption table inside the leading table is dropped.
+  const captions = p.captions?.filter((c) => c.from >= end);
+  const rest = passageNumbers(lead.rest).numbers.map((n) => ({ ...n, at: n.at + end }));
+  return { ...p, ...(captions ? { captions } : {}), preceding: { unit, table: passageNumbers(lead.table).numbers, rest, end } };
 }
 
 const FACTOR: Record<Scale, number> = { thousand: 1e3, million: 1e6, billion: 1e9, trillion: 1e12 };
 const round = (v: number, d: number) => Math.round(v * 10 ** d) / 10 ** d;
 
 /** How a figure matched a passage. `unit_unstated` is a near match only: it never counts as verified. */
-export type FigureRule = 'exact' | 'scaled' | 'preceding_unit' | 'unit_unstated';
+export type FigureRule = 'exact' | 'scaled' | 'caption_unit' | 'preceding_unit' | 'unit_unstated';
 
 /**
  * Does this passage print the figure? The rules, in order (each states only that a number with
@@ -340,6 +395,10 @@ export type FigureRule = 'exact' | 'scaled' | 'preceding_unit' | 'unit_unstated'
  *   printed) rounding to it at the figure's own precision, "$416.2 billion" for 416,161 in
  *   millions, never "$1 billion" for 1,234 ('scaled'). Rounding under the same scale word
  *   ("$295B" for "$295.49 billion") is not accepted;
+ * - caption unit: in a passage that states no unit, a "$" amount or table cell of a table whose
+ *   first header cell is a bare currency caption ("(MILLIONS) | …"; `captionTables`), matched in
+ *   that table's unit exactly as 'scaled' matches a passage-stated unit ('caption_unit'). An
+ *   unscaled figure of 1,000 or more found only in such a table is refused (the unit was dropped);
  * - preceding unit: in a passage that states no unit, a "$" amount or table cell of the table
  *   the passage opens with, whose unit caption ("(In millions)") is the line right before the
  *   passage in the same filing section (`withPrecedingUnit`), and whose amount in that unit is
@@ -348,7 +407,8 @@ export type FigureRule = 'exact' | 'scaled' | 'preceding_unit' | 'unit_unstated'
  *   refused, as above (the unit was dropped);
  * - a scaled figure whose printed digits equal a bare table cell in a passage that states no
  *   unit (the header is often in another chunk) is 'unit_unstated': reported, not verified.
- *   Cells of a leading table under a preceding unit are not near matches: their unit is known.
+ *   Cells of a leading table under a preceding unit, or of a caption table, are not near
+ *   matches: their unit is known.
  * A comparison cell's figure takes the unit its row label or column header states (`headerScale`).
  */
 export function matchFigure(f: Figure, p: PassageNumbers): FigureRule | null {
@@ -360,33 +420,39 @@ export function matchFigure(f: Figure, p: PassageNumbers): FigureRule | null {
     if (p.unit && f.value >= 1000) return null;
     // Printed only in a table whose caption (in the previous chunk) states a unit: the unit was dropped.
     if (p.preceding && f.value >= 1000 && !p.preceding.rest.some((n) => !n.excluded && !n.percent && !n.scale && (n.dollar || (n.cell && p.dollarSign)) && n.value === f.value)) return null;
+    // Printed only in tables under a bare caption (or the leading table): the unit was dropped.
+    if (p.captions?.length && f.value >= 1000 && !amounts.some((n) => n.value === f.value && !captionUnitOf(p, n) && !(p.preceding && n.at < p.preceding.end))) return null;
     return 'exact';
   }
   if (usable.some((n) => n.scale === f.scale && n.value === f.value)) return 'exact';
   const amount = f.value * FACTOR[f.scale];
   for (const n of usable) if (n.scale && n.scale !== f.scale && Math.abs(n.value * FACTOR[n.scale] - amount) < 1e-6 * amount) return 'scaled';
   const cells = usable.filter((n) => !n.percent && !n.scale && (n.dollar || n.cell));
-  if (p.unit) {
-    if (p.unit === f.scale) return cells.some((n) => n.value === f.value) ? 'scaled' : null;
-    if (FACTOR[f.scale] > FACTOR[p.unit] && significantDigits(f.digits) >= 3) {
-      const ratio = FACTOR[f.scale] / FACTOR[p.unit];
-      if (cells.some((n) => round(n.value / ratio, f.decimals) === f.value)) return 'scaled';
-    }
-    return null;
-  }
-  const cellsOf = (ns: readonly PassageNumber[]) => ns.filter((n) => !n.excluded && !n.percent && !n.scale && (n.dollar || n.cell));
+  if (p.unit) return inUnit(f, f.scale, p.unit, cells) ? 'scaled' : null;
+  if (p.captions?.length) for (const c of p.captions) if (inUnit(f, f.scale, c.unit, cells.filter((n) => n.at >= c.from && n.at < c.to))) return 'caption_unit';
+  const cellsOf = (ns: readonly PassageNumber[]) => ns.filter((n) => !n.excluded && !n.percent && !n.scale && (n.dollar || n.cell) && !captionUnitOf(p, n));
   if (p.preceding) {
     const unitFactor = FACTOR[p.preceding.unit];
     // Exactly equal amounts only (to floating-point noise): 72,220 in millions is $72.22 billion.
     if (cellsOf(p.preceding.table).some((n) => Math.abs(n.value * unitFactor - amount) < 1e-9 * amount)) return 'preceding_unit';
   }
-  const loose = p.preceding ? cellsOf(p.preceding.rest) : cells;
+  const loose = cellsOf(p.preceding ? p.preceding.rest : usable);
   return significantDigits(f.digits) >= 3 && loose.some((n) => n.cell && n.digits === f.digits) ? 'unit_unstated' : null;
 }
 
+/** A scaled figure against amounts stated in `unit`: equal in that unit, or (a coarser figure with at least 3 significant digits) rounding to it at the figure's precision. */
+function inUnit(f: Figure, scale: Scale, unit: Scale, cells: readonly PassageNumber[]): boolean {
+  if (unit === scale) return cells.some((n) => n.value === f.value);
+  if (FACTOR[scale] <= FACTOR[unit] || significantDigits(f.digits) < 3) return false;
+  const ratio = FACTOR[scale] / FACTOR[unit];
+  return cells.some((n) => round(n.value / ratio, f.decimals) === f.value);
+}
+
+const captionUnitOf = (p: PassageNumbers, n: PassageNumber): Scale | null => p.captions?.find((c) => n.at >= c.from && n.at < c.to)?.unit ?? null;
+
 /* ------------------------------------------------------------- validation */
 
-const RULE_RANK: Record<FigureRule, number> = { exact: 0, scaled: 1, preceding_unit: 2, unit_unstated: 3 };
+const RULE_RANK: Record<FigureRule, number> = { exact: 0, scaled: 1, caption_unit: 2, preceding_unit: 3, unit_unstated: 4 };
 
 export interface ValidatedBrief {
   brief: DiligenceBrief;

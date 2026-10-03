@@ -3,57 +3,54 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`main` (no remote yet). Last commits: `feef6ff` (Phase 6r step 4), fast-forwarded from `phase-6r-step4`; `0494871` (light palette); `35af2d0` (step 3 deploy record). Step 3: `280660b`; step 2: `a5cbf2b`; step 1: `c4a4797`.
+`phase-7` (branched from `main` at `aec53f2`), **uncommitted**: Phase 7 waits for Mike's commit go-ahead. `main` holds Phase 6r step 4 (`feef6ff`) and its deploy record (`aec53f2`). There is no remote yet.
 
 ## Current phase
-**Phase 6r (readability, DD-21) is complete: step 4 of 4, the refined Compare and Findings (DD-21 h), is gated, committed (`feef6ff`) and deployed (2026-10-03).** Handoff: `docs/handoffs/phase-06r-step4.md`. Steps 1–3 are deployed too (handoffs `phase-06r-step1.md` … `phase-06r-step3.md`).
-- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point the set at `iv-9cf51c066743/det-v2`.
-- **Step 4 adds:**
-  - **Compare:**
-    - a fixed-rule bottom line (`apps/web/src/lib/compare-summary.ts`) whose footer names the metrics pointing in opposite directions;
-    - side-by-side cells with the latest value, change and sparkline;
-    - one risk-area grid with cell popovers, replacing the common, distinctive and ranking lists;
-    - "Ask next" and a jump bar.
-  - **Findings:**
-    - a summary strip of toggle filters;
-    - one filter row with text search plus More filters;
-    - compact cards with a status chip menu and a source count that unfolds the citation chips;
-    - a Board view;
-    - Ask follow-up, which only prefills `/analysis/new` with `origin=finding:<id>`.
-  - The committed built test set now has AAPL, TSLA, JPM, MSFT, NVDA and PFE.
+**Phase 7 (evaluation, security, reliability, observability; plan row 7) is gated and not deployed.** Handoff: `docs/handoffs/phase-07.md`. Phase 6r (steps 1–4) is complete and deployed.
+- Production (unchanged by Phase 7): active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: `iv-9cf51c066743/det-v2`.
+- **Phase 7 adds:**
+  - **CSP** (assumptions D10, Mike's choice): after `next build`, `apps/web/src/build/csp.ts` writes each page's own `<meta>` CSP with `script-src 'self'` plus that page's inline-script hashes. Header CSP keeps `frame-ancestors`. The one residual allowance is `style-src 'unsafe-inline'` (sonner's runtime `<style>`). Zod runs `jitless` (`packages/core/src/zod-config.ts`, core's first import) so its `new Function` probe raises no violation.
+  - **Validator: the caption rule** (Mike's decision). A bare currency caption ("(MILLIONS)") counts only as the first cell of a table header row, and states the unit of that table only (rule `caption_unit`). Any other scale caption in the passage disqualifies it, and it never overrides a preceding unit. `PROFILE_VALIDATOR_VERSION` is 3; the stored manifests keep 2, because a re-score changed nothing. da-v4 numeric grounding went from 0.911 to 0.989 (531/537).
+  - **Observability:** the api writes one `api_request` line per request (route template, status, duration, code). Logs are raw JSON lines on stdout, because Lambda's text format prefixes `console.log` output, which breaks JSON metric filters. `apiRequestId` now travels in the queue message and is non-fatal. Every fail path writes an `analysis_summary` line with status `failed`.
+  - **Metrics and alarms:** metric filters for generation latency, estimated cost, citations removed, `AnalysisFailed` by code (worker, dlq-handler and api) and `Api5xx`. Alarms: `GenerationCallsOverOne` and `DlqHandlerInvokedAlarm`.
+  - **IAM:** each Lambda has its own role (`infrastructure/cdk/lib/lambda-role.ts`) that writes only to its own log group. No managed policies, enforced by the cost guard rule `iam-managed-policy`.
+  - **Evals:** `evals/robustness.yaml` (6 questions; 5/6 pass; $0.6515 live, approved). It includes three planted-document injections; the realistic "last" one fails by the check's letter, because the brief quoted the planted text to reject it. The manual review is `evals/results/manual-review-iv-9cf51c066743-da-v4.md`: a Claude agent, 8 briefs, 62.5% of claims supported and 96.3% supported or partly. Web perf: `evals/results/web-perf.*`. `docs/evaluation.md` §7–§10 are new.
+  - **Architecture page:** measured numbers only (`apps/web/src/app/architecture/measured.ts`), each recomputed from its record by `measured.test.ts`. Statuses are updated (everything through 6r is deployed; the Budget alert is Phase 8).
+  - `engines` is `node >=22.18`, because the web build runs `node src/build/csp.ts` with native type stripping.
 
 ## Gate
-`pnpm gate` on 2026-10-03 against the Phase 6r step 4 working tree: **exit 0**.
+`pnpm gate` on 2026-10-03 against the Phase 7 working tree: **exit 0**.
 - check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 432, api 135 (**1,203**).
-- `cdk:synth` and `build` succeeded. **e2e: 88 passed, 4 skipped.** The skipped ones are the `DARK_SCREENSHOTS`-only screenshot tests.
+- Unit tests with `REQUIRE_CORPUS=1`: core 79, cdk 46, corpus 102, rag 453, web 464, api 154 (**1,298**).
+- `cdk:synth` and `build` succeeded; the CSP step covered 11 pages and 77 hashes.
+- **e2e: 100 passed, 4 skipped** (the `DARK_SCREENSHOTS`-only tests).
 
-Gate record: adversary (3 high, 7 medium, 11 low) → fresh fixer (all 21 fixed with regression tests) → `/code-review` medium (2 findings, both fixed with tests: duplicate card IDs when grouped by company, and a note draft lost on a Board move) → `pnpm gate` green.
+Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with tests; CLAUDE.md's Node line left to the main session) → `/code-review` medium (2 findings, both fixed: an apiRequestId regex that dropped base64 `+` and `/`, and perf bytes that omit lazy chunks, now documented as first-load) → `pnpm gate` green.
 
 ## In flight
-- **Done 2026-10-03 (Mike approved):** the commit, the fast-forward to `main`, then `pnpm deploy:web` (Amplify job 11). The headless production check passed:
-  - **Compare** `AAPL,MSFT,NVDA` in light and dark:
-    - the five bottom-line lines ("Revenue grew at all three" … "2 areas only at NVIDIA Corporation");
-    - the footer "Opposite directions: Operating cash flow (rising at Microsoft Corporation and NVIDIA Corporation, falling at Apple Inc).";
-    - the Apple Inc · Regulatory grid popover opens with its headings.
-    - Body #F0F2F6 in light, #0B1020 in dark.
-  - **Findings** in light and dark:
-    - the summary strip (4 findings across 5 companies; 1 needs follow-up);
-    - search narrows 4 → 1;
-    - Board columns Needs Follow-Up · 1, Active · 3, Resolved · 0.
-  - **Ask follow-up** lands on `/analysis/new/` with `origin=finding:fd-…`, the question filled in and the "A saved finding" label. Nothing posts an analysis.
-  - **Phone, 390 px:** no sideways scroll on Compare or Findings.
-  - **Requests:** only reads and `POST /api/session` (`/api/session`, `/api/analyses`, `/api/findings`, `/api/companies`, `/api/companies/<t>/intelligence`, `/api/health`).
-  - Axe was not run against production; it is clean in the e2e suite in light and dark.
-- **Known limit (M3, from step 2):** profile citations carry no subsection, so their drawer titles show only the section.
-- **Next:** Phase 7. The Deep Analysis and brief mockups (same v2 folder) were not chosen; ask Mike before building them.
+- **Waiting for Mike:** the commit (proposed message in the handoff), then each with his go-ahead:
+  1. fast-forward `main`;
+  2. **`pnpm deploy:infra` before `pnpm deploy:web`** (the Architecture page claims the CSP, logs, metrics and the scoped IAM are built, so infra must be live first; the WorkerStack deploys before the ApiStack through the cross-stack reference);
+  3. `pnpm deploy:web`;
+  4. production check.
+- **Production check plan:**
+  - The CSP `<meta>` is present, there are zero violations on the P0 pages, and the theme applies.
+  - The header CSP and nosniff are present; requests are reads only plus `POST /api/session`.
+  - Light and dark; 390 px.
+  - Read-only, approved by Mike: `aws logs test-metric-filter` with sample lines for every filter, then `aws logs filter-log-events` for `api_request` lines after page views. The filters have never been seen matching in production (the Phase 4 `GenerationCallsOverOne` had the console prefix too).
+- **Known limits recorded, not fixed:**
+  - The seeded expert-question brief misdates the Apple DMA fines to FY2025 (they are in FY2024's 1A-017) and claims AI and tariffs were absent from FY2023/FY2024 (evaluation.md §8). Mike: document now, fix in a da-v5 prompt later (a live eval run and a reseed, ask first).
+  - The JS is heavy (about 390 KB gzipped first load on workspace pages; Zod and the core schemas).
+  - M3 profile citations carry no subsection.
+- **Next after the deploy:** Phase 8 (production hardening, alarm notification targets, Budget alert, prod smoke, README and `examples/`). Do not build the Deep Analysis or brief mockups without asking.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
-- **Validator (Deep Analysis):** whether to read a same-chunk "(MILLIONS)" caption (42 Pfizer near matches; free re-score).
 - **PERSISTENT go on its stated basis** (Phase 3). Recommended: keep it.
 - **F1 (rerank) to Eliza:** the Phase 4 evals show no need.
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
+- **da-v5 prompt** (from the manual review and robustness): a change claim needs a cited passage from each period it compares; do not quote disregarded passages. Needs a live eval run (about $2.25) and a reseed.
+- Settled this session: the Pfizer "(MILLIONS)" caption rule (yes, narrowed by the adversary) and the CSP strategy (per-page meta hashes).
 
 ## Known traps
 - **Compare's bottom line and core's Diverging section use different rules on purpose.** The bottom line (`compare-summary.ts`) counts "slowing" as still rising, and its footer follows the lines. Core's `diverging` (Diverging trends section) counts only rising against declining. Only lines where every company shares a direction are coloured (DD-21 h). An operating margin at or below zero gets loss wording, never "widened".
@@ -161,3 +158,8 @@ Gate record: adversary (3 high, 7 medium, 11 low) → fresh fixer (all 21 fixed 
 - **`cdk diff` is not side-effect free.** It publishes template and Lambda assets to the CDK bootstrap bucket.
 - **Profile build (Phase 4b):** `pnpm intelligence:build` never calls without `--yes` and never calls a company twice at one `profilePromptVersion` (S3 ledger). `--llm --max-calls 0` rebuilds the LLM set from stored outcomes for free. Changing anything that alters the request (evidence, blocks, prompt) marks new-format outcomes `stale_outcome`; the v3 outcomes have no hash (`promptVerified: false`), so keep `assemble`'s block-relevant output, `evidence.ts` and `prompt.ts` unchanged or bump the version.
 - **Deploy the api before activating a profile set that uses new schema fields.** The api validates profiles with its own bundled core schema (strict); an unknown field makes the profile read as `PROFILE_MISSING`, with no error surfaced to the user. Order: deploy:infra → pointer → smoke → deploy:web.
+- **Log with `log()` (raw stdout), never `console.log`, for anything a metric filter reads.** Lambda's Text format prefixes console lines, so `{ $.event = … }` filters cannot match them. Tests capture lines with `services/api/src/test-log.ts`, not a `console.log` spy.
+- **`out/` HTML is rewritten after `next build`** (`node src/build/csp.ts out`). Never hand-edit `out/`. A new inline script anywhere is picked up by the next build. A new runtime `eval` or `new Function` (for example a library JIT) shows as a CSP violation in `security.spec.ts`; Zod must stay `jitless`, set by core's first import.
+- **The caption rule is table-scoped.** A bare "(MILLIONS)" counts only as a table header's first cell. Any other scale caption ("(millions of shares)", a row label "(millions)") in the same passage turns the rule off, and it never overrides a preceding unit. Re-score all four prompt versions plus `--set robustness` after any validator change, and compare figure by figure against HEAD.
+- **Architecture page numbers are tests.** `measured.test.ts` recomputes every value and every digit in its text from `evals/results/*` and `docs/evaluation.md` §5. Re-running an eval or editing §5 fails the gate until `measured.ts` matches.
+- **Robustness plants must not be index chunk IDs** (the CLI refuses). Their position is replayed from the recorded context order, so changing `plant.ts` layout breaks replay of recorded requests (the "last" layout must stay byte-identical; `plant.test.ts` guards it).
