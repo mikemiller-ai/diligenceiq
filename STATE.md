@@ -3,10 +3,10 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`phase-6r-step2` (from `main` at `f39bd32`; no remote yet), **uncommitted**: Phase 6r step 2 awaits Mike's go-ahead to commit. Last code commit on `main`: `c4a4797` (Phase 6r step 1; plan `6cee6eb`). Phase 6: `bdd817e`.
+`main` (no remote yet). Last code commit: `a5cbf2b` (Phase 6r step 2), fast-forwarded from `phase-6r-step2`. Phase 6r step 1: `c4a4797`; Phase 6: `bdd817e`.
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 2 of 3 is gated, not committed and not deployed: readable evidence.** Handoff: `docs/handoffs/phase-06r-step2.md`. Step 1 (readable dashboard plus dark mode) is committed (`c4a4797`) and deployed (2026-10-02; handoff `docs/handoffs/phase-06r-step1.md`).
+**Phase 6r (readability, DD-21), step 2 of 3 is gated, committed (`a5cbf2b`) and deployed (2026-10-03): readable evidence.** Handoff: `docs/handoffs/phase-06r-step2.md`. Step 1 (readable dashboard plus dark mode) is committed (`c4a4797`) and deployed (2026-10-02; handoff `docs/handoffs/phase-06r-step1.md`).
 - Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point it at `iv-9cf51c066743/det-v2`.
 - **Step 2 adds:**
   - an offset-preserving display layer for the source view and the drawer: paragraphs, headings including risk headings, lists, column-aligned tables, and page furniture hidden;
@@ -22,12 +22,12 @@ _Last updated: 2026-10-03 (local)_
 Gate record: adversary (0 blockers, 6 high, 4 medium) → fresh fixer (all fixed with tests, except M3, a known limit) → `/code-review` medium (2 low, fixed with tests) → `pnpm gate` green.
 
 ## In flight
-- **Waiting on Mike:** commit `phase-6r-step2`, merge to `main`, then `pnpm deploy:web`. It is web only: no api, CDK, profile or S3 change.
-- **Production check after deploy:**
-  - the AAPL 10-K source view: tables and no footers;
-  - a dashboard citation: its closest sentences and Show full passage;
-  - the Compare periods diff, in light and dark mode;
-  - only reads, plus `POST /api/session`.
+- **Done 2026-10-03 (Mike approved):** commit `a5cbf2b`, fast-forward to `main`, then `pnpm deploy:web` (Amplify job 8). The headless production check passed:
+  - **AAPL 10-K source view** (`#chunk-AAPL-FY2025-10K-1A-001`): the passage is highlighted and focused; 28 risk headings; 54 tables, 36 with a header row; 15 scroll boxes, focusable only where a table overflows. No "Apple Inc. | 2025 Form 10-K | N" footers and no page-number back-links remain, and the page has no sideways scroll.
+  - **AAPL dashboard risk citation:** the statement is shown and one closest sentence is highlighted; Show full passage works.
+  - **Compare periods:** "New in FY2025 10-K, in the shared stretch (6)", "Removed since FY2024 10-K, in the shared stretch (6)", "Unchanged (12)".
+  - **Light and dark:** dark renders; in light the body is #F3F4F8 and the key highlight is #FBEFC4 behind #14151F text. Axe was not run against production; it is clean in the e2e suite.
+  - **Requests:** only reads and `POST /api/session`.
 - **Known limit (M3):** profile citations carry no subsection, so their drawer titles show only the section. A fix needs a profile-builder or api change and a new profile-set version.
 - **Next:** Phase 6r step 3 (the brief and Compare, DD-21 g), then Phase 7.
 
