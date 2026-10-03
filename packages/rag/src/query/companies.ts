@@ -88,7 +88,7 @@ export interface Alias {
   kind: 'name' | 'ticker';
 }
 
-export function buildAliases(catalog: Catalog): Alias[] {
+export function buildAliases(catalog: { companies: ReadonlyArray<Pick<Catalog['companies'][number], 'ticker' | 'company'>> }): Alias[] {
   const out: Alias[] = [];
   const seen = new Set<string>();
   const add = (ticker: string, text: string, kind: Alias['kind']) => {

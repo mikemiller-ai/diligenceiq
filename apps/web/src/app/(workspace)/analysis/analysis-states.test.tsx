@@ -218,6 +218,58 @@ describe('Diligence Brief panels (SPEC §15.2, P0)', () => {
     expect(screen.queryByText(/Period not cited/)).not.toBeInTheDocument();
   });
 
+  it('claim checks: plain-language badges in place, on the Bottom line and in the rail; one badge per cue per finding', () => {
+    const analysis: AnalysisDetail = {
+      ...complete,
+      validation: validationWith({
+        arithmeticClaims: [
+          { location: 'keyFindings[0].title', from: '$15,068 million', to: '$116,193 million', stated: 'up 145%', computed: '+671%' },
+          { location: 'keyFindings[0].finding', from: '$15,068 million', to: '$116,193 million', stated: 'up 145%', computed: '+671%' },
+        ],
+        attributionClaims: [
+          { location: 'keyFindings[0].finding', companies: ['GOOG', 'UNH'], mentions: [{ ticker: 'GOOG', text: 'Google Cloud' }, { ticker: 'UNH', text: 'UnitedHealth' }] },
+          { location: 'comparison.rows[0].values[0]', companies: ['MSFT'], mentions: [{ ticker: 'MSFT', text: 'Microsoft (MSFT)', column: true }] },
+          // Stored before the review fix: no mentions.
+          { location: 'investmentConsiderations[0].text', companies: ['V'] },
+        ],
+        scopeClaims: [
+          { location: 'investmentConsiderations[0].text', cue: 'all five', scope: 5, cited: 4 },
+          { location: 'executiveSummary', cue: 'all three', scope: 3, cited: 2 },
+        ],
+        notices: ['1 change does not match the two values stated with it (marked "Change doesn\'t add up").'],
+      }),
+    };
+    renderInWorkspace(<AnalysisView />, { initial: { analyses: [analysis] }, contexts: SAMPLE_CONTEXTS });
+    const title = complete.brief!.keyFindings[0]!.title;
+    const findings = screen.getByRole('heading', { name: 'Key findings' }).closest('section')!;
+    const first = within(findings).getAllByRole('listitem').find((li) => li.textContent?.includes(title))!;
+    // The title and the finding state the same change: one badge.
+    expect(within(first).getAllByText(/^Change doesn't add up/)).toHaveLength(1);
+    expect(within(first).getByText(/^Change doesn't add up: says up 145%, figures give \+671%/)).toHaveTextContent('From $15,068 million to $116,193 million is +671%, not up 145%.');
+    expect(within(first).getByText(/^Names Google Cloud \(Alphabet\); cites no Alphabet passage/)).toHaveTextContent('This says something about Alphabet but cites no Alphabet passage.');
+    expect(within(first).getByText(/^Names UnitedHealth[\w ]*; cites no UnitedHealth[\w ]* passage/)).toBeInTheDocument();
+    const bottom = screen.getByRole('heading', { name: 'Bottom line' }).closest('section')!;
+    const headline = within(bottom).getAllByRole('listitem').find((li) => li.textContent?.includes(title))!;
+    expect(within(headline).getByText(/^Change doesn't add up: says up 145%/)).toBeInTheDocument();
+    expect(within(headline).getByText(/^Names Google Cloud \(Alphabet\)/)).toBeInTheDocument();
+    expect(within(screen.getAllByRole('table')[0]!).getByText(/^Microsoft column; cites no Microsoft passage/)).toBeInTheDocument();
+    const considerations = screen.getByRole('heading', { name: 'Investment considerations' }).closest('section')!;
+    expect(within(considerations).getByText(/^Says “all five”; cites 4 companies/)).toHaveTextContent('This says “all five” (5 companies) but cites passages from 4 companies.');
+    expect(within(considerations).getByText(/^Names Visa; cites no Visa passage/)).toBeInTheDocument();
+    expect(within(screen.getByRole('heading', { name: 'Executive summary' }).closest('section')!).getByText(/^Says “all three”; cites 2 companies/)).toBeInTheDocument();
+    const rail = screen.getByRole('list', { name: 'Validation' });
+    expect(within(rail).getByText('2 stated changes not matching their own two values; marked "Change doesn\'t add up".')).toBeInTheDocument();
+    expect(within(rail).getByText('3 items naming a company none of their citations is from; marked "Names …; cites no … passage".')).toBeInTheDocument();
+    expect(within(rail).getByText('2 claims about more companies than their citations cover; marked "Says …; cites N companies".')).toBeInTheDocument();
+    expect(within(rail).queryByText(/change does not match the two values/)).not.toBeInTheDocument();
+  });
+
+  it('claim checks: an analysis stored before them shows none of their badges', () => {
+    const { arithmeticClaims: _a, attributionClaims: _b, scopeClaims: _c, ...older } = validationWith({});
+    renderInWorkspace(<AnalysisView />, { initial: { analyses: [{ ...complete, validation: older }] }, contexts: SAMPLE_CONTEXTS });
+    expect(screen.queryByText(/Change doesn't add up|cites no .* passage|Says “/)).not.toBeInTheDocument();
+  });
+
   it('M1: every validated location is badged: the title, a comparison row label, an evidence gap', () => {
     const fig = (location: string, figure: string) => ({ location, figure, verified: false, rule: null, chunkId: null });
     const analysis: AnalysisDetail = {

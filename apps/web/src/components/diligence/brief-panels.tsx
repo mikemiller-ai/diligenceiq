@@ -8,6 +8,8 @@ import { SectionHeading } from '@/components/diligence/page';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip } from '@/components/ui/tooltip';
 import { companyName } from '@/fixtures';
+import { type ClaimFlags, SHOWN_CLAIM_CHECKS, atLocation, claimBadges } from '@/lib/brief-summary';
+import { shortCompanyName } from '@/lib/company-name';
 import { pluralize } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -252,7 +254,7 @@ export function CoverageMatrix({ analysis, passages }: { analysis: AnalysisDetai
 
 /** Figures at a location (or under a location prefix such as `keyFindings[2].`). */
 export function figuresAt(validation: BriefValidation | undefined, ...prefixes: string[]): Figure[] {
-  return (validation?.numeric.figures ?? []).filter((f) => prefixes.some((p) => f.location === p || f.location.startsWith(p)));
+  return (validation?.numeric.figures ?? []).filter((f) => prefixes.some((p) => atLocation(f.location, p)));
 }
 
 /**
@@ -307,7 +309,32 @@ export function PeriodBadges({ periods, onNavy = false }: { periods: readonly st
   );
 }
 
-/** Validation summary for the Sources rail: citations, removed IDs, figures, period claims, uncited items, notices. */
+/**
+ * Claim-check badges (architecture §6.9; 2026-10-03): a stated change its own two values do not
+ * give ("Change doesn't add up: says up 145%, figures give +671%"), a company named with no citation
+ * from it ("Names Google Cloud (Alphabet); cites no Alphabet passage"), and a sweeping claim wider
+ * than the item's citations ("Says “all five”; cites 4 companies"). Wording: `claimBadges`. Reported,
+ * never pass/fail; analyses stored before the checks have none. Same pill as the period badge.
+ */
+export function ClaimBadges({ flags, onNavy = false }: { flags: ClaimFlags; onNavy?: boolean }) {
+  const items = claimBadges(flags, (t) => shortCompanyName(companyName(t)));
+  if (items.length === 0) return null;
+  return (
+    <span className="ml-1 inline-flex flex-wrap gap-1 align-middle">
+      {items.map((b) => (
+        <Tooltip key={b.key} content={b.detail}>
+          <Badge tone={onNavy ? 'outline' : 'warning'} className={cn('cursor-help', onNavy && 'ring-risk-med')}>
+            <AlertTriangle aria-hidden className={cn('size-3', onNavy && 'text-risk-med')} />
+            {b.label}
+            <span className="sr-only">. {b.detail}</span>
+          </Badge>
+        </Tooltip>
+      ))}
+    </span>
+  );
+}
+
+/** Validation summary for the Sources rail: citations, removed IDs, figures, period and claim checks, uncited items, notices. */
 export function ValidationSummary({ validation, citedCount }: { validation: BriefValidation | undefined; citedCount: number }) {
   if (!validation) return null;
   const removed = validation.citations.removed.length;
@@ -324,8 +351,15 @@ export function ValidationSummary({ validation, citedCount }: { validation: Brie
   ];
   const periodClaims = validation.periodClaims?.length ?? 0;
   if (periodClaims) rows.push({ ok: false, text: `${pluralize(periodClaims, 'claim')} about a period none of ${periodClaims === 1 ? 'its' : 'their'} citations is from; marked "Period not cited".` });
+  const arithmetic = SHOWN_CLAIM_CHECKS.arithmetic ? (validation.arithmeticClaims?.length ?? 0) : 0;
+  if (arithmetic) rows.push({ ok: false, text: `${pluralize(arithmetic, 'stated change')} not matching ${arithmetic === 1 ? 'its' : 'their'} own two values; marked "Change doesn't add up".` });
+  const attribution = SHOWN_CLAIM_CHECKS.attribution ? (validation.attributionClaims?.length ?? 0) : 0;
+  if (attribution) rows.push({ ok: false, text: `${pluralize(attribution, 'item')} naming a company none of ${attribution === 1 ? 'its' : 'their'} citations is from; marked "Names …; cites no … passage".` });
+  const scope = SHOWN_CLAIM_CHECKS.scope ? (validation.scopeClaims?.length ?? 0) : 0;
+  if (scope) rows.push({ ok: false, text: `${pluralize(scope, 'claim')} about more companies than ${scope === 1 ? 'its' : 'their'} citations cover; marked "Says …; cites N companies".` });
   if (validation.uncited.length) rows.push({ ok: false, text: `${pluralize(validation.uncited.length, 'item')} left without a valid citation.` });
-  const notices = validation.notices.filter((n) => !/citation removed|figure|period not cited/i.test(n));
+  // The claim-check notices (current and stored wordings, and the could-not-run notice) are stated by the rows above or by the hidden-check rule.
+  const notices = validation.notices.filter((n) => !/citation removed|figure|period not cited|change does not add up|change doesn't add up|company not cited|scope not cited|cites no … passage|Says …; cites/i.test(n));
   return (
     <ul className="flex flex-col gap-1.5 border-b border-border px-4 py-2.5 text-xs" aria-label="Validation">
       {rows.map((r) => (

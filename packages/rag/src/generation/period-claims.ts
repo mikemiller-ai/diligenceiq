@@ -93,6 +93,11 @@ const ABOUT_EVIDENCE = [
   /\bwhether\b/i,
 ];
 
+/** Whether a sentence is about the evidence supplied (or asks rather than claims), not about a filing: such a sentence makes no claim the checks read. */
+export function isAboutEvidence(sentence: string): boolean {
+  return ABOUT_EVIDENCE.some((re) => re.test(sentence));
+}
+
 const YEAR = String.raw`(?:19|20)\d{2}`;
 const SEP = String.raw`\s*(?:–|—|-|to|through)\s*`;
 const LIST = String.raw`(?:\s*,\s*(?:and\s+|or\s+)?|\s+(?:and|or)\s+)`;
@@ -227,7 +232,7 @@ export function periodClaimIn(text: string, citedYears: ReadonlySet<number>, fal
   const uncited: number[] = [];
   let cue: string | null = null;
   for (const s of sentencesOf(text)) {
-    if (!CUE.test(s) || ABOUT_EVIDENCE.some((re) => re.test(s))) continue;
+    if (!CUE.test(s) || isAboutEvidence(s)) continue;
     const mentions = periodMentionsIn(s);
     for (const m of s.matchAll(CUES())) {
       // A comparison cell that names no period of its own is about its column's (or row's) period.

@@ -1,64 +1,87 @@
 WEBVTT
 
-00:00:00.650 --> 00:00:04.300
-Private equity diligence begins
-with a mountain of SEC filings.
+00:00:02.600 --> 00:00:05.100
+A deal team asks a question
+like this every week.
 
-00:00:04.300 --> 00:00:06.600
-DiligenceIQ turns them into decisions.
+00:00:05.300 --> 00:00:08.700
+Answering it properly means hours
+inside 10-Ks and 10-Qs.
 
-00:00:07.050 --> 00:00:08.000
-Pick a company.
+00:00:10.800 --> 00:00:14.300
+DiligenceIQ reads the filings for you,
+and shows its evidence.
 
-00:00:08.000 --> 00:00:11.400
-Before you ask anything, you see
-how NVIDIA is performing,
+00:00:16.000 --> 00:00:18.550
+Open a company, and the first read
+is already there:
 
-00:00:11.400 --> 00:00:13.300
-what changed across its filings,
+00:00:18.550 --> 00:00:21.000
+how it's performing, and what changed.
 
-00:00:13.300 --> 00:00:15.100
-and what deserves a closer look —
+00:00:23.300 --> 00:00:29.700
+Like the $4.5 billion export-control charge
+that pulled NVIDIA's gross margin to 60.5%.
 
-00:00:15.100 --> 00:00:17.200
-every figure straight from the filing,
+00:00:29.700 --> 00:00:32.200
+Flagged, with the filing passage behind it.
 
-00:00:17.200 --> 00:00:19.000
-every line you can check.
+00:00:34.400 --> 00:00:36.450
+Then ask anything, in plain English.
 
-00:00:21.500 --> 00:00:23.300
-Have a question? Just ask.
+00:00:36.450 --> 00:00:40.300
+It searches the filings, gathers the
+passages that answer your question,
 
-00:00:23.300 --> 00:00:27.100
-Retrieval searches the filings, then
-exactly one model call writes your answer.
+00:00:40.300 --> 00:00:43.400
+and makes exactly one model call
+to write the brief.
 
-00:00:27.100 --> 00:00:29.700
-These are the real steps — no black box.
+00:00:43.600 --> 00:00:45.000
+Every step is shown.
 
-00:00:33.650 --> 00:00:35.300
-The result is a Diligence Brief,
+00:00:46.600 --> 00:00:48.800
+What comes back reads like
+an investment memo:
 
-00:00:35.300 --> 00:00:37.500
-structured like an investment memo.
+00:00:48.800 --> 00:00:51.300
+a summary, the key findings, and the trend.
 
-00:00:39.700 --> 00:00:41.850
-Every claim opens its source passage,
+00:00:54.900 --> 00:00:57.300
+Every claim opens the passage
+it came from.
 
-00:00:41.850 --> 00:00:45.100
-and every number is verified
+00:00:58.600 --> 00:01:01.800
+And every number is checked
 against the filing it cites.
 
-00:00:47.500 --> 00:00:49.600
-Compare companies side by side —
+00:01:03.000 --> 00:01:04.650
+Compare companies side by side:
 
-00:00:49.600 --> 00:00:52.800
-see where they move together,
-and where they diverge.
+00:01:04.650 --> 00:01:08.000
+which risk areas they share,
+and where their trends diverge.
 
-00:00:54.500 --> 00:00:55.700
+00:01:11.300 --> 00:01:14.000
+A cited brief in about a minute,
+for about thirteen cents.
+
+00:01:14.100 --> 00:01:16.200
+And close to nothing
+when no one is using it.
+
+00:01:17.300 --> 00:01:19.200
+Today, it reads public filings.
+
+00:01:19.200 --> 00:01:22.300
+Next, it watches for new ones.
+And later, your deal room.
+
+00:01:22.500 --> 00:01:23.700
 DiligenceIQ.
 
-00:00:55.700 --> 00:00:59.500
-Know what changed, what matters,
-and what to investigate next.
+00:01:23.700 --> 00:01:25.650
+Know what changed. Know what matters.
+
+00:01:25.650 --> 00:01:27.600
+Know what to investigate next.

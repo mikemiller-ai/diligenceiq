@@ -152,7 +152,7 @@ for (const name of files) {
     const snapshot = rec.contextChunkIds.map((id) => chunks.get(id) ?? planted(id) ?? fail(`${name}: ${rec.id}: context chunk ${id} not in ${stored.indexVersion}`));
     const repaired = repairBrief(gen.toolInput);
     if (!repaired.ok) fail(`${name}: ${rec.id}: the recorded response no longer passes repair: ${repaired.issues.join('; ')}`);
-    const { brief, validation, citedChunkIds } = validateBrief(repaired.brief, repaired.repairs, new Map(snapshot.map((e) => [e.chunkId, e.text])), precedingText);
+    const { brief, validation, citedChunkIds } = validateBrief(repaired.brief, repaired.repairs, new Map(snapshot.map((e) => [e.chunkId, e.text])), precedingText, { scopeTickers: (rec.interpretation as { companies?: string[] } | undefined)?.companies ?? [] });
     const s = rec.score;
     // The original run's telemetry, as recorded; totalDurationMs is not a re-score measurement.
     const telemetry = {
@@ -173,7 +173,7 @@ for (const name of files) {
     scores.push(score);
     records.push({ ...rec, score, brief, validation });
     const failed = score.checks.filter((c) => !c.pass);
-    console.log(`  ${score.pass ? 'PASS' : 'FAIL'} ${rec.id}: figures ${score.figures.verified}/${score.figures.total}${score.figures.unitUnstated ? ` (${score.figures.unitUnstated} near)` : ''}${score.periodClaims ? `; ${score.periodClaims} period claim(s): ${(validation.periodClaims ?? []).map((c) => `${c.location} ${c.periods.join('/')} "${c.cue}"`).join(', ')}` : ''}${failed.length ? ` — ${failed.map((c) => c.name).join(', ')}` : ''}`);
+    console.log(`  ${score.pass ? 'PASS' : 'FAIL'} ${rec.id}: figures ${score.figures.verified}/${score.figures.total}${score.figures.unitUnstated ? ` (${score.figures.unitUnstated} near)` : ''}${score.periodClaims ? `; ${score.periodClaims} period claim(s): ${(validation.periodClaims ?? []).map((c) => `${c.location} ${c.periods.join('/')} "${c.cue}"`).join(', ')}` : ''}${(validation.arithmeticClaims ?? []).map((c) => `; arithmetic ${c.location} ${c.from} → ${c.to}: ${c.stated} vs ${c.computed}`).join('')}${(validation.attributionClaims ?? []).map((c) => `; attribution ${c.location} ${c.companies.join('/')}`).join('')}${(validation.scopeClaims ?? []).map((c) => `; sweeping ${c.location} "${c.cue}" ${c.cited}/${c.scope}`).join('')}${failed.length ? ` — ${failed.map((c) => c.name).join(', ')}` : ''}`);
   }
 
   const summary = summarizeGeneration(scores, { totalsMeasured: (stored.summary as { latencyMs?: { totalP50?: number | null } }).latencyMs?.totalP50 != null });
@@ -192,6 +192,6 @@ for (const name of files) {
   });
   writeFileSync(join(outDir, name.replace(/\.json$/, '.md')), md);
   console.log(
-    `${name}: ${summary.passed}/${summary.questions} pass; numeric grounding ${summary.numericGrounding} (${summary.figuresVerified}/${summary.figuresTotal}, ${summary.figuresUnitUnstated} near matches); every figure verified in ${summary.briefsFullyGrounded}/${summary.completed}; period claims ${summary.periodClaims.claims} in ${summary.periodClaims.briefs} briefs; comparisons aligned ${summary.comparisonAligned.passed}/${summary.comparisonAligned.total}; abstention ${summary.abstention.passed}/${summary.abstention.total}; follow-ups answerable ${summary.followUpsAnswerable.passed}/${summary.followUpsAnswerable.total}; injection ${summary.injection.passed}/${summary.injection.total}; coverage ${summary.briefCoverage.passed}/${summary.briefCoverage.total}; citation validity ${summary.citationValidityPre} → ${summary.citationValidityPost}`,
+    `${name}: ${summary.passed}/${summary.questions} pass; numeric grounding ${summary.numericGrounding} (${summary.figuresVerified}/${summary.figuresTotal}, ${summary.figuresUnitUnstated} near matches); every figure verified in ${summary.briefsFullyGrounded}/${summary.completed}; period claims ${summary.periodClaims.claims} in ${summary.periodClaims.briefs} briefs; arithmetic ${summary.arithmeticClaims.claims} in ${summary.arithmeticClaims.briefs}; attribution ${summary.attributionClaims.claims} in ${summary.attributionClaims.briefs}; sweeping ${summary.scopeClaims.claims} in ${summary.scopeClaims.briefs}; comparisons aligned ${summary.comparisonAligned.passed}/${summary.comparisonAligned.total}; abstention ${summary.abstention.passed}/${summary.abstention.total}; follow-ups answerable ${summary.followUpsAnswerable.passed}/${summary.followUpsAnswerable.total}; injection ${summary.injection.passed}/${summary.injection.total}; coverage ${summary.briefCoverage.passed}/${summary.briefCoverage.total}; citation validity ${summary.citationValidityPre} → ${summary.citationValidityPost}`,
   );
 }

@@ -14,7 +14,8 @@ export function LaunchFilm({ film }: { film: LaunchFilmAssets | null }) {
         {film ? (
           <video className="block aspect-video w-full" controls preload="metadata" playsInline poster={film.poster}>
             <source src={film.video} type="video/mp4" />
-            {film.captions && <track kind="captions" src={film.captions} srcLang="en" label="English" default />}
+            {/* Not `default`: the film burns in its own caption cards, so the transcript track is opt-in (CC button) rather than stacked on top. */}
+            {film.captions && <track kind="captions" src={film.captions} srcLang="en" label="English" />}
             Your browser can’t play this video.{' '}
             <a href={film.video} className="underline">
               Download the film

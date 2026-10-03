@@ -11,7 +11,7 @@ import { CitationList, CitedText, useEvidence } from '@/components/diligence/evi
 import { JumpBar, type JumpLink } from '@/components/diligence/jump-bar';
 import { PageContainer, SectionHeading } from '@/components/diligence/page';
 import { SaveFindingButton } from '@/components/diligence/save-finding-dialog';
-import { CoverageMatrix, FigureBadges, InterpretationPanel, PeriodBadges, ValidationSummary, figuresAt } from '@/components/diligence/brief-panels';
+import { ClaimBadges, CoverageMatrix, FigureBadges, InterpretationPanel, PeriodBadges, ValidationSummary, figuresAt } from '@/components/diligence/brief-panels';
 import { PageSkeleton } from '@/components/diligence/page-skeleton';
 import { StageTracker } from '@/components/diligence/stage-tracker';
 import { CopyableId, EmptyState, ErrorPanel, NoticeBar, RetryButton } from '@/components/diligence/states';
@@ -19,10 +19,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import { ApiRequestError } from '@/lib/api';
-import { briefHeadlines, briefStatus, figureChip, findingAnchor, uncitedPeriodsAt } from '@/lib/brief-summary';
+import { briefHeadlines, briefStatus, claimBadges, claimFlagsAt, figureChip, findingAnchor, uncitedPeriodsAt } from '@/lib/brief-summary';
 import { formatDate, formatDurationSeconds, formatLocalDateTime, pluralize } from '@/lib/format';
 import { FAILURE_COPY } from '@/lib/labels';
-import { companies } from '@/fixtures';
+import { companies, companyName } from '@/fixtures';
+import { shortCompanyName } from '@/lib/company-name';
 import { filtersAsPrefill, newAnalysisHref } from '@/lib/links';
 import { useWorkspace } from '@/lib/workspace-store';
 
@@ -282,6 +283,7 @@ function AnalysisDetail({ analysis, problems }: { analysis: AnalysisDetail; prob
               </p>
               <FigureBadges figures={figuresAt(analysis.validation, 'executiveSummary')} />
               <PeriodBadges periods={uncitedPeriodsAt(analysis.validation, 'executiveSummary')} onNavy />
+              <ClaimBadges flags={claimFlagsAt(analysis.validation, 'executiveSummary')} onNavy />
             </section>
           )}
         </div>
@@ -364,6 +366,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                         {k.finding} <CitationList ids={k.citationIds} context={context} provenance="brief" claim={k.finding} figureChecks={figuresAt(v, `keyFindings[${i}].`)} />
                         <FigureBadges figures={figuresAt(v, `keyFindings[${i}].`)} />
                         <PeriodBadges periods={uncitedPeriodsAt(v, `keyFindings[${i}].`)} />
+                        <ClaimBadges flags={claimFlagsAt(v, `keyFindings[${i}].`)} />
                       </p>
                     </div>
                     <SaveFindingButton source={{ kind: 'keyFinding', analysisId: analysis.analysisId, index: i }} />
@@ -405,6 +408,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                             {value}
                             <FigureBadges figures={figuresAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
                             <PeriodBadges periods={uncitedPeriodsAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
+                            <ClaimBadges flags={claimFlagsAt(v, `comparison.rows[${rowIndex}].values[${i}]`)} />
                           </TD>
                         ))}
                         <TD className="align-top">
@@ -436,6 +440,7 @@ function BriefBody({ analysis, context, passages, snapshot }: { analysis: Analys
                     {c.text} <CitationList ids={c.citationIds} context={context} provenance="brief" claim={c.text} figureChecks={figuresAt(v, `investmentConsiderations[${i}].`)} />
                     <FigureBadges figures={figuresAt(v, `investmentConsiderations[${i}].`)} />
                     <PeriodBadges periods={uncitedPeriodsAt(v, `investmentConsiderations[${i}].`)} />
+                    <ClaimBadges flags={claimFlagsAt(v, `investmentConsiderations[${i}].`)} />
                   </p>
                   <SaveFindingButton source={{ kind: 'consideration', analysisId: analysis.analysisId, index: i }} />
                 </li>
@@ -587,6 +592,13 @@ function BriefBottomLine({ analysis, citedPassages }: { analysis: AnalysisDetail
                     <span className="sr-only">. This finding claims something about {h.uncitedPeriods.join(' and ')} but cites no passage from {h.uncitedPeriods.length === 1 ? 'that period' : 'those periods'}.</span>
                   </Badge>
                 )}
+                {claimBadges(h.claims, (t) => shortCompanyName(companyName(t))).map((b) => (
+                  <Badge key={b.key} tone="warning">
+                    <AlertTriangle aria-hidden className="size-3" />
+                    {b.label}
+                    <span className="sr-only">. {b.detail}</span>
+                  </Badge>
+                ))}
                 {!h.cited && <Badge tone="warning">No valid citation</Badge>}
               </span>
             </li>

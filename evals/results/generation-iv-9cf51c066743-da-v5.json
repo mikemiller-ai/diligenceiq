@@ -40,6 +40,18 @@
    "claims": 8,
    "briefs": 2
   },
+  "arithmeticClaims": {
+   "claims": 1,
+   "briefs": 1
+  },
+  "attributionClaims": {
+   "claims": 0,
+   "briefs": 0
+  },
+  "scopeClaims": {
+   "claims": 5,
+   "briefs": 1
+  },
   "comparisonAligned": {
    "passed": 16,
    "total": 16
@@ -148,7 +160,10 @@
       "detail": "all 3 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Primary Risk Factor Comparison: Apple, Tesla, and JPMorgan (FY2025)",
@@ -429,6 +444,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "The model output needed 1 deterministic repair before validation."
     ]
@@ -588,7 +606,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 1,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "NVIDIA Revenue Trajectory: FY2024–FY2026 YTD Acceleration and Emerging Headwinds",
@@ -1565,8 +1586,20 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [
+     {
+      "location": "keyFindings[0].finding",
+      "from": "$15.07 billion",
+      "to": "$116.19 billion",
+      "stated": "up 145%",
+      "computed": "+671%"
+     }
+    ],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
-     "4 figures not found in the cited passages (marked \"unverified figure\")."
+     "4 figures not found in the cited passages (marked \"unverified figure\").",
+     "1 change does not match the two values stated with it (marked \"Change doesn't add up\")."
     ]
    },
    "interpretation": {
@@ -1708,7 +1741,10 @@
       "detail": "all 5 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 5
    },
    "brief": {
     "title": "Regulatory Risk Landscape Across Major Pharma: JNJ, PFE, MRK, LLY, ABBV",
@@ -1982,7 +2018,43 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
-    "notices": []
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [
+     {
+      "location": "keyFindings[0].finding",
+      "cue": "all five",
+      "scope": 5,
+      "cited": 4
+     },
+     {
+      "location": "keyFindings[1].title",
+      "cue": "all five",
+      "scope": 5,
+      "cited": 4
+     },
+     {
+      "location": "keyFindings[1].finding",
+      "cue": "every company",
+      "scope": 5,
+      "cited": 4
+     },
+     {
+      "location": "investmentConsiderations[2].text",
+      "cue": "all five",
+      "scope": 5,
+      "cited": 3
+     },
+     {
+      "location": "investmentConsiderations[3].text",
+      "cue": "all five",
+      "scope": 5,
+      "cited": 4
+     }
+    ],
+    "notices": [
+     "5 claims cover more companies than their citations are from (marked \"Says …; cites N companies\")."
+    ]
    },
    "interpretation": {
     "companies": [
@@ -2168,7 +2240,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 7
+    "periodClaims": 7,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Apple Regulatory Disclosure Evolution: FY2023–FY2025",
@@ -2465,6 +2540,9 @@
       "cue": "not disclosed"
      }
     ],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "7 claims say something is new or absent in a period none of its citations is from (marked \"period not cited\")."
     ]
@@ -2606,7 +2684,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Microsoft FY2025 Revenue Growth: Cloud and AI as Primary Drivers",
@@ -3476,6 +3557,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "2 figures not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -3612,7 +3696,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Tesla FY2025: Demand and Pricing Risk Assessment",
@@ -3832,6 +3919,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "The model output needed 1 deterministic repair before validation."
     ]
@@ -3968,7 +4058,10 @@
       "detail": "all 3 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Cloud Business Comparison: Microsoft Azure, AWS, and Google Cloud",
@@ -4527,6 +4620,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -4682,7 +4778,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Pfizer Revenue Trend: FY2022–FY2025 YTD",
@@ -5314,6 +5413,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -5461,7 +5563,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 1
+    "periodClaims": 1,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "NVIDIA Export Controls: Escalating Restrictions and China Market Foreclosure",
@@ -5710,6 +5815,9 @@
       "cue": "added"
      }
     ],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "1 claim says something is new or absent in a period none of its citations is from (marked \"period not cited\")."
     ]
@@ -5848,7 +5956,10 @@
       "detail": "all 2 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Inflation & Interest Rate Exposure: Walmart vs. JPMorgan (FY2025)",
@@ -6174,6 +6285,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "The model output needed 1 deterministic repair before validation."
     ]
@@ -6320,7 +6434,10 @@
       "detail": "all 3 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Cybersecurity Risk Profiles: Visa, UnitedHealth Group & Boeing",
@@ -6603,6 +6720,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -6761,7 +6881,10 @@
       "detail": "all 4 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Big-Bank Capital & Liquidity Positions: JPM, BAC, GS, MS",
@@ -7469,6 +7592,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "1 figure not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -7645,7 +7771,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Meta Platforms FY2025: Revenue Acceleration, Massive CapEx Ramp, and Elevated Legal Exposure",
@@ -8512,6 +8641,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "4 figures not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -8658,7 +8790,10 @@
       "detail": "15/15 rows have 3 values (after repair dropped a row-label column)"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Tariff Risk Disclosure Across Portfolio Companies: Sector-Wide Exposure",
@@ -9068,6 +9203,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "The model output needed 1 deterministic repair before validation."
     ]
@@ -9193,7 +9331,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Coca-Cola Pricing Strategy: FY2022–FY2025 YTD Trend Analysis",
@@ -9624,6 +9765,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -9766,7 +9910,10 @@
       "detail": "no follow-up asks about /2015/"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Apple Inc. FY2015 Risk Factors: Requested Period Not in Corpus",
@@ -9884,6 +10031,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -10021,7 +10171,10 @@
       "detail": "no follow-up asks about /Ford/"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Ford EV Strategy: Insufficient Evidence — Ford Not in Corpus",
@@ -10056,6 +10209,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -10185,7 +10341,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Apple Inc. (AAPL) Supply Chain Risk Assessment — FY2025",
@@ -10325,6 +10484,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -10464,7 +10626,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Netflix FY2025: Key Risk Factors from Annual 10-K",
@@ -10663,6 +10828,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": []
    },
    "interpretation": {
@@ -10799,7 +10967,10 @@
       "detail": "all 1 companies cited"
      }
     ],
-    "periodClaims": 0
+    "periodClaims": 0,
+    "arithmeticClaims": 0,
+    "attributionClaims": 0,
+    "scopeClaims": 0
    },
    "brief": {
     "title": "Alphabet Q2 2025: Advertising Revenue Performance and Drivers",
@@ -11353,6 +11524,9 @@
     },
     "comparisonMisaligned": [],
     "periodClaims": [],
+    "arithmeticClaims": [],
+    "attributionClaims": [],
+    "scopeClaims": [],
     "notices": [
      "1 figure not found in the cited passages (marked \"unverified figure\")."
     ]
@@ -11421,7 +11595,7 @@
   }
  ],
  "rescore": {
-  "rescoredAt": "2026-10-03T20:52:47.049Z",
+  "rescoredAt": "2026-10-03T23:09:03.456Z",
   "by": "pnpm eval:generation:rescore",
   "note": "Recorded responses re-validated and re-scored with the current validator and checks; no model call. Telemetry (generation latency, tokens, cost) is from the original run."
  }

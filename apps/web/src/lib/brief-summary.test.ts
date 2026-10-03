@@ -1,6 +1,6 @@
 import { findBannedPhrases, type BriefValidation, type DiligenceBrief, type FigureCheck } from '@diligenceiq/core';
 import { describe, expect, it } from 'vitest';
-import { briefHeadlines, briefStatus, figureChip, tallyFigures } from './brief-summary';
+import { atLocation, briefHeadlines, briefStatus, claimBadges, claimFlagsAt, figureChip, tallyFigures, uncitedPeriodsAt } from './brief-summary';
 
 const fig = (location: string, verified: boolean, rule: FigureCheck['rule'] = verified ? 'exact' : null): FigureCheck => ({ location, figure: '$1 billion', verified, rule, chunkId: null });
 
@@ -93,5 +93,54 @@ describe('brief bottom line (DD-21 g)', () => {
       ...briefStatus({ keyFindings: [finding('A'), finding('B')], evidenceGaps: ['g', 'h'] }, validation([fig('a', true)]), 4),
     ];
     expect(findBannedPhrases(strings.join(' \n '))).toEqual([]);
+  });
+});
+
+describe('claim-check flags (2026-10-03 review)', () => {
+  it('L2: a location matches its prefix exactly or at a "." / "[" boundary, so values[1] never takes values[10]', () => {
+    expect(atLocation('comparison.rows[0].values[1]', 'comparison.rows[0].values[1]')).toBe(true);
+    expect(atLocation('comparison.rows[0].values[10]', 'comparison.rows[0].values[1]')).toBe(false);
+    expect(atLocation('keyFindings[1].finding', 'keyFindings[1].')).toBe(true);
+    expect(atLocation('keyFindings[10].finding', 'keyFindings[1].')).toBe(false);
+    expect(atLocation('keyFindings[1].finding', 'keyFindings[1]')).toBe(true);
+    expect(atLocation('executiveSummaryX', 'executiveSummary')).toBe(false);
+    const v: BriefValidation = {
+      ...validation([fig('comparison.rows[0].values[10]', false)]),
+      periodClaims: [{ location: 'comparison.rows[0].values[10]', periods: ['FY2020'], cue: 'new in' }],
+      arithmeticClaims: [{ location: 'comparison.rows[0].values[10]', from: '$1', to: '$2', stated: 'up 5%', computed: '+100%' }],
+      attributionClaims: [{ location: 'comparison.rows[0].values[10]', companies: ['V'] }],
+      scopeClaims: [{ location: 'comparison.rows[0].values[10]', cue: 'all five', scope: 5, cited: 4 }],
+    };
+    const flags = claimFlagsAt(v, 'comparison.rows[0].values[1]');
+    expect(flags).toEqual({ arithmetic: [], companies: [], scope: [] });
+    expect(uncitedPeriodsAt(v, 'comparison.rows[0].values[1]')).toEqual([]);
+    expect(tallyFigures(v, 'comparison.rows[0].values[1]').total).toBe(0);
+  });
+
+  it('M4: one badge per cue per item (title + finding), in plain words, quoting the text that named the company', () => {
+    const v: BriefValidation = {
+      ...validation([]),
+      arithmeticClaims: [
+        { location: 'keyFindings[0].title', from: '$15,068 million', to: '$116,193 million', stated: 'up 145%', computed: '+671%' },
+        { location: 'keyFindings[0].finding', from: '$15,068 million', to: '$116,193 million', stated: 'up 145%', computed: '+671%' },
+      ],
+      attributionClaims: [
+        { location: 'keyFindings[0].title', companies: ['GOOG'], mentions: [{ ticker: 'GOOG', text: 'Google' }] },
+        { location: 'keyFindings[0].finding', companies: ['GOOG', 'AMZN'], mentions: [{ ticker: 'GOOG', text: 'Google Cloud' }, { ticker: 'AMZN', text: 'AWS' }] },
+      ],
+      scopeClaims: [
+        { location: 'keyFindings[0].title', cue: 'all five', scope: 5, cited: 4 },
+        { location: 'keyFindings[0].finding', cue: 'all five', scope: 5, cited: 4 },
+      ],
+    };
+    const names: Record<string, string> = { GOOG: 'Alphabet', AMZN: 'Amazon' };
+    const labels = claimBadges(claimFlagsAt(v, 'keyFindings[0].'), (t) => names[t] ?? t).map((b) => b.label);
+    expect(labels).toEqual([
+      "Change doesn't add up: says up 145%, figures give +671%",
+      'Names Google (Alphabet); cites no Alphabet passage',
+      'Names AWS (Amazon); cites no Amazon passage',
+      'Says “all five”; cites 4 companies',
+    ]);
+    expect(findBannedPhrases(labels.join(' \n '))).toEqual([]);
   });
 });

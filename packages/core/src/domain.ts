@@ -311,6 +311,57 @@ export const PeriodClaimSchema = z.object({
 });
 export type PeriodClaim = z.infer<typeof PeriodClaimSchema>;
 
+/**
+ * One change claim whose own figures disagree with it (`BriefValidation.arithmeticClaims`;
+ * packages/rag `arithmetic-claims.ts`): "from $15,068 million to $116,193 million (up 145%)".
+ */
+export const ArithmeticClaimSchema = z.object({
+  location: z.string(),
+  /** The earlier value as written ("$15,068 million"). */
+  from: z.string(),
+  /** The later value as written ("$116,193 million"). */
+  to: z.string(),
+  /** The change as written ("145%", "2.9 pp", "$787 million"). */
+  stated: z.string(),
+  /** The change the two values give, at the stated precision, signed ("+671%", "-2.0 pp", "+$787 million"). */
+  computed: z.string(),
+});
+export type ArithmeticClaim = z.infer<typeof ArithmeticClaimSchema>;
+
+/**
+ * One item that says something positive about a corpus company none of its own citations is from,
+ * and whose cited passages do not name it either (`BriefValidation.attributionClaims`; packages/rag
+ * `generation/company-claims.ts`).
+ */
+export const AttributionClaimSchema = z.object({
+  location: z.string(),
+  /** The uncited companies, as tickers ("V", "UNH"). */
+  companies: z.array(z.string()).min(1),
+  /**
+   * How each was named, in the same order: the text as written ("Google Cloud", "AWS"), and
+   * `column` when the company is a comparison cell's column header. Optional: claims stored before
+   * 2026-10-03's review fix have none.
+   */
+  mentions: z.array(z.object({ ticker: z.string(), text: z.string(), column: z.boolean().optional() })).optional(),
+});
+export type AttributionClaim = z.infer<typeof AttributionClaimSchema>;
+
+/**
+ * One sweeping claim ("all five companies", "each company", "the only one of the three") whose
+ * item cites passages from fewer companies than the claim covers (`BriefValidation.scopeClaims`;
+ * packages/rag `generation/company-claims.ts`).
+ */
+export const ScopeClaimSchema = z.object({
+  location: z.string(),
+  /** The quantifier as written, lower-cased ("all five", "each company", "the only"). */
+  cue: z.string(),
+  /** How many companies the claim covers (for "the only" / "the first": the brief's in-scope companies). */
+  scope: z.number().int().positive(),
+  /** How many distinct companies the item's own valid citations are from. */
+  cited: z.number().int().nonnegative(),
+});
+export type ScopeClaim = z.infer<typeof ScopeClaimSchema>;
+
 /** Deterministic validation of one brief (SPEC §31; architecture §6.9). Never a second model call. */
 export const BriefValidationSchema = z.object({
   /** Deterministic repairs applied before the schema parse (empty when none were needed). */
@@ -343,6 +394,18 @@ export const BriefValidationSchema = z.object({
    * Optional: analyses and seeds stored before this check have none.
    */
   periodClaims: z.array(PeriodClaimSchema).optional(),
+  /**
+   * The three claim checks of 2026-10-03 (architecture §6.9; evaluation.md §13), each reported,
+   * never pass/fail, and each optional: analyses and seeds stored before them have none.
+   * - `arithmeticClaims`: a stated change ("from X to Y (up Z%)") that its own two values do not give.
+   * - `attributionClaims`: a corpus company the item says something positive about with no citation
+   *   from it (comparison cells: their column's company; negation, absence and contrast frames skipped).
+   * - `scopeClaims`: "all N / every / each / both companies" (or "the only / the first" naming an
+   *   uncited in-scope company) with citations from fewer companies than the claim covers.
+   */
+  arithmeticClaims: z.array(ArithmeticClaimSchema).optional(),
+  attributionClaims: z.array(AttributionClaimSchema).optional(),
+  scopeClaims: z.array(ScopeClaimSchema).optional(),
   /** Plain-language notices for the brief ("1 citation removed: not in the supplied evidence"). */
   notices: z.array(z.string()),
 });

@@ -58,6 +58,10 @@ export interface GenerationScore {
   figures: { total: number; verified: number; unitUnstated: number };
   /** Period claims the validator flagged (architecture §6.9): reported, not a pass/fail check. Absent on scores recorded before 2026-10-03. */
   periodClaims?: number;
+  /** The claim checks of 2026-10-03 (architecture §6.9; evaluation.md §13): reported, not pass/fail. Absent on earlier scores. */
+  arithmeticClaims?: number;
+  attributionClaims?: number;
+  scopeClaims?: number;
   uncitedFindings: number;
   citedCompanies: string[];
   answerType: string | null;
@@ -196,6 +200,9 @@ export function scoreGeneration(q: EvalQuestion & { expect: EvalQuestion['expect
     citations: { returned: v.citations.returned, valid: v.citations.valid, removed: v.citations.removed.length, preValidationRate: v.citations.preValidationRate, inBrief: briefIds.length, inBriefInContext },
     figures: { total: v.numeric.total, verified: v.numeric.verified, unitUnstated: v.numeric.unitUnstated },
     periodClaims: v.periodClaims?.length ?? 0,
+    arithmeticClaims: v.arithmeticClaims?.length ?? 0,
+    attributionClaims: v.attributionClaims?.length ?? 0,
+    scopeClaims: v.scopeClaims?.length ?? 0,
     uncitedFindings,
     citedCompanies,
     answerType: b.answerType,
@@ -219,6 +226,10 @@ export interface GenerationSummary {
   briefsFullyGrounded: number;
   /** Period claims flagged (a claim that something is new or absent in a fiscal period none of its citations is from), and the briefs with any. Reported only; no check fails on it. */
   periodClaims: { claims: number; briefs: number };
+  /** The claim checks of 2026-10-03, each as claims and briefs with any. Reported only. */
+  arithmeticClaims: { claims: number; briefs: number };
+  attributionClaims: { claims: number; briefs: number };
+  scopeClaims: { claims: number; briefs: number };
   comparisonAligned: { passed: number; total: number };
   abstention: { passed: number; total: number };
   followUpsAnswerable: { passed: number; total: number };
@@ -234,6 +245,9 @@ const pct = (xs: number[], p: number) => {
   const s = [...xs].sort((a, b) => a - b);
   return s.length ? s[Math.min(s.length - 1, Math.floor(p * s.length))]! : 0;
 };
+
+type ClaimKey = 'periodClaims' | 'arithmeticClaims' | 'attributionClaims' | 'scopeClaims';
+const tallyClaims = (done: readonly GenerationScore[], key: ClaimKey) => ({ claims: done.reduce((n, s) => n + (s[key] ?? 0), 0), briefs: done.filter((s) => (s[key] ?? 0) > 0).length });
 
 export function summarizeGeneration(scores: readonly GenerationScore[], options: { totalsMeasured?: boolean } = {}): GenerationSummary {
   const totalsMeasured = options.totalsMeasured ?? true;
@@ -262,7 +276,10 @@ export function summarizeGeneration(scores: readonly GenerationScore[], options:
     figuresUnitUnstated: done.reduce((n, s) => n + s.figures.unitUnstated, 0),
     numericGrounding: figuresTotal ? Number((figuresVerified / figuresTotal).toFixed(4)) : null,
     briefsFullyGrounded: done.filter((s) => s.figures.verified === s.figures.total).length,
-    periodClaims: { claims: done.reduce((n, s) => n + (s.periodClaims ?? 0), 0), briefs: done.filter((s) => (s.periodClaims ?? 0) > 0).length },
+    periodClaims: tallyClaims(done, 'periodClaims'),
+    arithmeticClaims: tallyClaims(done, 'arithmeticClaims'),
+    attributionClaims: tallyClaims(done, 'attributionClaims'),
+    scopeClaims: tallyClaims(done, 'scopeClaims'),
     comparisonAligned: checkTally('comparison aligned'),
     abstention: checkTally('abstains'),
     followUpsAnswerable: checkTally('follow-ups answerable'),

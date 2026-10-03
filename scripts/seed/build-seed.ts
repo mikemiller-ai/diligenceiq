@@ -94,9 +94,10 @@ const byQuestion = (id: string) => analyses[SEED_QUESTIONS.indexOf(id)]!;
  * The seeded findings, each chosen by its text rather than a bare index, so a reseed under a new
  * prompt version fails loudly instead of quietly saving whatever item now sits at that index.
  * Each must be a substantive claim (UX review item 5: a "Reporting period" row of fiscal-year end
- * dates was once seeded) with every figure in it verified against its cited passage and no period
- * claim flagged on it (`validation.periodClaims`, evaluation.md §12). Each was also read against its
- * cited chunk text by hand: evals/results/seed-verification-2026-10-03.md.
+ * dates was once seeded) with every figure in it verified against its cited passage and no period,
+ * arithmetic, attribution or sweeping claim flagged on it (`validation.periodClaims`,
+ * `arithmeticClaims`, `attributionClaims`, `scopeClaims`; evaluation.md §12, §13). Each was also
+ * read against its cited chunk text by hand: evals/results/seed-verification-2026-10-03.md.
  */
 type SeedItemKind = 'keyFinding' | 'comparisonRow';
 const SEED_FINDINGS: Array<{ question: string; kind: SeedItemKind; match: RegExp; theme: string; status: string }> = [
@@ -109,7 +110,13 @@ const SEED_FINDINGS: Array<{ question: string; kind: SeedItemKind; match: RegExp
 ];
 
 type SeedBrief = { keyFindings: Array<{ title: string; finding: string }>; comparison?: { rows: Array<{ label: string }> } };
-type SeedValidation = { numeric: { figures: Array<{ location: string; verified: boolean }> }; periodClaims?: Array<{ location: string; periods: string[] }> };
+type SeedValidation = {
+  numeric: { figures: Array<{ location: string; verified: boolean }> };
+  periodClaims?: Array<{ location: string; periods: string[] }>;
+  arithmeticClaims?: Array<{ location: string; stated: string; computed: string }>;
+  attributionClaims?: Array<{ location: string; companies: string[] }>;
+  scopeClaims?: Array<{ location: string; cue: string }>;
+};
 function seedItem(spec: (typeof SEED_FINDINGS)[number]): { kind: SeedItemKind; analysisId: string; index: number } {
   const a = byQuestion(spec.question) as unknown as { analysisId: string; brief: SeedBrief; validation: SeedValidation };
   const texts = spec.kind === 'keyFinding' ? a.brief.keyFindings.map((k) => `${k.title} ${k.finding}`) : (a.brief.comparison?.rows ?? []).map((r) => r.label);
@@ -121,6 +128,14 @@ function seedItem(spec: (typeof SEED_FINDINGS)[number]): { kind: SeedItemKind; a
   if (unverified.length) fail(`${spec.question} ${prefix}: ${unverified.length} unverified figure(s); a seeded finding must have every figure verified`);
   const periodClaims = (a.validation.periodClaims ?? []).filter((p) => p.location.startsWith(prefix));
   if (periodClaims.length) fail(`${spec.question} ${prefix}: ${periodClaims.length} period claim(s) not cited (${periodClaims.map((p) => p.periods.join('/')).join(', ')}); a seeded finding must have none`);
+  // The claim checks of 2026-10-03: a seeded finding carries none of their flags either.
+  const at = <T extends { location: string }>(xs: readonly T[] | undefined) => (xs ?? []).filter((x) => x.location.startsWith(prefix));
+  const arithmetic = at(a.validation.arithmeticClaims);
+  if (arithmetic.length) fail(`${spec.question} ${prefix}: ${arithmetic.length} change(s) that do not add up (${arithmetic.map((c) => `${c.stated} vs ${c.computed}`).join(', ')}); a seeded finding must have none`);
+  const attribution = at(a.validation.attributionClaims);
+  if (attribution.length) fail(`${spec.question} ${prefix}: names ${attribution.flatMap((c) => c.companies).join(', ')} with no citation from them; a seeded finding must have none`);
+  const scope = at(a.validation.scopeClaims);
+  if (scope.length) fail(`${spec.question} ${prefix}: sweeping claim(s) (${scope.map((c) => `"${c.cue}"`).join(', ')}) wider than their citations; a seeded finding must have none`);
   return { kind: spec.kind, analysisId: a.analysisId, index };
 }
 

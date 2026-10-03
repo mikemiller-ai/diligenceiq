@@ -107,13 +107,29 @@ Mike's decisions this phase (2026-10-03):
   - "What's changed" depth.
 - **P1** (Thesis, Watchlist, IC Brief, explorer): not built, not claimed.
 
+## Claim checks (after the rehearsal, Mike's request)
+- **Three deterministic checks** sit beside the period check: no model calls, an optional validation field each, a badge in place, reporting only.
+  - **Arithmetic:** a stated change must match its from/to values. Badge: "Change doesn't add up: says up 145%, figures give +671%".
+  - **Company attribution:** a positive claim naming a company must cite that company's filings. Absence, contrast and negative cells are exempt.
+  - **Sweeping claims:** "all five", "every company", "both" and similar need citations from that many companies.
+  - A throw in any check is contained: it never fails an analysis.
+- **Bar:** a badge type is shown only if it raises zero pure false alarms on the 109 real briefs (106 recorded and 3 production rehearsals).
+  - Arithmetic: 2 flags, both real.
+  - Attribution: 4, all real (36 before the adversary fixes).
+  - Sweeping: 25 (16 real, 9 wider than their evidence but likely true).
+  - On the rehearsals they flag the NVIDIA +145% error and pharma's "all five" (citing 4); PDF example 1 is clean. Details: evaluation.md §13.
+- **Process:** adversary (3 high, 4 medium, 4 low), then a fresh fixer, then `/code-review` medium (5 precision gaps, all fixed with tests; the flag list was identical after re-measuring), then `pnpm gate` exit 0.
+  - Unit tests: core 79, cdk 49, corpus 102, rag 509, web 530, api 175 (**1,444**).
+  - e2e 112 passed, 4 skipped.
+- **Deployed:** `pnpm deploy:infra` (WorkerStack and ApiStack, 2026-10-03 23:41 UTC) and `pnpm deploy:web` (Amplify job 15), run by Claude at Mike's request. `pnpm e2e:prod` 19/19.
+
 ## Spend this phase
 - da-v5 live eval: $2.4718.
 - Production example runs: $0.129 (failed), $0.1316 and $0.1299.
+- Rehearsal of the three PDF questions: $0.4133.
 - Cost Explorer queries: about $0.04.
 
 ## Next
 - Mike's go-ahead to commit and push.
-- Rehearse the three PDF examples before the panel (about $0.36, ask first).
 - Check Budget attribution when the billing data arrives.
 - After the panel: turn the kill switch off and make the repo private.

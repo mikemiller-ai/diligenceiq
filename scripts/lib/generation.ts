@@ -76,6 +76,7 @@ export function createRecordedGenerationClient(options: { live: boolean; promptV
 export function renderGenerationReport(r: { indexVersion: string; promptVersion: string; provenance: string[]; summary: GenerationSummary; scores: readonly GenerationScore[]; notRecorded: readonly string[] }): string {
   const sum = r.summary;
   const tally = (t: { passed: number; total: number }) => (t.total ? `${t.passed}/${t.total}` : 'n/a');
+  const claims = (c: { claims: number; briefs: number } | undefined) => (c ? `${c.claims} in ${c.briefs} briefs` : 'not checked');
   return [
     `# Generation eval — ${r.indexVersion}, prompt ${r.promptVersion}`,
     '',
@@ -92,6 +93,9 @@ export function renderGenerationReport(r: { indexVersion: string; promptVersion:
     `| Unverified near matches (digits in a table cell; passage states no unit) | ${sum.figuresUnitUnstated} |`,
     `| Briefs with every figure verified | ${sum.briefsFullyGrounded}/${sum.completed} |`,
     `| Period claims flagged (new or absent in a period none of the claim's citations is from; reported, not a check) | ${sum.periodClaims ? `${sum.periodClaims.claims} in ${sum.periodClaims.briefs} briefs` : 'not checked'} |`,
+    `| Arithmetic claims flagged (a stated change its own two values do not give; reported, not a check) | ${claims(sum.arithmeticClaims)} |`,
+    `| Company attribution flagged (an item saying something positive about a company none of its citations is from; reported, not a check) | ${claims(sum.attributionClaims)} |`,
+    `| Sweeping claims flagged (all N / every / both companies, with citations from fewer companies; reported, not a check) | ${claims(sum.scopeClaims)} |`,
     `| Comparison tables aligned (one value per column in every row) | ${tally(sum.comparisonAligned)} |`,
     `| Abstention | ${tally(sum.abstention)} |`,
     `| Follow-ups answerable (abstention questions) | ${tally(sum.followUpsAnswerable)} |`,
@@ -105,11 +109,11 @@ export function renderGenerationReport(r: { indexVersion: string; promptVersion:
     '',
     '## Per question',
     '',
-    '| Question | Result | Answer type | Citations valid / returned | Figures verified (near matches) | Period claims | Tokens in / out | Generation ms | Failed checks |',
-    '|---|---|---|---|---|---|---|---|---|',
+    '| Question | Result | Answer type | Citations valid / returned | Figures verified (near matches) | Period claims | Arithmetic / attribution / sweeping | Tokens in / out | Generation ms | Failed checks |',
+    '|---|---|---|---|---|---|---|---|---|---|',
     ...r.scores.map(
       (s) =>
-        `| \`${s.id}\` | ${s.pass ? 'pass' : 'fail'} | ${s.answerType ?? s.code ?? s.status} | ${s.citations.valid}/${s.citations.returned} | ${s.figures.verified}/${s.figures.total}${s.figures.unitUnstated ? ` (${s.figures.unitUnstated})` : ''} | ${s.periodClaims ?? '—'} | ${s.inputTokens} / ${s.outputTokens} | ${s.generationMs} | ${s.checks.filter((c) => !c.pass).map((c) => `${c.name}: ${c.detail.replace(/\|/g, '/')}`).join('; ') || '—'} |`,
+        `| \`${s.id}\` | ${s.pass ? 'pass' : 'fail'} | ${s.answerType ?? s.code ?? s.status} | ${s.citations.valid}/${s.citations.returned} | ${s.figures.verified}/${s.figures.total}${s.figures.unitUnstated ? ` (${s.figures.unitUnstated})` : ''} | ${s.periodClaims ?? '—'} | ${s.arithmeticClaims === undefined ? '—' : `${s.arithmeticClaims} / ${s.attributionClaims ?? 0} / ${s.scopeClaims ?? 0}`} | ${s.inputTokens} / ${s.outputTokens} | ${s.generationMs} | ${s.checks.filter((c) => !c.pass).map((c) => `${c.name}: ${c.detail.replace(/\|/g, '/')}`).join('; ') || '—'} |`,
     ),
     '',
   ].join('\n');

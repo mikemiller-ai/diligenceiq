@@ -121,7 +121,7 @@ test('brief, wide: a jump to Follow-up questions (beside Evidence gaps, equal to
 });
 
 for (const scheme of ['light', 'dark'] as const) {
-  test(`brief (${scheme}): warning, unit-not-stated, "No valid citation" and "Period not cited" badges pass axe`, async ({ page }) => {
+  test(`brief (${scheme}): warning, unit-not-stated, "No valid citation", "Period not cited" and the claim-check badges pass axe`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme });
     // The seeded brief as served, with its validation changed in the response only (no test hook in the app):
     // an unverified key-finding figure, a unit-not-stated one, and a finding left without a valid citation. They go on
@@ -148,6 +148,21 @@ for (const scheme of ['light', 'dark'] as const) {
         { location: `keyFindings[${a}].finding`, periods: ['FY2019'], cue: 'absent' },
         { location: 'executiveSummary', periods: ['FY2018'], cue: 'new in' },
       ];
+      // The claim checks of 2026-10-03 (architecture §6.9): one of each on a clean finding, and on a
+      // comparison cell, a consideration and the executive summary (the navy header).
+      v.arithmeticClaims = [
+        { location: `keyFindings[${b}].finding`, from: '$15,068 million', to: '$116,193 million', stated: 'up 145%', computed: '+671%' },
+        { location: 'executiveSummary', from: '$1.0 billion', to: '$2.0 billion', stated: 'up 50%', computed: '+100%' },
+      ];
+      v.attributionClaims = [
+        { location: `keyFindings[${c}].finding`, companies: ['V'] },
+        { location: 'comparison.rows[0].values[0]', companies: ['UNH'] },
+      ];
+      v.scopeClaims = [
+        { location: `keyFindings[${a}].finding`, cue: 'all five', scope: 5, cited: 4 },
+        { location: 'investmentConsiderations[0].text', cue: 'the only', scope: 3, cited: 1 },
+        { location: 'executiveSummary', cue: 'all three', scope: 3, cited: 2 },
+      ];
       await route.fulfill({ response, json: body });
     });
     await page.goto(`/analysis/?id=${SEEDED.analysisId}`);
@@ -162,6 +177,18 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(items.nth(clean[0]!)).toContainText('Period not cited: FY2019');
     await expect(page.getByRole('heading', { name: 'Key findings' }).locator('..').getByText(/^Period not cited: FY2019/)).toBeVisible();
     await expect(page.locator('section[aria-labelledby="exec-summary"]').getByText(/^Period not cited: FY2018/)).toBeVisible();
+    await expect(items.nth(clean[0]!)).toContainText('Says “all five”; cites 4 companies');
+    await expect(items.nth(clean[1]!)).toContainText("Change doesn't add up: says up 145%, figures give +671%");
+    await expect(items.nth(clean[2]!)).toContainText('Names Visa; cites no Visa passage');
+    const keyFindings = page.getByRole('heading', { name: 'Key findings' }).locator('..');
+    await expect(keyFindings.getByText(/^Change doesn't add up: says up 145%/)).toBeVisible();
+    await expect(keyFindings.getByText(/^Names Visa; cites no Visa passage/)).toBeVisible();
+    await expect(keyFindings.getByText(/^Says “all five”; cites 4 companies/)).toBeVisible();
+    await expect(page.getByRole('table').first().getByText(/^Names UnitedHealth[\w ]*; cites no UnitedHealth[\w ]* passage/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Investment considerations' }).locator('..').getByText(/^Says “the only”; cites 1 company/)).toBeVisible();
+    const summary = page.locator('section[aria-labelledby="exec-summary"]');
+    await expect(summary.getByText(/^Change doesn't add up: says up 50%/)).toBeVisible();
+    await expect(summary.getByText(/^Says “all three”; cites 2 companies/)).toBeVisible();
     await expectNoAxeViolations(page);
   });
 }

@@ -368,7 +368,7 @@ export async function runDeepAnalysis(input: PipelineInput, deps: PipelineDeps):
   const passages = new Map(context.snapshot.map((e) => [e.chunkId, e.text]));
   // A table's unit caption can end the previous chunk of the same filing section: the validator
   // reads it from there (architecture §6.9, preceding-unit rule). The snapshot is unchanged.
-  const { brief, validation, citedChunkIds } = validateBrief(repaired.brief, repaired.repairs, passages, (id) => deps.retriever.precedingText(id));
+  const { brief, validation, citedChunkIds } = validateBrief(repaired.brief, repaired.repairs, passages, (id) => deps.retriever.precedingText(id), { scopeTickers: interpretation.companies });
   return {
     status: 'COMPLETE',
     output: {

@@ -95,7 +95,7 @@ describe('launch film assets (SPEC §7)', () => {
     expect(container.querySelector('video')).toBeNull();
   });
 
-  it('renders the family video frame: controls, no autoplay, poster and default captions', () => {
+  it('renders the family video frame: controls, no autoplay, poster and opt-in captions', () => {
     const { container } = render(<LaunchFilm film={LAUNCH_FILM_PATHS} />);
     const video = container.querySelector('video')!;
     expect(video).toHaveAttribute('controls');
@@ -103,6 +103,8 @@ describe('launch film assets (SPEC §7)', () => {
     expect(video).toHaveAttribute('poster', LAUNCH_FILM_PATHS.poster);
     expect(video.querySelector('source')).toHaveAttribute('src', LAUNCH_FILM_PATHS.video);
     expect(video.querySelector('track[kind="captions"]')).toHaveAttribute('src', LAUNCH_FILM_PATHS.captions);
+    // The film has burned-in caption cards; a default track would render a second set on top.
+    expect(video.querySelector('track[kind="captions"]')).not.toHaveAttribute('default');
     expect(screen.queryByTestId('launch-film-placeholder')).toBeNull();
   });
 

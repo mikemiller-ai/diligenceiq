@@ -29,6 +29,8 @@
 | | | | 72.4% Q2, 73.4% Q3 → the Q2 and Q3 MDA-004 tables | yes (verified) | Table rows "Gross margin \| 72.4 \| %" and "73.4 \| %" |
 | | | | Year-on-year compression from Blackwell full-scale systems vs Hopper HGX → `NVDA-FY2026Q2-10Q-MDA-004` | yes ("different cost structure" is the brief's paraphrase of the stated mix change) | "Blackwell revenue consists primarily of full-scale datacenter systems compared to Hopper HGX systems" |
 
+**Claim checks (added later on 2026-10-03; evaluation.md §13).** After the arithmetic, company-attribution and sweeping-claim checks were built, `pnpm seed:build` was rerun (3 replayed, 0 live) and now also fails if a seeded finding carries any of their flags. None of the four seeded findings does, so none was replaced. At brief level, `multi-cloud` carries 1 flag ("All three companies are making significant and increasing capital expenditures…" citing Alphabet and Microsoft), and `pdf-2` and `expert-1` none. (Before the same-day adversary review it also carried 2 attribution flags for Google Cloud named only as a benchmark in two Microsoft items; benchmark and contrast mentions are no longer flagged, evaluation.md §13.)
+
 **Not seeded, and why:**
 - `expert-1` key finding 0 (DMA), the finding seeded before: it says FY2025 "added" the DMA fines and "many risks will remain", but `AAPL-FY2024-10K-1A-017`, which it cites, already has both ("The DMA provides for significant fines and penalties for noncompliance"). Misdated; no badge, because a contradiction with a cited period needs the passage's meaning (evaluation.md §12).
 - `expert-1` key finding 2 (Google): it describes FY2023 content but cites no FY2023 passage. The comparison row (finding 1 above) cites all three years.

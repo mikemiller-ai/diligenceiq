@@ -1,5 +1,7 @@
 import { type BriefValidation, type DiligenceBrief, DiligenceBriefSchema, INLINE_CITATION } from '@diligenceiq/core';
 import { isTableRow } from '@diligenceiq/corpus';
+import { arithmeticClaimsIn } from './arithmetic-claims';
+import { citedCompanies, companiesNamedIn, scopeClaimIn, uncitedCompaniesIn } from './company-claims';
 import { citedFiscalYears, periodClaimIn, periodsIn } from './period-claims';
 
 /**
@@ -18,6 +20,13 @@ import { citedFiscalYears, periodClaimIn, periodsIn } from './period-claims';
  * 4. Period claims: a sentence saying something is new, a first, added or absent in a fiscal
  *    period that none of the item's own citations belongs to (the summary: none of the brief's
  *    cited passages) is flagged with that period. The rules are in `period-claims.ts`.
+ * 5. Claim checks (2026-10-03), reported like period claims, never pass/fail:
+ *    - arithmetic: a stated change ("from X to Y (up Z%)") that its own two values do not give
+ *      (`arithmetic-claims.ts`; reads the brief's text only);
+ *    - attribution: an item naming a corpus company that none of its citations is from and none
+ *      of its cited passages names (`company-claims.ts`);
+ *    - scope: "all five companies", "each company", "the only …" with citations from fewer
+ *      companies than the claim covers (`company-claims.ts`).
  *
  * What a verified figure proves: a number with these digits and this unit (percent, "$", a scale
  * word, or a table unit the passage states) is printed in a cited passage. It does not prove the
@@ -257,13 +266,19 @@ export function significantDigits(digits: string): number {
  * scale word of its own takes it, as a reader would.
  */
 export function extractFigures(text: string, headerScale: Figure['scale'] = null): Figure[] {
-  const out: Array<Figure & { at: number }> = [];
+  return extractFiguresAt(text, headerScale).map(({ at: _at, end: _end, ...f }) => f);
+}
+
+/** `extractFigures` with each figure's character span in the text (`end` is exclusive), in text order. */
+export function extractFiguresAt(text: string, headerScale: Figure['scale'] = null): Array<Figure & { at: number; end: number }> {
+  const out: Array<Figure & { at: number; end: number }> = [];
   for (const m of text.matchAll(CURRENCY)) {
-    out.push({ at: m.index, text: m[0].trim(), digits: digitsOf(m[1]!), value: toValue(m[1]!), kind: 'currency', scale: m[2] ? SCALE_WORDS[m[2].toLowerCase()]! : headerScale, decimals: decimalsOf(m[1]!) });
+    const end = m.index + m[0].trimEnd().length;
+    out.push({ at: m.index, end, text: m[0].trim(), digits: digitsOf(m[1]!), value: toValue(m[1]!), kind: 'currency', scale: m[2] ? SCALE_WORDS[m[2].toLowerCase()]! : headerScale, decimals: decimalsOf(m[1]!) });
   }
-  for (const m of text.matchAll(PERCENT)) out.push({ at: m.index, text: m[0].trim(), digits: digitsOf(m[1]!), value: toValue(m[1]!), kind: 'percent', scale: null, decimals: decimalsOf(m[1]!) });
+  for (const m of text.matchAll(PERCENT)) out.push({ at: m.index, end: m.index + m[0].length, text: m[0].trim(), digits: digitsOf(m[1]!), value: toValue(m[1]!), kind: 'percent', scale: null, decimals: decimalsOf(m[1]!) });
   // In text order.
-  return out.sort((a, b) => a.at - b.at).map(({ at: _at, ...f }) => f);
+  return out.sort((a, b) => a.at - b.at);
 }
 
 /**
@@ -536,7 +551,21 @@ export interface ValidatedBrief {
  * `Retriever.precedingText`; the re-score builds the same from chunks.jsonl). It only feeds the
  * preceding-unit rule; without it that rule never applies. It must be pure for a given index.
  */
-export function validateBrief(brief: DiligenceBrief, repairs: string[], passages: ReadonlyMap<string, string>, precedingText?: (chunkId: string) => string | null): ValidatedBrief {
+export interface ValidateOptions {
+  /**
+   * The question's companies (the interpretation's `companies`): the scope of "every company" and
+   * "all companies", and the companies a bare ticker may name. Without it, the companies the brief cites.
+   */
+  scopeTickers?: readonly string[];
+}
+
+export function validateBrief(
+  brief: DiligenceBrief,
+  repairs: string[],
+  passages: ReadonlyMap<string, string>,
+  precedingText?: (chunkId: string) => string | null,
+  options: ValidateOptions = {},
+): ValidatedBrief {
   const removed: Array<{ location: string; id: string }> = [];
   let returned = 0;
   let valid = 0;
@@ -610,25 +639,119 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
   out.investmentConsiderations.forEach((c, i) => check(c.text, `investmentConsiderations[${i}].text`, c.citationIds));
   out.evidenceGaps.forEach((g, i) => check(g, `evidenceGaps[${i}]`, cited));
 
+  // The claim checks are reported, never pass/fail: a throw in one (a bug, never expected) yields an
+  // empty list for that check and a content-free notice, and never fails the analysis or touches the
+  // citation and numeric validation above (H2, 2026-10-03 review).
+  const failedChecks: string[] = [];
+  const guarded = (name: string, run: () => void) => {
+    try {
+      run();
+    } catch {
+      if (!failedChecks.includes(name)) failedChecks.push(name);
+    }
+  };
+
   // Period claims: each item against the fiscal years of its own valid citations; the summary
   // against every cited passage (its inline citations included). A comparison cell that names no
   // period of its own is read against its column header's (or row label's) period.
-  const periodClaims: NonNullable<BriefValidation['periodClaims']> = [];
-  const periodCheck = (text: string, location: string, ids: Iterable<string>, fallback: readonly number[] = []) => {
-    const claim = periodClaimIn(text, citedFiscalYears(ids), fallback);
-    if (claim) periodClaims.push({ location, ...claim });
-  };
+  let periodClaims: NonNullable<BriefValidation['periodClaims']> = [];
   const summaryInline = [...out.executiveSummary.matchAll(INLINE_CITATION)].map((m) => m[1] ?? '').filter((id) => passages.has(id));
-  periodCheck(out.executiveSummary, 'executiveSummary', [...cited, ...summaryInline]);
+  guarded('period', () => {
+    const found: typeof periodClaims = [];
+    const periodCheck = (text: string, location: string, ids: Iterable<string>, fallback: readonly number[] = []) => {
+      const claim = periodClaimIn(text, citedFiscalYears(ids), fallback);
+      if (claim) found.push({ location, ...claim });
+    };
+    periodCheck(out.executiveSummary, 'executiveSummary', [...cited, ...summaryInline]);
+    out.keyFindings.forEach((f, i) => {
+      periodCheck(f.title, `keyFindings[${i}].title`, f.citationIds);
+      periodCheck(f.finding, `keyFindings[${i}].finding`, f.citationIds);
+    });
+    out.comparison?.rows.forEach((r, i) => {
+      const header = (j: number) => periodsIn(out.comparison!.columns[j] ?? '');
+      r.values.forEach((v, j) => periodCheck(v, `comparison.rows[${i}].values[${j}]`, r.citationIds, header(j).length ? header(j) : periodsIn(r.label)));
+    });
+    out.investmentConsiderations.forEach((c, i) => periodCheck(c.text, `investmentConsiderations[${i}].text`, c.citationIds));
+    periodClaims = found;
+  });
+
+  // Arithmetic: each change claim against its own two values (the brief's text only).
+  let arithmeticClaims: NonNullable<BriefValidation['arithmeticClaims']> = [];
+  guarded('arithmetic', () => {
+    const found: typeof arithmeticClaims = [];
+    const arithmeticCheck = (text: string, location: string) => {
+      for (const c of arithmeticClaimsIn(text)) found.push({ location, ...c });
+    };
+    arithmeticCheck(out.executiveSummary, 'executiveSummary');
+    out.keyFindings.forEach((f, i) => {
+      arithmeticCheck(f.title, `keyFindings[${i}].title`);
+      arithmeticCheck(f.finding, `keyFindings[${i}].finding`);
+    });
+    out.comparison?.rows.forEach((r, i) => r.values.forEach((v, j) => arithmeticCheck(v, `comparison.rows[${i}].values[${j}]`)));
+    out.investmentConsiderations.forEach((c, i) => arithmeticCheck(c.text, `investmentConsiderations[${i}].text`));
+    arithmeticClaims = found;
+  });
+
+  // Attribution and scope: each item against the companies of its own valid citations; the summary
+  // against every cited passage. A comparison cell is about its column header's company.
+  const briefCompanies = citedCompanies([...cited, ...summaryInline]);
+  const scopeTickers = options.scopeTickers?.length ? options.scopeTickers : [...briefCompanies];
+  const inScope = new Set([...scopeTickers, ...briefCompanies]);
+  const scopeCount = new Set(scopeTickers).size;
+  const companyItems: Array<{ text: string; location: string; ids: readonly string[]; cell?: { column: string; row: string } }> = [];
+  companyItems.push({ text: out.executiveSummary, location: 'executiveSummary', ids: [...new Set([...cited, ...summaryInline])] });
   out.keyFindings.forEach((f, i) => {
-    periodCheck(f.title, `keyFindings[${i}].title`, f.citationIds);
-    periodCheck(f.finding, `keyFindings[${i}].finding`, f.citationIds);
+    companyItems.push({ text: f.title, location: `keyFindings[${i}].title`, ids: f.citationIds });
+    companyItems.push({ text: f.finding, location: `keyFindings[${i}].finding`, ids: f.citationIds });
   });
+  // A misaligned table's values cannot be matched to their column headers: its cells are read for the companies they name only.
+  const aligned = comparisonMisaligned.length === 0;
   out.comparison?.rows.forEach((r, i) => {
-    const header = (j: number) => periodsIn(out.comparison!.columns[j] ?? '');
-    r.values.forEach((v, j) => periodCheck(v, `comparison.rows[${i}].values[${j}]`, r.citationIds, header(j).length ? header(j) : periodsIn(r.label)));
+    r.values.forEach((v, j) => {
+      const column = aligned ? (out.comparison!.columns[j] ?? '') : '';
+      companyItems.push({ text: v, location: `comparison.rows[${i}].values[${j}]`, ids: r.citationIds, cell: { column, row: r.label } });
+    });
   });
-  out.investmentConsiderations.forEach((c, i) => periodCheck(c.text, `investmentConsiderations[${i}].text`, c.citationIds));
+  out.investmentConsiderations.forEach((c, i) => companyItems.push({ text: c.text, location: `investmentConsiderations[${i}].text`, ids: c.citationIds }));
+
+  let attributionClaims: NonNullable<BriefValidation['attributionClaims']> = [];
+  guarded('attribution', () => {
+    const found: typeof attributionClaims = [];
+    for (const item of companyItems) {
+      // A cell's own companies: its column header's, or (with none) its row label's.
+      let subjects: Array<{ ticker: string; text: string }> | undefined;
+      if (item.cell) {
+        const { column, row } = item.cell;
+        const header = companiesNamedIn(column, inScope).map((t) => ({ ticker: t, text: column }));
+        subjects = header.length ? header : companiesNamedIn(row, inScope).map((t) => ({ ticker: t, text: row }));
+      }
+      const uncitedCompanies = uncitedCompaniesIn(item.text, {
+        cited: citedCompanies(item.ids),
+        passages: item.ids.map((id) => passages.get(id) ?? ''),
+        inScope,
+        title: item.location.endsWith('.title'),
+        ...(subjects ? { subjects } : {}),
+      });
+      if (uncitedCompanies.length) {
+        found.push({
+          location: item.location,
+          companies: uncitedCompanies.map((c) => c.ticker),
+          mentions: uncitedCompanies.map((c) => ({ ticker: c.ticker, text: c.text, ...(c.column ? { column: true } : {}) })),
+        });
+      }
+    }
+    attributionClaims = found;
+  });
+
+  let scopeClaims: NonNullable<BriefValidation['scopeClaims']> = [];
+  guarded('scope', () => {
+    const found: typeof scopeClaims = [];
+    for (const item of companyItems) {
+      const scope = scopeClaimIn(item.text, citedCompanies(item.ids), scopeCount, inScope);
+      if (scope) found.push({ location: item.location, ...scope });
+    }
+    scopeClaims = found;
+  });
 
   const verified = figures.filter((f) => f.verified).length;
   const unitUnstated = figures.filter((f) => f.rule === 'unit_unstated').length;
@@ -638,8 +761,13 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
   if (uncited.length) notices.push(`${plural(uncited.length, 'item has', 'items have')} no supporting citation.`);
   if (figures.length - verified > 0) notices.push(`${plural(figures.length - verified, 'figure', 'figures')} not found in the cited passages (marked "unverified figure").`);
   if (periodClaims.length) notices.push(`${plural(periodClaims.length, 'claim says', 'claims say')} something is new or absent in a period none of its citations is from (marked "period not cited").`);
+  if (arithmeticClaims.length) notices.push(`${plural(arithmeticClaims.length, 'change does', 'changes do')} not match the two values stated with ${arithmeticClaims.length === 1 ? 'it' : 'them'} (marked "Change doesn't add up").`);
+  if (attributionClaims.length) notices.push(`${plural(attributionClaims.length, 'item names a company', 'items name a company')} none of ${attributionClaims.length === 1 ? 'its' : 'their'} citations is from (marked "Names …; cites no … passage").`);
+  if (scopeClaims.length) notices.push(`${plural(scopeClaims.length, 'claim covers', 'claims cover')} more companies than ${scopeClaims.length === 1 ? 'its' : 'their'} citations are from (marked "Says …; cites N companies").`);
   if (comparisonMisaligned.length) notices.push(`${plural(comparisonMisaligned.length, 'comparison row does', 'comparison rows do')} not line up with the table's columns.`);
   if (repairs.length) notices.push(`The model output needed ${plural(repairs.length, 'deterministic repair', 'deterministic repairs')} before validation.`);
+  // Content-free: names the check only, never the text it was reading.
+  if (failedChecks.length) notices.push(`The ${failedChecks.join(', ')} claim ${failedChecks.length === 1 ? 'check' : 'checks'} could not run on this brief; ${failedChecks.length === 1 ? 'its' : 'their'} marks are not shown.`);
 
   return {
     brief: out,
@@ -651,6 +779,9 @@ export function validateBrief(brief: DiligenceBrief, repairs: string[], passages
       numeric: { figures, total: figures.length, verified, unitUnstated },
       comparisonMisaligned,
       periodClaims,
+      arithmeticClaims,
+      attributionClaims,
+      scopeClaims,
       notices,
     },
   };
