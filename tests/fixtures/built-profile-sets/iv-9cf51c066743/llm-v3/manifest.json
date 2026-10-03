@@ -7,7 +7,7 @@
  "validatorVersion": "2",
  "profilePromptVersion": "3",
  "ledgerBucket": "diligenceiq-core-databuckete3889a50-cto74g4tj9kn",
- "note": "TEST-ONLY subset of iv-9cf51c066743/llm-v3: AAPL, TSLA, JPM, copied verbatim by pnpm fixtures:test-profiles. Never upload.",
+ "note": "TEST-ONLY subset of iv-9cf51c066743/llm-v3: AAPL, TSLA, JPM, MSFT, NVDA, PFE, copied verbatim by pnpm fixtures:test-profiles. Never upload.",
  "companies": [
   {
    "ticker": "AAPL",
@@ -65,6 +65,95 @@
    "reusedOutcome": true,
    "promptVerified": false,
    "headline": "JPMorgan Chase posted its highest-ever annual revenue in FY2025, but revenue growth slowed sharply and net income declined modestly as rising credit losses and expenses offset top-line gains."
+  },
+  {
+   "ticker": "MSFT",
+   "company": "Microsoft Corporation",
+   "sector": "Information Technology",
+   "tier": "deep",
+   "filings": 16,
+   "periodsCovered": [
+    "2022-06-30",
+    "2023-06-30",
+    "2024-06-30",
+    "2025-06-30"
+   ],
+   "mode": "llm",
+   "generationCallCount": 1,
+   "validation": {
+    "invalidCitations": 0,
+    "unsupportedFigures": 0,
+    "bannedPhrases": 0
+   },
+   "signals": 9,
+   "facts": 53,
+   "modelId": "us.anthropic.claude-sonnet-4-6",
+   "inputTokens": 20252,
+   "outputTokens": 4040,
+   "durationMs": 56436,
+   "ledgerRunId": "2026-10-02T20-59-02-412Z-fe926752",
+   "reusedOutcome": true,
+   "promptVerified": false,
+   "headline": "Microsoft continues to grow revenue at a strong pace while investing heavily in cloud and AI infrastructure, with profitability margins holding stable even as operating cash flow growth slows from its prior-year pace."
+  },
+  {
+   "ticker": "NVDA",
+   "company": "NVIDIA Corporation",
+   "sector": "Information Technology",
+   "tier": "deep",
+   "filings": 16,
+   "periodsCovered": [
+    "2022-01-30",
+    "2023-01-29",
+    "2024-01-28",
+    "2025-01-26"
+   ],
+   "mode": "llm",
+   "generationCallCount": 1,
+   "validation": {
+    "invalidCitations": 0,
+    "unsupportedFigures": 0,
+    "bannedPhrases": 0
+   },
+   "signals": 15,
+   "facts": 53,
+   "modelId": "us.anthropic.claude-sonnet-4-6",
+   "inputTokens": 21953,
+   "outputTokens": 5813,
+   "durationMs": 68910,
+   "ledgerRunId": "2026-10-02T20-59-02-412Z-fe926752",
+   "reusedOutcome": true,
+   "promptVerified": false,
+   "headline": "NVIDIA's profitability improved sharply in FY2025 even as the pace of revenue growth slowed from its prior-year peak, while persistent regulatory, competition, and supply-chain risks continue to appear in every annual report."
+  },
+  {
+   "ticker": "PFE",
+   "company": "Pfizer Inc",
+   "sector": "Health Care",
+   "tier": "deep",
+   "filings": 15,
+   "periodsCovered": [
+    "2022-12-31",
+    "2023-12-31",
+    "2024-12-31"
+   ],
+   "mode": "llm",
+   "generationCallCount": 1,
+   "validation": {
+    "invalidCitations": 0,
+    "unsupportedFigures": 0,
+    "bannedPhrases": 0
+   },
+   "signals": 1,
+   "facts": 34,
+   "modelId": "us.anthropic.claude-sonnet-4-6",
+   "inputTokens": 20277,
+   "outputTokens": 2183,
+   "durationMs": 32247,
+   "ledgerRunId": "2026-10-02T21-03-14-550Z-8c72cfc8",
+   "reusedOutcome": true,
+   "promptVerified": false,
+   "headline": "Pfizer returned to revenue growth in FY2024 after a steep COVID-driven decline, but its most recent quarter shows revenue declining again, and operating cash flow has been on a declining trend."
   },
   {
    "ticker": "TSLA",

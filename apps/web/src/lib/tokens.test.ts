@@ -171,6 +171,18 @@ describe('dark palette contrast (WCAG 2.1)', () => {
     expect(contrast(dark('input'), dark('card'))).toBeGreaterThanOrEqual(3);
   });
 
+  it('a native select’s chevron is drawn in a theme token (no fixed hex), at 3:1 on a card in both modes', () => {
+    const start = css.indexOf('@utility select-chevron');
+    const block = css.slice(start, css.indexOf('}', start));
+    expect(start).toBeGreaterThan(-1);
+    expect(block).toContain('var(--muted-foreground)');
+    expect(block).not.toMatch(/#[0-9a-f]{3,6}|url\(/i);
+    const input = readFileSync(join(__dirname, '../components/ui/input.tsx'), 'utf8');
+    expect(input).toContain('select-chevron');
+    expect(input).not.toMatch(/%23|url\(/);
+    for (const mode of ['light', 'dark'] as const) expect(contrast(valueIn('muted-foreground', mode), valueIn('card', mode))).toBeGreaterThanOrEqual(3);
+  });
+
   it('status badges keep ink on a tint at 4.5:1, and the dot at 3:1, on a dark card', () => {
     const tints: [string, number][] = [
       ['ok', 0.15],

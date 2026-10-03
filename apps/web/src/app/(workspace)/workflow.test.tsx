@@ -1,5 +1,5 @@
 import type * as React from 'react';
-import { OTHER_RISKS_LABEL, SIGNAL_CATEGORY_LABELS, type CompanyIntelligenceProfile } from '@diligenceiq/core';
+import { OTHER_RISKS_LABEL, SIGNAL_CATEGORY_LABELS, composeCompare, type CompanyIntelligenceProfile } from '@diligenceiq/core';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -403,7 +403,7 @@ describe('Compare', () => {
     }
     const majorRow = screen.getByRole('rowheader', { name: 'Major attention area' }).closest('tr')!;
     expect(within(majorRow).getAllByText('Placeholder, not filing data')).toHaveLength(3);
-    for (const id of ['attention-areas', 'ranking', 'comparative-diligence']) {
+    for (const id of ['risk-areas', 'ask-next']) {
       expect(container.querySelector(`[aria-labelledby="${id}"]`)).toHaveTextContent(
         'Computed from each company’s full profile once it is built. These preview profiles list the headings an extraction rule found; the rule can miss some headings and can include a sentence that is not a heading, so no comparison is drawn from them.',
       );
@@ -411,17 +411,17 @@ describe('Compare', () => {
     // No Save on any row: nothing here is a citable comparative fact yet.
     expect(screen.queryByRole('button', { name: /^Save/ })).not.toBeInTheDocument();
     // Factual rows stay: coverage tier and fiscal-year end, with the different-month note.
-    expect(screen.getByRole('rowheader', { name: 'Fiscal year ends' }).closest('tr')).toHaveTextContent('Sep 27, 2025');
+    expect(screen.getByRole('columnheader', { name: /Apple Inc/ })).toHaveTextContent('FY ends Sep 27, 2025');
     expect(screen.getByText(/Fiscal years end in different months/)).toBeInTheDocument();
     // One templated question that does not depend on which headings the profiles hold.
-    const links = within(screen.getByRole('heading', { name: 'Recommended comparative diligence' }).closest('section')!).getAllByRole('link');
+    const links = within(screen.getByRole('heading', { name: 'Ask next' }).closest('section')!).getAllByRole('link');
     expect(links).toHaveLength(1);
     expect(hrefParams(links[0]!).get('q')).toBe('Compare the primary risk factors Apple Inc, Microsoft Corporation, and NVIDIA Corporation describe in their latest annual reports.');
     expect(hrefParams(links[0]!).get('origin')).toBe('compare:AAPL,MSFT,NVDA:risk-factors');
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('with built profiles, composes common and distinctive areas and saves a row with its evidence', async () => {
+  it('with built profiles, composes the risk-area grid and saves a row with its evidence', async () => {
     setRoute('/compare/', 'tickers=AAPL,MSFT');
     renderInWorkspace(
       <>
@@ -430,22 +430,27 @@ describe('Compare', () => {
       </>,
       { profiles: builtProfiles() },
     );
-    const common = screen.getByRole('heading', { name: 'Common attention areas' }).closest('section')!;
-    expect(within(common).getAllByText(/^(Regulatory|Competition|Cybersecurity)$/).map((e) => e.textContent)).toEqual(['Regulatory', 'Competition', 'Cybersecurity']);
-    const distinctive = screen.getByRole('heading', { name: 'Distinctive attention areas' }).closest('section')!;
-    expect(distinctive).toHaveTextContent('Supply chain');
-    const link = within(screen.getByRole('heading', { name: 'Recommended comparative diligence' }).closest('section')!).getAllByRole('link')[0]!;
+    const grid = screen.getByRole('heading', { name: 'Risk areas' }).closest('section')!;
+    expandAll(grid);
+    const shared = [...grid.querySelectorAll<HTMLElement>('tr[data-area]')].filter((r) => within(r).queryByText('Both'));
+    // Shared areas, exactly in core's attention-ranking order (more change signals first).
+    const ranked = composeCompare(['AAPL', 'MSFT'], builtProfiles());
+    if (!ranked.ok) throw new Error('compare failed');
+    const expected = ranked.result.attentionRanking.filter((r) => r.tickers.length === 2).map((r) => r.label);
+    expect(expected).toEqual(expect.arrayContaining(['Regulatory', 'Competition', 'Cybersecurity']));
+    expect(shared.map((r) => r.dataset.area)).toEqual(expected);
+    const supply = grid.querySelector<HTMLElement>('tr[data-area="Supply chain"]')!;
+    expect(supply).toHaveTextContent('Only AAPL');
+    const link = within(screen.getByRole('heading', { name: 'Ask next' }).closest('section')!).getAllByRole('link')[0]!;
     expect(hrefParams(link).get('origin')).toBe('compare:AAPL,MSFT:common-regulatory');
 
-    await userEvent.click(within(distinctive).getByRole('button', { name: 'Save Finding' }));
+    await userEvent.click(within(supply).getByRole('button', { name: 'Save' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByLabelText('Title')).toHaveValue('Supply chain: distinctive to Apple Inc');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save finding' }));
     expect(screen.getByRole('heading', { name: 'Risk Factors · 1' })).toBeInTheDocument();
-    // The same row in the attention ranking is the same stored item, so it shows as saved too.
-    const ranking = screen.getByRole('heading', { name: 'Attention ranking' }).closest('section')!;
-    expandAll(ranking);
-    expect(within(ranking).getAllByRole('link', { name: 'Saved' })).toHaveLength(1);
+    // The grid row now shows the stored item as saved.
+    expect(within(supply).getAllByRole('link', { name: 'Saved' })).toHaveLength(1);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 

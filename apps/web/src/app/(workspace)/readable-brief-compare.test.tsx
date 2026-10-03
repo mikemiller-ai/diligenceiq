@@ -1,4 +1,4 @@
-import { findBannedPhrases, type AnalysisDetail, type BriefValidation, type CompanyIntelligenceProfile } from '@diligenceiq/core';
+import { SIGNAL_CATEGORIES, findBannedPhrases, type AnalysisDetail, type BriefValidation, type CompanyIntelligenceProfile } from '@diligenceiq/core';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { isCurrent, readTrend, rowChange } from '@/components/intelligence/signals';
@@ -196,7 +196,7 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
     const table = within(section('Side by side')).getByRole('table');
     let chips = 0;
     for (const metric of ['Revenue', 'Operating margin', 'Operating income', 'Operating cash flow']) {
-      const row = within(table).getByRole('rowheader', { name: `${metric} trend` }).closest('tr')!;
+      const row = table.querySelector<HTMLElement>(`tr[data-metric="${metric}"]`)!;
       const cells = within(row).getAllByRole('cell');
       ['AAPL', 'TSLA', 'JPM'].forEach((t, i) => {
         const profile = p.get(t)!;
@@ -219,7 +219,7 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
 
   it('a Financials company’s operating cash flow keeps its arrow without a colour, and says why to a screen reader', () => {
     renderCompare('AAPL,JPM');
-    const row = within(section('Side by side')).getByRole('rowheader', { name: 'Operating cash flow trend' }).closest('tr')!;
+    const row = section('Side by side').querySelector<HTMLElement>('tr[data-metric="Operating cash flow"]')!;
     const [aapl, jpm] = within(row).getAllByRole('cell');
     expect(aapl!.querySelector('[data-direction]')).toHaveAttribute('data-direction', 'down');
     expect(jpm!.querySelector('[data-direction]')).toHaveAttribute('data-direction', 'neutral');
@@ -262,7 +262,7 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
     p.set('TSLA', tsla);
     setRoute('/compare/', 'tickers=AAPL,TSLA');
     renderInWorkspace(<CompareView />, { profiles: p });
-    const row = within(section('Side by side')).getByRole('rowheader', { name: 'Operating cash flow trend' }).closest('tr')!;
+    const row = section('Side by side').querySelector<HTMLElement>('tr[data-metric="Operating cash flow"]')!;
     const [aapl, stale] = within(row).getAllByRole('cell');
     expect(aapl!.querySelector('[data-direction]')).toHaveAttribute('data-direction', 'down');
     expect(stale!.querySelector('[data-direction]')).toBeNull();
@@ -276,11 +276,11 @@ describe('Compare: trend chips (DD-21 g, the dashboard’s rules)', () => {
 
   it('over every built test profile, a cell has a chip exactly when its trend reads back, is current and has a labeled change', () => {
     const p = renderCompare('AAPL,TSLA,JPM');
-    const rows = within(within(section('Side by side')).getByRole('table')).getAllByRole('rowheader').filter((r) => / trend$/.test(r.textContent ?? ''));
+    const rows = [...section('Side by side').querySelectorAll<HTMLElement>('tr[data-metric]')];
     expect(rows.length).toBeGreaterThan(0);
     for (const r of rows) {
-      const metric = r.textContent!.replace(/ trend$/, '');
-      within(r.closest('tr')!)
+      const metric = r.dataset.metric!;
+      within(r)
         .getAllByRole('cell')
         .slice(0, 3)
         .forEach((cell, i) => {
@@ -333,36 +333,32 @@ describe('Compare: condensed sections (DD-21 c, g)', () => {
   /** Visible list items (folded ones carry `hidden`). */
   const shown = (el: HTMLElement) => [...el.querySelectorAll('li')].filter((li) => !li.closest('[hidden]') && !li.hidden);
 
-  it('the ranking shows five, then "Show all N" reveals every area with its Save', () => {
+  it('the risk-area grid shows five areas, then "Show all N" reveals every area with its Save', () => {
     renderCompare('AAPL,TSLA,JPM');
-    const ranking = section('Attention ranking');
-    const list = ranking.querySelector('ol')!;
-    const total = list.children.length;
+    const grid = section('Risk areas');
+    const rows = [...grid.querySelectorAll<HTMLElement>('tr[data-area]')];
+    const total = rows.length;
     expect(total).toBeGreaterThan(5);
-    expect(shown(list)).toHaveLength(5);
-    const toggle = within(ranking).getByRole('button', { name: `Show all ${total} areas` });
+    expect(rows.filter((r) => !r.hidden)).toHaveLength(5);
+    const toggle = within(grid).getByRole('button', { name: `Show all ${total} areas` });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(shown(list)).toHaveLength(total);
-    expect(within(list).getAllByRole('button', { name: 'Save' })).toHaveLength(total);
+    expect(rows.filter((r) => !r.hidden)).toHaveLength(total);
+    // Focus moves to the first revealed area.
+    expect(document.activeElement).toBe(rows[5]);
+    expect(within(grid).getAllByRole('button', { name: 'Save' })).toHaveLength(total);
   });
 
-  it('attention areas show four each and recommended questions three, every one a click away', () => {
+  it('Ask next shows three questions, every one a click away', () => {
     renderCompare('AAPL,TSLA,JPM');
-    for (const [name, initial] of [
-      ['Common attention areas', 4],
-      ['Distinctive attention areas', 4],
-      ['Recommended comparative diligence', 3],
-    ] as const) {
-      const el = section(name);
-      const list = el.querySelector('ul')!;
-      const total = list.children.length;
-      expect(shown(list).length, name).toBe(Math.min(total, initial));
-      if (total > initial) {
-        fireEvent.click(within(el).getByRole('button', { name: /^Show all \d+/ }));
-        expect(shown(list).length, name).toBe(total);
-      }
+    const el = section('Ask next');
+    const list = el.querySelector('ul')!;
+    const total = list.children.length;
+    expect(shown(list).length).toBe(Math.min(total, 3));
+    if (total > 3) {
+      fireEvent.click(within(el).getByRole('button', { name: /^Show all \d+/ }));
+      expect(shown(list).length).toBe(total);
     }
   });
 
@@ -390,5 +386,66 @@ describe('Compare: condensed sections (DD-21 c, g)', () => {
     expect(more).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(more);
     expect(within(emphasis).getByRole('button', { name: 'Less: Management describes several outlook topics in' })).toHaveAttribute('aria-expanded', 'true');
+  });
+});
+
+describe('Compare: refined bottom line and risk grid (DD-21 h, after the adversary review)', () => {
+  const built = (tickers: string[]) => new Map<string, CompanyIntelligenceProfile>(tickers.map((t) => [t, BUILT[t as keyof typeof BUILT]]));
+  function renderWith(p: Map<string, CompanyIntelligenceProfile>) {
+    setRoute('/compare/', `tickers=${[...p.keys()].join(',')}`);
+    renderInWorkspace(<CompareView />, { profiles: p });
+  }
+  const chipOf = (link: HTMLElement) => link.closest('li')!.querySelector('[data-direction]')!;
+
+  it('the footer agrees with the lines; only a shared direction is coloured; the legend names the grey arrow', () => {
+    renderWith(built(['AAPL', 'MSFT', 'NVDA']));
+    const box = section('Bottom line');
+    const [revenue, margin, cash] = within(box).getAllByRole('link');
+    expect(chipOf(revenue!)).toHaveAttribute('data-direction', 'up');
+    // One company differs: its arrow without colour.
+    expect(chipOf(margin!)).toHaveAttribute('data-direction', 'neutral');
+    expect(chipOf(cash!)).toHaveAttribute('data-direction', 'neutral');
+    expect(box).toHaveTextContent('Opposite directions: Operating cash flow (rising at Microsoft Corporation and NVIDIA Corporation, falling at Apple Inc).');
+    expect(box).not.toHaveTextContent('No metric');
+    const legend = within(box).getByRole('list', { name: 'Legend' });
+    expect(legend).toHaveTextContent('increased at every company');
+    expect(legend).toHaveTextContent('no colour: one company differs, or neither direction is better');
+  });
+
+  it('mixed directions get the distinct "directions differ" symbol, explained in the legend', () => {
+    renderWith(built(['AAPL', 'TSLA']));
+    const box = section('Bottom line');
+    const revenue = within(box).getByRole('link', { name: 'Revenue grew at Apple Inc; fell at Tesla Inc' });
+    expect(chipOf(revenue)).toHaveAttribute('data-direction', 'neutral');
+    expect(chipOf(revenue)).toHaveTextContent('directions differ');
+    expect(chipOf(revenue).querySelector('svg.lucide-arrow-left-right')).not.toBeNull();
+    expect(within(box).getByRole('list', { name: 'Legend' })).toHaveTextContent('directions differ');
+  });
+
+  it('the grid uses screen-reader text, not aria-label on spans; a cell’s name holds its visible text; the popover is named', () => {
+    // MSFT given a signal in an area where it has no risk heading: its cell shows "No heading".
+    const msft = BUILT.MSFT;
+    const headed = new Set(msft.currentRisks.map((r) => r.category));
+    const empty = SIGNAL_CATEGORIES.find((c) => !headed.has(c) && !msft.signals.some((s) => s.category === c))!;
+    const p = built(['AAPL', 'MSFT', 'NVDA']).set('MSFT', { ...msft, signals: [{ ...msft.signals[0]!, category: empty }, ...msft.signals.slice(1)] });
+    renderWith(p);
+    const grid = section('Risk areas');
+    expect(grid.querySelectorAll('span[aria-label]')).toHaveLength(0);
+    const first = grid.querySelector<HTMLElement>('tr[data-area]')!;
+    expect(within(first).getByText('Rank 1')).toHaveClass('sr-only');
+    expect(within(grid).getAllByText('Not in this company’s areas')[0]).toHaveClass('sr-only');
+    const showAll = within(grid).queryByRole('button', { name: /^Show all \d+ areas$/ });
+    if (showAll) fireEvent.click(showAll);
+    const cell = within(grid).getByRole('button', { name: /^Microsoft Corporation, .*: No heading · 1 signal$/ });
+    expect(cell).toHaveTextContent('No heading');
+    fireEvent.click(cell);
+    const popover = screen.getByRole('dialog');
+    expect(popover).toHaveAccessibleName(expect.stringMatching(/^Microsoft Corporation · /));
+  });
+
+  it('a stale or unread cell keeps its plain label; a slowing cell names the prior year', () => {
+    renderWith(built(['AAPL', 'MSFT', 'NVDA']));
+    const row = section('Side by side').querySelector<HTMLElement>('tr[data-metric="Revenue"]')!;
+    expect(row).toHaveTextContent('after +125.9% in FY2024');
   });
 });

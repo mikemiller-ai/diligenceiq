@@ -74,6 +74,8 @@ export type EvidenceTarget =
       provenance?: EvidenceProvenance;
       /** The statement the passages support (a signal's "what changed"), passed on when one is opened. */
       claim?: string;
+      /** Per passage, the figures a brief's validator verified in it (a saved finding's sources), passed on when one is opened. */
+      figuresByChunk?: Record<string, string[]>;
     }
   /** A citation beside the same section of the adjacent comparable filings (SPEC §16.2; `GET /api/evidence/adjacent`). */
   | ({ kind: 'adjacent' } & Opened);
@@ -146,7 +148,19 @@ export function useEvidence() {
 export { filingHref };
 
 function EvidencePanel({ target }: { target: EvidenceTarget }) {
-  if (target.kind === 'periods') return <PeriodsPanel title={target.title} periods={target.periods} description={target.description} eyebrow={target.eyebrow} empty={target.empty} provenance={target.provenance ?? 'profile'} claim={target.claim} />;
+  if (target.kind === 'periods')
+    return (
+      <PeriodsPanel
+        title={target.title}
+        periods={target.periods}
+        description={target.description}
+        eyebrow={target.eyebrow}
+        empty={target.empty}
+        provenance={target.provenance ?? 'profile'}
+        claim={target.claim}
+        figuresByChunk={target.figuresByChunk}
+      />
+    );
   if (target.kind === 'adjacent') return <AdjacentPanel key={target.citation.chunkId} opened={target} />;
   if (target.kind === 'invalid') {
     return (
@@ -457,8 +471,10 @@ function PeriodsPanel({
   empty = 'No passage for this period.',
   provenance,
   claim,
+  figuresByChunk,
 }: {
   claim?: string;
+  figuresByChunk?: Record<string, string[]>;
   title: string;
   periods: Array<{ period: string; citations: Citation[]; provenance?: EvidenceProvenance }>;
   description?: string;
@@ -497,7 +513,7 @@ function PeriodsPanel({
                   <PlainPassage text={c.text} className="rounded-lg border border-border bg-secondary/60 p-4 text-[14px] leading-6" />
                   <button
                     type="button"
-                    onClick={() => show({ kind: 'citation', citation: c, provenance: p.provenance ?? provenance, claim })}
+                    onClick={() => show({ kind: 'citation', citation: c, provenance: p.provenance ?? provenance, claim, ...(figuresByChunk ? { figures: figuresByChunk[c.chunkId] ?? [] } : {}) })}
                     className="mt-1.5 text-[12px] text-primary hover:underline"
                   >
                     {citationLabel(c)}

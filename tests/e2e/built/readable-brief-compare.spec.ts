@@ -57,13 +57,13 @@ for (const scheme of ['light', 'dark'] as const) {
     await expect(page.getByRole('region', { name: 'Diverging trends' }).getByText('Apple Inc: rising').first()).toBeVisible();
     await expectNoAxeViolations(page);
 
-    const ranking = page.getByRole('region', { name: 'Attention ranking' });
-    const toggle = ranking.getByRole('button', { name: /^Show all \d+ areas/ });
+    const grid = page.getByRole('region', { name: 'Risk areas' });
+    const toggle = grid.getByRole('button', { name: /^Show all \d+ areas/ });
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await toggle.click();
-    await expect(ranking.getByRole('button', { name: /^Show fewer/ })).toHaveAttribute('aria-expanded', 'true');
+    await expect(grid.getByRole('button', { name: /^Show fewer/ })).toHaveAttribute('aria-expanded', 'true');
     // Focus moves to the first area revealed.
-    await expect(ranking.locator('ol > li').nth(5)).toBeFocused();
+    await expect(grid.locator('tr[data-area]').nth(5)).toBeFocused();
     await expandAll(page);
     await expectNoAxeViolations(page);
     expect(requests.every(isViewSafe)).toBe(true);

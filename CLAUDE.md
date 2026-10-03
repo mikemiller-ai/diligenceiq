@@ -76,7 +76,7 @@ pnpm gate
   - Upload with `pnpm profiles:upload-set --root .index/intelligence --set <iv>/<set>` (S3 write, ask first); switching `/diligenceiq/active-profile-set` is a separate `aws ssm put-parameter` (ask first).
 - **Phase 6 tools (never in the gate):**
   - `pnpm evidence:check` checks citation integrity over the local index build (every chunk, adjacency reference, and seed, live-brief and profile-set citation resolves); writes `evals/results/evidence-<iv>.json` (no AWS).
-  - `pnpm fixtures:test-profiles` copies the real AAPL, TSLA and JPM `llm-v3` profiles verbatim into the committed test set `tests/fixtures/built-profile-sets/<iv>/llm-v3/` (a separate root: never upload it), used by the web readability tests and the e2e `built-profiles` project (no AWS; Phase 6r).
+  - `pnpm fixtures:test-profiles` copies the real AAPL, TSLA, JPM, MSFT, NVDA and PFE `llm-v3` profiles verbatim into the committed test set `tests/fixtures/built-profile-sets/<iv>/llm-v3/` (a separate root: never upload it), used by the web readability tests and the e2e `built-profiles` project (no AWS; Phase 6r).
   - `pnpm fixtures:evidence` regenerates the committed adjacency subset `tests/fixtures/evidence/<iv>/adjacency/` from `.index/build` (no AWS); the api tests and the e2e server process filings from the corpus themselves.
 - **Generation tools (Phase 4, never in the gate):**
   - `pnpm eval:retrieval --generate` replays recorded generations (free). `--live` makes Bedrock generation calls, about $0.11 each, about $2.25 per run: ask first.

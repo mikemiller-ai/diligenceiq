@@ -15,7 +15,7 @@ export function THead({ className, ...props }: React.HTMLAttributes<HTMLTableSec
   return <thead className={cn('bg-secondary', className)} {...props} />;
 }
 
-export function TBody({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
+export function TBody({ className, ...props }: React.ComponentProps<'tbody'>) {
   return <tbody className={cn('[&_tr:last-child]:border-0', className)} {...props} />;
 }
 

@@ -2,7 +2,7 @@
 
 import type { CompanyIntelligenceProfile, ProfileFact, ProfileSignal, Trajectory, TrendBasis } from '@diligenceiq/core';
 import { parseDriverChangeBasis, parseTrendBasis } from '@diligenceiq/core';
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Minus, Plus, Repeat2, type LucideIcon } from 'lucide-react';
+import { ArrowDownRight, ArrowLeftRight, ArrowRight, ArrowUpRight, Minus, Plus, Repeat2, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /*
@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
  * lines); everything else is neutral.
  */
 
-export type Direction = 'up' | 'down' | 'flat' | 'slowing' | 'repeat' | 'new' | 'info' | 'none';
+export type Direction = 'up' | 'down' | 'flat' | 'slowing' | 'mixed' | 'repeat' | 'new' | 'info' | 'none';
 
 const TRAJECTORY_DIRECTION: Record<Trajectory, Direction> = {
   accelerating: 'up',
@@ -39,6 +39,8 @@ const STYLE: Record<Direction, { icon: LucideIcon; chip: string; dot: string }> 
   down: { icon: ArrowDownRight, chip: 'bg-destructive/10 text-destructive-ink', dot: 'var(--destructive)' },
   slowing: { icon: ArrowDownRight, chip: 'bg-risk-med/15 text-risk-med-ink', dot: 'var(--risk-med)' },
   flat: { icon: ArrowRight, chip: 'bg-secondary text-foreground/75', dot: 'var(--muted-foreground)' },
+  /** Compare only: the companies' directions differ (never coloured). */
+  mixed: { icon: ArrowLeftRight, chip: 'bg-secondary text-foreground/75', dot: 'var(--muted-foreground)' },
   repeat: { icon: Repeat2, chip: 'bg-secondary text-foreground/75', dot: 'var(--muted-foreground)' },
   new: { icon: Plus, chip: 'bg-primary/10 text-primary', dot: 'var(--primary)' },
   info: { icon: ArrowRight, chip: 'bg-primary/10 text-primary', dot: 'var(--primary)' },
@@ -51,6 +53,7 @@ export const DIRECTION_WORD: Record<Direction, string> = {
   down: 'decreased',
   slowing: 'slowing',
   flat: 'about the same',
+  mixed: 'directions differ',
   repeat: 'repeated',
   new: 'new',
   info: 'for information',
@@ -89,9 +92,9 @@ export function directionColor(d: Direction): string {
 }
 
 /** A small trend line; the last point takes the direction's colour. */
-export function Sparkline({ values, direction, label }: { values: number[]; direction: Direction; label: string }) {
+export function Sparkline({ values, direction, label, width = 96 }: { values: number[]; direction: Direction; label: string; width?: number }) {
   if (values.length < 2) return null;
-  const w = 96;
+  const w = width;
   const h = 26;
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -415,7 +418,7 @@ export function profitTitle(b: Extract<TrendBasis, { kind: 'margin' }>): string 
 }
 
 /** The latest dollar amount behind a growth trend, from the trend's own row, when the profile holds it. */
-function latestAmount(profile: CompanyIntelligenceProfile, metric: string, t: ReadTrend): number | null {
+export function latestAmount(profile: CompanyIntelligenceProfile, metric: string, t: Pick<ReadTrend, 'chunkIds' | 'basis'>): number | null {
   const last = comparableSeries(profile, metric, t).at(-1);
   return last && last.period === t.basis.period ? last.value : null;
 }

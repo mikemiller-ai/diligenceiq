@@ -81,8 +81,8 @@ describe('the committed built test set', () => {
   it('is a valid profile set the api can serve, and verbatim llm-v3 when the local build is present', () => {
     const manifest = ProfileSetManifestSchema.parse(JSON.parse(readFileSync(join(BUILT_SET_DIR, 'manifest.json'), 'utf8')));
     expect(`${manifest.indexVersion}/${manifest.profileSetId}`).toBe('iv-9cf51c066743/llm-v3');
-    expect(manifest.companies.map((c) => c.ticker).sort()).toEqual(['AAPL', 'JPM', 'TSLA']);
-    for (const t of ['AAPL', 'TSLA', 'JPM']) {
+    expect(manifest.companies.map((c) => c.ticker).sort()).toEqual(['AAPL', 'JPM', 'MSFT', 'NVDA', 'PFE', 'TSLA']);
+    for (const t of ['AAPL', 'TSLA', 'JPM', 'MSFT', 'NVDA', 'PFE']) {
       const src = join(LOCAL_ROOT, 'llm-v3', `${t}.json`);
       if (existsSync(src)) expect(readFileSync(join(BUILT_SET_DIR, `${t}.json`), 'utf8'), t).toBe(readFileSync(src, 'utf8'));
     }

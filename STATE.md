@@ -3,35 +3,42 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`main` (no remote yet). Last commits: `d3ce536` (plan Phase 6r step 4) and `280660b` (Phase 6r step 3), fast-forwarded from `phase-6r-step3`. Step 2: `a5cbf2b`; step 1: `c4a4797`; Phase 6: `bdd817e`.
+`phase-6r-step4` (from `main` at `0494871`, "Soften the light palette"), **uncommitted**: Phase 6r step 4 is gated and waiting for Mike's go-ahead to commit. `main` (no remote yet) has step 3 (`280660b`), the step 4 plan (`d3ce536`), the step 3 deploy record (`35af2d0`) and the light-palette change (`0494871`).
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 3 of 4 is gated, committed (`280660b`) and deployed (2026-10-03): the brief and Compare (DD-21 g).** Handoff: `docs/handoffs/phase-06r-step3.md`. Steps 1 and 2 are deployed (handoffs `phase-06r-step1.md`, `phase-06r-step2.md`).
+**Phase 6r (readability, DD-21), step 4 of 4 is gated (2026-10-03), not committed and not deployed: the refined Compare and Findings (DD-21 h).** Handoff: `docs/handoffs/phase-06r-step4.md`. Steps 1–3 are deployed (handoffs `phase-06r-step1.md` … `phase-06r-step3.md`).
 - Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point the set at `iv-9cf51c066743/det-v2`.
-- **Step 3 adds:**
-  - **Brief:** a bottom line (each key finding's stored title linking to the finding, with chips for basis, companies and the validator's figure check; no direction colours, Mike's choice); a status line of counts; a jump bar (`components/diligence/jump-bar.tsx`, now shared with the dashboard) that links only shown sections, plus Sources.
-  - **Compare:** trend cells on direction chips with the builder's change and year (`trendRead`: the dashboard's rules, plus no colour for a trend about an older year than the latest annual report); a legend; one chip per company in Diverging trends; long lists folded (areas 4, ranking 5, questions 3); management emphasis clamped to 3 lines.
-  - Fix in passing: the `Table` wrapper is `relative`, so an sr-only header no longer makes the brief and Compare scroll sideways on a phone.
-- **Step 4 is planned, not started** (`d3ce536`: SPEC A.4 2026-10-03; implementation-plan row 6r): the refined Compare and Findings from the mockups Mike chose, `Compare - refined.html` and `Findings - refined.html`, in `~/Library/Mobile Documents/com~apple~CloudDocs/Downloads/DiligenceIQ redesign for readabilityv2/`. Ask follow-up is in (prefill only, `finding` origin, which core already accepts). The Deep Analysis and brief mockups in the same folder were not chosen. DD-21 (h) is still to be written at the start of step 4.
+- **Step 4 adds:**
+  - **Compare:**
+    - a fixed-rule bottom line (`apps/web/src/lib/compare-summary.ts`) whose footer names the metrics pointing in opposite directions;
+    - side-by-side cells with the latest value, change and sparkline;
+    - one risk-area grid with cell popovers, replacing the common, distinctive and ranking lists;
+    - "Ask next" and a jump bar.
+  - **Findings:**
+    - a summary strip of toggle filters;
+    - one filter row with text search plus More filters;
+    - compact cards with a status chip menu and a source count that unfolds the citation chips;
+    - a Board view;
+    - Ask follow-up, which only prefills `/analysis/new` with `origin=finding:<id>`.
+  - The committed built test set now has AAPL, TSLA, JPM, MSFT, NVDA and PFE.
 
 ## Gate
-`pnpm gate` on 2026-10-03 against the Phase 6r step 3 working tree: **exit 0**.
+`pnpm gate` on 2026-10-03 against the Phase 6r step 4 working tree: **exit 0**.
 - check-docs OK; lint and typecheck clean.
-- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 377, api 135 (**1,148**).
-- `cdk:synth` and `build` succeeded. **e2e: 79 passed, 4 skipped.** The skipped ones are the `DARK_SCREENSHOTS`-only screenshot tests.
+- Unit tests with `REQUIRE_CORPUS=1`: core 78, cdk 43, corpus 102, rag 413, web 432, api 135 (**1,203**).
+- `cdk:synth` and `build` succeeded. **e2e: 88 passed, 4 skipped.** The skipped ones are the `DARK_SCREENSHOTS`-only screenshot tests.
 
-Gate record: adversary (1 blocker, 1 high, 5 medium, 7 low) → fresh fixer (all 15 fixed with regression tests) → `/code-review` medium (1 confirmed: the Sources jump on a wide screen; fixed with a test) → `pnpm gate` green.
+Gate record: adversary (3 high, 7 medium, 11 low) → fresh fixer (all 21 fixed with regression tests) → `/code-review` medium (2 findings, both fixed with tests: duplicate card IDs when grouped by company, and a note draft lost on a Board move) → `pnpm gate` green.
 
 ## In flight
-- **Done 2026-10-03 (Mike approved):** the two commits, the fast-forward to `main`, then `pnpm deploy:web` (Amplify job 9). The headless production check passed:
-  - **Brief** `0mur5o8buseedmulticloud` at 1280 px: six bottom-line headlines linking to `#finding-1`…`#finding-6`; status line "6 key findings · 16 passages cited · 36 of 36 figures found in their cited passages · 7 evidence gaps". Jump links: Summary, Bottom line, Key findings 6, Comparison 8, Considerations 4, Evidence coverage, Evidence gaps 7, Follow-up questions 4, Sources 24. Evidence coverage and the third headline land at 140 px, below the jump bar (bottom at 95 px), and are marked; Evidence gaps lands at 328 px (the end of the page) and is marked.
-  - **Compare** `AAPL,MSFT,NVDA`: 12 trend chips with the builder's change and year (for example Apple "Growing +6.4% in FY2025", Microsoft operating margin "Stable +0.98 pp in FY2025", NVIDIA "Slowing +114.2% in FY2025"); the legend; "Show all 9 areas" and "Show all 6 questions".
-  - **Light and dark:** dark rendered (body #0B1020); light rendered (body #F3F4F8). Axe was not run against production; it is clean in the e2e suite in both.
-  - **Phone, 390 px:** no sideways scroll on Compare or the brief; the brief shows the "Jump to section" menu.
-  - **Requests:** only reads and `POST /api/session`.
-  - In a background browser tab, smooth scrolling is paused, so jump checks need the tab in front.
+- **Waiting for Mike:** commit on `phase-6r-step4` (handoff, DD-21 h, code and tests), then a fast-forward of `main`, then `pnpm deploy:web`.
+- **Production check after that deploy:**
+  - Compare `AAPL,MSFT,NVDA`: bottom line plus its "Opposite directions: Operating cash flow …" footer, and a grid cell popover;
+  - Findings: strip, search, Board, Ask follow-up prefill;
+  - light and dark, and 390 px;
+  - only reads and `POST /api/session` are sent.
 - **Known limit (M3, from step 2):** profile citations carry no subsection, so their drawer titles show only the section.
-- **Next:** step 4 (DD-21 h first), then Phase 7.
+- **Next:** Phase 7. The Deep Analysis and brief mockups (same v2 folder) were not chosen; ask Mike before building them.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
@@ -41,6 +48,9 @@ Gate record: adversary (1 blocker, 1 high, 5 medium, 7 low) → fresh fixer (all
 - **Sonnet 5.5:** still 0 quota. Switching needs a SPEC §29.1 change first.
 
 ## Known traps
+- **Compare's bottom line and core's Diverging section use different rules on purpose.** The bottom line (`compare-summary.ts`) counts "slowing" as still rising, and its footer follows the lines. Core's `diverging` (Diverging trends section) counts only rising against declining. Only lines where every company shares a direction are coloured (DD-21 h). An operating margin at or below zero gets loss wording, never "widened".
+- **Findings card IDs must be per rendered card (`React.useId`).** Group by Company renders a finding about several companies once per company. Note drafts live in `NoteDraftsProvider` (findings-view), so a Board status change that remounts a card keeps the draft.
+- **`cn`/tailwind-merge drops a `bg-[…]` position class next to a `bg-<colour>`.** The select chevron is the `select-chevron` utility in globals.css, not a `bg-…` class.
 - **Jump bar (shared, `components/diligence/jump-bar.tsx`).**
   - Targets need `scroll-mt-40`.
   - The section in view is the lowest heading at or above the line; on equal tops the earlier in the list wins.

@@ -1,7 +1,9 @@
 /**
  * TEST-ONLY built profiles for the readability tests (DD-21): AAPL (deep, growing, with revenue
- * lines), TSLA (declining) and JPM (a bank: few facts, no revenue lines), copied byte for byte from
- * the locally built model-written set, with that set's manifest cut down to the three companies.
+ * lines), TSLA (declining), JPM (a bank: few facts, no revenue lines), and MSFT, NVDA and PFE (the
+ * refined Compare, DD-21 h: AAPL, MSFT, NVDA side by side; PFE's operating cash flow trend is about an
+ * older year than its latest annual report), copied byte for byte from
+ * the locally built model-written set, with that set's manifest cut down to those companies.
  * They are real pipeline output, never edited, and never imported by application code. `.index/`
  * is gitignored, so the copies are committed.
  *
@@ -19,7 +21,7 @@ import { CompanyIntelligenceProfileSchema, ProfileSetManifestSchema, profileInte
 import { ROOT, fail } from '../lib/common';
 
 const SET = process.env.TEST_PROFILE_SET ?? 'iv-9cf51c066743/llm-v3';
-const TICKERS = ['AAPL', 'TSLA', 'JPM'] as const;
+const TICKERS = ['AAPL', 'TSLA', 'JPM', 'MSFT', 'NVDA', 'PFE'] as const;
 const FROM = join(ROOT, '.index/intelligence', SET);
 const TO = join(ROOT, 'tests/fixtures/built-profile-sets', SET);
 

@@ -620,6 +620,7 @@ const TOP_BORDER: Record<Direction, string> = {
   down: 'var(--destructive)',
   slowing: 'var(--risk-med)',
   flat: 'var(--border)',
+  mixed: 'var(--border)',
   repeat: 'var(--border)',
   new: 'var(--primary)',
   info: 'var(--primary)',

@@ -137,7 +137,7 @@ describe('Missing source document (architecture §9.1)', () => {
     setRoute('/findings/');
     const { unmount } = renderInWorkspace(<FindingsView />, { initial: { findings: [finding()] } });
     expect(screen.getByText('Revenue grew 12% to $4.2 billion.')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /AAPL FY2030 10-K · Item 1A/ }));
+    await userEvent.click(screen.getByRole('button', { name: /^1 source: open the evidence/ }));
     const drawer = await screen.findByRole('dialog');
     expect(drawer).toHaveTextContent('The copied passage text survives a missing filing.');
     unmount();

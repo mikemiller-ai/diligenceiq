@@ -146,7 +146,7 @@ test.describe('error and degraded states (architecture §9.1)', () => {
 test('Compare: AAPL, MSFT, NVDA launches comparative diligence without running it', async ({ page }) => {
   const requests = recordRequests(page);
   await page.goto('/compare/?tickers=AAPL,MSFT,NVDA');
-  const section = page.getByRole('region', { name: 'Recommended comparative diligence' });
+  const section = page.getByRole('region', { name: 'Ask next' });
   await section.getByRole('link', { name: /Investigate/ }).first().click();
   await expect(page).toHaveURL(/\/analysis\/new\/\?.*origin=compare%3AAAPL%2CMSFT%2CNVDA%3A/);
   await expect(page.getByRole('textbox', { name: 'Question', exact: true })).toHaveValue(/Compare the primary risk factors/);
@@ -178,10 +178,10 @@ test('Findings: the seeded board, save from Company Intelligence, filter, group,
   await expect(page.getByRole('heading', { name: 'Regulatory & Compliance · 1' })).toBeVisible();
   await page.getByLabel('Status', { exact: true }).selectOption('all');
 
-  await page.getByLabel('Group by').selectOption('status');
+  await page.getByRole('radiogroup', { name: 'Group by' }).getByRole('radio', { name: 'Status' }).click();
   await expect(page.getByRole('heading', { name: 'Active · 1' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Needs Follow-Up · 1' })).toBeVisible();
-  await page.getByLabel('Group by').selectOption('company');
+  await page.getByRole('radiogroup', { name: 'Group by' }).getByRole('radio', { name: 'Company' }).click();
   await expect(page.getByRole('heading', { name: 'Microsoft Corporation (MSFT) · 2' })).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters' }).first().click();
   await expect(page.getByText(`${SEED.findings.length + 2} findings`)).toBeVisible();
