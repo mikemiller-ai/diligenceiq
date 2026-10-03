@@ -38,11 +38,13 @@ import {
   SessionUnavailableError,
   clientKey,
   encodeSessionValue,
+  forwardedForKeys,
   newWorkspaceId,
   readCookie,
   sessionCookieName,
   sessionSetCookie,
   verifySessionValue,
+  viewerAddress,
 } from './session/session';
 import { createFinding } from './workspace/findings';
 import { type Seed, applySeed } from './workspace/seed';
@@ -199,7 +201,9 @@ export function createApp(deps: AppDeps) {
     }
     const day = at.toISOString().slice(0, 10);
     const counterTtl = ttlFrom(at, COUNTER_TTL_DAYS);
-    const client = clientKey(secret, event.requestContext?.http?.sourceIp);
+    const forwardedFor = event.headers?.['x-forwarded-for'];
+    const viewer = viewerAddress(event.requestContext?.http?.sourceIp, forwardedFor);
+    const client = clientKey(secret, viewer.address);
     if (!(await deps.workspace.incrementCounter('GLOBAL', `WSCREATE#${day}#${client}`, caps.perClientDailyWorkspaceCreations, counterTtl))) {
       return fail('RATE_LIMITED', 'This network has opened its limit of new demo workspaces for today. Try again tomorrow.', requestId, { scope: 'workspace_creation_client', retryAfter: nextUtcDay(at) });
     }
@@ -210,7 +214,18 @@ export function createApp(deps: AppDeps) {
     const ttl = ttlFrom(at, WORKSPACE_TTL_DAYS);
     await deps.workspace.createMeta({ workspaceId, createdAt: at.toISOString(), seedVersion: deps.seed?.seedVersion ?? null, ttl });
     await seedSafely(workspaceId, at, requestId);
-    log('info', 'workspace created', { requestId, workspaceId, seedVersion: deps.seed?.seedVersion ?? null });
+    // D12: the per-client key, where it came from, whether sourceIp is CloudFront, and the last 5 forwarded hops' keys (keys only, never addresses).
+    const forwarded = forwardedForKeys(secret, forwardedFor);
+    log('info', 'workspace created', {
+      requestId,
+      workspaceId,
+      seedVersion: deps.seed?.seedVersion ?? null,
+      clientKey: client,
+      clientKeySource: viewer.source,
+      viaCloudFront: viewer.viaCloudFront,
+      forwardedForKeys: forwarded.keys,
+      forwardedForHops: forwarded.hops,
+    });
     return sessionResponse(workspaceId, true, ttl, secret, requestId);
   });
 

@@ -2,6 +2,8 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { GetParameterCommand } from '@aws-sdk/client-ssm';
 import { log } from '../http';
 import type { SsmLike } from '../kill-switch';
+import { CLOUDFRONT_RANGES } from './cloudfront-ranges';
+import { type Cidr, clientAddressKey, inCidr, parseCidr, parseIp } from './ip';
 
 /**
  * Anonymous demo sessions (SPEC §40, §39; architecture §8 "Demo sessions"). The cookie holds a
@@ -115,4 +117,72 @@ export function staticSessionSecret(secret: string): SessionSecret {
  */
 export function clientKey(secret: string, sourceIp: string | undefined): string {
   return createHmac('sha256', secret).update(`ip.v1.${sourceIp ?? 'unknown'}`).digest('hex').slice(0, 16);
+}
+
+/** The CloudFront ranges, parsed once per container. */
+const CLOUDFRONT_CIDRS: Cidr[] = [...CLOUDFRONT_RANGES.ipv4, ...CLOUDFRONT_RANGES.ipv6].map(parseCidr);
+
+/** True when the address is in AWS's published CloudFront ranges (services CLOUDFRONT and CLOUDFRONT_ORIGIN_FACING). */
+export function isCloudFrontAddress(address: string | undefined): boolean {
+  const ip = parseIp(address);
+  return ip !== null && CLOUDFRONT_CIDRS.some((cidr) => inCidr(ip, cidr));
+}
+
+function splitHops(header: string | undefined): string[] {
+  return (header ?? '')
+    .split(',')
+    .map((hop) => hop.trim())
+    .filter(Boolean);
+}
+
+export interface ViewerAddress {
+  /** The normalised address the key is made from (`clientAddressKey`): IPv4, or an IPv6 /64. */
+  address: string | undefined;
+  source: 'viewer_hop' | 'source_ip';
+  /** Whether `sourceIp` is a CloudFront address, the only case in which a forwarded hop is trusted. */
+  viaCloudFront: boolean;
+}
+
+/**
+ * The address the per-client workspace-creation cap is keyed on (assumptions D12, Mike's choice
+ * 2026-10-03). Through Amplify's `/api/<*>` rewrite, `sourceIp` is a proxy address that changes
+ * between requests, and `X-Forwarded-For` read `viewer, edge, proxy` in production (API Gateway
+ * appends the proxy, which is `sourceIp`).
+ *
+ * `X-Forwarded-For` is trusted ONLY when `sourceIp` is itself a CloudFront address: only then did
+ * infrastructure we rely on append the hops nearest the end. A caller of the execute-api URL can
+ * forge any hops it likes, but its `sourceIp` is its own (unforgeable TCP) address, so it is keyed
+ * on that. The check is fail-safe: if the real proxy address is missing from the bundled list
+ * (`pnpm fixtures:cloudfront`), every request keys on `sourceIp`, never on a forgeable hop.
+ *
+ * Via CloudFront, the viewer is the first hop from the right that is not itself a CloudFront
+ * address: each CloudFront layer (edge, origin-facing proxy, any added later) appends the address
+ * it received from, so walking left past CloudFront hops reaches the first address no CloudFront
+ * layer vouched for as its own, which CloudFront appended itself. Hops a client sends sit further
+ * left and are never reached. A walk that finds only CloudFront hops falls back to `sourceIp`.
+ * The keyed form is normalised: IPv4-mapped IPv6 is the IPv4, and IPv6 keys on its /64.
+ */
+export function viewerAddress(sourceIp: string | undefined, forwardedFor: string | undefined): ViewerAddress {
+  const viaCloudFront = isCloudFrontAddress(sourceIp);
+  if (viaCloudFront) {
+    const hops = splitHops(forwardedFor);
+    for (let i = hops.length - 1; i >= 0; i--) {
+      if (!isCloudFrontAddress(hops[i])) return { address: clientAddressKey(hops[i]), source: 'viewer_hop', viaCloudFront };
+    }
+  }
+  return { address: clientAddressKey(sourceIp), source: 'source_ip', viaCloudFront };
+}
+
+/** At most this many `X-Forwarded-For` hops are keyed; a client can send a long forged header. */
+const MAX_FORWARDED_HOPS = 5;
+
+/**
+ * Assumption D12's production check: the `clientKey` of each of the LAST 5 `X-Forwarded-For` hops,
+ * in header order (the hops infrastructure appended are at the end; a client's forged hops are at
+ * the start), plus the total hop count, so the "workspace created" line shows which hop carries the
+ * same key as a direct request from the same visitor. Keys only: the raw addresses are never logged.
+ */
+export function forwardedForKeys(secret: string, header: string | undefined): { keys: string[]; hops: number } {
+  const hops = splitHops(header);
+  return { keys: hops.slice(-MAX_FORWARDED_HOPS).map((hop) => clientKey(secret, clientAddressKey(hop))), hops: hops.length };
 }

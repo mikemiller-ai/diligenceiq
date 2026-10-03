@@ -82,6 +82,10 @@ pnpm gate
   - `pnpm eval:retrieval --set robustness [--generate]` runs `evals/robustness.yaml` (replay is free; `--embed` and `--live` spend: ask first) and writes only `generation-<iv>-<pv>-robustness.*`.
   - `pnpm eval:web-perf` measures bytes and render timings of the built export against the local server (no AWS; run `pnpm build` first).
   - The web build's post-step `node src/build/csp.ts out` writes each page's CSP `<meta>` (runs inside `pnpm build`; never hand-edit `out/`).
+- **Phase 8 tools (never in the gate):**
+  - `pnpm e2e:prod` runs the read-only Playwright smoke suite (`tests/e2e/prod`, own config, no local server) against `PROD_URL` (default `https://diligenceiq.mikemiller.ai`). It creates at most one anonymous workspace per run (the cookie is reused across runs from the OS temp dir), aborts and fails on any write other than `POST /api/session`, never sends `POST /api/analyses`, and calls no model.
+  - `pnpm fixtures:cloudfront` regenerates `services/api/src/session/cloudfront-ranges.ts` from AWS's public `ip-ranges.json` (a read-only GET, no account). The api trusts `X-Forwarded-For` only when `sourceIp` is in these ranges (assumptions D12).
+  - `bash examples/analysis-request.sh` runs one analysis against production: 1 Bedrock call (about $0.12) and 1 workspace; ask first.
 - **Generation tools (Phase 4, never in the gate):**
   - `pnpm eval:retrieval --generate` replays recorded generations (free). `--live` makes Bedrock generation calls, about $0.11 each, about $2.25 per run: ask first.
   - `pnpm eval:generation:rescore` re-validates stored briefs (no AWS).

@@ -2,10 +2,11 @@ import { ApiErrorSchema, type AnalysisDetail, type Finding, type Page } from '@d
 import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_CAPS, MAX_BODY_BYTES } from './app';
 import type { HttpResponse } from './http';
-import { SESSION_COOKIE, SESSION_COOKIE_SECURE, encodeSessionValue } from './session/session';
+import { SESSION_COOKIE, SESSION_COOKIE_SECURE, clientKey, encodeSessionValue } from './session/session';
 import { fileURLToPath } from 'node:url';
 import { createProfileProvider, dirSetReader } from './profiles/provider';
-import { SEED, authed, body, makeEvent, newSession, testApp } from './test-helpers';
+import { SEED, TEST_SECRET, authed, body, makeEvent, newSession, testApp } from './test-helpers';
+import { loggedLines, spyOnLog } from './test-log';
 import { MAX_FINDINGS_PER_WORKSPACE } from './workspace/store';
 
 function expectApiError(res: HttpResponse, status: number, code: string) {
@@ -455,6 +456,117 @@ describe('Phase 5 fixes: sessions under load, TTL, reset, cookies and JSON bodie
     const keys = [...workspace.counters.keys()].join(' ');
     expect(keys).not.toMatch(/198\.51|192\.0\.2/);
     expect(keys).toMatch(new RegExp(`GLOBAL\\|WSCREATE#${day}#[0-9a-f]{16}`));
+  });
+
+  // D12 test addresses: 130.176.88.10 is in CLOUDFRONT_ORIGIN_FACING (the Amplify proxy's shape), 108.138.0.10 in CLOUDFRONT (an
+  // edge); 203.0.113.x and 198.51.100.x are documentation ranges, never CloudFront.
+  const CF_PROXY = '130.176.88.10';
+  const CF_PROXY_2 = '130.176.88.11';
+  const CF_EDGE = '108.138.0.10';
+  const viaCloudFront = (proxy: string, hops: string[]) => {
+    const e = fromIp(proxy);
+    e.headers = { ...e.headers, 'x-forwarded-for': [...hops, proxy].join(', ') };
+    return e;
+  };
+
+  it('D12: the workspace-created line carries the client key, viaCloudFront, the last 5 hop keys and the hop count, never a raw address', async () => {
+    const { app } = testApp();
+    const spy = spyOnLog();
+    try {
+      const e = fromIp('198.51.100.7');
+      e.headers = { ...e.headers, 'x-forwarded-for': '192.0.2.10, 198.51.100.7' };
+      expect((await app(e)).statusCode).toBe(200);
+      const plain = fromIp('198.51.100.8');
+      expect((await app(plain)).statusCode).toBe(200);
+      expect((await app(viaCloudFront(CF_PROXY, ['192.0.2.77', CF_EDGE]))).statusCode).toBe(200);
+      const created = loggedLines(spy).filter((l) => l.msg === 'workspace created');
+      expect(created).toHaveLength(3);
+      type Line = { clientKey: string; clientKeySource: string; viaCloudFront: boolean; forwardedForKeys: string[]; forwardedForHops: number };
+      const [forwarded, direct, cloudFront] = created as Line[];
+      expect(forwarded!.clientKey).toMatch(/^[0-9a-f]{16}$/);
+      expect(forwarded!.forwardedForKeys).toHaveLength(2);
+      expect(forwarded!.forwardedForHops).toBe(2);
+      // sourceIp is not CloudFront, so the key stays on the source address (here also the last hop).
+      expect(forwarded).toMatchObject({ clientKeySource: 'source_ip', viaCloudFront: false });
+      expect(forwarded!.forwardedForKeys[1]).toBe(forwarded!.clientKey);
+      expect(forwarded!.forwardedForKeys[0]).not.toBe(forwarded!.clientKey);
+      expect(direct).toMatchObject({ forwardedForKeys: [], forwardedForHops: 0, clientKeySource: 'source_ip', viaCloudFront: false });
+      // Via CloudFront the key is the viewer hop's, the first of the three.
+      expect(cloudFront).toMatchObject({ clientKeySource: 'viewer_hop', viaCloudFront: true, forwardedForHops: 3 });
+      expect(cloudFront!.forwardedForKeys[0]).toBe(cloudFront!.clientKey);
+      expect(JSON.stringify(created)).not.toMatch(/198\.51|192\.0\.2|130\.176|108\.138/);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('D12 (H1): a direct caller forging Amplify-shaped hops is keyed on its own sourceIp, so fresh forged hops never reset its cap', async () => {
+    const { app } = testApp({ caps: { ...DEFAULT_CAPS, perClientDailyWorkspaceCreations: 2 } });
+    const direct = (i: number) => {
+      const e = fromIp('198.51.100.66');
+      e.headers = { ...e.headers, 'x-forwarded-for': `192.0.2.${i}, ${CF_EDGE}, ${CF_PROXY}` };
+      return e;
+    };
+    expect((await app(direct(1))).statusCode).toBe(200);
+    expect((await app(direct(2))).statusCode).toBe(200);
+    for (let i = 3; i < 10; i++) {
+      const refused = expectApiError(await app(direct(i)), 429, 'RATE_LIMITED');
+      expect(refused.error.details).toMatchObject({ scope: 'workspace_creation_client' });
+    }
+  });
+
+  it('D12: through CloudFront (viewer, edge, proxy) the cap is keyed on the viewer hop, so rotating proxies and forged leading hops share one visitor limit', async () => {
+    const { app } = testApp({ caps: { ...DEFAULT_CAPS, perClientDailyWorkspaceCreations: 2 } });
+    const spy = spyOnLog();
+    try {
+      expect((await app(viaCloudFront(CF_PROXY, ['198.51.100.7', CF_EDGE]))).statusCode).toBe(200);
+      // Another proxy address, and hops the client forged in front (even CloudFront-looking ones): still the same visitor.
+      expect((await app(viaCloudFront(CF_PROXY_2, ['10.9.9.9', CF_EDGE, '198.51.100.7', CF_EDGE]))).statusCode).toBe(200);
+      const refused = expectApiError(await app(viaCloudFront(CF_PROXY, ['203.0.113.250', '198.51.100.7', CF_EDGE])), 429, 'RATE_LIMITED');
+      expect(refused.error.details).toMatchObject({ scope: 'workspace_creation_client' });
+      // Another visitor through the same proxy still gets in.
+      expect((await app(viaCloudFront(CF_PROXY, ['198.51.100.99', CF_EDGE]))).statusCode).toBe(200);
+      const created = loggedLines(spy).filter((l) => l.msg === 'workspace created') as Array<{ clientKeySource: string; viaCloudFront: boolean }>;
+      expect(created.map((l) => [l.clientKeySource, l.viaCloudFront])).toEqual([
+        ['viewer_hop', true],
+        ['viewer_hop', true],
+        ['viewer_hop', true],
+      ]);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('D12 (M2): IPv6 viewers share a limit per /64, and an IPv4-mapped viewer is its IPv4 address', async () => {
+    const { app } = testApp({ caps: { ...DEFAULT_CAPS, perClientDailyWorkspaceCreations: 2 } });
+    expect((await app(viaCloudFront(CF_PROXY, ['2001:DB8:aa:bb::1', CF_EDGE]))).statusCode).toBe(200);
+    expect((await app(viaCloudFront(CF_PROXY, ['2001:db8:aa:bb:ffff:1:2:3', CF_EDGE]))).statusCode).toBe(200);
+    expectApiError(await app(viaCloudFront(CF_PROXY, ['2001:0db8:00aa:00bb::9', CF_EDGE])), 429, 'RATE_LIMITED');
+    expect((await app(viaCloudFront(CF_PROXY, ['2001:db8:aa:bc::1', CF_EDGE]))).statusCode).toBe(200); // another /64
+    // A direct IPv6 caller rotating inside its /64 is one client too.
+    expect((await app(fromIp('2001:db8:1:2::a'))).statusCode).toBe(200);
+    expect((await app(fromIp('2001:db8:1:2::b'))).statusCode).toBe(200);
+    expectApiError(await app(fromIp('2001:db8:1:2::c')), 429, 'RATE_LIMITED');
+    // ::ffff:198.51.100.20 and 198.51.100.20 are one client.
+    expect((await app(viaCloudFront(CF_PROXY, ['::ffff:198.51.100.20', CF_EDGE]))).statusCode).toBe(200);
+    expect((await app(fromIp('198.51.100.20'))).statusCode).toBe(200);
+    expectApiError(await app(viaCloudFront(CF_PROXY, ['::FFFF:198.51.100.20', CF_EDGE])), 429, 'RATE_LIMITED');
+  });
+
+  it('D12 (M3): a long forged X-Forwarded-For is keyed for its last 5 hops only, and the line counts every hop', async () => {
+    const { app } = testApp();
+    const spy = spyOnLog();
+    try {
+      const hops = Array.from({ length: 40 }, (_, i) => `10.0.0.${i}`);
+      const e = fromIp('198.51.100.9');
+      e.headers = { ...e.headers, 'x-forwarded-for': hops.join(',') };
+      expect((await app(e)).statusCode).toBe(200);
+      const line = loggedLines(spy).find((l) => l.msg === 'workspace created') as { forwardedForKeys: string[]; forwardedForHops: number };
+      expect(line.forwardedForHops).toBe(40);
+      expect(line.forwardedForKeys).toEqual(hops.slice(-5).map((h) => clientKey(TEST_SECRET, h)));
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('H1: the global cap still applies across clients (scope workspace_creation)', async () => {

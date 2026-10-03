@@ -1,0 +1,200 @@
+DiligenceIQ example request
+  Base URL:  https://diligenceiq.mikemiller.ai
+  Question:  How have Apple's regulatory disclosures changed from 2023 through 2025, and what actions does management describe?
+  Tickers:   AAPL
+  Note: against production, each run makes one paid Bedrock generation call (estimated $0.09–0.13)
+        and creates one demo workspace.
+
+Session:   workspace 7GdvVRIa37lG68pGfzi27Q (created: true, expires 2026-11-02T17:23:20.000Z)
+Analysis:  0musnut8nOjvY7SCANb queued (HTTP 202)
+
+  [  2s] RUNNING (loading_index)
+  [  4s] RUNNING (generating)
+  [ 53s] COMPLETE (complete)
+
+Raw poll response saved to examples/sample-analysis.json
+
+====================================================================================================
+Apple Regulatory Disclosure Evolution: FY2023–FY2025
+====================================================================================================
+Question: How have Apple's regulatory disclosures changed from 2023 through 2025, and what actions does management describe?
+Scope:    AAPL · FY2023, FY2024, FY2025 · 10-K, 10-Q
+
+Summary
+  Apple's regulatory risk disclosures have grown materially more specific and consequential from
+  FY2023 through FY2025, moving from forward-looking DMA compliance obligations to reporting
+  concrete actions already taken—including EU App Store restructuring, U.S. court-ordered commission
+  restrictions, and a new Google antitrust ruling with direct revenue implications. Management
+  describes an expanding set of implemented changes (alternative distribution, fee structures,
+  payment processing) alongside ongoing challenges from the European Commission and U.S. antitrust
+  litigation. By FY2025, the disclosure landscape also incorporates new macro-regulatory
+  risks—tariffs on imports from multiple countries and AI/machine learning legal considerations—that
+  were absent in FY2023.
+
+Key findings
+  1. DMA Compliance: From Obligation to Implemented Changes (reported; AAPL)
+     In FY2023, Apple disclosed it was required to comply with the EU Digital Markets Act by March
+     2024 and described future changes as anticipated. By FY2024, Apple reported it had already
+     implemented changes to iOS, iPadOS, the App Store and Safari in the EU, including new business
+     terms, alternative fee structures, alternative distribution methods, alternative payment
+     processing, and additional developer tools and APIs. FY2025 disclosures repeat these
+     implemented changes and add that the compliance plan has been challenged by the European
+     Commission and may be challenged further by private litigants. [AAPL-FY2023-10K-1A-017,
+     AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-016, AAPL-FY2025-10K-1A-017]
+  2. U.S. App Store: Court Order Restricting Commissions Added in FY2025 (reported; AAPL)
+     FY2023 and FY2024 disclosures described U.S. App Store changes to developer-consumer
+     communications regarding alternative purchasing mechanisms as implemented actions. FY2025 adds
+     a materially new element: Apple is 'currently subject to a court order preventing it from
+     imposing any commission or fee on certain purchases that consumers make,' a specific legal
+     constraint not present in prior-year filings. [AAPL-FY2023-10K-1A-017, AAPL-FY2024-10K-1A-017,
+     AAPL-FY2025-10K-1A-016]
+  3. Google Antitrust Ruling Introduces Direct Revenue Risk in FY2025 (reported; AAPL)
+     FY2023 and FY2024 filings disclosed that Apple's search licensing arrangements with Google and
+     others were subject to government investigations and legal proceedings. FY2025 adds that on
+     August 5, 2024, Google was found to have violated U.S. antitrust laws, and on September 2,
+     2025, the D.C. District Court ordered certain remedies. The filing warns that if DOJ-proposed
+     remedies—such as prohibiting Google from offering Apple commercial terms for search
+     distribution—were implemented, they 'could materially adversely affect the Company's ability to
+     earn revenue from such licensing arrangements.' [AAPL-FY2023-10K-1A-018,
+     AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-017, AAPL-FY2025-10K-1A-018]
+  4. U.S. Antitrust Litigation Named Explicitly from FY2024 Onward (reported; AAPL)
+     FY2023 disclosures referenced antitrust investigations in various jurisdictions generally.
+     FY2024 and FY2025 filings specifically name civil antitrust lawsuits in the U.S. alleging
+     monopolization or attempted monopolization in the markets for 'performance smartphones' and
+     'smartphones' generally in violation of U.S. antitrust laws, representing a more granular and
+     escalated disclosure. [AAPL-FY2023-10K-1A-017, AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-017]
+  5. New Risk Categories Emerge in FY2025: Tariffs and AI (reported; AAPL)
+     FY2025 introduces two regulatory risk categories absent from FY2023 and FY2024 filings. First,
+     beginning in the second quarter of FY2025, new U.S. tariffs were announced on imports from
+     China, India, Japan, South Korea, Taiwan, Vietnam, the EU and others, with a Section 232
+     semiconductor investigation also noted. Second, AI and machine learning are cited as
+     exacerbating patent and data privacy risks, including risks of novel IP claims and inadvertent
+     personal data disclosure. [AAPL-FY2025-10K-MDA-001, AAPL-FY2025-10K-1A-013,
+     AAPL-FY2025-10K-1A-018]
+  6. ESG and Social Disclosure Language Shifts in FY2025 (analysis; AAPL)
+     FY2023 and FY2024 filings framed ESG risk around stakeholder expectations and reporting
+     obligations, referencing climate change, human and civil rights, and diversity, equity and
+     inclusion. FY2025 reframes this section under 'Varied stakeholder expectations about social and
+     other issues,' removing explicit ESG terminology and referencing 'evolving, varied and at times
+     conflicting federal, state and international laws, executive orders, regulations and
+     standards,' reflecting a more legally cautious and politically neutral framing.
+     [AAPL-FY2023-10K-1A-016, AAPL-FY2024-10K-1A-016, AAPL-FY2025-10K-1A-016]
+
+Comparison (trend)
+  EU DMA Status
+     FY2023: Compliance required by March 2024; changes anticipated
+     FY2024: Changes implemented (fees, distribution, payments, APIs); Commission engagement ongoing
+     FY2025: Same changes in place; compliance plan challenged by Commission and potentially private
+     litigants
+     Sources: [AAPL-FY2023-10K-1A-017, AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-016,
+     AAPL-FY2025-10K-1A-017]
+  U.S. App Store Court Order
+     FY2023: Not disclosed
+     FY2024: Not disclosed
+     FY2025: Court order prohibits commission/fee on certain purchases
+     Sources: [AAPL-FY2023-10K-1A-017, AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-016]
+  U.S. Antitrust Litigation
+     FY2023: Antitrust investigations in various jurisdictions referenced generally
+     FY2024: Civil lawsuits named: monopolization in 'performance smartphones' and 'smartphones'
+     markets
+     FY2025: Same civil lawsuits named; ongoing investigations in Europe and other jurisdictions
+     Sources: [AAPL-FY2023-10K-1A-017, AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-017]
+  Google Search Licensing Risk
+     FY2023: Arrangements subject to government investigations and legal proceedings
+     FY2024: Same disclosure; Google LLC named explicitly
+     FY2025: Google found to have violated U.S. antitrust laws (Aug 2024); court remedies ordered
+     (Sep 2025); DOJ remedies could bar commercial search distribution terms
+     Sources: [AAPL-FY2023-10K-1A-018, AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-017,
+     AAPL-FY2025-10K-1A-018]
+  Tariff / Trade Risk
+     FY2023: Export/import regulation risk noted generally
+     FY2024: Export/import regulation risk noted generally
+     FY2025: New U.S. tariffs on imports from multiple countries; Section 232 semiconductor
+     investigation disclosed
+     Sources: [AAPL-FY2023-10K-1A-016, AAPL-FY2024-10K-1A-016, AAPL-FY2025-10K-MDA-001]
+  AI / Machine Learning Regulatory Risk
+     FY2023: Not disclosed
+     FY2024: AI/ML cited as expanding compliance cost risk in health and financial services
+     FY2025: AI/ML cited as exacerbating patent claims, novel IP risks, and personal data disclosure
+     risks
+     Sources: [AAPL-FY2024-10K-1A-016, AAPL-FY2025-10K-1A-013, AAPL-FY2025-10K-1A-018]
+  ESG / Social Risk Framing
+     FY2023: ESG framing: climate, human/civil rights, DEI; reporting obligations
+     FY2024: Same ESG framing with reporting obligations
+     FY2025: Reframed as 'varied stakeholder expectations'; references conflicting laws and
+     executive orders; explicit ESG terminology removed
+     Sources: [AAPL-FY2023-10K-1A-016, AAPL-FY2024-10K-1A-016, AAPL-FY2025-10K-1A-016]
+
+Considerations
+  - The FY2025 court order barring Apple from imposing commissions or fees on certain purchases,
+  combined with the DMA's alternative fee structures and distribution requirements already in place
+  in the EU, represents a compounding structural pressure on App Store economics. Diligence teams
+  should assess the cumulative revenue and margin impact of these constraints, noting that the
+  filings warn such changes could reduce App Store sales and commission rates.
+  [AAPL-FY2025-10K-1A-016, AAPL-FY2024-10K-1A-010, AAPL-FY2023-10K-1A-010]
+  - The Google antitrust ruling and associated court remedies introduce a specific, named revenue
+  risk to Apple's search licensing income. The FY2025 filing explicitly warns that DOJ-proposed
+  remedies prohibiting Google from offering Apple commercial search distribution terms 'could
+  materially adversely affect the Company's ability to earn revenue from such licensing
+  arrangements,' a risk that was only generically described in FY2023 and FY2024.
+  [AAPL-FY2025-10K-1A-017, AAPL-FY2025-10K-1A-018, AAPL-FY2024-10K-1A-017]
+  - The FY2025 tariff disclosure—covering imports from China, India, Japan, South Korea, Taiwan,
+  Vietnam and the EU, plus a Section 232 semiconductor investigation—signals a new and material
+  supply chain and cost risk not present in prior filings. The filing notes the ultimate impact
+  'remains uncertain' and depends on further government actions, making this a key area for scenario
+  analysis in any financial model. [AAPL-FY2025-10K-MDA-001]
+  - The progressive escalation from anticipated DMA compliance (FY2023) to implemented changes under
+  Commission challenge (FY2025) suggests ongoing regulatory execution risk in the EU. The filing
+  notes the DMA 'provides for significant fines and penalties for noncompliance' and that 'many
+  risks will remain' even after Apple's implemented changes, indicating that EU regulatory exposure
+  is not resolved. [AAPL-FY2023-10K-1A-017, AAPL-FY2024-10K-1A-017, AAPL-FY2025-10K-1A-017]
+
+Evidence gaps
+  - No 10-Q filings are included in the excerpts; intra-year regulatory developments between annual
+  filings (e.g., Q1–Q3 FY2025 or FY2024) are not covered.
+  - The filings do not quantify the revenue contribution from Google search licensing arrangements,
+  so the financial magnitude of the Google antitrust remedy risk cannot be assessed from these
+  excerpts alone.
+  - The filings do not disclose the specific fine amounts or financial penalties Apple has incurred
+  or accrued in connection with DMA non-compliance proceedings.
+  - The financial impact of the U.S. court order restricting App Store commissions is not quantified
+  in the excerpts.
+  - The excerpts do not cover any FY2025 10-Q filings that might contain more recent updates on the
+  Google remedy proceedings or DMA Commission actions after the FY2025 10-K filing date.
+
+Follow-up questions
+  - What specific financial liabilities or accruals has Apple recorded in its FY2024 and FY2025
+  financial statements in connection with App Store litigation and DMA-related proceedings?
+  - How does Apple's FY2025 10-K describe the quantitative contribution of search licensing revenue
+  to its Services segment, and what contingency disclosures accompany the Google antitrust remedy
+  risk?
+  - What changes, if any, did Apple disclose in its FY2025 quarterly filings (10-Qs) regarding the
+  status of the European Commission's challenge to its DMA compliance plan?
+  - How have Apple's disclosures regarding data privacy obligations—particularly for health,
+  biometric and financial data—evolved across FY2023, FY2024 and FY2025 in light of the AI/machine
+  learning risk language added in FY2025?
+
+Citations (12, each a passage supplied to the model)
+  AAPL-FY2023-10K-1A-017  Apple Inc FY2023 10-K (filed 2023-11-03) · Item 1A — Risk Factors › Legal and Regulatory Compliance Risks
+  AAPL-FY2024-10K-1A-017  Apple Inc FY2024 10-K (filed 2024-11-01) · Item 1A — Risk Factors › Business Risks
+  AAPL-FY2025-10K-1A-016  Apple Inc FY2025 10-K (filed 2025-10-31) · Item 1A — Risk Factors › Legal and Regulatory Compliance Risks
+  AAPL-FY2025-10K-1A-017  Apple Inc FY2025 10-K (filed 2025-10-31) · Item 1A — Risk Factors › Legal and Regulatory Compliance Risks
+  AAPL-FY2023-10K-1A-018  Apple Inc FY2023 10-K (filed 2023-11-03) · Item 1A — Risk Factors › Legal and Regulatory Compliance Risks
+  AAPL-FY2025-10K-1A-018  Apple Inc FY2025 10-K (filed 2025-10-31) · Item 1A — Risk Factors › Legal and Regulatory Compliance Risks
+  AAPL-FY2025-10K-MDA-001  Apple Inc FY2025 10-K (filed 2025-10-31) · Item 7 — Management’s Discussion and Analysis
+  AAPL-FY2025-10K-1A-013  Apple Inc FY2025 10-K (filed 2025-10-31) · Item 1A — Risk Factors › Macroeconomic and Industry Risks
+  AAPL-FY2023-10K-1A-016  Apple Inc FY2023 10-K (filed 2023-11-03) · Item 1A — Risk Factors › Legal and Regulatory Compliance Risks
+  AAPL-FY2024-10K-1A-016  Apple Inc FY2024 10-K (filed 2024-11-01) · Item 1A — Risk Factors › Business Risks
+  AAPL-FY2024-10K-1A-010  Apple Inc FY2024 10-K (filed 2024-11-01) · Item 1A — Risk Factors › Business Risks
+  AAPL-FY2023-10K-1A-010  Apple Inc FY2023 10-K (filed 2023-11-03) · Item 1A — Risk Factors › Business Risks
+
+Validation (deterministic, server-side)
+  Citations: 53 of 53 valid; 0 removed
+  Figures:   0 of 0 verified against the cited passages
+
+Telemetry
+  Model us.anthropic.claude-sonnet-4-6 · prompt da-v4 · index iv-9cf51c066743
+  Generation calls: 1 · embedding calls: 1 · rerank calls: 0
+  Context: 25 chunks from 3 filings (84 retrieved)
+  Tokens: 20024 in / 3800 out · estimated cost $0.1171
+  Time: retrieval 279 ms · generation 48538 ms · total 51435 ms

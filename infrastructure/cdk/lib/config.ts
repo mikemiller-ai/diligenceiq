@@ -19,6 +19,11 @@ export const CONFIG = {
    * (CloudFormation cannot create SecureStrings), referenced here by name only.
    */
   sessionSecretParameterName: '/diligenceiq/session-secret',
+  /**
+   * Where alarm notifications go: an SSM String the admin creates, resolved by CloudFormation
+   * at deploy time, so the address never sits in the repo or the template.
+   */
+  alertEmailParameterName: '/diligenceiq/alert-email',
   /** Spend caps (SPEC §35.11), passed to the api as environment variables. */
   caps: { workspaceHourlyAnalyses: 10, globalDailyAnalyses: 200, dailyWorkspaceCreations: 500, perClientDailyWorkspaceCreations: 100 },
   /** The index the worker loads from s3://<data bucket>/index/<indexVersion>/ (Phase 2 build, verified in S3). */

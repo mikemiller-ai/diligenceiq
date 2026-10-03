@@ -19,6 +19,7 @@ export function buildApp(app: App) {
     table: core.table,
     dataBucket: core.dataBucket,
     killSwitch: core.killSwitch,
+    alertTopic: core.alertTopic,
   });
   const api = new ApiStack(app, CONFIG.stackNames.api, {
     ...common,

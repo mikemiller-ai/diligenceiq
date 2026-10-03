@@ -108,6 +108,20 @@ describe('CoreStack', () => {
       Value: 'false',
     });
   });
+
+  it('Phase 8: an alert topic with an email subscription read from SSM at deploy time; no Budget resource (the account owns it)', () => {
+    templates.core.hasResourceProperties('AWS::SNS::Topic', { TopicName: 'diligenceiq-alerts' });
+    const subs = resourcesOf(templates.core, 'AWS::SNS::Subscription');
+    expect(subs).toHaveLength(1);
+    expect(propsOf(subs[0]!).Protocol).toBe('email');
+    // The endpoint is a CloudFormation parameter backed by the SSM String, never a literal address.
+    const endpoint = propsOf(subs[0]!).Endpoint as { Ref?: string };
+    expect(endpoint.Ref).toBeDefined();
+    const param = (templates.core.toJSON().Parameters as Record<string, { Type: string; Default?: string }>)[endpoint.Ref!]!;
+    expect(param).toEqual({ Type: 'AWS::SSM::Parameter::Value<String>', Default: CONFIG.alertEmailParameterName });
+    expect(JSON.stringify(templates.core.toJSON())).not.toMatch(/@[a-z0-9-]+\.[a-z]{2,}/i);
+    expect(resourcesOf(templates.core, 'AWS::Budgets::Budget')).toHaveLength(0);
+  });
 });
 
 describe('ApiStack', () => {
@@ -214,7 +228,7 @@ describe('WebStack', () => {
     const join = (apiRule!.Target as { 'Fn::Join': [string, unknown[]] })['Fn::Join'];
     expect(join[1].at(-1)).toBe('/api/<*>');
     expect(join[1].at(0)).toBeTypeOf('object'); // the API endpoint token
-    expect(notFound).toEqual({ Source: '/<*>', Target: '/404.html', Status: '404' });
+    expect(notFound).toEqual({ Source: '/<*>', Target: '/404.html', Status: '404-200' });
   });
 
   it('sets the security headers on every path', () => {
@@ -317,6 +331,18 @@ describe('WorkerStack (architecture §4.3, §5; DD-04)', () => {
       MetricTransformations: [Match.objectLike({ MetricName: GENERATION_CALLS_OVER_ONE, MetricValue: '1' })],
     });
     templates.worker.hasResourceProperties('AWS::CloudWatch::Alarm', { MetricName: GENERATION_CALLS_OVER_ONE, Threshold: 1, TreatMissingData: 'notBreaching' });
+  });
+
+  it('Phase 8: both alarms notify exactly the core alert topic (a weak Fn::GetStackOutput reference to its Ref output)', () => {
+    const topicIds = Object.keys(templates.core.findResources('AWS::SNS::Topic', { Properties: { TopicName: 'diligenceiq-alerts' } }));
+    expect(topicIds).toHaveLength(1);
+    const outputs = templates.core.toJSON().Outputs as Record<string, { Value: unknown }>;
+    const outputNames = Object.keys(outputs).filter((name) => JSON.stringify(outputs[name]!.Value) === JSON.stringify({ Ref: topicIds[0] }));
+    expect(outputNames).toHaveLength(1);
+    const expected = [{ 'Fn::GetStackOutput': { StackName: stacks.core.stackName, Region: stacks.core.region, OutputName: outputNames[0] } }];
+    const alarms = resourcesOf(templates.worker, 'AWS::CloudWatch::Alarm');
+    expect(alarms).toHaveLength(2);
+    for (const alarm of alarms) expect(propsOf(alarm).AlarmActions).toEqual(expected);
   });
 
   it('Phase 7 IAM review: no managed policies; each function writes only to its own log group', () => {

@@ -160,7 +160,13 @@ Synthesize all stacks and assert:
   - **CSP (Phase 7, `security.spec.ts`):** nine pages load and hydrate with zero `securitypolicyviolation` events, as does client-side navigation; every page has one CSP `<meta>`; an inline script injected after load is blocked; the theme pre-paint script applies a stored Dark choice with every `/_next/static` bundle blocked, which proves it runs by its hash.
   - **Phase 8b (P1):** thesis link and watchlist toggle.
   - **Reset.**
-- **Prod smoke** (`tests/e2e/smoke`): landing, Company Intelligence for AAPL (profile loads, no model call), compare, a citation opening `/sources/filing` at its passage (the `/sources` explorer is P1, Phase 8b, and is smoke-tested only once built), one real analysis to COMPLETE with valid citations, security headers present. Runs against `https://diligenceiq.mikemiller.ai`.
+- **Prod smoke:** see "Production smoke (Phase 8)" below.
+
+**Production smoke (Phase 8).** `pnpm e2e:prod` runs `tests/e2e/prod` (its own config, `tests/e2e/prod/playwright.config.ts`, Playwright project `prod`, one worker) against `PROD_URL` (default `https://diligenceiq.mikemiller.ai`). It starts no local server and is never part of `pnpm e2e` or the gate. It is **read-only**:
+- **Writes:** at most **one** anonymous workspace per run. `global-setup.ts` sends `POST /api/session` once and saves the cookie (`<os tmpdir>/diligenceiq-e2e-prod/<host>.json`); every test reuses it, and a later run confirms the saved workspace (`created: false`) instead of creating one, so repeat runs usually create none (per-client cap 100/day, global 500/day).
+- **Guard:** every browser request other than a read or `POST /api/session` is aborted and fails the test (`fixtures.ts`); the api clients expose only GET and the session request. `POST /api/analyses` is never sent: a live analysis is `pnpm analysis:run`, with Mike's approval only.
+- **Coverage (SPEC §49 Phase 8):** HTTPS (and HTTP → HTTPS), the Amplify security headers on pages and `/api/*` (HSTS, nosniff, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy, header CSP `frame-ancestors 'none'`; the api adds `x-request-id`); one CSP `<meta>` and zero violations on every P0 page, the seeded brief and the source view; the `__Host-diq_ws` cookie (Secure, HttpOnly, SameSite=Lax, Path=/, no Domain) through the rewrite, and 401 `SESSION_REQUIRED` without it; `/api/health` (index manifest reachable, active set on the same index); `/api/companies` = the 53 profiled companies and a schema-valid, integrity-clean profile from the active set for each (sequential, under the throttle), GE `PROFILE_MISSING` (G2); a cited AAPL passage byte-identical in its source filing and its adjacent periods (S3); the AAPL dashboard, Compare, Findings, a seeded brief (DynamoDB) and Architecture render; a prefilled Deep Analysis sends no `POST /api/analyses`; documented error codes for an unknown ticker, analysis, filing and api route; an unknown page is a 404; no sideways scroll at 390 px on the dashboard and Compare.
+- It reports the served profile set (`e2e:prod profile set <iv>/<set>: <n> companies`) and whether it created a workspace.
 
 ## 7. Evaluation harness
 
@@ -204,7 +210,7 @@ The SPEC §51.3 expert question ("How have Apple's regulatory disclosures change
 | Full-corpus tests | Yes when `CORPUS_PATH` is present, otherwise skipped with a message | | No |
 | CDK assertion tests | Yes (`pnpm test` + `pnpm cdk:synth`) | | No |
 | Playwright local (static export, real api in-process, stub worker) | Yes (`pnpm e2e`, after `pnpm build`) | Yes (`pnpm e2e`) | No |
-| Playwright prod smoke | | Yes (`pnpm e2e:smoke`) | Yes (deployed app) |
+| Playwright prod smoke (read-only; ≤ 1 anonymous workspace per run) | | Yes (`pnpm e2e:prod`) | Yes (deployed app) |
 | Eval harness | | Yes (`pnpm eval:retrieval`, `--generate`, `--set robustness`; replay is free, `--live` and `--embed` spend) | Only for new recordings (Bedrock, real index) |
 | Architecture-page traceability (`measured.test.ts`) | Yes (`pnpm test`) | | No |
 | Web performance | | Yes (`pnpm eval:web-perf`) | No |

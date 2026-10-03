@@ -1,5 +1,6 @@
 import { CfnOutput, Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
+import * as cloudwatchActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import type * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -7,6 +8,7 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import type * as s3 from 'aws-cdk-lib/aws-s3';
+import type * as sns from 'aws-cdk-lib/aws-sns';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import type * as ssm from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
@@ -17,6 +19,8 @@ export interface WorkerStackProps extends StackProps {
   table: dynamodb.ITable;
   dataBucket: s3.IBucket;
   killSwitch: ssm.IStringParameter;
+  /** Where both alarms notify (Phase 8). */
+  alertTopic: sns.ITopic;
 }
 
 /** Metric namespace for the single-call alarm (SPEC §30.1). */
@@ -135,7 +139,7 @@ export class WorkerStack extends Stack {
     this.dlqFunction.addToRolePolicy(new iam.PolicyStatement({ actions: ['dynamodb:UpdateItem'], resources: [props.table.tableArn] }));
 
     // SPEC §30.1: generationCallCount must never exceed 1. The metric filter is free; the alarm
-    // is about $0.10 a month. Its notification target is added with the Phase 8 alerts.
+    // is about $0.10 a month. It notifies the alert topic (Phase 8).
     const overOne = new logs.MetricFilter(this, 'GenerationCallsOverOneFilter', {
       logGroup: workerLogs,
       filterPattern: logs.FilterPattern.all(logs.FilterPattern.stringValue('$.event', '=', 'analysis_summary'), logs.FilterPattern.numberValue('$.generationCallCount', '>', 1)),
@@ -144,7 +148,7 @@ export class WorkerStack extends Stack {
       metricValue: '1',
       defaultValue: 0,
     });
-    new cloudwatch.Alarm(this, 'GenerationCallsOverOneAlarm', {
+    const overOneAlarm = new cloudwatch.Alarm(this, 'GenerationCallsOverOneAlarm', {
       metric: overOne.metric({ statistic: 'Sum', period: Duration.minutes(5) }),
       threshold: 1,
       evaluationPeriods: 1,
@@ -203,8 +207,8 @@ export class WorkerStack extends Stack {
     // The dlq-handler drains the DLQ within seconds, so the queue's depth would almost never be
     // seen at 1; the handler's invocations are the signal instead: each one is at least one
     // analysis message the worker gave up on (the handler marks it failed). Lambda metrics are
-    // free; the alarm is about $0.10 a month. Notification target: Phase 8.
-    new cloudwatch.Alarm(this, 'DlqHandlerInvokedAlarm', {
+    // free; the alarm is about $0.10 a month. It notifies the alert topic (Phase 8).
+    const dlqAlarm = new cloudwatch.Alarm(this, 'DlqHandlerInvokedAlarm', {
       metric: this.dlqFunction.metricInvocations({ statistic: 'Sum', period: Duration.minutes(5) }),
       threshold: 1,
       evaluationPeriods: 1,
@@ -212,6 +216,8 @@ export class WorkerStack extends Stack {
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
       alarmDescription: 'An analysis message reached the dead-letter queue and the dlq-handler ran (architecture §12).',
     });
+
+    for (const alarm of [overOneAlarm, dlqAlarm]) alarm.addAlarmAction(new cloudwatchActions.SnsAction(props.alertTopic));
 
     new CfnOutput(this, 'AnalysisQueueUrl', { value: this.queue.queueUrl });
     new CfnOutput(this, 'WorkerFunctionName', { value: this.workerFunction.functionName });

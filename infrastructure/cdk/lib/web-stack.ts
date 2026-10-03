@@ -47,8 +47,9 @@ export class WebStack extends Stack {
       // Order matters: Amplify applies the first matching rule.
       customRules: [
         { source: '/api/<*>', target: `${props.apiEndpoint}/api/<*>`, status: '200' },
-        // '404' (not '404-200') so unknown paths return a real 404 status; Amplify applies it only when no file matches.
-        { source: '/<*>', target: '/404.html', status: '404' },
+        // '404-200' (the "not found, rewrite" type): Amplify serves /404.html in place with a 404 status, only when no
+        // file matches. The plain '404' type redirected instead (302 to /404.html, then 200; Phase 8 prod smoke).
+        { source: '/<*>', target: '/404.html', status: '404-200' },
       ],
       customHeaders: customHeadersYaml(),
     });
