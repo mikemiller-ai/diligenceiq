@@ -3,11 +3,11 @@
 _Last updated: 2026-10-02 (local)_
 
 ## Branch
-`readability-prototype` (branched from `main` at `14295d0`; plan commit `6cee6eb`). Phase 6r step 1 is gated and staged for commit (awaiting Mike's go-ahead), then merge to `main`. `main`: Phase 6 `bdd817e`, deploy record `14295d0`.
+`main` (no remote yet). Last code commit: `c4a4797` (Phase 6r step 1; plan `6cee6eb`). Phase 6: `bdd817e`.
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 1 of 3: the Company Intelligence dashboard plus dark mode, gated (`pnpm gate` exit 0, 2026-10-02), not yet committed or deployed.** Handoff: `docs/handoffs/phase-06r-step1.md`.
-- Production still runs Phase 6 (deployed 2026-10-02): active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: pointer to `iv-9cf51c066743/det-v2`.
+**Phase 6r (readability, DD-21), step 1 of 3 is gated, committed (`c4a4797`) and deployed (2026-10-02): the readable Company Intelligence dashboard plus dark mode.** Handoff: `docs/handoffs/phase-06r-step1.md`.
+- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: pointer to `iv-9cf51c066743/det-v2`.
 - Mike's decisions 2026-10-02: keep the current dashboard depth plus signals (BLUF, chips, sparklines, condensed sections, jump bar), not the plain-language redesign; gate and deploy after the dashboard step; ship dark mode (System / Light / Dark) with it.
 
 ## Gate
@@ -19,9 +19,8 @@ _Last updated: 2026-10-02 (local)_
 Gate record: adversary (2 blockers, 7 high, 9 medium) → fresh fixer (all fixed with tests) → dark mode merged from its worktree → `/code-review` medium (no findings) → `pnpm gate` green.
 
 ## In flight
-- **Commit step 1** (Mike's go-ahead), merge `readability-prototype` into `main`, then **`pnpm deploy:web`** (ask first; web only) and a production check in light and dark.
-- Then Phase 6r step 2 (readable filing text and evidence), step 3 (brief and Compare), then Phase 7.
-- Housekeeping: the dark-mode worktree `.claude/worktrees/agent-ab8004e9c3c9d9634` (branch `worktree-agent-ab8004e9c3c9d9634`, uncommitted, already merged here by patch) can be removed after the commit.
+- **Done 2026-10-02 (Mike approved):** commit `c4a4797`, fast-forward `main`, `pnpm deploy:web` (Amplify job 7), production check (headless, 1280×800, system light and dark): AAPL, TSLA and JPM dashboards show the bottom line ("Revenue grew +6.4% in FY2025…", "Revenue fell −2.9%…", "Revenue growth slowed +2.8%…"), the jump bar (9–10 links) moves to Attention signals and marks it, every Show all opens, axe WCAG 2.1 A/AA clean on all six pages, body ground #F3F4F8 light / #0B1020 dark, and no API request other than reads and `POST /api/session`. The dark-mode worktree was removed (its changes are in `c4a4797`).
+- Next: Phase 6r step 2 (readable filing text and evidence, DD-21 e–f), step 3 (brief and Compare), then Phase 7.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
