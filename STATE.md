@@ -3,16 +3,16 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`phase-6r-step3`, branched from `main` at `7ee692c`; the step 3 work is uncommitted, waiting for Mike's go-ahead (no remote yet). On `main`: Phase 6r step 2 `a5cbf2b` (deployed), step 1 `c4a4797`, Phase 6 `bdd817e`.
+`main` (no remote yet). Last commits: `d3ce536` (plan Phase 6r step 4) and `280660b` (Phase 6r step 3), fast-forwarded from `phase-6r-step3`. Step 2: `a5cbf2b`; step 1: `c4a4797`; Phase 6: `bdd817e`.
 
 ## Current phase
-**Phase 6r (readability, DD-21), step 3 of 4 is gated (2026-10-03), not committed and not deployed: the brief and Compare (DD-21 g).** Handoff: `docs/handoffs/phase-06r-step3.md`. Steps 1 and 2 are deployed (handoffs `phase-06r-step1.md`, `phase-06r-step2.md`).
-- Production (unchanged by step 3): active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`, steps 1 and 2 live. Instant fallback: point the set at `iv-9cf51c066743/det-v2`.
+**Phase 6r (readability, DD-21), step 3 of 4 is gated, committed (`280660b`) and deployed (2026-10-03): the brief and Compare (DD-21 g).** Handoff: `docs/handoffs/phase-06r-step3.md`. Steps 1 and 2 are deployed (handoffs `phase-06r-step1.md`, `phase-06r-step2.md`).
+- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: point the set at `iv-9cf51c066743/det-v2`.
 - **Step 3 adds:**
   - **Brief:** a bottom line (each key finding's stored title linking to the finding, with chips for basis, companies and the validator's figure check; no direction colours, Mike's choice); a status line of counts; a jump bar (`components/diligence/jump-bar.tsx`, now shared with the dashboard) that links only shown sections, plus Sources.
   - **Compare:** trend cells on direction chips with the builder's change and year (`trendRead`: the dashboard's rules, plus no colour for a trend about an older year than the latest annual report); a legend; one chip per company in Diverging trends; long lists folded (areas 4, ranking 5, questions 3); management emphasis clamped to 3 lines.
   - Fix in passing: the `Table` wrapper is `relative`, so an sr-only header no longer makes the brief and Compare scroll sideways on a phone.
-- **Step 4 is planned, not started** (SPEC A.4 2026-10-03; implementation-plan row 6r): the refined Compare and Findings from the mockups Mike chose, `Compare - refined.html` and `Findings - refined.html`, in `~/Library/Mobile Documents/com~apple~CloudDocs/Downloads/DiligenceIQ redesign for readabilityv2/`. Ask follow-up is in (prefill only, `finding` origin, which core already accepts). The Deep Analysis and brief mockups in the same folder were not chosen. DD-21 (h) is still to be written at the start of step 4.
+- **Step 4 is planned, not started** (`d3ce536`: SPEC A.4 2026-10-03; implementation-plan row 6r): the refined Compare and Findings from the mockups Mike chose, `Compare - refined.html` and `Findings - refined.html`, in `~/Library/Mobile Documents/com~apple~CloudDocs/Downloads/DiligenceIQ redesign for readabilityv2/`. Ask follow-up is in (prefill only, `finding` origin, which core already accepts). The Deep Analysis and brief mockups in the same folder were not chosen. DD-21 (h) is still to be written at the start of step 4.
 
 ## Gate
 `pnpm gate` on 2026-10-03 against the Phase 6r step 3 working tree: **exit 0**.
@@ -23,10 +23,15 @@ _Last updated: 2026-10-03 (local)_
 Gate record: adversary (1 blocker, 1 high, 5 medium, 7 low) → fresh fixer (all 15 fixed with regression tests) → `/code-review` medium (1 confirmed: the Sources jump on a wide screen; fixed with a test) → `pnpm gate` green.
 
 ## In flight
-- **Waiting for Mike:** commit the step 3 tree on `phase-6r-step3` → fast-forward `main` → `pnpm deploy:web` → production check: a seeded brief's bottom line and jump bar (including Evidence coverage and Sources), Compare `AAPL,MSFT,NVDA` chips, legend and Show all, light and dark, phone width with no sideways scroll, and only reads plus `POST /api/session`.
-- `.claude/launch.json` is unchanged in git. A `design-mock` server (port 4180, serving the mockup folder) was started during the session from a temporary config entry that was then reverted.
+- **Done 2026-10-03 (Mike approved):** the two commits, the fast-forward to `main`, then `pnpm deploy:web` (Amplify job 9). The headless production check passed:
+  - **Brief** `0mur5o8buseedmulticloud` at 1280 px: six bottom-line headlines linking to `#finding-1`…`#finding-6`; status line "6 key findings · 16 passages cited · 36 of 36 figures found in their cited passages · 7 evidence gaps". Jump links: Summary, Bottom line, Key findings 6, Comparison 8, Considerations 4, Evidence coverage, Evidence gaps 7, Follow-up questions 4, Sources 24. Evidence coverage and the third headline land at 140 px, below the jump bar (bottom at 95 px), and are marked; Evidence gaps lands at 328 px (the end of the page) and is marked.
+  - **Compare** `AAPL,MSFT,NVDA`: 12 trend chips with the builder's change and year (for example Apple "Growing +6.4% in FY2025", Microsoft operating margin "Stable +0.98 pp in FY2025", NVIDIA "Slowing +114.2% in FY2025"); the legend; "Show all 9 areas" and "Show all 6 questions".
+  - **Light and dark:** dark rendered (body #0B1020); light rendered (body #F3F4F8). Axe was not run against production; it is clean in the e2e suite in both.
+  - **Phone, 390 px:** no sideways scroll on Compare or the brief; the brief shows the "Jump to section" menu.
+  - **Requests:** only reads and `POST /api/session`.
+  - In a background browser tab, smooth scrolling is paused, so jump checks need the tab in front.
 - **Known limit (M3, from step 2):** profile citations carry no subsection, so their drawer titles show only the section.
-- **Next:** step 4 (DD-21 h), then Phase 7.
+- **Next:** step 4 (DD-21 h first), then Phase 7.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
