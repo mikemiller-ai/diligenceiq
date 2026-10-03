@@ -3,15 +3,15 @@
 _Last updated: 2026-10-03 (local)_
 
 ## Branch
-`phase-7` (branched from `main` at `aec53f2`), **uncommitted**: Phase 7 waits for Mike's commit go-ahead. `main` holds Phase 6r step 4 (`feef6ff`) and its deploy record (`aec53f2`). There is no remote yet.
+`main` at `2aeaec5` (Phase 7), fast-forwarded from `phase-7`, plus this deploy record. There is no remote yet.
 
 ## Current phase
-**Phase 7 (evaluation, security, reliability, observability; plan row 7) is gated and not deployed.** Handoff: `docs/handoffs/phase-07.md`. Phase 6r (steps 1–4) is complete and deployed.
-- Production (unchanged by Phase 7): active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: `iv-9cf51c066743/det-v2`.
+**Phase 7 (evaluation, security, reliability, observability; plan row 7) is complete: gated, committed (`2aeaec5`) and deployed (2026-10-03).** Handoff: `docs/handoffs/phase-07.md`. Phase 6r (steps 1–4) is complete and deployed.
+- Production: active profile set `iv-9cf51c066743/llm-v3`, kill switch `false`. Instant fallback: `iv-9cf51c066743/det-v2`. Deployed: WorkerStack and ApiStack (2026-10-03 16:19 / 16:21 UTC), Amplify job 12.
 - **Phase 7 adds:**
   - **CSP** (assumptions D10, Mike's choice): after `next build`, `apps/web/src/build/csp.ts` writes each page's own `<meta>` CSP with `script-src 'self'` plus that page's inline-script hashes. Header CSP keeps `frame-ancestors`. The one residual allowance is `style-src 'unsafe-inline'` (sonner's runtime `<style>`). Zod runs `jitless` (`packages/core/src/zod-config.ts`, core's first import) so its `new Function` probe raises no violation.
   - **Validator: the caption rule** (Mike's decision). A bare currency caption ("(MILLIONS)") counts only as the first cell of a table header row, and states the unit of that table only (rule `caption_unit`). Any other scale caption in the passage disqualifies it, and it never overrides a preceding unit. `PROFILE_VALIDATOR_VERSION` is 3; the stored manifests keep 2, because a re-score changed nothing. da-v4 numeric grounding went from 0.911 to 0.989 (531/537).
-  - **Observability:** the api writes one `api_request` line per request (route template, status, duration, code). Logs are raw JSON lines on stdout, because Lambda's text format prefixes `console.log` output, which breaks JSON metric filters. `apiRequestId` now travels in the queue message and is non-fatal. Every fail path writes an `analysis_summary` line with status `failed`.
+  - **Observability:** the api writes one `api_request` line per request (route template, status, duration, code). Logs are raw JSON lines on stdout (tidiness only: the production check showed CloudWatch JSON filters also match Lambda's prefixed `console.log` lines). `apiRequestId` now travels in the queue message and is non-fatal. Every fail path writes an `analysis_summary` line with status `failed`.
   - **Metrics and alarms:** metric filters for generation latency, estimated cost, citations removed, `AnalysisFailed` by code (worker, dlq-handler and api) and `Api5xx`. Alarms: `GenerationCallsOverOne` and `DlqHandlerInvokedAlarm`.
   - **IAM:** each Lambda has its own role (`infrastructure/cdk/lib/lambda-role.ts`) that writes only to its own log group. No managed policies, enforced by the cost guard rule `iam-managed-policy`.
   - **Evals:** `evals/robustness.yaml` (6 questions; 5/6 pass; $0.6515 live, approved). It includes three planted-document injections; the realistic "last" one fails by the check's letter, because the brief quoted the planted text to reject it. The manual review is `evals/results/manual-review-iv-9cf51c066743-da-v4.md`: a Claude agent, 8 briefs, 62.5% of claims supported and 96.3% supported or partly. Web perf: `evals/results/web-perf.*`. `docs/evaluation.md` §7–§10 are new.
@@ -28,21 +28,20 @@ _Last updated: 2026-10-03 (local)_
 Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with tests; CLAUDE.md's Node line left to the main session) → `/code-review` medium (2 findings, both fixed: an apiRequestId regex that dropped base64 `+` and `/`, and perf bytes that omit lazy chunks, now documented as first-load) → `pnpm gate` green.
 
 ## In flight
-- **Waiting for Mike:** the commit (proposed message in the handoff), then each with his go-ahead:
-  1. fast-forward `main`;
-  2. **`pnpm deploy:infra` before `pnpm deploy:web`** (the Architecture page claims the CSP, logs, metrics and the scoped IAM are built, so infra must be live first; the WorkerStack deploys before the ApiStack through the cross-stack reference);
-  3. `pnpm deploy:web`;
-  4. production check.
-- **Production check plan:**
-  - The CSP `<meta>` is present, there are zero violations on the P0 pages, and the theme applies.
-  - The header CSP and nosniff are present; requests are reads only plus `POST /api/session`.
-  - Light and dark; 390 px.
-  - Read-only, approved by Mike: `aws logs test-metric-filter` with sample lines for every filter, then `aws logs filter-log-events` for `api_request` lines after page views. The filters have never been seen matching in production (the Phase 4 `GenerationCallsOverOne` had the console prefix too).
+- **Done 2026-10-03 (Mike approved):** the commit, the fast-forward, `pnpm deploy:infra` and `pnpm deploy:web` (both run by Mike). The headless production check passed:
+  - **CSP:** 7 P0 pages × light and dark × 1280 and 390 px (28 loads). Each has one CSP `<meta>`, zero `securitypolicyviolation` events and no sideways scroll.
+  - **Script control:** an injected inline script is blocked. The theme toggle sets Dark, and the stored Dark applies on reload with every `/_next/static` bundle blocked, so the hash works in production.
+  - **Requests:** only reads plus `POST /api/session` (`/api/analyses`, `/api/companies`, `/api/companies/<t>/intelligence`, `/api/findings`, `/api/health`, `/api/sources/<doc>`, `/api/session`).
+  - **Headers:** HSTS, nosniff, Referrer-Policy, X-Frame-Options DENY, Permissions-Policy, and the header CSP `frame-ancestors 'none'; base-uri 'self'; object-src 'none'`. The api adds nosniff and `x-request-id`.
+  - **Read-only log checks (Mike pre-approved):** all 8 deployed metric filters were tested with `aws logs test-metric-filter`, and each matches its sample line and rejects the counter-example.
+    - **They also match a line carrying Lambda's Text `console.log` prefix.** The adversary's H3 premise was wrong, and the Phase 4 one-call filter could always match. The docs are corrected.
+    - `filter-log-events`: 126 production `api_request` lines arrived as raw JSON, all with route templates (no IDs or queries) and status 200, apart from one `HEAD` probe (404, `unmatched`).
+  - **Not checked in production:** the worker's filters against real lines and either alarm firing. No analysis has run since the deploy (the kill switch is off); running one needs Mike's go-ahead.
 - **Known limits recorded, not fixed:**
   - The seeded expert-question brief misdates the Apple DMA fines to FY2025 (they are in FY2024's 1A-017) and claims AI and tariffs were absent from FY2023/FY2024 (evaluation.md §8). Mike: document now, fix in a da-v5 prompt later (a live eval run and a reseed, ask first).
   - The JS is heavy (about 390 KB gzipped first load on workspace pages; Zod and the core schemas).
   - M3 profile citations carry no subsection.
-- **Next after the deploy:** Phase 8 (production hardening, alarm notification targets, Budget alert, prod smoke, README and `examples/`). Do not build the Deep Analysis or brief mockups without asking.
+- **Next:** Phase 8 (production hardening, alarm notification targets, Budget alert, prod smoke, README and `examples/`). Do not build the Deep Analysis or brief mockups without asking.
 
 ## Decisions pending with Mike
 - **D12 (per-client creation cap keyed on `sourceIp`):** raised to 100 a day (Mike, 2026-10-02); verify the address the api sees in Phase 8.
@@ -158,7 +157,7 @@ Gate record: adversary (4 high, 6 medium, 8 low) → fresh fixer (all fixed with
 - **`cdk diff` is not side-effect free.** It publishes template and Lambda assets to the CDK bootstrap bucket.
 - **Profile build (Phase 4b):** `pnpm intelligence:build` never calls without `--yes` and never calls a company twice at one `profilePromptVersion` (S3 ledger). `--llm --max-calls 0` rebuilds the LLM set from stored outcomes for free. Changing anything that alters the request (evidence, blocks, prompt) marks new-format outcomes `stale_outcome`; the v3 outcomes have no hash (`promptVerified: false`), so keep `assemble`'s block-relevant output, `evidence.ts` and `prompt.ts` unchanged or bump the version.
 - **Deploy the api before activating a profile set that uses new schema fields.** The api validates profiles with its own bundled core schema (strict); an unknown field makes the profile read as `PROFILE_MISSING`, with no error surfaced to the user. Order: deploy:infra → pointer → smoke → deploy:web.
-- **Log with `log()` (raw stdout), never `console.log`, for anything a metric filter reads.** Lambda's Text format prefixes console lines, so `{ $.event = … }` filters cannot match them. Tests capture lines with `services/api/src/test-log.ts`, not a `console.log` spy.
+- **Log with `log()` (raw stdout).** Tests capture lines with `services/api/src/test-log.ts`; a `console.log` spy sees nothing. (CloudWatch JSON filters match prefixed `console.log` lines too, as tested in production on 2026-10-03, so a stray `console.log` would still be counted; it would just be untidy.)
 - **`out/` HTML is rewritten after `next build`** (`node src/build/csp.ts out`). Never hand-edit `out/`. A new inline script anywhere is picked up by the next build. A new runtime `eval` or `new Function` (for example a library JIT) shows as a CSP violation in `security.spec.ts`; Zod must stay `jitless`, set by core's first import.
 - **The caption rule is table-scoped.** A bare "(MILLIONS)" counts only as a table header's first cell. Any other scale caption ("(millions of shares)", a row label "(millions)") in the same passage turns the rule off, and it never overrides a preceding unit. Re-score all four prompt versions plus `--set robustness` after any validator change, and compare figure by figure against HEAD.
 - **Architecture page numbers are tests.** `measured.test.ts` recomputes every value and every digit in its text from `evals/results/*` and `docs/evaluation.md` §5. Re-running an eval or editing §5 fails the gate until `measured.ts` matches.

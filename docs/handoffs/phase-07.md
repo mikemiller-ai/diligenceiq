@@ -1,6 +1,6 @@
 # Phase 7 Handoff: Evaluation, Security and Observability
 
-_2026-10-03 (local). Branch `phase-7`, uncommitted until Mike's go-ahead. Not deployed._
+_2026-10-03 (local). Committed `2aeaec5` on `main`; deployed 2026-10-03._
 
 ## Why
 Implementation plan row 7 and SPEC §49 row 7: the eval harness and `docs/evaluation.md` covering Deep Analysis and profiles; unsupported-query and injection tests; structured logging, request IDs, 14-day retention and metric filters; input validation; security headers and the CSP (assumptions D10); the IAM review; accessibility and performance review; cost telemetry; and the Architecture and business-value page with measured numbers only.
@@ -27,7 +27,7 @@ Mike's decisions this phase:
   - Re-scores: da-v1 0.892 → 0.944, da-v2 0.873 → 0.977, da-v3 0.931 → 0.987, **da-v4 0.911 → 0.989 (531/537)**. All 149 near matches are now `caption_unit`, and no figure lost its verification (checked figure by figure against HEAD). The seed is unchanged.
 - **Observability (architecture §12).**
   - **api access line:** one `api_request` line per request, with the route template (never IDs or the query), status, duration and code.
-  - **Raw JSON logging:** `log()` writes raw JSON to stdout, because Lambda's text format prefixes `console.log` output, which defeats JSON metric filters.
+  - **Raw JSON logging:** `log()` writes raw JSON to stdout. The adversary's reason (that Lambda's text prefix defeats JSON metric filters) was disproved by the production check; see Deployed.
   - **Request ID correlation:** `apiRequestId` travels in the queue message (optional, non-fatal, base64 characters allowed).
   - **Failed summaries:** every fail path writes an `analysis_summary` line with status `failed` and its code: worker, dlq-handler, poll expiry, enqueue failure.
 - **Metrics and alarms.**
@@ -97,16 +97,16 @@ Mike's decisions this phase:
 - No screen-reader walkthrough was done.
 
 ## Deployed
-Nothing yet. Required order: `pnpm deploy:infra` (CoreStack, then WorkerStack, then ApiStack, then WebStack; the cross-stack references order them), **then** `pnpm deploy:web`.
+2026-10-03, run by Mike after his approval: `pnpm deploy:infra` (WorkerStack 16:19 UTC, ApiStack 16:21 UTC; CoreStack and WebStack had no change), then `pnpm deploy:web` (Amplify job 12).
+
+**Production check (headless):**
+- **CSP:** 28 page loads (7 P0 pages, light and dark, 1280 and 390 px), each with one CSP `<meta>`, zero violations and no sideways scroll.
+- **Script control:** an injected inline script is blocked. The theme toggle works, and the stored Dark applies with every bundle blocked (the hash works).
+- **Requests:** only reads plus `POST /api/session`.
+- **Headers:** all present on pages and the api.
+- **Metric filters** (read-only checks Mike approved): all 8 deployed patterns match their sample lines and reject counter-examples. They match equally a line with Lambda's Text `console.log` prefix, so H3's premise was wrong; the raw stdout lines stay, and the docs say why.
+- **Real logs:** 126 `api_request` lines arrived as raw JSON, with route templates only.
+- **Not checked:** the worker filters against a real line and an alarm firing. No analysis has run (the kill switch is off).
 
 ## Next
-1. Commit (Mike).
-2. Fast-forward `main`.
-3. Deploy infra, then web (Mike).
-4. Production check:
-   - the CSP meta and zero violations;
-   - headers;
-   - reads only plus `POST /api/session`;
-   - light, dark and 390 px;
-   - read-only `aws logs test-metric-filter` and `filter-log-events` (approved).
-5. Phase 8.
+Phase 8 (implementation plan row 8). Optionally, with Mike's go-ahead, one analysis through production to see the worker's summary line reach its metric filters.

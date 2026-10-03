@@ -43,10 +43,10 @@ export function error(
 
 /**
  * One JSON object per line so CloudWatch Logs Insights can query fields directly and the metric
- * filters' JSON selectors (`{ $.event = ... }`) match. Written raw to stdout, not through
- * `console.log`: under Lambda's default Text log format the runtime prefixes every console line
- * with a timestamp, request ID and level, which makes the line not JSON; stdout lines are
- * captured verbatim (the way Embedded Metric Format is emitted). Architecture §12.
+ * filters' JSON selectors (`{ $.event = ... }`) match. Written raw to stdout, so each event is
+ * exactly the JSON object with no runtime prefix. (Production check, 2026-10-03: CloudWatch's
+ * JSON filters also match a `console.log` line under Lambda's Text-format prefix, so this is
+ * tidiness, not a fix; architecture §12.)
  */
 export function log(
   level: 'info' | 'warn' | 'error',
