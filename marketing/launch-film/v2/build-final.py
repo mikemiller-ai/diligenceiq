@@ -136,7 +136,10 @@ def mux():
 def publish():
     os.makedirs(WEB, exist_ok=True)
     shutil.copyfile(os.path.join(OUT, 'diligenceiq-launch-film.mp4'), os.path.join(WEB, 'diligenceiq-launch-film.mp4'))
-    shutil.copyfile(os.path.join(OUT, 'poster.jpg'), os.path.join(WEB, 'diligenceiq-launch-film-poster.jpg'))
+    # The designed poster (poster/posters.html, option A, rendered by poster/render.mjs) replaces the frame grab.
+    designed = os.path.join(ROOT, 'poster', 'poster-a.jpg')
+    shutil.copyfile(designed if os.path.exists(designed) else os.path.join(OUT, 'poster.jpg'),
+                    os.path.join(WEB, 'diligenceiq-launch-film-poster.jpg'))
     shutil.copyfile(os.path.join(ROOT, 'diligenceiq-launch-film.vtt'), os.path.join(WEB, 'diligenceiq-launch-film.vtt'))
     print(f'published to {WEB}')
 

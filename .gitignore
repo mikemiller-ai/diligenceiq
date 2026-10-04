@@ -38,3 +38,8 @@ UPDATED_FDE-AI-RAG-Assessment.pdf
 
 # The presenter's private demo run sheet (SPEC A.4, 2026-10-03): kept locally, never published.
 docs/demo-script.md
+# Poster work files: source frames and render outputs (poster-a.jpg, the chosen one, is tracked)
+/marketing/launch-film/v2/poster/src/
+/marketing/launch-film/v2/poster/poster-*.png
+/marketing/launch-film/v2/poster/poster-b.jpg
+/marketing/launch-film/v2/poster/poster-c.jpg
