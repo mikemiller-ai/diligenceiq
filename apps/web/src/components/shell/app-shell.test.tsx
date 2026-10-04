@@ -33,6 +33,14 @@ describe('AppShell', () => {
     expect(screen.getByRole('link', { name: /Architecture/ })).toBeInTheDocument();
   });
 
+  it('links to the source repository from the sidebar footer, in a new tab', () => {
+    shell();
+    const link = screen.getByRole('link', { name: 'Source code' });
+    expect(link).toHaveAttribute('href', 'https://github.com/mikemiller-ai/diligenceiq');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noreferrer noopener');
+  });
+
   it.each([
     ['/intelligence/', 'Company Intelligence'],
     ['/compare/', 'Compare'],

@@ -16,6 +16,15 @@ describe('Architecture and business value page', () => {
     expect(screen.getByRole('link', { name: 'Ask a question' }).getAttribute('href')).toMatch(/^\/analysis\/new\/?$/);
   });
 
+  it('links to the source repository and its deliverables map, in a new tab', () => {
+    render(<ArchitecturePage />);
+    const repo = screen.getByRole('link', { name: /Source code/ });
+    expect(repo).toHaveAttribute('href', 'https://github.com/mikemiller-ai/diligenceiq');
+    const deliverables = screen.getByRole('link', { name: /Assessment deliverables/ });
+    expect(deliverables).toHaveAttribute('href', 'https://github.com/mikemiller-ai/diligenceiq/blob/main/docs/deliverables.md');
+    for (const l of [repo, deliverables]) expect(l).toHaveAttribute('rel', 'noreferrer noopener');
+  });
+
   it('states what is built and what is designed', () => {
     const { container } = render(<ArchitecturePage />);
     const text = container.textContent ?? '';

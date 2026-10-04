@@ -1,4 +1,4 @@
-import { ArrowRight, Cloud, Database, MessageSquareText, Server } from 'lucide-react';
+import { ArrowRight, Cloud, CodeXml, Database, ExternalLink, MessageSquareText, Server } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EvidenceCard, Eyebrow, NavyAtmosphere, Section } from '@/components/evidence/section';
@@ -6,6 +6,7 @@ import { BrandMark, Wordmark } from '@/components/shell/brand';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { DELIVERABLES_URL, REPOSITORY_URL } from '@/lib/links';
 import { MEASURED } from './measured';
 
 export const metadata: Metadata = { title: 'Architecture and business value' };
@@ -170,6 +171,18 @@ export default function ArchitecturePage() {
                 and why. When they need to go deeper, any question becomes a cited brief written by exactly one model call.
                 This page describes what runs in this deployment; the future state at the end is marked as not built.
               </p>
+              <div className="mt-6 flex flex-wrap gap-2" data-testid="repository-links">
+                <Button asChild variant="ghost-dark" size="sm">
+                  <a href={REPOSITORY_URL} target="_blank" rel="noreferrer noopener">
+                    <CodeXml /> Source code <ExternalLink />
+                  </a>
+                </Button>
+                <Button asChild variant="ghost-dark" size="sm">
+                  <a href={DELIVERABLES_URL} target="_blank" rel="noreferrer noopener">
+                    Assessment deliverables <ExternalLink />
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
         </section>

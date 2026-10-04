@@ -53,3 +53,7 @@ export function filingHref(documentId: string, chunkId?: string, indexVersion?: 
   if (indexVersion) params.set('iv', indexVersion);
   return `/sources/filing/?${params.toString()}${chunkId ? `#chunk-${chunkId}` : ''}`;
 }
+
+/** The public source repository, and its map of each assessment deliverable to where it lives. */
+export const REPOSITORY_URL = 'https://github.com/mikemiller-ai/diligenceiq';
+export const DELIVERABLES_URL = `${REPOSITORY_URL}/blob/main/docs/deliverables.md`;

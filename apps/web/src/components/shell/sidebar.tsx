@@ -1,8 +1,9 @@
 'use client';
 
-import { ChevronsLeft, ChevronsRight, Network, RotateCcw } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, CodeXml, Network, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { REPOSITORY_URL } from '@/lib/links';
 import { cn } from '@/lib/utils';
 import { Tooltip } from '@/components/ui/tooltip';
 import { BrandMark, Wordmark } from './brand';
@@ -89,6 +90,10 @@ export function Sidebar({
           <Network aria-hidden className="size-4 shrink-0" />
           <span className={cn(collapsed && 'sr-only')}>Architecture &amp; value</span>
         </Link>
+        <a href={REPOSITORY_URL} target="_blank" rel="noreferrer noopener" className={footerItem}>
+          <CodeXml aria-hidden className="size-4 shrink-0" />
+          <span className={cn(collapsed && 'sr-only')}>Source code</span>
+        </a>
         <ResetWorkspaceDialog>
           <button type="button" className={footerItem}>
             <RotateCcw aria-hidden className="size-4 shrink-0" />
